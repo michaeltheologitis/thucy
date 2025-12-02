@@ -13,7 +13,7 @@ def handle_config_command(args):
     if args.config_action == 'set':
         config.set_env_var(args.key, args.value)
     elif args.config_action == 'show':
-        config.list_config()
+        config.show_config()
     else:
         print("Use: thucy config [set|show]")
 

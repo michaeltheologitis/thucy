@@ -39,27 +39,25 @@ class Config:
         """Load everything in DEFAULTS + everything in the .env file."""
         # Load into the environment to make sure
         load_dotenv(self.env_path, override=True)
-
         env = dotenv_values(self.env_path)
 
-        # defaults
-        for key, default in self.DEFAULTS.items():
-            val = env.get(key, default)
+        for key, val in env.items():
             if val.isdigit(): setattr(self, key.lower(), int(val))
             else: setattr(self, key.lower(), val)
-
-        # user-defined keys (e.g., OPENAI_API_KEY)
-        for key, val in env.items():
-            if key not in self.DEFAULTS:
-                if val.isdigit(): setattr(self, key.lower(), int(val))
-                else: setattr(self, key.lower(), val)
+    
+    def restore_defaults(self):
+        for key, val in self.DEFAULTS.items():
+            self.set_env_var(key, str(val))
 
     def set_env_var(self, key, value):
         """Set or update a variable and persist to .env."""
-        value = str(value)
-        set_key(self.env_path, key, value)
-        setattr(self, key.lower(), value)
+        set_key(self.env_path, key, str(value))
         self._load_env()
+
+    def show_config(self):
+        env = dotenv_values(self.env_path)
+        for key, val in env.items():
+            print(f"{key}={val}")
 
 # %% ../nbs/01_configuration.ipynb 8
 config = Config()
