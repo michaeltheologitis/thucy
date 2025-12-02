@@ -19,19 +19,6 @@ class GenAIToolboxMCP:
     def set_specific_toolset(self, toolset: str):
         self.toolset = toolset
 
-    def load_toolset(self, toolset_name: str):
-        """Load a toolset by name and wrap it with openai sdk tool tool func."""
-
-        # If a specific database is set, modify the toolset name accordingly.
-        # This allows for specific database toolsets to be loaded, instead
-        # of the "big" generic ones.
-        if self.toolset:
-            toolset_name = f"{self.toolset}-{toolset_name}"
-
-        toolset = self.client.load_toolset(toolset_name)
-
-        return [function_tool(tool) for tool in toolset]
-    
     def _load_raw_toolset(self, toolset_name: str):
         """Load a toolset by name and wrap it with openai sdk tool tool func."""
 
@@ -44,6 +31,10 @@ class GenAIToolboxMCP:
         toolset = self.client.load_toolset(toolset_name)
 
         return toolset
+
+    def load_toolset(self, toolset_name: str):
+        """Load a toolset by name and wrap it with openai sdk tool tool func."""
+        return [function_tool(tool) for tool in self._load_raw_toolset(toolset_name)]
     
     def connect(self):
         self.client = ToolboxSyncClient(config.genai_server_url)

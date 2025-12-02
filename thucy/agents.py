@@ -6,7 +6,7 @@
 __all__ = ['DATA_EXPERT_PROMPT', 'discover_data_sources_tool', 'SCHEMA_EXPERT_PROMPT', 'schema_query_tool', 'SQL_EXPERT_PROMPT',
            'nl_query_tool', 'VERIFIER_PROMPT', 'DataReport', 'discover_data_sources', 'SchemaQuery',
            'SchemaQueryAnswer', 'schema_query', 'NLQuery', 'NLQueryAnswer', 'nl_query', 'UserQuery',
-           'VerificationAnswer']
+           'VerificationAnswer', 'verify']
 
 # %% ../nbs/03_agents.ipynb 4
 from pydantic import Field, BaseModel
@@ -63,7 +63,7 @@ async def discover_data_sources() -> DataReport:  # Returns a `DataReport`
 # %% ../nbs/03_agents.ipynb 19
 discover_data_sources_tool = function_tool(discover_data_sources)
 
-# %% ../nbs/03_agents.ipynb 22
+# %% ../nbs/03_agents.ipynb 25
 SCHEMA_EXPERT_PROMPT = """
 # Role and Objective
 You are a database expert specializing in answering schema-related questions for relational databases. You have tools that allow you to inspect and analyze schemas across multiple databases. Use these tools whenever they are beneficial to your analysis.
@@ -80,7 +80,7 @@ Never invent or infer schemas, tables, or columns that are not actually present 
 - Avoid speculation, assumptions, or irrelevant details.
 """
 
-# %% ../nbs/03_agents.ipynb 24
+# %% ../nbs/03_agents.ipynb 27
 class SchemaQuery(BaseModel):
     context_hint: str = Field(
         ..., 
@@ -104,7 +104,7 @@ class SchemaQuery(BaseModel):
             f"### Relevant Context or Domain\n{self.context_hint}\n"
         )
 
-# %% ../nbs/03_agents.ipynb 29
+# %% ../nbs/03_agents.ipynb 32
 class SchemaQueryAnswer(BaseModel):
     answer: str = Field(
         ..., 
@@ -114,7 +114,7 @@ class SchemaQueryAnswer(BaseModel):
         )
     )
 
-# %% ../nbs/03_agents.ipynb 34
+# %% ../nbs/03_agents.ipynb 37
 async def schema_query(query: SchemaQuery  # The `SchemaQuery` instance containing the user's schema question
                        ) -> SchemaQueryAnswer:  # The `SchemaQueryAnswer` instance containing the final answer
     """A tool that answers natural language questions about database schemas across 
@@ -135,10 +135,10 @@ async def schema_query(query: SchemaQuery  # The `SchemaQuery` instance containi
 
     return result.final_output
 
-# %% ../nbs/03_agents.ipynb 35
+# %% ../nbs/03_agents.ipynb 38
 schema_query_tool = function_tool(schema_query)
 
-# %% ../nbs/03_agents.ipynb 39
+# %% ../nbs/03_agents.ipynb 45
 SQL_EXPERT_PROMPT = """
 # Role and Objective
 You are an SQL expert focused on transparency and reproducibility. Your goal is to answer the user's question as accurately and directly as possible, while *always displaying every final SQL query* that contributed evidence to your answer. Each part of your response must clearly show the concrete SQL query (or queries) that produced the corresponding result.  You have access to tools that allow you to execute SQL queries on various databases. Use these tools whenever they are beneficial to your analysis.
@@ -161,7 +161,7 @@ You are an SQL expert focused on transparency and reproducibility. Your goal is 
 - Prefer multiple simple, well-scoped queries over single complex ones by breaking problems into logical sub-steps.
 """
 
-# %% ../nbs/03_agents.ipynb 41
+# %% ../nbs/03_agents.ipynb 47
 class NLQuery(BaseModel):
     query: str = Field(
         ..., 
@@ -182,7 +182,7 @@ class NLQuery(BaseModel):
             f"### Relevant Schema Information for the Necessary Data\n{self.schema_info}\n"
         )
 
-# %% ../nbs/03_agents.ipynb 48
+# %% ../nbs/03_agents.ipynb 54
 class NLQueryAnswer(BaseModel):
     answer: str = Field(
         ..., 
@@ -192,7 +192,7 @@ class NLQueryAnswer(BaseModel):
         )
     )
 
-# %% ../nbs/03_agents.ipynb 53
+# %% ../nbs/03_agents.ipynb 59
 async def nl_query(
         query: NLQuery  # The `NLQuery` instance containing the user's question and schema info
         ) -> NLQueryAnswer:  # The `NLQueryAnswer` instance containing the final answer and SQL evidence
@@ -215,10 +215,10 @@ async def nl_query(
 
     return result.final_output
 
-# %% ../nbs/03_agents.ipynb 54
+# %% ../nbs/03_agents.ipynb 60
 nl_query_tool = function_tool(nl_query)
 
-# %% ../nbs/03_agents.ipynb 57
+# %% ../nbs/03_agents.ipynb 66
 VERIFIER_PROMPT = """
 # Role and Objective
 You are a data expert and a verifier. Your goal is to verify every claim provided to you by grounding your reasoning in real, verifiable data sources. You have access to various tools that enable you to retrieve and analyze factual data—use them whenever they enhance your analysis. You must produce a clear and structured report that summarizes your findings and **includes the exact SQL queries** that generated the supporting evidence. Your query tools are specifically designed to return these executed SQL statements for inclusion in your report.
@@ -239,11 +239,11 @@ You are a data expert and a verifier. Your goal is to verify every claim provide
 - Remember: Tools are stateless. Recreate any necessary context between tool calls explicitly.
 """
 
-# %% ../nbs/03_agents.ipynb 59
+# %% ../nbs/03_agents.ipynb 68
 class UserQuery(BaseModel):
     query: str
 
-# %% ../nbs/03_agents.ipynb 63
+# %% ../nbs/03_agents.ipynb 72
 class VerificationAnswer(BaseModel):
     report: str = Field(
         ...,
@@ -259,3 +259,18 @@ class VerificationAnswer(BaseModel):
             "- **Inaccurate**: The overall claim is contradicted or unsupported by the evidence.\n"
         )
     )
+
+# %% ../nbs/03_agents.ipynb 77
+async def verify(user_query: UserQuery):  # The `UserQuery` instance containing the user's claims to verify):
+
+    verifier_agent = Agent(
+        name="Lead Verifier",
+        instructions=VERIFIER_PROMPT,
+        model=config.lead_model,
+        tools=[nl_query_tool, schema_query_tool, discover_data_sources_tool],
+        output_type=VerificationAnswer,
+    )
+
+    result = await Runner.run(verifier_agent, user_query.query, max_turns=config.lead_max_turns)
+
+    return result.final_output
