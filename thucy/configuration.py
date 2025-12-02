@@ -17,9 +17,9 @@ class Config:
     DEFAULTS = {
         "EXPERTS_MODEL": "gpt-5-mini",
         "LEAD_MODEL": "gpt-5",
-        "SQL_EXPERT_MAX_TURNS": 30,
-        "SCHEMA_EXPERT_MAX_TURNS": 30,
-        "DATA_EXPERT_MAX_TURNS": 30,
+        "SQL_EXPERT_MAX_TURNS": "30",
+        "SCHEMA_EXPERT_MAX_TURNS": "30",
+        "DATA_EXPERT_MAX_TURNS": "30",
         "GENAI_SERVER_URL": "http://127.0.0.1:5000",
     }
     
