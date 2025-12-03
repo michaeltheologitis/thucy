@@ -23,6 +23,8 @@ thucy verify "The number of violent crimes decreased in Seattle between 2024 and
 
 ## Installation
 
+### Clone
+
 Clone from [GitHub](https://github.com/michaeltheologitis/thucy):
 
 ``` sh
@@ -35,7 +37,7 @@ Then, install the package (usually in a virtual environment):
 pip install -e .
 ```
 
-## Configurations
+### Configurations
 
 We know that setting up and configuring stuff is a pain. However, there
 are a lot of moving parts in this project. We have made the
