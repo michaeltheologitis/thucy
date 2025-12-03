@@ -44,7 +44,7 @@ async def handle_verify_command(args):
     append_to_file(f"{file_id}.txt", user_query, "userQuery")
     append_to_file(f"{file_id}.txt", result, "verificationAnswer")
 
-    print(f"Saved full report to results/{file_id}.txt")
+    print(f"Saved full report to experiments/results/{file_id}.txt")
 
     genai_mcp.close()
     print("Exiting!")
@@ -62,7 +62,7 @@ def main():
     verify_parser = subparsers.add_parser('verify', help='Run claim verification')
     verify_parser.add_argument('query', help='Natural language query to verify')
     verify_parser.add_argument('--workflow', default='Default-Workflow',
-                              help="Workflow name for the traces on OpenAI. Will also be the filename (with the unique trace).")
+                              help="A name that will help you find this file in the results. It is not important for it to be unique, but it would be helpful! We usually set it to something that describes the veriication 'workflow' (e.g., 'Seattle-Violent-Crime').")
     verify_parser.add_argument('--toolset', help="Toolset name (e.g., seattle). For example, if given `seattle`, then, in the `tools.yaml` we must provide the toolsets `seattle-sql` and `seattle-schema`.", required=True)
 
     # ---------------------------------------------
