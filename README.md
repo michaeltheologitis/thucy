@@ -163,7 +163,9 @@ Of course, we can add more database connections (e.g., MySQL, SQLite,
 etc.) by following the same pattern as above. We simply append more
 entries under the `sources` section. Follow the link above for other
 database connections and their required parameters (e.g.,
-[MySQL](https://googleapis.github.io/genai-toolbox/resources/sources/mysql/))
+[MySQL](https://googleapis.github.io/genai-toolbox/resources/sources/mysql/),
+[SQLite](https://googleapis.github.io/genai-toolbox/resources/sources/sqlite/),
+etc.).
 
 #### Tools
 
@@ -215,9 +217,9 @@ example, we have two toolsets: `seattle-schema` and `seattle-sql`. Of
 course, in this example we only have one tool in each toolset.
 
 This is **not** how it usually is. We encourage you to take a look at
-`example_tools_template.yaml` for more complex examples with multiple
-databases and tools. This is where you will appreciate the flexibility
-of Google’s toolbox!
+`tools.yaml.template` for more complex examples with multiple databases
+and tools. This is where you will appreciate the flexibility of Google’s
+toolbox!
 
 #### Running the MCP Toolbox
 
@@ -241,9 +243,15 @@ from personal experience here). Usually, the errors are self-explanatory
 and easily-fixable. Otherwise, you can take a look at the
 [docs](https://googleapis.github.io/genai-toolbox/resources/sources/).
 
-## Run
+## Usage Workflow
 
-You can run Thucy as follows:
+First, make sure that the toolbox is running:
+
+``` sh
+toolbox --ui
+```
+
+Then, we can run Thucy as follows:
 
 ``` sh
 thucy verify <CLAIM-TO-VERIFY> --workflow <CUSTOM-NAME> --toolset <TOOLSET-TO-USE>
@@ -252,16 +260,18 @@ thucy verify <CLAIM-TO-VERIFY> --workflow <CUSTOM-NAME> --toolset <TOOLSET-TO-US
 The `<CUSTOM-NAME>` is an arbitrary name you give to your workflow
 (e.g., `Violent-Crimes` in the example above).
 
-Notably, the `<TOOLSET-TO-USE>` is one of the prefixes of the toolset
-you want to use from the `tools.yaml` we configured above. Thucy, always
-uses two toolsets in exacution: ① a schema toolset, and a ② a sql
-toolset. Users are expected to give the prefix of these toolsets. In our
-configuration example above, this would be `seattle`. Internally, we
-assign `seattle-sql` to the SQL expert agent, and `seattle-schema` to
-the SQL expert agent!
+The `<TOOLSET-TO-USE>` is a prefix of the toolset you want to use from
+the `tools.yaml` we configured above. Internally, Thucy always uses two
+toolsets in exacution: ① a schema toolset, and a ② a sql toolset. Users
+are expected to give the common prefix of these toolsets. In our
+configuration example above, this would be `seattle`. What happens in
+the code is that we assign `seattle-sql` to the SQL expert agent, and
+`seattle-schema` to the SQL expert agent!
 
-In the configuration of `example_tools_template.yaml`, we might choose
-to do `--toolset west-coast`!
+We also encourage you to take a look at the `tools.yaml.template`
+configuration which showcases the flexibility of the toolbox. In this
+configuration we might choose to do `--toolset west-coast`. This would
+give the agents access to 3 databases.
 
 # Paper Results
 
