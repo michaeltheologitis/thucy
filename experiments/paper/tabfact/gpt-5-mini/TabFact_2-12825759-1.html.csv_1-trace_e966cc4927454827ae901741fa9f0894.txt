@@ -1,0 +1,74 @@
+
+<userQuery>
+<query>
+twickenham stoop be the venue on 6 april 2007 , where the score be 22 - 12
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "twickenham stoop be the venue on 6 april 2007 , where the score be 22 - 12"
+
+Available data sources explored
+- Database discovered: postgres_tabfact32 (public schema)
+- Relevant table: public.craig_hall_rugby_league_born_1988
+  - Columns: date (text), venue (text), opponent (text), result (text), tournament (text), scored (bigint)
+
+Verification steps and evidence
+1) Identify any match on 6 April 2007 and see its venue and score
+- Executed SQL:
+  SELECT date, venue, opponent, result, tournament, scored
+  FROM public.craig_hall_rugby_league_born_1988
+  WHERE trim(date) ~* '^0?6\s+(Apr|April)\s+2007$';
+- Result:
+  - date: 6 april 2007
+    venue: twickenham stoop
+    opponent: harlequins rl
+    result: 30 - 28
+    tournament: super league
+    scored: 1
+- Finding: There is a match on 6 April 2007 at Twickenham Stoop. The recorded final score is 30 - 28, not 22 - 12.
+
+2) Check if any match in the table has a final score of 22-12 (any common dash and spacing)
+- Executed SQL (count):
+  SELECT count(*) AS match_count
+  FROM craig_hall_rugby_league_born_1988
+  WHERE result ~ '22\s*[-–:]\s*12';
+- Result: match_count = 0 (no such scores found)
+
+3) Check the reversed ordering 12-22 (in case of home/away formatting)
+- Executed SQL (rows):
+  SELECT date, venue, opponent, result, tournament, scored
+  FROM public.craig_hall_rugby_league_born_1988
+  WHERE result ~ '12[[:space:]]*[-–—][[:space:]]*22';
+- Result: no rows returned
+- Executed SQL (count):
+  SELECT COUNT(*) AS match_count
+  FROM public.craig_hall_rugby_league_born_1988
+  WHERE result ~ '12[[:space:]]*[-–—][[:space:]]*22';
+- Result: match_count = 0
+
+4) Directly test whether any 6 April 2007 row has result 22-12 (case-insensitive date matching)
+- Executed SQL (list rows on that date, case-insensitive):
+  SELECT * FROM public.craig_hall_rugby_league_born_1988 WHERE lower(date) = lower('6 April 2007');
+- Result:
+  - date: 6 april 2007; venue: twickenham stoop; opponent: harlequins rl; result: 30 - 28; tournament: super league; scored: 1
+- Executed SQL (same date, test for result 22-12):
+  SELECT * FROM public.craig_hall_rugby_league_born_1988 WHERE lower(date) = lower('6 April 2007') AND trim(lower(result)) = lower('22-12');
+- Result: no rows returned
+
+Conclusion
+- True: Twickenham Stoop was the venue on 6 April 2007 (as per the table row).
+- False: The score was not 22 - 12; the recorded result is 30 - 28.
+
+Final assessment: The claim mixes a correct venue and date with an incorrect score.
+
+Assumptions
+- I interpret the claim as referring to the match data contained in the available table (public.craig_hall_rugby_league_born_1988), which we treat as authoritative for verification.
+- "Score be 22 - 12" refers to the final match result recorded in the result column.
+- Date matching was done case-insensitively and allowed for common textual formatting (e.g., "6 April 2007").
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

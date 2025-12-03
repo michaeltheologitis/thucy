@@ -1,0 +1,50 @@
+
+<userQuery>
+<query>
+2010 - 11 detail season have a runner - up of tokai , and a title of 47th
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “2010 - 11 detail season have a runner - up of tokai, and a title of 47th.”
+
+Data sources explored
+- Discovered database: Japan University Rugby Championship (public schema)
+- Relevant table: all_japan_university_rugby_championship
+- Table columns (text unless noted): title, season, winner, score, "runner - up", venue, attendance
+
+Evidence
+1) Exact lookup for the 2010 - 11 season row
+- Result: Season = 2010 - 11 details; Title = 47th; Winner = Teikyo; Score = 17 - 14; Runner-up = Waseda
+- Executed SQL:
+  SELECT season, title, winner, score, "runner - up" FROM public.all_japan_university_rugby_championship WHERE season = '2010 - 11 details';
+
+2) Check whether any row lists Tokai as runner-up (to verify the “runner-up of tokai” part)
+- Result: A Tokai runner-up exists, but for Season = 2009 - 10 details; Title = 46th; Winner = Teikyo; Score = 14 - 13 (i.e., not 2010 - 11)
+- Executed SQL:
+  SELECT season, title, winner, score, "runner - up" FROM public.all_japan_university_rugby_championship WHERE LOWER("runner - up") = 'tokai';
+
+3) Discovery query used to locate the 2010 - 11 entry initially
+- Result: Season = 2010 - 11 details; Title = 47th; Winner = Teikyo; Score = 17 - 14; Runner-up = Waseda
+- Executed SQL:
+  SELECT season, title, winner, score, "runner - up" FROM public.all_japan_university_rugby_championship WHERE season LIKE '%2010%';
+
+Findings
+- The 2010 - 11 season entry has Title = 47th (this matches the claim).
+- The runner-up for the 2010 - 11 season is Waseda, not Tokai (this contradicts the claim).
+- Tokai appears as runner-up in 2009 - 10 (Title = 46th), not in 2010 - 11.
+
+Conclusion
+- The title “47th” for the 2010 - 11 season is supported by the data.
+- The runner-up being “Tokai” for the 2010 - 11 season is not supported; the data shows “Waseda.”
+
+Assumptions
+- Interpreted “2010 - 11 detail season” as the row where season equals '2010 - 11 details' in the all_japan_university_rugby_championship table.
+- Interpreted “runner - up of tokai” as the 'runner - up' column value being Tokai.
+- Interpreted “title of 47th” as the 'title' column value being '47th'.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

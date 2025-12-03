@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+there be 4 test match in the last 2 month of 1978
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “there be 4 test match in the last 2 month of 1978.”
+
+Conclusion: Supported by the available data. The 1978 New Zealand rugby union tour dataset shows exactly 4 Test matches in November and December 1978.
+
+Evidence from data (with executed SQL):
+
+1) List all Test-match rows and their dates
+SQL:
+SELECT date, status FROM public.t_1978_new_zealand_rugby_union_tour_of_britain_and_ireland WHERE status ILIKE '%Test%';
+Result:
+- 4 november 1978 | test match
+- 11 november 1978 | test match
+- 25 november 1978 | test match
+- 9 december 1978 | test match
+
+2) Count total Test matches
+SQL:
+SELECT COUNT(*) AS total_test_matches FROM public.t_1978_new_zealand_rugby_union_tour_of_britain_and_ireland WHERE status ILIKE '%Test%';
+Result:
+- total_test_matches = 4
+
+3) Count Test matches by month (to confirm they’re in the last two months of 1978)
+SQL:
+SELECT split_part(date, ' ', 2) AS month, COUNT(*) AS matches_count
+FROM public.t_1978_new_zealand_rugby_union_tour_of_britain_and_ireland
+WHERE status ILIKE '%Test%'
+GROUP BY month
+ORDER BY month;
+Result:
+- december | 1
+- november | 3
+
+Interpretation
+- The dataset records four Test matches with dates in November (three) and December (one) 1978, which are the last two months of the year. This directly supports the claim.
+
+Assumptions
+- “Last 2 month of 1978” is interpreted as November and December 1978.
+- Rows whose status contains “Test” (case-insensitive) are treated as Test matches.
+- The date column is text formatted like “4 november 1978”; month parsed as the middle token.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

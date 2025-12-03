@@ -1,0 +1,84 @@
+
+<userQuery>
+<query>
+nine elm works be the manufacturer of an undine with a 2 - 4 - 0wt wheel arrangement from 1884 - 1886
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim being checked:
+"Nine Elms Works was the manufacturer of an Undine with a 2-4-0WT wheel arrangement from 1884–1886."
+
+Data sources discovered:
+- PostgreSQL database with table: public.locomotives_of_the_southern_railway (authoritative for Southern Railway and precursor companies’ locomotive data).
+
+Schema of the evidence table (summary):
+- Columns (all TEXT): class, "wheel arrangement", manufacturer, "year made", "quantity made", "quantity preserved", "year (s) withdrawn".
+
+Evidence and executed SQL:
+1) Does a class named Undine exist, and what are its details?
+SQL:
+SELECT class, "wheel arrangement", manufacturer, "year made"
+FROM locomotives_of_the_southern_railway
+WHERE class ILIKE '%Undine%';
+Result (single row):
+- class: Undine; wheel arrangement: 2 - 4 - 0; manufacturer: Nine Elms Works; year made: 1859 - 60.
+
+2) What 2-4-0 and 2-4-0WT entries exist, and how is Undine classified?
+SQL:
+SELECT class, "wheel arrangement", manufacturer, "year made",
+       CASE WHEN "wheel arrangement" LIKE '%wt%' THEN 'Yes' ELSE 'No' END AS "Well Tank"
+FROM locomotives_of_the_southern_railway
+WHERE "wheel arrangement" LIKE '%2 - 4 - 0%';
+Key relevant rows (selected):
+- minerva: 2 - 4 - 0wt; Nine Elms Works; 1856; Well Tank: Yes
+- nelson: 2 - 4 - 0wt; Nine Elms Works; 1858; Well Tank: Yes
+- nile: 2 - 4 - 0wt; Nine Elms Works; 1859; Well Tank: Yes
+- 177: 2 - 4 - 0wt; beyer , peacock & co (82) nine elms works (3); 1863 - 1875; Well Tank: Yes
+- undine: 2 - 4 - 0; Nine Elms Works; 1859 - 60; Well Tank: No
+This shows Undine is 2-4-0 (not WT) and dates to 1859–60, not the 1880s.
+
+3) Are there any 2-4-0WT entries dated 1884–1886?
+SQL:
+SELECT class, "wheel arrangement", manufacturer, "year made"
+FROM locomotives_of_the_southern_railway
+WHERE "wheel arrangement" LIKE '%2 - 4 - 0wt%'
+AND ("year made" LIKE '%1884%' OR "year made" LIKE '%1885%' OR "year made" LIKE '%1886%');
+Result: No rows returned.
+
+4) Is there any 'Undine' built in 1884–1886?
+SQL:
+SELECT class, "wheel arrangement", manufacturer, "year made"
+FROM locomotives_of_the_southern_railway
+WHERE class ILIKE '%undine%'
+AND "year made" IN ('1884','1885','1886');
+Result: No rows returned. (Additionally, from Evidence 1, Undine is dated 1859–60.)
+
+5) Combined check: Nine Elms Works AND (Undine OR 2-4-0WT) AND 1884–1886
+SQL:
+SELECT class, "wheel arrangement", manufacturer, "year made"
+FROM locomotives_of_the_southern_railway
+WHERE manufacturer ILIKE '%nine elms works%'
+AND (class ILIKE '%undine%' OR "wheel arrangement" ILIKE '%2 - 4 - 0wt%')
+AND ("year made" LIKE '%1884%' OR "year made" LIKE '%1885%' OR "year made" LIKE '%1886%');
+Result: No rows returned.
+
+Findings:
+- Manufacturer: Nine Elms Works did manufacture the Undine (supported).
+- Wheel arrangement: The Undine is 2-4-0, not 2-4-0WT (contradicted).
+- Dates: The Undine dates to 1859–1860, not 1884–1886 (contradicted).
+- No evidence of any 2-4-0WT tied to 1884–1886 in this dataset, and none named Undine.
+
+Conclusion:
+The claim is incorrect in two key aspects (wheel arrangement and manufacture dates), though it is correct that Nine Elms Works is associated with the Undine. Overall, the claim is not reliable as stated.
+
+Assumptions:
+- "Undine" refers to the class/name recorded as "Undine" in the locomotives_of_the_southern_railway table.
+- "WT" denotes well tank.
+- "from 1884–1886" refers to years of construction as recorded in the "year made" field.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

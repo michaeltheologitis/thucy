@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+5 of the game list end with 0 - 0 result and 3 with a result of 5 - 0
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Data sources discovered:
+- postgres_tabfact19 (TabFact). Relevant table: public.t_2008_09_bradford_city_a_f_c_season (columns: game, date, opponent, venue, result, attendance).
+
+Evidence 1: Distinct scorelines and their frequencies
+SQL:
+SELECT result, COUNT(*) AS count
+FROM public.t_2008_09_bradford_city_a_f_c_season
+GROUP BY result
+ORDER BY count DESC, result;
+Key returned rows:
+- 0 - 0 — 5
+- 5 - 0 — 1
+
+Evidence 2: Exact count of 0 - 0 results
+SQL:
+SELECT COUNT(*) AS count_0_0 FROM public.t_2008_09_bradford_city_a_f_c_season WHERE result = '0 - 0';
+Result: count_0_0 = 5
+
+Evidence 3: Exact count (and details) of 5 - 0 results
+SQL (count):
+SELECT COUNT(*) AS count_5_0 FROM public.t_2008_09_bradford_city_a_f_c_season WHERE result = '5 - 0';
+Result: count_5_0 = 1
+
+SQL (details):
+SELECT game, date, opponent, venue, result, attendance FROM public.t_2008_09_bradford_city_a_f_c_season WHERE result = '5 - 0';
+Returned row: {game: 35, date: '7 march 2009', opponent: 'aldershot town', venue: 'home', result: '5 - 0', attendance: 12465}
+
+Conclusion:
+- The claim that 5 games ended 0 - 0 is supported by the data.
+- The claim that 3 games ended 5 - 0 is contradicted by the data; only 1 such game is present.
+
+Assumptions:
+- “game list” refers to all fixtures in public.t_2008_09_bradford_city_a_f_c_season.
+- Results were matched exactly as stored (e.g., '0 - 0', '5 - 0').
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

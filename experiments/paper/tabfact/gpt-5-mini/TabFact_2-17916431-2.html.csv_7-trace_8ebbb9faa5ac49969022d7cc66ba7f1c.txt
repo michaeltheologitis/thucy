@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+aldershot town be the opponent on 10 march 2009 , when bradford city score their highest point total
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Aldershot Town were the opponent on 10 March 2009, when Bradford City scored their highest point total.”
+
+What the data shows
+- The 2008–09 Bradford City A.F.C. season table lists match dates, opponents, venues, results, and attendance.
+- Bradford City’s highest-scoring match (most goals scored by Bradford in a single game) in this dataset was 5 goals, achieved on 7 March 2009 vs Aldershot Town (result 5 - 0).
+- On 10 March 2009, Bradford City played Rochdale away and lost 0 - 3.
+
+Supporting evidence with executed SQL
+1) Full season context (to inspect dates, opponents, and result format)
+Executed SQL:
+SELECT * FROM public.t_2008_09_bradford_city_a_f_c_season;
+Key relevant rows returned include:
+- game=35, date=7 march 2009, opponent=aldershot town, venue=home, result=5 - 0, attendance=12465
+- game=36, date=10 march 2009, opponent=rochdale, venue=away, result=0 - 3, attendance=5157
+
+2) Identify the match(es) with the maximum goals scored by Bradford (parse left-hand side of result as Bradford’s goals)
+Executed SQL:
+WITH gf AS (
+  SELECT date, opponent, venue, result, trim(split_part(result, '-', 1))::int AS goals_for
+  FROM t_2008_09_bradford_city_a_f_c_season
+)
+SELECT date, opponent, venue, result, goals_for
+FROM gf
+WHERE goals_for = (SELECT MAX(goals_for) FROM gf);
+Result:
+- date = 7 march 2009, opponent = aldershot town, venue = home, result = 5 - 0, goals_for = 5
+
+3) Confirm opponent and result on 10 March 2009
+Executed SQL:
+SELECT game, date, opponent, venue, result, attendance
+FROM public.t_2008_09_bradford_city_a_f_c_season
+WHERE lower(date) = '10 march 2009';
+Result:
+- game: 36, date: 10 march 2009, opponent: rochdale, venue: away, result: 0 - 3, attendance: 5157
+
+Conclusion
+- Aldershot Town were not the opponent on 10 March 2009; Rochdale were.
+- Bradford City’s highest-scoring game (5 goals) in this dataset occurred on 7 March 2009 vs Aldershot Town, not on 10 March 2009.
+- Therefore, the claim is contradicted by the data.
+
+Assumptions
+- Interpreted “highest point total” as “most goals scored by Bradford City in a single match” because the available table records match results (goals) but does not store cumulative league points by date.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

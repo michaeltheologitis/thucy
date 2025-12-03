@@ -1,0 +1,76 @@
+
+<userQuery>
+<query>
+shane hall run more race on the stegell motorsports team than any of his other team
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Shane Hall ran more races on the Stegell Motorsports team than on any of his other teams.”
+
+Data discovery
+- Available source: PostgreSQL database with table public.shane_hall capturing Shane Hall’s yearly stats, including a text field "team (s)" and a numeric field races.
+
+Raw data inspection
+- Executed SQL:
+  SELECT * FROM public.shane_hall;
+- Result (abridged key fields year, races, team (s)):
+  • 1995 | 2  | stegell motorsports
+  • 1996 | 14 | stegell motorsports
+  • 1997 | 28 | stegell motorsports
+  • 1998 | 31 | stegell motorsports
+  • 1999 | 25 | curb - agajanian performance group
+  • 2000 | 2  | alumni motorsports
+  • 2001 | 33 | hensley racing
+  • 2002 | 24 | hensley racing
+  • 2003 | 5  | jay robinson racing
+  • 2004 | 9  | moy racing / jay robinson racing
+  • 2005 | 7  | jay robinson racing
+  • 2006 | 9  | jay robinson racing
+  • 2008 | 1  | jay robinson racing
+
+Totals by exact team string
+- Executed SQL:
+  SELECT "team (s)", SUM(races) AS total_races
+  FROM public.shane_hall
+  GROUP BY "team (s)"
+  ORDER BY total_races DESC;
+- Result:
+  • Stegell Motorsports: 75
+  • Hensley Racing: 57
+  • Curb - Agajanian Performance Group: 25
+  • Jay Robinson Racing: 22
+  • Moy Racing / Jay Robinson Racing: 9
+  • Alumni Motorsports: 2
+
+Upper-bound check for mixed-team entry (2004)
+- To ensure no other team could exceed Stegell even if all mixed-team races are attributed to them, we computed substring-based sums.
+- Jay Robinson Racing (including the 2004 combined entry):
+  Executed SQL:
+  SELECT SUM(races) AS total_races
+  FROM public.shane_hall
+  WHERE "team (s)" LIKE '%jay robinson racing%';
+  Result: 31
+- Stegell Motorsports and Hensley Racing confirmation (substring-based sums):
+  Executed SQL:
+  SELECT SUM(races) AS sum_races_stegell FROM public.shane_hall WHERE "team (s)" LIKE '%stegell motorsports%';
+  Result: 75
+  Executed SQL:
+  SELECT SUM(races) AS sum_races_hensley FROM public.shane_hall WHERE "team (s)" LIKE '%hensley racing%';
+  Result: 57
+
+Conclusion
+- Stegell Motorsports total races: 75.
+- Next highest single team total is Hensley Racing with 57.
+- Even assigning all 9 races from the mixed 2004 entry to Jay Robinson Racing yields 31, well below 75.
+- Therefore, Shane Hall ran more races with Stegell Motorsports than with any other team in the dataset.
+
+Assumptions
+- Interpreted the claim as: across recorded seasons, total races for Stegell Motorsports exceed totals for any other single team.
+- The 2004 “moy racing / jay robinson racing” entry represents a split season; exact per-team split is not specified. We validated the claim even under a conservative upper-bound assumption assigning all 9 to Jay Robinson Racing.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

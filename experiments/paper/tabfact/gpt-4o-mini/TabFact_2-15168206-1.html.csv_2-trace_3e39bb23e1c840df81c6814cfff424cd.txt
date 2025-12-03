@@ -1,0 +1,62 @@
+
+<userQuery>
+<query>
+spy v spy be list under the arcade genre with dragon 32
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The game “Spy v Spy” (aka “Spy vs Spy”) is listed under the Arcade genre and associated with the Dragon 32 platform in the available dataset.
+
+Data source discovery:
+- Available database: TabFact
+- Schema: public
+- Table: beyond_software (columns: title, genre, "c = 64", "zx spectrum", others, year, format)
+
+Evidence 1: Does “Spy vs Spy” exist and what is its genre and platforms?
+Executed SQL:
+SELECT title, genre, "c = 64", "zx spectrum", others, year, format 
+FROM public.beyond_software 
+WHERE title ILIKE '%Spy vs Spy%' OR title ILIKE '%Spy v Spy%' OR title ILIKE '%Spy Vs. Spy%';
+
+Result:
+- title: spy vs spy
+- genre: arcade
+- c = 64: c64
+- zx spectrum: zx spectrum
+- others: amstrad cpc
+- year: 1984
+- format: tape
+
+Finding: “Spy vs Spy” is listed with genre “arcade” and platforms C64, ZX Spectrum, and Amstrad CPC. No Dragon 32 indicated.
+
+Evidence 2: Is Dragon 32 referenced anywhere in the table (to confirm platform encoding)?
+Executed SQL:
+SELECT title, genre, "c = 64", "zx spectrum", others, year, format 
+FROM public.beyond_software 
+WHERE title ILIKE '%dragon 32%' 
+   OR genre ILIKE '%dragon 32%' 
+   OR "c = 64" ILIKE '%dragon 32%' 
+   OR "zx spectrum" ILIKE '%dragon 32%' 
+   OR others ILIKE '%dragon 32%' 
+   OR format ILIKE '%dragon 32%';
+
+Sample results that mention Dragon 32:
+- kriegspiel — others: dragon 32
+- up periscope — others: dragon 32
+
+Finding: The dataset encodes Dragon 32 under the “others” column for certain titles, confirming how the platform would appear if applicable. “Spy vs Spy” does not list Dragon 32.
+
+Conclusion:
+- True: “Spy vs Spy” is listed under the Arcade genre.
+- False: It is not listed with the Dragon 32 platform (platforms shown: C64, ZX Spectrum, Amstrad CPC).
+
+Assumptions:
+- “Spy v Spy” refers to “Spy vs Spy.”
+- Verification is constrained to the TabFact.public.beyond_software dataset described above.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

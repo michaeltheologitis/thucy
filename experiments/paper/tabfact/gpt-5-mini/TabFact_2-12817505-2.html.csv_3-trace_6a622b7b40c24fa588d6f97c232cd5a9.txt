@@ -1,0 +1,81 @@
+
+<userQuery>
+<query>
+there have be 19 game since 13 august 2005 which have an attendance of 60000 or more
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “there have be 19 game since 13 august 2005 which have an attendance of 60000 or more.”
+
+Data source discovery
+- Using the available tools, I discovered one accessible database: postgres_tabfact4 (public schema).
+- Identified table: public.t_2005_06_manchester_united_f_c_season.
+
+Schema details (from the public schema)
+- Table: t_2005_06_manchester_united_f_c_season
+  - Columns: date (text), opponents (text), h / a (text), result f - a (text), attendance (bigint), league position (text)
+  - No primary keys or foreign keys defined.
+
+Exploration of date format (to ensure correct filtering by date)
+Executed SQL:
+SELECT date, attendance FROM public.t_2005_06_manchester_united_f_c_season LIMIT 10;
+Returned sample rows (abridged):
+- '13 august 2005', 38610
+- '20 august 2005', 67934
+- '28 august 2005', 52327
+- '10 september 2005', 67839
+- '18 september 2005', 44917
+- '24 september 2005', 67765
+- …
+Interpretation: Dates are stored as text like '13 august 2005'. I parse them with to_date(initcap(date), 'DD Month YYYY').
+
+Verification queries and results
+1) Chronological list of qualifying matches (attendance >= 60000, on or after 13 August 2005)
+Executed SQL:
+SELECT to_date(initcap(date), 'DD Month YYYY') AS match_date, date AS date_text, attendance
+FROM t_2005_06_manchester_united_f_c_season
+WHERE to_date(initcap(date), 'DD Month YYYY') >= to_date('13 August 2005','DD Month YYYY')
+  AND attendance >= 60000
+ORDER BY match_date;
+Results (match_date — attendance):
+- 2005-08-20 — 67934
+- 2005-09-10 — 67839
+- 2005-09-24 — 67765
+- 2005-10-22 — 67856
+- 2005-11-06 — 67864
+- 2005-12-03 — 67684
+- 2005-12-11 — 67831
+- 2005-12-14 — 67793
+- 2005-12-26 — 67972
+- 2005-12-31 — 67858
+- 2006-01-22 — 67874
+- 2006-02-04 — 67844
+- 2006-03-12 — 67858
+- 2006-03-26 — 69070
+- 2006-03-29 — 69522
+- 2006-04-09 — 70908
+- 2006-04-14 — 72519
+- 2006-05-01 — 69531
+- 2006-05-07 — 73006
+
+2) Count of qualifying matches
+Executed SQL:
+SELECT COUNT(*) AS match_count
+FROM t_2005_06_manchester_united_f_c_season
+WHERE to_date(initcap(date), 'DD Month YYYY') >= to_date('13 August 2005','DD Month YYYY')
+  AND attendance >= 60000;
+Result: 19
+
+Conclusion
+- The data shows 19 matches on or after 13 August 2005 with attendance of at least 60,000. Therefore, the claim is supported by the data.
+
+Assumptions
+- “Since 13 august 2005” is treated as inclusive of that date. The match on 13 August 2005 had attendance 38,610 and thus does not qualify, which aligns with the count.
+- Verification is based on the only available authoritative dataset (Manchester United 2005–06 season table).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

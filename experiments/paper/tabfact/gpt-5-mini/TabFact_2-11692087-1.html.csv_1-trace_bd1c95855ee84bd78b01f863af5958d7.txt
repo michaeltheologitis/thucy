@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+the 1977 , 1978 and 1989 season each have less than 26 point , more than 18 game , and exactly 13 loss
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “the 1977, 1978 and 1989 season each have less than 26 point, more than 18 game, and exactly 13 loss.”
+
+Data source explored
+- Database: postgres_tabfact20
+- Table: public.coquitlam_adanacs (columns: season TEXT, "team name" TEXT, games BIGINT, losses BIGINT, points BIGINT)
+
+Step 1 — Inspect seasons and values
+Executed SQL:
+SELECT season, games, losses, points
+FROM public.coquitlam_adanacs
+ORDER BY season;
+
+Key results relevant to the claim:
+- 1977 — games: 24, losses: 13, points: 22
+- 1978 — games: 24, losses: 13, points: 21
+- 1989 — games: 24, losses: 13, points: 22
+
+Step 2 — Direct verification for 1977, 1978, 1989
+Executed SQL:
+SELECT season, games, losses, points, (points < 26) AS points_lt_26, (games > 18) AS games_gt_18, (losses = 13) AS losses_eq_13
+FROM public.coquitlam_adanacs
+WHERE season IN ('1977', '1978', '1989')
+ORDER BY season;
+
+Results:
+- 1977 | games: 24 | losses: 13 | points: 22 | points_lt_26: true | games_gt_18: true | losses_eq_13: true
+- 1978 | games: 24 | losses: 13 | points: 21 | points_lt_26: true | games_gt_18: true | losses_eq_13: true
+- 1989 | games: 24 | losses: 13 | points: 22 | points_lt_26: true | games_gt_18: true | losses_eq_13: true
+
+Conclusion
+- All three specified seasons meet all three conditions. The claim is fully supported by the data.
+
+Assumptions
+- “Season” refers to the season field in the public.coquitlam_adanacs table for the Coquitlam Adanacs team. The aggregate row labeled “total” is not a season and was excluded from verification.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

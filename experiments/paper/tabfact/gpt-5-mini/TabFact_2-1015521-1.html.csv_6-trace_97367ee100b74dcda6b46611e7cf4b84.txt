@@ -1,0 +1,58 @@
+
+<userQuery>
+<query>
+the ebraer emb 120 basilia from switzerland be a transport / utility type aircraft
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “The Embraer EMB 120 Brasilia from Switzerland is a transport/utility type aircraft.”
+
+Data sources explored
+- Available database: TabFact (PostgreSQL)
+- Relevant table discovered: public.uruguayan_air_force (columns: aircraft, origin, type, versions, in service)
+
+Evidence collected (with executed SQL)
+1) Is the EMB-120 Brasilia classified as transport/utility?
+- Executed SQL:
+  SELECT aircraft, type FROM public.uruguayan_air_force WHERE lower(aircraft) LIKE '%embraer emb 120%' OR lower(aircraft) LIKE '%brasilia%';
+- Result:
+  [{"aircraft":"embraer emb 120 brasilia","type":"transport"}]
+- Finding: In this authoritative dataset, the EMB-120 Brasilia is classified as “transport,” not “transport / utility.”
+
+2) Full row for the EMB-120 (to check any other attributes)
+- Executed SQL:
+  SELECT * FROM public.uruguayan_air_force WHERE aircraft ILIKE '%Embraer EMB 120%' OR aircraft ILIKE '%Brasilia%';
+- Result (1 row):
+  - aircraft: embraer emb 120 brasilia
+  - origin: brazil
+  - type: transport
+  - versions: emb 120
+  - in service: 1
+- Finding: The table lists “origin: brazil” for the EMB-120 entry and confirms the type “transport.”
+
+3) Sanity check across Embraer types in the same table
+- Executed SQL:
+  SELECT aircraft, type FROM uruguayan_air_force WHERE LOWER(aircraft) LIKE '%embraer%';
+- Results:
+  - embraer emb 110 bandeirante — type: transport / utility
+  - embraer emb 120 brasilia — type: transport
+- Finding: The dataset distinguishes between two Embraer aircraft: the EMB-110 (explicitly “transport / utility”) and the EMB-120 (only “transport”). This supports that “utility” is not listed for the EMB-120 in this data.
+
+Assessment against the claim
+- “Transport/utility type”: Partly supported. The dataset explicitly classifies the EMB-120 as “transport.” It does not list “utility” for this type (whereas it does for the EMB-110). Therefore, the “utility” portion is not supported by the available data.
+- “From Switzerland”: Not supported by this dataset. The only country-related field shown for the EMB-120 row is origin, which is “brazil.” There is no evidence here about Swiss operation or registration, and if “from Switzerland” is interpreted as origin, it is contradicted by the data.
+
+Conclusion
+- The data supports that the Embraer EMB-120 Brasilia is a transport aircraft.
+- The data does not support classifying it as “transport/utility,” and it does not support “from Switzerland.”
+
+Assumptions made
+- Because the claim is ambiguous, “from Switzerland” could mean origin or operator/location. The table provides only “origin,” which is “brazil,” and contains no operator information. I therefore treated “from Switzerland” as unverified (and as inaccurate if intended as country of origin).
+- All conclusions are based strictly on the TabFact public.uruguayan_air_force table, treated as authoritative per instructions.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

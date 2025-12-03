@@ -1,0 +1,74 @@
+
+<userQuery>
+<query>
+in 2006 , glo mobile have 11000 growth 52
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “in 2006, glo mobile have 11000 growth 52”.
+
+Summary conclusion:
+- The 2006 figure of 11,000 (thousands) subscribers for Glo Mobile is supported by the data (i.e., 11 million subscribers in 2006 for Nigeria).
+- The growth figure is not 52; the table records growth as 22%, which also matches the calculation from 2005 to 2006.
+
+Data source consulted:
+- Database: TabFact (public schema)
+- Table: mobile_telephony_in_africa
+- Relevant columns: provider, country, subscribers (2005) (thousands), subscribers (2006) (thousands), growth %
+
+Evidence and executed SQL:
+1) Find providers containing “glo” and show 2006 subscribers and growth
+SQL:
+SELECT provider, country, "subscribers (2006) (thousands)", "growth %" 
+FROM public.mobile_telephony_in_africa
+WHERE lower(provider) LIKE '%glo%';
+Result:
+- provider: glo mobile; country: nigeria; subscribers (2006) (thousands): 11000; growth %: 22
+
+2) Retrieve the full row for Glo Mobile
+SQL:
+SELECT * FROM public.mobile_telephony_in_africa WHERE provider ILIKE 'glo mobile';
+Result:
+- provider: glo mobile
+- country: nigeria
+- subscribers (2005) (thousands): 9000
+- subscribers (2006) (thousands): 11000
+- growth %: 22
+
+3) Independently compute the growth from 2005 to 2006 and compare to stored growth
+SQL:
+SELECT provider,
+       "subscribers (2005) (thousands)" AS subs_2005,
+       "subscribers (2006) (thousands)" AS subs_2006,
+       "growth %" AS stored_growth,
+       CASE WHEN "subscribers (2005) (thousands)" = 0 THEN NULL
+            ELSE (( ("subscribers (2006) (thousands)"::double precision - "subscribers (2005) (thousands)"::double precision)
+                   / "subscribers (2005) (thousands)"::double precision) * 100)
+       END AS computed_growth
+FROM public.mobile_telephony_in_africa
+WHERE lower(provider) = 'glo mobile';
+Result:
+- subs_2005: 9000; subs_2006: 11000; stored_growth: 22; computed_growth: 22.22222222222222
+Interpretation: The stored 22% aligns with the computed ≈22.22% (minor rounding difference); not 52%.
+
+Optional schema confirmation used during verification
+SQL:
+SELECT column_name, data_type FROM information_schema.columns WHERE table_name='mobile_telephony_in_africa' AND table_schema='public';
+Result (abridged):
+- provider (text); country (text); subscribers (2005) (thousands) (bigint); subscribers (2006) (thousands) (bigint); growth % (double precision)
+
+Conclusion:
+- True: In 2006, Glo Mobile (Nigeria) had 11,000 (thousands) subscribers (11 million).
+- False: The growth figure is not 52; it is recorded as 22% (≈22.22% by calculation).
+
+Assumptions made:
+- “11000” refers to the “subscribers (2006) (thousands)” field (i.e., 11,000 thousands = 11 million).
+- “growth 52” refers to the growth percentage from 2005 to 2006.
+- “Glo Mobile” refers to the provider entry “glo mobile” in Nigeria within the mobile_telephony_in_africa table.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

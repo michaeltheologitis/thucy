@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+brook lopez lead the team in both point and rebound in a single game 3 different time
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Brook Lopez led his team in both points and rebounds in a single game three different times.”
+
+Data sources explored
+- Discovered database: TabFact (postgres_tabfact7). Accessible table: public.t_2010_11_new_jersey_nets_season, which contains per-game team leaders for the 2010–11 New Jersey Nets (7 games available).
+
+Step 1: Inspect table contents and format
+- Executed SQL:
+  SELECT "game", "date", "team", "score", "high points", "high rebounds" FROM public.t_2010_11_new_jersey_nets_season LIMIT 10;
+- Result excerpt (table has 7 rows total):
+  1) game=75, date=april 1, high points=brandan wright (15), high rebounds=brandan wright (11)
+  2) game=76, date=april 3, high points=deron williams (18), high rebounds=travis outlaw (9)
+  3) game=77, date=april 5, high points=brook lopez (30), high rebounds=brook lopez (12)
+  4) game=78, date=april 6, high points=brook lopez (39), high rebounds=brook lopez (7)
+  5) game=79, date=april 8, high points=brook lopez (27), high rebounds=jordan farmar (8)
+  6) game=80, date=april 10, high points=brook lopez (35), high rebounds=brook lopez (11)
+  7) game=81, date=april 11, high points=brook lopez (31), high rebounds=dan gadzuric (8)
+
+- Executed SQL to confirm row count:
+  SELECT COUNT(*) FROM public.t_2010_11_new_jersey_nets_season;
+- Result: 7
+
+Step 2: Count games where Brook Lopez led both points and rebounds
+- Executed SQL (count):
+  SELECT COUNT(*) AS brook_both_count FROM public.t_2010_11_new_jersey_nets_season WHERE "high points" ILIKE '%Brook Lopez%' AND "high rebounds" ILIKE '%Brook Lopez%';
+- Result: brook_both_count = 3
+
+- Executed SQL (list matching games):
+  SELECT game, date, "high points", "high rebounds" FROM public.t_2010_11_new_jersey_nets_season WHERE "high points" ILIKE '%Brook Lopez%' AND "high rebounds" ILIKE '%Brook Lopez%';
+- Result rows:
+  - game 77 (april 5): high points=brook lopez (30), high rebounds=brook lopez (12)
+  - game 78 (april 6): high points=brook lopez (39), high rebounds=brook lopez (7)
+  - game 80 (april 10): high points=brook lopez (35), high rebounds=brook lopez (11)
+
+Conclusion
+- Within the available dataset (2010–11 New Jersey Nets table covering 7 games), Brook Lopez led the team in both points and rebounds in exactly 3 games. This directly supports the claim as interpreted.
+
+Assumptions and scope notes
+- Scope: Verified against the accessible dataset (public.t_2010_11_new_jersey_nets_season). The claim may or may not hold in other seasons or across his full career; only these 7 games were available via the connected data source.
+- Matching rule: Counted a game when the text leaders for both “high points” and “high rebounds” contained the substring “Brook Lopez” (case-insensitive). No ties were present in the listed rows.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

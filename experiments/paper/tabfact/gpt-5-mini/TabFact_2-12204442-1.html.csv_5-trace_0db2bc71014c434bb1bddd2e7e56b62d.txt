@@ -1,0 +1,57 @@
+
+<userQuery>
+<query>
+the drop height of 272 foot be open before march 22 , 2003
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: A drop tower with a 272-foot drop was open before March 22, 2003.
+
+Data source consulted
+- Database: postgres_tabfact22 (public schema)
+- Table: drop_tower_scream_zone (columns: park, tower height, drop height, speed, model, opened, height requirement) — all stored as text
+
+Evidence and executed SQL
+1) Locate any entries with a 272 ft drop
+Executed SQL #1:
+SELECT park, "drop height", opened, "tower height", model,
+       NULLIF(regexp_replace("drop height",'[^0-9.]','','g'), '') AS drop_num_text,
+       CASE WHEN regexp_replace("drop height",'[^0-9.]','','g') ~ '^[0-9]+(\.[0-9]+)?$' THEN (regexp_replace("drop height",'[^0-9.]','','g'))::float ELSE NULL END AS drop_num
+FROM public.drop_tower_scream_zone
+WHERE ("drop height" ILIKE '%272%')
+   OR (
+       regexp_replace("drop height",'[^0-9.]','','g') ~ '^[0-9]+(\.[0-9]+)?$'
+       AND (regexp_replace("drop height",'[^0-9.]','','g'))::float BETWEEN 270 AND 274
+   );
+
+Result row:
+{ park: "kings dominion", drop height: "272feet", opened: "march 22 , 2003", tower height: "305feet", model: "gyro drop", drop_num_text: "272", drop_num: 272 }
+
+2) Parse the opened field into a date and compare to 2003-03-22
+Executed SQL #2:
+SELECT park, "drop height", opened, to_date(initcap(regexp_replace(opened,'\s+,\s+',', ', 'g')), 'Month DD, YYYY') AS opened_date
+FROM public.drop_tower_scream_zone
+WHERE "drop height" ILIKE '%272%';
+
+Result row:
+{ park: "kings dominion", drop height: "272feet", opened: "march 22 , 2003", opened_date: "2003-03-22" }
+
+Analysis
+- The entry with a 272-foot drop exists (at Kings Dominion; model: Gyro Drop).
+- Its opened date is 2003-03-22, which is the same day as March 22, 2003, not before it.
+
+Conclusion
+- The part asserting a 272-foot drop is supported.
+- The claim that it was open before March 22, 2003 is not supported. The data shows it opened on March 22, 2003 (not earlier).
+
+Assumptions
+- Interpreted “the drop height of 272 foot” as referencing any entry where the drop height is approximately 272 feet in the drop_tower_scream_zone table.
+- Treated “be open before March 22, 2003” as requiring the opened date to be strictly earlier than 2003-03-22.
+- No separate ride name column exists; I identified the record by park and model.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

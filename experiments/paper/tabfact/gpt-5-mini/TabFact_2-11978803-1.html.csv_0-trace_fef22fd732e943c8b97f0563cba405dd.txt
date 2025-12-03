@@ -1,0 +1,58 @@
+
+<userQuery>
+<query>
+on august 15 , 2012 , the team book a win in a friendly competition match
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim: On August 15, 2012, the team booked a win in a friendly competition match.
+- Finding: Supported by the data.
+
+Data source discovery
+- Available source: PostgreSQL database “TabFact (postgres_tabfact1)” with a public schema.
+
+Relevant schema
+- Table: public.branimir_suba_i
+  - Columns: date (text), venue (text), score (text), result (text), competition (text)
+  - This table contains match-like records including date, competition type, and match outcome.
+
+Evidence from data
+- Retrieved row for the target date shows a friendly match with a win:
+  - date: august 15 , 2012
+  - competition: friendly
+  - result: win
+  - score: 3 - 0
+  - venue: baku , azerbaijan
+
+Executed SQL (evidence)
+SELECT date, competition, result, score, venue
+FROM public.branimir_suba_i
+WHERE date ILIKE '%2012%'
+  AND (
+    date ILIKE '%Aug%15%'
+    OR date ILIKE '%August%15%'
+    OR date ILIKE '%15%Aug%'
+    OR date ILIKE '%15%August%'
+    OR date ILIKE '%08/15/2012%'
+    OR date ILIKE '%8/15/2012%'
+    OR date ILIKE '%2012-08-15%'
+    OR date ILIKE '%15-Aug-2012%'
+    OR date ILIKE '%15 August 2012%'
+    OR date ILIKE '%15.08.2012%'
+    OR date ILIKE '%15/08/2012%'
+  );
+
+Assessment
+- The row explicitly indicates a “win” in a “friendly” on “august 15 , 2012.” This directly supports the claim.
+
+Assumptions
+- “The team” refers to the team represented by entries in public.branimir_suba_i. The table does not name the team explicitly, but it records match outcomes that are treated as authoritative within this data source.
+- Dates are matched textually; the found entry exactly matches “august 15 , 2012,” confirming the intended date.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

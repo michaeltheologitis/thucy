@@ -1,0 +1,62 @@
+
+<userQuery>
+<query>
+bodil olsson be not from switzerland and do not receive 27 sp + f
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of the claim
+Claim: "bodil olsson be not from switzerland and do not receive 27 sp + f"
+Interpretation: The claim has two parts about the participant Bodil Olsson in the 1979 World Figure Skating Championships table: (1) her nation is not Switzerland, and (2) her combined short program + free skate score (sp + fs) is not 27.
+
+Data sources discovered
+- Database: TabFact
+- Schema: public
+- Table: t_1979_world_figure_skating_championships
+  - Columns: rank (bigint), name (text), nation (text), "sp + fs" (bigint), points (double precision), places (bigint)
+
+Evidence and executed SQL
+1) Initial exact-name lookup (no rows returned)
+SQL:
+SELECT name, nation, "sp + fs" FROM t_1979_world_figure_skating_championships WHERE name = 'Bodil Olsson';
+Result: 0 rows
+
+2) Case-insensitive, partial-name lookup (found the participant)
+SQL:
+SELECT name, nation, "sp + fs" FROM t_1979_world_figure_skating_championships WHERE name ILIKE '%Bodil Olsson%';
+Result:
+- name: Bodil Olsson
+- nation: Sweden
+- sp + fs: 23
+
+3) Verification that her nation is not Switzerland
+SQL:
+SELECT COUNT(*) AS count_switzerland
+FROM public.t_1979_world_figure_skating_championships
+WHERE name ILIKE 'Bodil Olsson' AND nation = 'Switzerland';
+Result: count_switzerland = 0
+
+4) Verification that her "sp + fs" is not 27
+SQL:
+SELECT COUNT(*) AS count_sp_fs_27
+FROM public.t_1979_world_figure_skating_championships
+WHERE name ILIKE 'Bodil Olsson' AND "sp + fs" = 27;
+Result: count_sp_fs_27 = 0
+
+Assessment
+- Part 1 (not from Switzerland): Supported. The participant record for Bodil Olsson lists nation = Sweden, and there are zero records for her with nation = Switzerland.
+- Part 2 (did not receive 27 sp + f): Supported. Her "sp + fs" value is 23, and there are zero records for her with "sp + fs" = 27.
+
+Conclusion
+Both components of the claim are supported by the data; therefore, the overall claim is verified.
+
+Assumptions
+- "sp + f" in the claim is interpreted as the table column "sp + fs" (combined short program + free skate).
+- Name matching used case-insensitive search due to the initial exact match returning no rows (possible whitespace or formatting differences in the stored name).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

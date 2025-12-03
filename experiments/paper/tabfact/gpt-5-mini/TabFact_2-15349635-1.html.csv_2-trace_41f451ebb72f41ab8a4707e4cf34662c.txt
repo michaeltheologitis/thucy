@@ -1,0 +1,67 @@
+
+<userQuery>
+<query>
+4 of the team have a minus goal difference while only 4 have score more goal than those against them
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Data source discovery
+- Available database: TabFact (PostgreSQL), public schema.
+- Relevant table (from schema exploration): public.t_1940_in_brazilian_football with columns: position, team, points, played, against, difference.
+
+Verification
+1) Count of teams by goal difference sign
+- Executed SQL:
+SELECT
+  SUM(CASE WHEN CAST(REPLACE(difference,' ','') AS integer) > 0 THEN 1 ELSE 0 END) AS positive_count,
+  SUM(CASE WHEN CAST(REPLACE(difference,' ','') AS integer) < 0 THEN 1 ELSE 0 END) AS negative_count,
+  SUM(CASE WHEN CAST(REPLACE(difference,' ','') AS integer) = 0 THEN 1 ELSE 0 END) AS zero_count
+FROM public.t_1940_in_brazilian_football;
+- Result:
+  - positive_count: 4
+  - negative_count: 4
+  - zero_count: 1
+
+2) Team-by-team goal differences (evidence listing)
+- Executed SQL:
+SELECT team, CAST(REPLACE(difference,' ','') AS integer) AS goal_difference
+FROM public.t_1940_in_brazilian_football
+ORDER BY goal_difference DESC;
+- Result (team — goal_difference):
+  - fluminense — 10
+  - flamengo — 8
+  - corinthians — 4
+  - palestra itália — 3
+  - botafogo — 0
+  - vasco da gama — -2
+  - portuguesa — -10
+  - américa — -10
+  - são paulo — -13
+
+3) Raw stored strings for “difference” (to justify cleaning step)
+- Executed SQL:
+SELECT team, difference FROM public.t_1940_in_brazilian_football ORDER BY difference DESC;
+- Result (team — raw difference):
+  - flamengo — "8"
+  - corinthians — "4"
+  - palestra itália — "3"
+  - fluminense — "10"
+  - botafogo — "0"
+  - vasco da gama — "- 2"
+  - são paulo — "- 13"
+  - américa — "- 10"
+  - portuguesa — "- 10"
+
+Conclusion
+- The data show 4 teams with a negative goal difference and 4 teams with a positive goal difference (with 1 team at zero). This directly supports the claim that 4 teams have a minus goal difference while only 4 have scored more than they conceded.
+
+Assumptions
+- “difference” is interpreted as goal difference (goals scored minus goals against).
+- Negative values stored with an embedded space (e.g., "- 2") were normalized by removing spaces before numeric casting to ensure accurate counting.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

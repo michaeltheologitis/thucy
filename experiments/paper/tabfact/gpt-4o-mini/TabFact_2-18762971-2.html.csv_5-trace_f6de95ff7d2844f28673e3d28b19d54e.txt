@@ -1,0 +1,46 @@
+
+<userQuery>
+<query>
+the match on march 7 , 2001 february 21 , 2001 both have attendance over 25000
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the match on March 7, 2001 [and] February 21, 2001 both have attendance over 25,000.”
+
+Data sources discovered
+- PostgreSQL database (public schema) containing: t_2000_01_sheffield_wednesday_f_c_season (Sheffield Wednesday FC 2000–2001 season). Relevant columns: date (TEXT), opponent (TEXT), venue (TEXT), result (TEXT), attendance (BIGINT).
+
+Evidence
+1) Retrieve all 2001 fixtures to inspect dates and attendance
+Executed SQL:
+SELECT date, opponent, venue, result, attendance FROM t_2000_01_sheffield_wednesday_f_c_season WHERE date LIKE '%2001%' ORDER BY date ASC;
+Result excerpt (relevant rows):
+- 21 February 2001 | Nottingham Forest | a | 1 - 0 | 23,266
+- 7 March 2001 | Portsmouth | h | 0 - 0 | 20,503
+
+2) Targeted retrieval for the two specific dates
+Executed SQL:
+SELECT date, opponent, venue, result, attendance 
+FROM public.t_2000_01_sheffield_wednesday_f_c_season 
+WHERE date ILIKE '%7 March 2001%' OR date ILIKE '%21 February 2001%';
+Returned rows:
+- Date: 21 February 2001 | Opponent: Nottingham Forest | Venue: Away | Result: 1 - 0 | Attendance: 23,266
+- Date: 7 March 2001 | Opponent: Portsmouth | Venue: Home | Result: 0 - 0 | Attendance: 20,503
+
+Analysis
+- Both queried dates are present in the dataset.
+- Attendances recorded are 23,266 (21 Feb 2001) and 20,503 (7 Mar 2001), both below 25,000.
+
+Conclusion
+- The claim that both matches had attendance over 25,000 is contradicted by the data.
+
+Assumptions
+- Interpreted “the match” as Sheffield Wednesday FC fixtures recorded in the table t_2000_01_sheffield_wednesday_f_c_season for the 2000–2001 season.
+- Dates are matched using the text format stored in the table (e.g., “7 March 2001”, “21 February 2001”).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

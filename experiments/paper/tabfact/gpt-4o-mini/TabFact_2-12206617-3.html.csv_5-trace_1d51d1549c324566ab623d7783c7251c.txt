@@ -1,0 +1,69 @@
+
+<userQuery>
+<query>
+the toronto blue jay play in 8 game with an attendance lower than 5000 in may of the 1991 season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the toronto blue jay play in 8 game with an attendance lower than 5000 in may of the 1991 season.”
+
+Data source discovery
+- Database: TabFact
+- Schema: public
+- Table: t_1991_toronto_blue_jays_season
+- Columns:
+  - date (text)
+  - opponent (text)
+  - score (text)
+  - loss (text)
+  - attendance (bigint)
+  - record (text)
+
+Note on date format: Sample rows show date values like “may 1”, “may 2”, etc., so filtering for May is done via LOWER(date) LIKE 'may %'.
+
+Evidence
+1) Count of May games with attendance < 5,000
+- Executed SQL:
+  SELECT COUNT(*) 
+  FROM public.t_1991_toronto_blue_jays_season 
+  WHERE LOWER(date) LIKE 'may %' AND attendance < 5000;
+- Result: 0
+
+2) List any May games with attendance < 5,000
+- Executed SQL:
+  SELECT date, opponent, attendance 
+  FROM t_1991_toronto_blue_jays_season 
+  WHERE LOWER(date) LIKE 'may %' AND attendance < 5000;
+- Result: no rows
+
+3) Context: total May games and minimum May attendance
+- Executed SQL (total May games):
+  SELECT COUNT(*) AS may_games 
+  FROM public.t_1991_toronto_blue_jays_season 
+  WHERE LOWER(date) LIKE 'may %';
+- Result: 27 May games
+- Executed SQL (minimum May attendance):
+  SELECT MIN(attendance) AS min_attendance 
+  FROM public.t_1991_toronto_blue_jays_season 
+  WHERE LOWER(date) LIKE 'may %';
+- Result: 20,809 minimum attendance in May
+
+4) Season-wide check for any game with attendance < 5,000
+- Executed SQL:
+  SELECT COUNT(*) AS count FROM public.t_1991_toronto_blue_jays_season WHERE attendance < 5000;
+- Result: 0
+
+Conclusion
+- The data shows zero Toronto Blue Jays games in May 1991 with attendance below 5,000 (and none below 5,000 in the entire 1991 season). Therefore, the claim that there were 8 such games is contradicted by the data.
+
+Assumptions
+- “Toronto Blue Jay” refers to the Toronto Blue Jays MLB team.
+- The t_1991_toronto_blue_jays_season table contains all 1991 regular-season games for the team, with attendance recorded per game.
+- “May of the 1991 season” is interpreted as all games with date values beginning with “may ” in this table.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

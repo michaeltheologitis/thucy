@@ -1,0 +1,51 @@
+
+<userQuery>
+<query>
+aldershot town be the opponent on 10 march 2009 , when bradford city score their highest point total
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Data sources explored
+- PostgreSQL database with table public.t_2008_09_bradford_city_a_f_c_season (columns: game, date [text], opponent, venue, result, attendance) covering Bradford City’s 2008–09 season.
+
+Evidence 1: What happened on 10 March 2009?
+- Finding: Bradford City played Rochdale away and lost 0–3 (thus earning 0 points).
+- Executed SQL:
+  SELECT date, opponent, venue, result FROM public.t_2008_09_bradford_city_a_f_c_season WHERE date::date = '2009-03-10';
+- Result:
+  Date: 10 March 2009; Opponent: Rochdale; Venue: Away; Result: 0 - 3
+
+Evidence 2: When did Bradford City face Aldershot Town?
+- Finding: Two fixtures vs Aldershot Town in 2008–09: 30 Aug 2008 (Away, 2–3) and 7 Mar 2009 (Home, 5–0).
+- Executed SQL:
+  SELECT date, opponent, venue, result 
+  FROM public.t_2008_09_bradford_city_a_f_c_season 
+  WHERE opponent ILIKE '%Aldershot%';
+- Results:
+  30 August 2008; Opponent: Aldershot Town; Venue: Away; Result: 2 - 3
+  7 March 2009; Opponent: Aldershot Town; Venue: Home; Result: 5 - 0
+
+Evidence 3: Highest goals scored in a single match (possible intent behind “highest point total”)
+- Finding: The maximum goals scored by Bradford City in any 2008–09 match was 5, achieved on 7 March 2009 vs Aldershot Town (Home, 5–0) — not on 10 March 2009.
+- Executed SQL:
+  SELECT date, opponent, venue, result, CAST(split_part(result, ' - ', 1) AS INTEGER) AS goals_for
+  FROM public.t_2008_09_bradford_city_a_f_c_season
+  WHERE CAST(split_part(result, ' - ', 1) AS INTEGER) = (
+      SELECT MAX(CAST(split_part(result, ' - ', 1) AS INTEGER))
+      FROM public.t_2008_09_bradford_city_a_f_c_season
+  );
+- Result:
+  7 March 2009; Opponent: Aldershot Town; Venue: Home; Result: 5 - 0; Goals Scored: 5
+
+Conclusion
+- On 10 March 2009, Bradford City’s opponent was Rochdale, not Aldershot Town, and Bradford City lost 0–3 (0 points). If “highest point total” refers to most goals scored in a match, that occurred on 7 March 2009 vs Aldershot Town (5–0), not on 10 March 2009. The claim is contradicted by the data.
+
+Assumptions noted
+- Because the dataset does not explicitly store a “points” field, “highest point total” was interpreted in two reasonable ways: (a) per-match league points (max 3 for a win), and (b) highest goals scored in a single match. Under either interpretation, 10 March 2009 does not correspond to Bradford City’s “highest point total,” and the opponent that day was not Aldershot Town.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,50 @@
+
+<userQuery>
+<query>
+king island open before 1999
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Data sources explored:
+- PostgreSQL instance TabFact21, public schema. Only table available: public.drop_tower_scream_zone (fields include: park, model, opened, etc.). This dataset documents drop-tower attractions at various parks, including their opening year.
+
+Evidence collected:
+1) Identify entries related to “King(s) Island” and retrieve opening year
+Executed SQL:
+SELECT park, model, opened FROM public.drop_tower_scream_zone WHERE park ILIKE '%King%' ORDER BY park;
+Results:
+- park: kings dominion | model: gyro drop | opened: march 22 , 2003
+- park: kings island   | model: gyro drop | opened: 1999
+
+2) Check exact naming variants (“king island” vs “kings island”)
+Executed SQL:
+SELECT park, model, opened FROM public.drop_tower_scream_zone WHERE lower(park) = 'king island';
+Result: no rows
+
+Executed SQL:
+SELECT park, model, opened FROM public.drop_tower_scream_zone WHERE lower(park) = 'kings island';
+Results:
+- park: kings island | model: gyro drop | opened: 1999
+
+Executed SQL:
+SELECT park, model, opened FROM public.drop_tower_scream_zone WHERE lower(park) IN ('king island','kings island');
+Results:
+- park: kings island | model: gyro drop | opened: 1999
+
+Assessment:
+- The only relevant record in the available data is for “kings island” (the amusement park) specifically tied to its drop-tower ride (“gyro drop”). The ride’s opened value is 1999. Therefore, with respect to this dataset and the likely referent (the drop-tower installation at Kings Island), the opening was not before 1999.
+
+Conclusion:
+- The claim “king island open before 1999” is contradicted by the available data (the Kings Island drop-tower opened in 1999, not before).
+
+Assumptions and scope notes:
+- Interpreted “open” as the “opened” field in the drop_tower_scream_zone table (i.e., the opening year of the drop-tower installation at Kings Island), because this is the only relevant entity available in the connected data source.
+- Treated “king island” as possibly referring to “kings island” (case-insensitive), and verified both spellings.
+- If the claim instead concerns the amusement park’s overall opening or a different entity (e.g., a tournament or airport), such data are not present in the accessible source; the verdict is based strictly on the dataset at hand.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

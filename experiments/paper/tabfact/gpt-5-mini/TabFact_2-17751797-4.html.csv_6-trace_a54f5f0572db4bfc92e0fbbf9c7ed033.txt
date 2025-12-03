@@ -1,0 +1,60 @@
+
+<userQuery>
+<query>
+2 - 3 be the score when the home team be liverpool after 30 / 01 / 1991
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “2 - 3 be the score when the home team be Liverpool after 30/01/1991.” Interpreted as: After 30 Jan 1991, any match where Liverpool were the home team had a final score of 2–3.
+
+Data sources discovered
+- postgres_tabfact15 (TabFact) database, public schema.
+- Relevant table: public.t_1990_91_fa_cup with columns: "tie no" (text), "home team" (text), "score" (text), "away team" (text), "date" (text).
+
+Key evidence from the data
+1) List all FA Cup 1990–91 rows involving Liverpool (to see available matches and date format)
+SQL executed:
+SELECT "home team", "score", "away team", "date" 
+FROM public.t_1990_91_fa_cup 
+WHERE "home team" ILIKE '%Liverpool%' OR "away team" ILIKE '%Liverpool%' 
+ORDER BY "date" ASC;
+Result:
+- home team: liverpool | score: 2 - 2 | away team: brighton & hove albion | date: 26 / 01 / 1991
+- home team: brighton & hove albion | score: 2 - 3 | away team: liverpool | date: 30 / 01 / 1991
+Observation: Only two Liverpool matches are in this table. The only 2–3 scoreline has Liverpool as the away team on 30/01/1991, not after, and not at home.
+
+2) Check explicitly for any home=Liverpool matches after 1991-01-30
+SQL executed:
+SELECT COUNT(*) AS cnt
+FROM public.t_1990_91_fa_cup
+WHERE lower("home team") LIKE '%liverpool%'
+  AND to_date(translate("date", ' ', ''), 'DD/MM/YYYY') > DATE '1991-01-30';
+Result:
+- cnt = 0
+Interpretation: No matches where Liverpool were the home team after 30 Jan 1991 in this dataset.
+
+3) Check for a home=Liverpool match with score exactly '2 - 3' after 30/01/1991
+SQL executed:
+SELECT *
+FROM public.t_1990_91_fa_cup
+WHERE lower("home team") = 'liverpool'
+  AND "score" = '2 - 3'
+  AND to_date(replace("date", ' ', ''), 'DD/MM/YYYY') > to_date('30/01/1991', 'DD/MM/YYYY');
+Result: No rows returned.
+
+Conclusion based on the data
+- In the 1990–91 FA Cup table, there are no matches after 30/01/1991 where Liverpool were the home team, and there is no instance of a home Liverpool match with a 2–3 scoreline after that date. The only 2–3 involving Liverpool is on 30/01/1991 with Liverpool away at Brighton & Hove Albion.
+
+Verdict: The claim is contradicted by the available data.
+
+Assumptions
+- “After 30/01/1991” interpreted as strictly later than 30 January 1991.
+- “Home team be Liverpool” matched case-insensitively to handle the table’s lowercase 'liverpool'.
+- Verification limited to the 1990–91 FA Cup dataset available in postgres_tabfact15/public.t_1990_91_fa_cup.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

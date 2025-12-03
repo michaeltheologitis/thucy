@@ -1,0 +1,108 @@
+
+<userQuery>
+<query>
+the game between team 1 saint - louis fc and team 2 eleven arrow fc have the highest combined agg compare to any featured game
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify:
+"the game between team 1 saint - louis fc and team 2 eleven arrow fc have the highest combined agg compare to any featured game"
+
+Data sources explored:
+- Database: TabFact (public schema)
+- Table identified: public.t_1992_african_cup_of_champions_clubs (two-legged ties with columns: "team 1", "team 2", "1st leg", "2nd leg", "agg")
+
+Step 1 — Inspect available games
+SQL executed:
+SELECT COUNT(*) AS total_rows FROM public.t_1992_african_cup_of_champions_clubs;
+Result:
+- total_rows = 10
+
+SQL executed:
+SELECT "team 1", "team 2", "1st leg", "2nd leg", "agg" FROM public.t_1992_african_cup_of_champions_clubs LIMIT 10;
+Result (10 rows):
+1) team 1: botswana defence force xi | team 2: mbabane highlanders | 1st leg: 1 - 1 | 2nd leg: 0 - 1 | agg: 1 - 2
+2) team 1: arsenal (maseru)        | team 2: eleven arrows fc   | 1st leg: 3 - 0 | 2nd leg: 1 - 0 | agg: 4 - 0
+3) team 1: cd elá nguema           | team 2: primeiro de agosto | 1st leg: 2 - 3 | 2nd leg: 0 - 3 1 | agg: 2 - 6
+4) team 1: lprc oilers             | team 2: mighty blackpool   | 1st leg: 1 - 0 | 2nd leg: 1 - 3 | agg: 2 - 3
+5) team 1: asc police              | team 2: as real bamako     | 1st leg: 1 - 1 | 2nd leg: 1 - 1 | agg: 2 - 2 (4 - 5)
+6) team 1: port autonome           | team 2: sporting clube da praia | 1st leg: 0 - 0 | 2nd leg: 0 - 0 | agg: 0 - 0 (1 - 3)
+7) team 1: saint - george sa       | team 2: al ittihad         | 1st leg: 2 - 1 | 2nd leg: 0 - 3 | agg: 2 - 4
+8) team 1: saint - louis fc        | team 2: young africans     | 1st leg: 1 - 3 | 2nd leg: 1 - 4 | agg: 2 - 7
+9) team 1: sahel sc                | team 2: postel sport       | 1st leg: 2 - 1 | 2nd leg: 2 - 1 | agg: 4 - 2
+10) team 1: tourbillon fc          | team 2: forces armées ca   | 1st leg: 0 - 0 | 2nd leg: 1 - 1 | agg: 1 - 1
+
+Step 2 — Compute combined aggregate for every game and find the maximum
+Definition used: combined_agg = sum of the two numbers in the first aggregate pair shown in the agg column (ignoring any penalty info in parentheses).
+
+SQL executed:
+SELECT "team 1" AS team1, "team 2" AS team2, agg,
+  ( (trim(split_part( CASE WHEN strpos(agg, '(') > 0 THEN substring(agg from 1 for strpos(agg,'(')-1) ELSE agg END , '-', 1))::int)
+   + (trim(split_part( CASE WHEN strpos(agg, '(') > 0 THEN substring(agg from 1 for strpos(agg,'(')-1) ELSE agg END , '-', 2))::int)
+  ) AS combined_agg
+FROM public.t_1992_african_cup_of_champions_clubs
+ORDER BY combined_agg DESC, team1, team2;
+Key results (sorted by combined_agg desc):
+- saint - louis fc vs young africans | agg: 2 - 7 | combined_agg: 9
+- cd elá nguema vs primeiro de agosto | agg: 2 - 6 | combined_agg: 8
+- sahel sc vs postel sport | agg: 4 - 2 | combined_agg: 6
+- saint - george sa vs al ittihad | agg: 2 - 4 | combined_agg: 6
+- lprc oilers vs mighty blackpool | agg: 2 - 3 | combined_agg: 5
+- arsenal (maseru) vs eleven arrows fc | agg: 4 - 0 | combined_agg: 4
+- asc police vs as real bamako | agg: 2 - 2 (4 - 5) | combined_agg: 4
+- botswana defence force xi vs mbabane highlanders | agg: 1 - 2 | combined_agg: 3
+- tourbillon fc vs forces armées ca | agg: 1 - 1 | combined_agg: 2
+- port autonome vs sporting clube da praia | agg: 0 - 0 (1 - 3) | combined_agg: 0
+
+SQL executed (maximum combined_agg):
+SELECT MAX( ( (trim(split_part( CASE WHEN strpos(agg, '(') > 0 THEN substring(agg from 1 for strpos(agg,'(')-1) ELSE agg END , '-', 1))::int)
+   + (trim(split_part( CASE WHEN strpos(agg, '(') > 0 THEN substring(agg from 1 for strpos(agg,'(')-1) ELSE agg END , '-', 2))::int)
+  ) ) AS max_combined_agg
+FROM public.t_1992_african_cup_of_champions_clubs;
+Result:
+- max_combined_agg = 9
+
+SQL executed (fixtures with max combined_agg):
+SELECT "team 1" AS team1, "team 2" AS team2, agg,
+  ( (trim(split_part( CASE WHEN strpos(agg, '(') > 0 THEN substring(agg from 1 for strpos(agg,'(')-1) ELSE agg END , '-', 1))::int)
+   + (trim(split_part( CASE WHEN strpos(agg, '(') > 0 THEN substring(agg from 1 for strpos(agg,'(')-1) ELSE agg END , '-', 2))::int)
+  ) AS combined_agg
+FROM public.t_1992_african_cup_of_champions_clubs
+WHERE ( (trim(split_part( CASE WHEN strpos(agg, '(') > 0 THEN substring(agg from 1 for strpos(agg,'(')-1) ELSE agg END , '-', 1))::int)
+   + (trim(split_part( CASE WHEN strpos(agg, '(') > 0 THEN substring(agg from 1 for strpos(agg,'(')-1) ELSE agg END , '-', 2))::int)
+  ) = (
+    SELECT MAX( ( (trim(split_part( CASE WHEN strpos(agg, '(') > 0 THEN substring(agg from 1 for strpos(agg,'(')-1) ELSE agg END , '-', 1))::int)
+   + (trim(split_part( CASE WHEN strpos(agg, '(') > 0 THEN substring(agg from 1 for strpos(agg,'(')-1) ELSE agg END , '-', 2))::int)
+  ) ) FROM public.t_1992_african_cup_of_champions_clubs
+  );
+Result:
+- saint - louis fc vs young africans | agg: 2 - 7 | combined_agg: 9 (highest)
+
+Step 3 — Check if a tie exists between Saint - Louis FC and Eleven Arrows FC
+SQL executed:
+SELECT "team 1" AS team1, "team 2" AS team2, agg
+FROM public.t_1992_african_cup_of_champions_clubs
+WHERE ("team 1" = 'Saint - Louis FC' AND "team 2" = 'Eleven Arrows FC')
+   OR ("team 1" = 'Eleven Arrows FC' AND "team 2" = 'Saint - Louis FC');
+Result:
+- No matching ties found (0 rows).
+
+Findings:
+- There is no recorded game in this dataset between Saint - Louis FC and Eleven Arrows FC.
+- The highest combined aggregate in the available games is 9, from Saint - Louis FC vs Young Africans (agg 2 - 7), not from any game involving Eleven Arrows FC.
+- The only game involving Eleven Arrows FC here is against Arsenal (Maseru), with combined aggregate 4 (agg 4 - 0), which is not the highest.
+
+Conclusion:
+The claim is not supported by the data. The game between Saint - Louis FC and Eleven Arrows FC does not exist in this dataset, and the highest combined aggregate belongs to Saint - Louis FC vs Young Africans (combined_agg = 9).
+
+Assumptions and interpretation notes:
+- "Featured game" was interpreted to mean any game listed in the public.t_1992_african_cup_of_champions_clubs table, as no explicit "featured" flag exists in the schema.
+- "Combined agg" was computed as the sum of the first aggregate pair in the agg field, ignoring any penalty shootout details in parentheses.
+- Team names were matched exactly as stored in the table; the dataset uses "eleven arrows fc" (plural).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

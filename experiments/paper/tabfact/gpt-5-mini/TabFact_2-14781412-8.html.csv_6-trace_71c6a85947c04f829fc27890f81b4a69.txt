@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+equestrian at the asian game have be locate in a different city every year that it occur except 1994 and 1998
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of approach
+- I first discovered the available data sources and found a single authoritative table: public.equestrian_at_the_asian_games in the TabFact PostgreSQL database.
+- I examined the schema, then queried the table to retrieve years and locations, check for repeated cities, and specifically compare 1994 and 1998.
+
+Data source and schema
+- Database: TabFact (PostgreSQL)
+- Table: public.equestrian_at_the_asian_games
+- Columns: year (bigint), location (text), gold (text), silver (text), bronze (text)
+
+Evidence 1: List all years and locations
+Executed SQL:
+SELECT year, location FROM public.equestrian_at_the_asian_games ORDER BY year ASC;
+Results:
+- 1982 — new delhi
+- 1986 — seoul
+- 1994 — hiroshima
+- 1998 — bangkok
+- 2002 — busan
+- 2006 — doha
+- 2010 — guangzhou
+Observation: Each listed edition has a distinct location string.
+
+Evidence 2: Check for any repeated locations across years
+Executed SQL:
+SELECT location, COUNT(*) AS cnt
+FROM public.equestrian_at_the_asian_games
+GROUP BY location
+ORDER BY cnt DESC, location;
+Results (all counts are 1):
+- bangkok — 1
+- busan — 1
+- doha — 1
+- guangzhou — 1
+- hiroshima — 1
+- new delhi — 1
+- seoul — 1
+Observation: No city appears more than once; there are no duplicates.
+
+Evidence 3: Specifically compare 1994 and 1998
+Executed SQL:
+SELECT year, location FROM public.equestrian_at_the_asian_games WHERE year IN (1994, 1998) ORDER BY year;
+Results:
+- 1994 — hiroshima
+- 1998 — bangkok
+Observation: 1994 and 1998 are different locations.
+
+Conclusion
+- The claim states that equestrian at the Asian Games has been located in a different city every time it occurred except for 1994 and 1998. The authoritative table shows no repeated cities at all, and specifically 1994 (Hiroshima) and 1998 (Bangkok) are different cities. Therefore, the claim is contradicted by the data.
+
+Assumptions and scope notes
+- I interpreted the claim as asserting that the only non-different-city case(s) involved 1994 and 1998 (i.e., implying a repeat or sameness). The available dataset covers editions from 1982 through 2010 and is treated as authoritative within its scope.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

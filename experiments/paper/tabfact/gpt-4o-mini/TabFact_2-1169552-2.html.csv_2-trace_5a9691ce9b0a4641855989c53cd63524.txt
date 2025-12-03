@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+for the class hercules , with wheel arrangement 2 - 4 - 0 , the manufacturer be nine elm work
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “for the class hercules, with wheel arrangement 2 - 4 - 0, the manufacturer be nine elm work.”
+
+Finding: Supported by the Southern Railway locomotive database. The entry for class “hercules” with wheel arrangement “2 - 4 - 0” lists the manufacturer as “Nine Elms Works.” The user’s phrasing (“nine elm work”) differs slightly in spelling/pluralization, but the intended manufacturer matches the data.
+
+Evidence from data (including executed SQL):
+1) Locate any entry containing “Hercules” in the class field
+- SQL:
+SELECT class, "wheel arrangement", manufacturer 
+FROM locomotives_of_the_southern_railway 
+WHERE class ILIKE '%Hercules%';
+- Result excerpt:
+  - class: hercules; wheel arrangement: 2 - 4 - 0; manufacturer: nine elms works
+
+2) Confirm exact match on class and normalized wheel arrangement, and return manufacturer
+- SQL:
+SELECT class, "wheel arrangement", manufacturer 
+FROM locomotives_of_the_southern_railway 
+WHERE LOWER(class) = 'hercules' 
+AND REPLACE(REPLACE("wheel arrangement", ' ', ''), '-', '') = '240';
+- Result excerpt:
+  - class: hercules; wheel arrangement: 2 - 4 - 0; manufacturer: Nine Elms Works
+
+3) Confirm uniqueness of the matching entry
+- SQL:
+SELECT COUNT(*) AS row_count
+FROM locomotives_of_the_southern_railway
+WHERE LOWER(class) = 'hercules'
+AND REPLACE("wheel arrangement", ' ', '') = '2-4-0';
+- Result: row_count = 1
+
+Conclusion: The database shows that for the class “hercules” with wheel arrangement “2 - 4 - 0,” the manufacturer is Nine Elms Works. This supports the claim, with only minor spelling/pluralization differences from the user’s phrasing.
+
+Assumptions:
+- The claim refers to the Southern Railway dataset available and uses Whyte notation for the wheel arrangement (2-4-0).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

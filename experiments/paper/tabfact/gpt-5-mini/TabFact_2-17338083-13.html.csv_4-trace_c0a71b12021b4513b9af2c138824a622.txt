@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+yi be the name when the royal house be ji and the state be cai and the year be 826
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+Claim: “yi be the name when the royal house be ji and the state be cai and the year be 826.” Interpreted as: In 826 BC, for the state of Cai under the Ji royal house, the leader’s name is Yi.
+
+Data source discovery
+- Available database: TabFact (public schema)
+- Relevant table: public.list_of_state_leaders_in_820s_bc (covers leaders in the 820s BC)
+- Table columns: state (text), type (text), name (text), title (text), royal house (text), from (text)
+
+Evidence
+1) Identify how “Cai” appears in the table (case/format)
+SQL:
+SELECT DISTINCT state
+FROM public.list_of_state_leaders_in_820s_bc
+WHERE lower(state) LIKE '%cai%'
+   OR lower(type) LIKE '%cai%'
+   OR lower(name) LIKE '%cai%'
+   OR lower(title) LIKE '%cai%'
+   OR lower("royal house") LIKE '%cai%'
+   OR lower("from") LIKE '%cai%';
+Result: state = cai
+
+2) Retrieve the entry for the state “cai”
+SQL:
+SELECT state, name, title, "royal house", "from"
+FROM public.list_of_state_leaders_in_820s_bc
+WHERE state = 'cai';
+Result: state=cai, name=yi, title=marquis, royal house=ji, from=837 bc
+Interpretation: The table specifically lists leaders in the 820s BC; the entry shows the leader for Cai is “yi,” of the Ji royal house, with a reign start noted as “837 bc,” indicating he was in power during the 820s (and thus in 826 BC).
+
+3) Direct check for an explicit “826” year string for Cai under Ji (none found, but not required given table scope)
+SQL:
+SELECT state, type, name, title, "royal house", "from"
+FROM public.list_of_state_leaders_in_820s_bc
+WHERE state ILIKE 'cai' AND "royal house" ILIKE 'ji' AND "from" ILIKE '%826%';
+Result: no matching rows (the “from” field records the start year as 837 bc; the table’s scope ensures the leader covers the 820s decade, including 826 BC)
+
+Conclusion
+- The table, which enumerates state leaders in the 820s BC, shows that for the state “cai” the leader’s name is “yi,” with royal house “ji.” Therefore, for the year 826 BC (within the 820s BC), the leader’s name being “yi” is supported by the data.
+
+Assumptions
+- “Year 826” refers to 826 BC.
+- Inclusion of a leader in the table “list_of_state_leaders_in_820s_bc” implies that leader held power during some or all of the 820s BC; a “from: 837 bc” start date indicates the reign extended into the 820s BC (hence covering 826 BC).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

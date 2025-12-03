@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+arienai kisu be broadcast 7 day after the title with the earliest broadcast date
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: "Arienai kisu [episode] is broadcast 7 days after the title with the earliest broadcast date."
+
+Data source overview:
+- Database: TabFact
+- Schema: public
+- Table: tsuki_no_koibito
+- Relevant columns: "episode title", "romanized title", "broadcast date"
+
+Evidence gathered:
+1) Identify the earliest broadcast date in the table
+- Result: earliest_date = 2010-05-10
+- Executed SQL:
+SELECT MIN(to_date(replace("broadcast date", ' ,', ','), 'Month DD, YYYY')) AS earliest_date
+FROM public.tsuki_no_koibito;
+
+2) Identify the episode(s) with that earliest date to confirm the “title with the earliest broadcast date”
+- Result: Episode Title: おまえが欲しい; Romanized Title: omae ga hosii; Normalized Date: 2010-05-10
+- Executed SQL:
+SELECT "episode title", "romanized title", to_date(replace("broadcast date", ' ,', ','), 'Month DD, YYYY') AS normalized_date 
+FROM tsuki_no_koibito 
+WHERE to_date(replace("broadcast date", ' ,', ','), 'Month DD, YYYY') = (
+    SELECT MIN(to_date(replace("broadcast date", ' ,', ','), 'Month DD, YYYY')) 
+    FROM tsuki_no_koibito
+);
+
+3) Get the broadcast date for the episode with romanized title 'arienai kisu'
+- Result: arienai_kisu_date = 2010-05-17
+- Executed SQL:
+SELECT to_date(replace("broadcast date", ' ,', ','), 'Month DD, YYYY') AS arienai_kisu_date
+FROM public.tsuki_no_koibito
+WHERE LOWER("romanized title") = 'arienai kisu';
+
+4) Compute the difference in days between 'arienai kisu' and the earliest broadcast date
+- Result: diff_days = 7
+- Executed SQL:
+SELECT
+  (SELECT to_date(replace("broadcast date", ' ,', ','), 'Month DD, YYYY')
+   FROM public.tsuki_no_koibito
+   WHERE LOWER("romanized title") = 'arienai kisu') -
+  (SELECT MIN(to_date(replace("broadcast date", ' ,', ','), 'Month DD, YYYY'))
+   FROM public.tsuki_no_koibito) AS diff_days;
+
+Conclusion:
+- The earliest broadcast date in the dataset is 2010-05-10 (episode: omae ga hosii).
+- The episode 'arienai kisu' aired on 2010-05-17.
+- The difference is exactly 7 days. The claim is supported by the data.
+
+Assumptions made:
+- “arienai kisu” refers to the row where "romanized title" = 'arienai kisu'.
+- “title with the earliest broadcast date” refers to the episode(s) having the minimum normalized date within the tsuki_no_koibito table.
+- Date normalization via to_date(replace(...), 'Month DD, YYYY') accurately represents the intended broadcast dates.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

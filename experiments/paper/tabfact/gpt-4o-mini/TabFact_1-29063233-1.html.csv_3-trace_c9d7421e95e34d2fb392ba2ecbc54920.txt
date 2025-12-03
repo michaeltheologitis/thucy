@@ -1,0 +1,57 @@
+
+<userQuery>
+<query>
+lucy watkins only write 1 episode of series 2
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: "Lucy Watkins only wrote 1 episode of Series 2" refers to the TV show Merlin, Series 2, and counts credited writer entries in the available dataset.
+
+Data source discovery:
+- Available database: TabFact (Public schema)
+- Relevant table: merlin_series_2
+- Table schema:
+  - no overall (bigint)
+  - no for series (bigint)
+  - title (text)
+  - directed by (text)
+  - written by (text)
+  - original air date (text)
+  - uk viewers (million) (double precision)
+
+Evidence:
+1) Count episodes written by Lucy Watkins
+SQL:
+SELECT COUNT(*) AS episode_count FROM merlin_series_2 WHERE "written by" ILIKE '%Lucy Watkins%';
+Result: 1 episode
+
+2) List episodes written by Lucy Watkins
+SQL:
+SELECT "no overall", title FROM merlin_series_2 WHERE "written by" ILIKE '%Lucy Watkins%';
+Result: no overall = 23, title = Sweet Dreams
+
+3) Distinct writer credits and counts (to cross-check)
+SQL:
+SELECT "written by", COUNT(*) AS episode_count 
+FROM merlin_series_2 
+GROUP BY "written by" 
+ORDER BY episode_count DESC;
+Result (abridged):
+- Julian Jones — 3 episodes
+- Howard Overman — 3 episodes
+- Jake Michie — 3 episodes
+- Ben Vanstone — 2 episodes
+- Lucy Watkins — 1 episode
+
+Conclusion: The dataset shows Lucy Watkins is credited with exactly one Merlin Series 2 episode (Sweet Dreams). This directly supports the claim.
+
+Assumptions:
+- "Series 2" refers to Merlin Series 2 as represented by the merlin_series_2 table.
+- "Wrote" means credited in the "written by" field (including any potential co-writes).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

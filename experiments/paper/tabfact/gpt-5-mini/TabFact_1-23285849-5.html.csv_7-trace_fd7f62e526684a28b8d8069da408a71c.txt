@@ -1,0 +1,69 @@
+
+<userQuery>
+<query>
+attendance of all game at the pepsi center be over 19000
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: All games at the Pepsi Center had attendance over 19,000.
+
+Data source discovery:
+- Using available connectors, I found one database: TabFact (postgres_tabfact29), schema public.
+
+Schema inspection:
+- Relevant table found: public.t_2009_10_denver_nuggets_season
+  - Columns: game, date, team, score, high points, high rebounds, high assists, "location attendance", record
+  - The "location attendance" column appears to store the venue name and an attendance number together as text (e.g., "pepsi center 19141").
+
+Data inspection (samples):
+- Executed SQL:
+  SELECT game, date, team, score, "location attendance" FROM public.t_2009_10_denver_nuggets_season ORDER BY game LIMIT 10;
+- Evidence (subset of returned rows shows Pepsi Center entries below 19,000):
+  - game 3: location attendance: pepsi center 15823
+  - game 10: location attendance: pepsi center 19141
+  - game 11: location attendance: pepsi center 16446
+  - game 13: location attendance: pepsi center 19359
+
+Verification analysis (Pepsi Center only):
+- Aggregated summary query:
+  SELECT
+    count(*) AS total_games,
+    min(regexp_replace("location attendance", '[^0-9]', '', 'g')::int) AS min_attendance,
+    max(regexp_replace("location attendance", '[^0-9]', '', 'g')::int) AS max_attendance,
+    sum(CASE WHEN regexp_replace("location attendance", '[^0-9]', '', 'g')::int <= 19000 THEN 1 ELSE 0 END) AS games_le_19000
+  FROM public.t_2009_10_denver_nuggets_season
+  WHERE lower("location attendance") LIKE '%pepsi center%';
+- Results:
+  - Total games at Pepsi Center: 6
+  - Minimum attendance: 15,823
+  - Maximum attendance: 19,359
+  - Games with attendance ≤ 19,000: 3
+
+Exception details (which games were ≤ 19,000):
+- Executed SQL:
+  SELECT
+    game,
+    date,
+    team,
+    regexp_replace("location attendance", '[^0-9]', '', 'g')::int AS attendance
+  FROM public.t_2009_10_denver_nuggets_season
+  WHERE lower("location attendance") LIKE '%pepsi center%'
+    AND regexp_replace("location attendance", '[^0-9]', '', 'g')::int <= 19000
+  ORDER BY date;
+- Returned rows:
+  - game 3, date: november 1, team: grizzlies, attendance: 15,823
+  - game 11, date: november 17, team: raptors, attendance: 16,446
+  - game 14, date: november 24, team: nets, attendance: 16,307
+
+Conclusion:
+- The data show multiple Pepsi Center games with attendance well below 19,000. Therefore, the claim that attendance of all games at the Pepsi Center was over 19,000 is not supported by the available evidence.
+
+Assumptions:
+- The verification is performed against the available dataset (Denver Nuggets 2009–10 season) in the TabFact database. The "location attendance" field reliably encodes the venue and numeric attendance, with attendance extracted using regexp to isolate digits.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

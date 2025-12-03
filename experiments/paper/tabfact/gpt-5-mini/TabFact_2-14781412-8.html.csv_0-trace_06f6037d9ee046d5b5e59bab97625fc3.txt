@@ -1,0 +1,66 @@
+
+<userQuery>
+<query>
+equestrian at the asian game happen every 4 year from 1982 to 2010 , except for in 1990
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Equestrian at the Asian Games happen every 4 year from 1982 to 2010, except for in 1990.”
+
+Data sources explored
+- Database discovered: TabFact (public schema)
+- Relevant table: equestrian_at_the_asian_games (columns: year, location, gold, silver, bronze)
+
+Evidence from executed SQL
+1) Distinct years recorded for equestrian at the Asian Games
+SQL:
+SELECT DISTINCT year FROM equestrian_at_the_asian_games ORDER BY year;
+Results:
+1982, 1986, 1994, 1998, 2002, 2006, 2010
+
+2) Years between 1982 and 2010 (inclusive) where equestrian is recorded
+SQL:
+SELECT DISTINCT year FROM equestrian_at_the_asian_games WHERE year BETWEEN 1982 AND 2010 ORDER BY year;
+Results:
+1982, 1986, 1994, 1998, 2002, 2006, 2010
+
+3) Check if 1990 is present
+SQL:
+SELECT COUNT(*) AS count_1990 FROM equestrian_at_the_asian_games WHERE year = 1990;
+Result:
+count_1990 = 0 (i.e., 1990 is not present)
+
+4) Year-to-year gaps to assess a 4-year cadence
+SQL:
+WITH yrs AS (
+  SELECT DISTINCT year FROM equestrian_at_the_asian_games ORDER BY year
+)
+SELECT year, lead(year) OVER (ORDER BY year) AS next_year,
+       (lead(year) OVER (ORDER BY year) - year) AS gap
+FROM yrs;
+Results:
+- 1982 → 1986: gap = 4
+- 1986 → 1994: gap = 8
+- 1994 → 1998: gap = 4
+- 1998 → 2002: gap = 4
+- 2002 → 2006: gap = 4
+- 2006 → 2010: gap = 4
+
+Assessment
+- The table shows equestrian events at the Asian Games in 1982, 1986, 1994, 1998, 2002, 2006, and 2010.
+- 1990 is missing (no recorded equestrian event), which creates the single 8-year gap from 1986 to 1994.
+- Aside from the missing 1990 edition, entries follow a 4-year pattern across the 1982–2010 window.
+
+Conclusion
+- The claim is supported by the data: equestrian occurred on a 4-year cadence from 1982 to 2010, with the exception that 1990 is not present.
+
+Assumptions
+- “Happen” is interpreted as “equestrian was contested/held at the Asian Games.”
+- The equestrian_at_the_asian_games table is authoritative for which editions included equestrian within 1982–2010.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

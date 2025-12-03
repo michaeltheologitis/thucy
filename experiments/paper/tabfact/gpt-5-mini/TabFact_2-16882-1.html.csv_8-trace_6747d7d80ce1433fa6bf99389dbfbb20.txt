@@ -1,0 +1,57 @@
+
+<userQuery>
+<query>
+the group equity shareholding of 99% have a company of epcor
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+What I verified
+- Claim interpreted: The statement appears to assert that there exists an EPCOR company (subsidiary) with a group equity shareholding of 99%.
+
+Data sources consulted
+- PostgreSQL database: TabFact (schema: public)
+- Relevant table discovered: public.klm (columns: company, type, principal activities, incorporated in, group 's equity shareholding)
+
+Evidence gathered
+1) Locate any EPCOR-related company records and inspect the group equity shareholding.
+Executed SQL:
+SELECT company, type, "principal activities", "incorporated in", "group 's equity shareholding" FROM public.klm WHERE company ILIKE '%EPCOR%';
+Result:
+- company: epcor
+  type: subsidiary
+  principal activities: maintenance
+  incorporated in: netherlands
+  group 's equity shareholding: 100%
+
+2) Check whether any record shows a 99% group equity shareholding (to see if any EPCOR record could match or if 99% exists at all).
+Executed SQL (with supporting column check):
+- Verify column names:
+SELECT column_name, data_type FROM information_schema.columns WHERE table_schema='public' AND table_name='klm';
+Returned columns: company (text), type (text), principal activities (text), incorporated in (text), group 's equity shareholding (text)
+
+- Search for shareholding values starting with 99:
+SELECT count(*) FROM public.klm WHERE "group 's equity shareholding" LIKE '99%';
+Result: 0
+
+- Check exact literal 99%:
+SELECT count(*) FROM public.klm WHERE "group 's equity shareholding" = '99%';
+Result: 0
+
+Findings
+- The only EPCOR record in the dataset shows a group’s equity shareholding of 100%, not 99%.
+- There are no records in the table with a group’s equity shareholding value of 99% at all.
+
+Conclusion
+- The claim that an EPCOR company has a group equity shareholding of 99% is not supported by the available data; the relevant EPCOR record shows 100%.
+
+Assumptions made
+- “Company of EPCOR” was interpreted as a subsidiary entry whose company name contains “EPCOR”.
+- “Group equity shareholding” refers to the literal column "group 's equity shareholding" in public.klm and the figures are compared as stored text values.
+- If the claim refers to a different EPCOR entity not present in this dataset, it would be outside the scope of the accessible data sources used here.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+the highest score for a winning team be 18 and the lowest score be 11.5
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the highest score for a winning team be 18 and the lowest score be 11.5.”
+
+Data source discovery
+- Connected database: TabFact
+- Schema: public
+- Table: solheim_cup (columns: year bigint, venue text, winning team text, score text, usa captain text, europe captain text)
+
+Understanding the data
+- Sample rows to inspect score formatting and confirm that the first number in score corresponds to the winning team’s points.
+Executed SQL:
+SELECT year, "winning team", score FROM public.solheim_cup LIMIT 30;
+Observed examples (subset of returned rows):
+- 2013 | Europe | 18 - 10
+- 2011 | Europe | 15 - 13
+- 2005 | United States | 15½ - 12½
+- 2000 | Europe | 14½ - 11½
+- 1996 | United States | 17 - 11
+- 1994 | United States | 13 - 7
+- 1992 | Europe | 11½ - 6½
+- 1990 | United States | 11½ - 4½
+These confirm the winning score is the first number and may include the half character ½.
+
+Computation of highest and lowest winning-team scores
+- Method: Parse the first numeric value before the dash in score, normalize ‘½’ to ‘.5’, handle possible en-dashes, trim spaces, cast to numeric; then compute MIN and MAX.
+Executed SQL:
+SELECT
+  MAX(CAST(NULLIF(TRIM(SUBSTRING(REPLACE(REPLACE(score, '–', '-'), '½', '.5') FROM '^[^-]+')), '') AS numeric)) AS max_score,
+  MIN(CAST(NULLIF(TRIM(SUBSTRING(REPLACE(REPLACE(score, '–', '-'), '½', '.5') FROM '^[^-]+')), '') AS numeric)) AS min_score
+FROM
+  public.solheim_cup;
+
+Results
+- Maximum winning team score: 18
+- Minimum winning team score: 11.5
+
+Conclusion
+- The data supports the claim: highest winning-team score is 18 and lowest is 11.5.
+
+Assumptions
+- Interpreted “winning team score” as the first numeric value in the score column (confirmed by samples).
+- The claim refers to the Solheim Cup dataset in the connected database.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

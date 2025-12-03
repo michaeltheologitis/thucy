@@ -1,0 +1,43 @@
+
+<userQuery>
+<query>
+only 1 match result in the result of a draw
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Only one match resulted in a draw.”
+
+Data source explored
+- Database: postgres_tabfact34
+- Schema: public
+- Table: public.tim_lajcik (columns: res, record, opponent, method, event, round, time)
+
+Evidence
+1) Distinct outcome counts in the res column
+- Executed SQL:
+  SELECT res, COUNT(*) AS count FROM public.tim_lajcik GROUP BY res ORDER BY count DESC, res;
+- Result:
+  - res = 'win' — 7
+  - res = 'loss' — 6
+  - res = 'draw' — 1
+
+2) Details of the draw match
+- Executed SQL:
+  SELECT opponent, event, method, round, time FROM public.tim_lajcik WHERE res = 'draw';
+- Result:
+  - opponent: ron waterman; event: ufc 22; method: draw; round: 3; time: 5:00
+
+Conclusion
+- The dataset shows exactly one row with res = 'draw'. This supports the claim that only one match resulted in a draw.
+
+Assumptions
+- “Match” refers to rows in public.tim_lajcik (Tim Lajcik’s fight records).
+- “Draw” is identified by res exactly equal to 'draw'.
+- Evaluation is over the entire table in the available dataset.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

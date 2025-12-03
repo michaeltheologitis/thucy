@@ -1,0 +1,57 @@
+
+<userQuery>
+<query>
+the 2005 drama desk award for outstanding choreography do not go to william ivey long
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “The 2005 Drama Desk Award for Outstanding Choreography did not go to William Ivey Long.”
+
+Data source discovered:
+- Database: postgres_tabfact11 (public schema)
+- Table: la_cage_aux_folles_musical (columns: year, award, category, nominee, result)
+
+Evidence:
+1) Winner of 2005 Drama Desk Award, Outstanding Choreography (as recorded for La Cage aux Folles):
+- SQL executed:
+  SELECT year, award, category, nominee, result
+  FROM la_cage_aux_folles_musical
+  WHERE year = 2005
+    AND award ILIKE 'Drama Desk%'
+    AND category ILIKE 'Outstanding Choreography';
+- Result row:
+  {"year":2005, "award":"drama desk award", "category":"outstanding choreography", "nominee":"jerry mitchell", "result":"won"}
+- Interpretation: The category winner recorded is Jerry Mitchell (won), not William Ivey Long.
+
+2) Any 2005 Drama Desk entries for William Ivey Long (to see his categories/results):
+- SQL executed:
+  SELECT year, award, category, nominee, result
+  FROM la_cage_aux_folles_musical
+  WHERE year = 2005
+    AND award ILIKE '%Drama Desk%'
+    AND nominee ILIKE '%William Ivey Long%';
+- Result row:
+  {"year":2005, "award":"drama desk award", "category":"outstanding costume design", "nominee":"william ivey long", "result":"nominated"}
+- Interpretation: William Ivey Long was a nominee for Outstanding Costume Design (not choreography) and did not win in this dataset.
+
+3) Direct check for William Ivey Long in 2005 Outstanding Choreography:
+- SQL executed:
+  SELECT * FROM la_cage_aux_folles_musical
+  WHERE year = 2005
+    AND award ILIKE '%drama desk%'
+    AND category ILIKE '%outstanding choreography%'
+    AND nominee ILIKE '%william ivey long%';
+- Result: no rows returned
+- Interpretation: No evidence he was a nominee (or winner) in Outstanding Choreography for 2005 in this data.
+
+Conclusion: The data shows the 2005 Drama Desk Award for Outstanding Choreography went to Jerry Mitchell. William Ivey Long is only listed for Outstanding Costume Design (nominated). Therefore, the claim is supported by the evidence.
+
+Assumptions/notes:
+- The available table catalogs award outcomes related to La Cage aux Folles and records the 2005 Outstanding Choreography winner as Jerry Mitchell. Case-insensitive matching (ILIKE) was used to account for capitalization differences.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

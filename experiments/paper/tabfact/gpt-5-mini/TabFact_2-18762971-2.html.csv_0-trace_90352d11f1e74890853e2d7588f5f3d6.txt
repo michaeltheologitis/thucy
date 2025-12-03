@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+the match on 7 march 2001 have an attendance of 20503 , while the 1 on 21 february 2001 have 23266
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim: The match on 7 March 2001 had an attendance of 20,503, and the match on 21 February 2001 had an attendance of 23,266.
+- Conclusion: Supported by the TabFact database entries for Sheffield Wednesday F.C.’s 2000–01 season.
+
+Data sources explored
+- Discovered data source: PostgreSQL database “TabFact” (postgres_tabfact29) with public schema.
+- Relevant table: public.t_2000_01_sheffield_wednesday_f_c_season
+  - Columns: date (text), opponent (text), venue (text), result (text), attendance (bigint)
+
+Evidence and executed SQL
+1) Context check (inspect date formatting and available 2001 entries)
+- Executed SQL:
+SELECT date FROM public.t_2000_01_sheffield_wednesday_f_c_season WHERE date LIKE '%2001%' ORDER BY date LIMIT 200;
+
+2) Pull all February and March 2001 matches (to locate the two dates and see attendances)
+- Executed SQL:
+SELECT date, opponent, venue, result, attendance
+FROM public.t_2000_01_sheffield_wednesday_f_c_season
+WHERE date ILIKE '%february 2001' OR date ILIKE '%march 2001'
+ORDER BY date;
+- Returned rows include:
+  - 21 february 2001 | nottingham forest | a | 1 - 0 | attendance: 23266
+  - 7 march 2001     | portsmouth        | h | 0 - 0 | attendance: 20503
+
+3) Direct verification for the two specific dates
+- Executed SQL:
+SELECT date, opponent, venue, result, attendance
+FROM public.t_2000_01_sheffield_wednesday_f_c_season
+WHERE lower(trim(date)) IN ('7 march 2001', '21 february 2001');
+- Result:
+  - date: 21 february 2001, opponent: nottingham forest, venue: a, result: 1 - 0, attendance: 23266
+  - date: 7 march 2001, opponent: portsmouth, venue: h, result: 0 - 0, attendance: 20503
+
+Assessment of each claim component
+- “7 March 2001 attendance of 20503”: Verified by the row for 7 march 2001 (attendance 20503).
+- “21 February 2001 attendance of 23266”: Verified by the row for 21 february 2001 (attendance 23266).
+
+Assumptions
+- The claim refers to fixtures recorded in the Sheffield Wednesday F.C. 2000–01 season table; dates are matched exactly as stored in text format (e.g., “7 march 2001”, “21 february 2001”).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

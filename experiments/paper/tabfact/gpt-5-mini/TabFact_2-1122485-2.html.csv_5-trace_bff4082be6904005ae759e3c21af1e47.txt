@@ -1,0 +1,96 @@
+
+<userQuery>
+<query>
+there be more brm then any other with alfa romeo and matra tying for the least
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: In the available data, there are more BRM entries than any other constructor, and Alfa Romeo and Matra tie for the fewest entries.
+
+Data sources explored
+- Discovered database: TabFact (public schema)
+- Available table: t_1971_south_african_grand_prix with columns: driver (text), constructor (text), laps (bigint), time / retired (text), grid (bigint)
+
+Evidence
+1) Constructor entry counts
+- SQL executed:
+SELECT constructor, COUNT(*) AS cnt
+FROM public.t_1971_south_african_grand_prix
+GROUP BY constructor
+ORDER BY cnt DESC;
+- Result:
+  • march - ford: 4
+  • brabham - ford: 3
+  • ferrari: 3
+  • mclaren - ford: 3
+  • brm: 3
+  • surtees - ford: 3
+  • lotus - ford: 2
+  • tyrrell - ford: 2
+  • matra: 1
+  • march - alfa romeo: 1
+
+- SQL executed (unique constructors):
+SELECT COUNT(DISTINCT constructor) AS unique_constructors
+FROM public.t_1971_south_african_grand_prix;
+- Result: 10
+
+- SQL executed (null check):
+SELECT COUNT(*) FILTER (WHERE constructor IS NULL) AS null_constructors
+FROM public.t_1971_south_african_grand_prix;
+- Result: 0
+
+2) Max/min constructors
+- SQL executed (counts ordered):
+SELECT constructor, COUNT(*) AS cnt
+FROM t_1971_south_african_grand_prix
+GROUP BY constructor
+ORDER BY cnt DESC, constructor;
+
+- SQL executed (max/min values):
+SELECT MAX(cnt) AS max_cnt, MIN(cnt) AS min_cnt
+FROM (
+  SELECT constructor, COUNT(*) AS cnt
+  FROM t_1971_south_african_grand_prix
+  GROUP BY constructor
+) sub;
+
+- SQL executed (constructors with max = 4):
+SELECT constructor, COUNT(*) AS cnt
+FROM t_1971_south_african_grand_prix
+GROUP BY constructor
+HAVING COUNT(*) = 4
+ORDER BY constructor;
+- Result: march - ford (4)
+
+- SQL executed (constructors with min = 1):
+SELECT constructor, COUNT(*) AS cnt
+FROM t_1971_south_african_grand_prix
+GROUP BY constructor
+HAVING COUNT(*) = 1
+ORDER BY constructor;
+- Result: march - alfa romeo (1), matra (1)
+
+3) Alfa Romeo mention check
+- SQL executed:
+SELECT constructor, COUNT(*) AS cnt
+FROM t_1971_south_african_grand_prix
+WHERE lower(constructor) LIKE '%alfa romeo%'
+GROUP BY constructor
+ORDER BY cnt DESC, constructor;
+- Result: march - alfa romeo — 1
+
+Findings
+- “More BRM than any other”: False. BRM has 3 entries; the maximum is 4 for “march - ford.” Several other constructors also have 3.
+- “Alfa Romeo and Matra tying for the least”: Supported. The least count is 1, shared by “matra” and “march - alfa romeo.” Note the constructor string includes “march - alfa romeo,” not a standalone “alfa romeo.”
+
+Assumptions
+- The claim refers to constructor frequencies within the single available table t_1971_south_african_grand_prix (1971 South African Grand Prix entries), not across broader seasons or datasets.
+- “Alfa Romeo” refers to the entry recorded as “march - alfa romeo,” which is the only occurrence containing “alfa romeo.”
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

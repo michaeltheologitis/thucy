@@ -1,0 +1,78 @@
+
+<userQuery>
+<query>
+at 459 feet , the schiesinger building be the fourth largest building in johannesburg
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “At 459 feet, the Schiesinger [Schlesinger] Building is the fourth largest [tallest] building in Johannesburg.”
+
+Data source discovered
+- Database: postgres_tabfact20 (public schema)
+- Relevant table: public.list_of_tallest_buildings_in_africa (name text, city text, years as tallest text, metres double precision, feet bigint, floors bigint)
+
+Evidence and executed SQL
+1) Johannesburg buildings by height (feet), ranked
+- SQL executed:
+  SELECT name, city, metres, feet, floors, RANK() OVER (ORDER BY feet DESC) AS johannesburg_rank
+  FROM public.list_of_tallest_buildings_in_africa
+  WHERE city ILIKE '%johannesburg%'
+  ORDER BY feet DESC;
+- Result (abridged):
+  1) Carlton Centre — 732 ft / 223 m (rank 1)
+  2) Kwadukuza Egoli Hotel Tower 1 , Trust Bank Building — 459 ft / 140 m (rank 2)
+  3) Standard Bank Building — 455 ft / 138.8 m (rank 3)
+  4) Schlesinger Building — 361 ft / 110 m (rank 4)
+  5) Chamber of Mines Building — 262 ft / 80 m (rank 5)
+
+2) Direct lookup of Schlesinger Building details
+- SQL executed:
+  SELECT name, city, metres, feet, floors
+  FROM public.list_of_tallest_buildings_in_africa
+  WHERE name ILIKE '%schles%';
+- Result: schlesinger building — Johannesburg — 361 ft / 110 m
+
+3) Confirm Schlesinger’s rank by height within Johannesburg
+- SQL executed:
+  WITH ranks AS (
+    SELECT *, rank() OVER (PARTITION BY city ORDER BY feet DESC) AS rank_by_height
+    FROM public.list_of_tallest_buildings_in_africa
+    WHERE city ILIKE 'johannesburg'
+  )
+  SELECT *
+  FROM ranks
+  WHERE name ILIKE '%schlesinger%';
+- Result: rank_by_height = 4; feet = 361; metres = 110; floors = 21
+
+4) Cross-check by number of floors (optional confirmation)
+- SQL executed:
+  SELECT name, floors, feet, RANK() OVER (ORDER BY floors DESC) AS floor_rank
+  FROM public.list_of_tallest_buildings_in_africa
+  WHERE city ILIKE 'Johannesburg'
+  ORDER BY floors DESC, name;
+- Result (abridged):
+  1) Carlton Centre — 50 floors (732 ft)
+  2) Standard Bank Building — 34 floors (455 ft)
+  3) Kwadukuza Egoli Hotel Tower 1 , Trust Bank Building — 31 floors (459 ft)
+  4) Schlesinger Building — 21 floors (361 ft)
+  5) Chamber of Mines Building — 18 floors (262 ft)
+
+Assessment
+- Height: The claim states 459 feet for the Schlesinger Building. Data shows the Schlesinger Building is 361 feet (110 m). The 459-foot figure corresponds to the Kwadukuza Egoli Hotel Tower 1 / Trust Bank Building, not Schlesinger.
+- Rank within Johannesburg: The Schlesinger Building is the 4th tallest in Johannesburg in this dataset, which aligns with the “fourth largest [tallest]” portion of the claim.
+
+Conclusion
+- The claim mixes accurate and inaccurate elements: correct rank (4th), incorrect height (it is 361 ft, not 459 ft). Therefore, the overall claim is partly inaccurate.
+
+Assumptions
+- Interpreted “largest” to mean tallest by height in feet.
+- Treated “Schiesinger” as a misspelling of “Schlesinger.”
+- Used case-insensitive matching for city = Johannesburg and building name.
+- Relied on the table list_of_tallest_buildings_in_africa as the authoritative dataset for this verification.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,50 @@
+
+<userQuery>
+<query>
+the score be 1 - 0 when the home team be shrewsbury town
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim evaluated: “the score be 1 - 0 when the home team be shrewsbury town.”
+- Context: Verified against the available TabFact database (public.t_1990_91_fa_cup), which contains FA Cup 1990–91 fixtures/results.
+
+Data source and schema
+- Database: TabFact
+- Schema: public
+- Table: t_1990_91_fa_cup
+- Columns (all text): "tie no", "home team", "score", "away team", "date"
+
+Evidence gathered
+1) Locate matches where the home team is Shrewsbury Town (case-insensitive)
+- Executed SQL:
+  SELECT "tie no", "home team", "score", "away team", "date" FROM public.t_1990_91_fa_cup WHERE "home team" ILIKE '%shrewsbury%';
+- Result:
+  - tie no: 6
+  - home team: Shrewsbury Town
+  - score: 1 - 0
+  - away team: Wimbledon
+  - date: 26 / 01 / 1991
+
+2) Verify whether all Shrewsbury Town home entries (if more than one) share the same score; count by score and list rows
+- Executed SQL (count by score):
+  SELECT score, COUNT(*) AS count FROM public.t_1990_91_fa_cup WHERE LOWER("home team") = 'shrewsbury town' GROUP BY score;
+- Result: one row — score: 1 - 0, count: 1
+
+- Executed SQL (list all such rows):
+  SELECT * FROM public.t_1990_91_fa_cup WHERE LOWER("home team") = 'shrewsbury town';
+- Result: one row — tie no 6, Shrewsbury Town vs Wimbledon, score 1 - 0, date 26 / 01 / 1991
+
+Conclusion
+- The dataset records a match where Shrewsbury Town was the home team and the score was 1 - 0 (vs Wimbledon on 26/01/1991). This supports the claim within the scope of the available data.
+
+Assumptions
+- The claim is interpreted relative to the accessible dataset (FA Cup 1990–91 only), not as a universal statement across all competitions or seasons.
+- The phrasing is taken to assert the existence of such a match (home team Shrewsbury Town with score 1 - 0), not that every Shrewsbury Town home match ends 1 - 0.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

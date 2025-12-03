@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+pierre lamine beat shinji someya by more than a point
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “pierre lamine beat shinji someya by more than a point.”
+
+Data sources checked
+- Database: TabFact (postgres_tabfact31), schema: public
+- Relevant table: public.t_1976_world_junior_figure_skating_championships
+
+Evidence
+1) Identify both competitors and their points/ranks
+Executed SQL:
+SELECT name, nation, rank, points
+FROM public.t_1976_world_junior_figure_skating_championships
+WHERE LOWER(name) LIKE '%pierre%'
+   OR LOWER(name) LIKE '%lamine%'
+   OR LOWER(name) LIKE '%shinji%'
+   OR LOWER(name) LIKE '%someya%';
+
+Result rows:
+- pierre lamine | france | rank 8 | points 150.5
+- shinji someya | japan  | rank 9 | points 150.34
+
+2) Compute the point difference directly
+Executed SQL:
+SELECT t1.rank AS lamine_rank, t1.points AS lamine_points, t2.rank AS someya_rank, t2.points AS someya_points, (t1.points - t2.points) AS point_diff
+FROM public.t_1976_world_junior_figure_skating_championships t1
+JOIN public.t_1976_world_junior_figure_skating_championships t2 ON TRUE
+WHERE t1.name = 'pierre lamine' AND t2.name = 'shinji someya';
+
+Returned:
+- lamine_rank = 8, lamine_points = 150.5
+- someya_rank = 9, someya_points = 150.34
+- point_diff = 0.1599999999999966 (≈ 0.16)
+
+Assessment
+- “Beat”: Supported. Pierre Lamine placed ahead of Shinji Someya (rank 8 vs 9) and had more points (150.5 vs 150.34).
+- “By more than a point”: Not supported. The margin is approximately 0.16 points, which is less than one point.
+
+Conclusion
+- The claim mixes a true element (Lamine beat Someya) with a false element (the margin was not more than a point).
+
+Assumptions
+- The claim refers to the event captured in the available dataset (1976 World Junior Figure Skating Championships), and “beat” is determined by rank/points recorded in this table.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

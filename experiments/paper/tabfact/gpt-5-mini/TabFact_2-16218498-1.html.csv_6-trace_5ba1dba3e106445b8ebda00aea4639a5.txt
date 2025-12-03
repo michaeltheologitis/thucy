@@ -1,0 +1,66 @@
+
+<userQuery>
+<query>
+port autonome versus sport clube da praia have higher score than of lprc oiler versus mighty blackpool
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “port autonome versus sport clube da praia have higher score than of lprc oiler versus mighty blackpool.”
+
+Data source discovery
+- Accessible source: PostgreSQL instance (postgres_tabfact2), public schema.
+- Relevant table: t_1992_african_cup_of_champions_clubs (teams and two-legged match results; columns: "team 1", "team 2", "1st leg", "2nd leg", "agg").
+
+Schema evidence
+- Tool: Schema inspection
+- Result: Table t_1992_african_cup_of_champions_clubs with match legs and aggregate scores, suitable for verifying the claim.
+
+Evidence query 1: Locate the two ties and view their legs and aggregate
+- Exact SQL executed:
+SELECT "team 1", "team 2", "1st leg", "2nd leg", "agg" 
+FROM public.t_1992_african_cup_of_champions_clubs
+WHERE "team 1" ILIKE '%Port Autonome%'
+   OR "team 2" ILIKE '%Port Autonome%'
+   OR "team 1" ILIKE '%Praia%'
+   OR "team 2" ILIKE '%Praia%'
+   OR "team 1" ILIKE '%LPRC Oilers%'
+   OR "team 2" ILIKE '%LPRC Oilers%'
+   OR "team 1" ILIKE '%Mighty Blackpool%'
+   OR "team 2" ILIKE '%Mighty Blackpool%';
+- Result rows:
+  - lprc oilers | mighty blackpool | 1 - 0 | 1 - 3 | 2 - 3
+  - port autonome | sporting clube da praia | 0 - 0 | 0 - 0 | 0 - 0 (1 - 3)
+
+Evidence query 2: Compute total goals across both legs for each tie
+- Exact SQL executed:
+SELECT "team 1", "team 2", "1st leg", "2nd leg",
+       (CAST(trim(split_part("1st leg", '-', 1)) AS INTEGER) + CAST(trim(split_part("1st leg", '-', 2)) AS INTEGER)
+        + CAST(trim(split_part("2nd leg", '-', 1)) AS INTEGER) + CAST(trim(split_part("2nd leg", '-', 2)) AS INTEGER))
+       AS total_goals
+FROM public.t_1992_african_cup_of_champions_clubs
+WHERE (LOWER("team 1") LIKE '%port autonome%' AND LOWER("team 2") LIKE '%sporting%')
+   OR (LOWER("team 1") LIKE '%sporting%' AND LOWER("team 2") LIKE '%port autonome%')
+   OR (LOWER("team 1") LIKE '%lprc oilers%' AND LOWER("team 2") LIKE '%mighty blackpool%')
+   OR (LOWER("team 1") LIKE '%mighty blackpool%' AND LOWER("team 2") LIKE '%lprc oilers%');
+- Computed totals:
+  - lprc oilers vs mighty blackpool: total_goals = 5 (legs 1-0 and 1-3)
+  - port autonome vs sporting clube da praia: total_goals = 0 (legs 0-0 and 0-0)
+
+Analysis
+- The Port Autonome vs Sporting Clube da Praia tie had 0 total goals across both legs.
+- The LPRC Oilers vs Mighty Blackpool tie had 5 total goals across both legs.
+- Therefore, Port Autonome vs Sporting Clube da Praia did not have a higher score; it had a lower score compared to LPRC Oilers vs Mighty Blackpool.
+
+Conclusion
+- The claim is contradicted by the data.
+
+Assumptions
+- “Score” refers to the number of goals scored in regulation across both legs, not the penalty shootout indicated in parentheses in the aggregate (e.g., “0 - 0 (1 - 3)”).
+- The matches referenced are those in the 1992 African Cup of Champions Clubs, as per the available table. Team name matching was case-insensitive and substring-based to account for minor naming variations.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

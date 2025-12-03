@@ -1,0 +1,47 @@
+
+<userQuery>
+<query>
+6 - 2 , 7 - 5 be the score for the opponent against katerina maleeva in the final
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “6 - 2 , 7 - 5 be the score for the opponent against Katerina Maleeva in the final.”
+
+Data source discovery:
+- Connected database: PostgreSQL
+- Schema: public
+- Table: public.isabel_cueto
+- Columns: date (text), tournament (text), surface (text), opponent in the final (text), score (text)
+
+Schema evidence (tool output):
+- The connected PostgreSQL database contains schema public with table public.isabel_cueto having columns: date, tournament, surface, opponent in the final, score.
+
+Step 1: Inspect opponents and scores recorded in finals for Isabel Cueto
+- Purpose: See if there is an entry involving Katerina Maleeva and what score is recorded.
+- Executed SQL: SELECT DISTINCT "opponent in the final", tournament, score FROM public.isabel_cueto;
+- Result excerpt (relevant row): opponent in the final: katerina maleeva; tournament: sofia, bulgaria; score: 6 - 2, 7 - 6 (3)
+
+Step 2: Retrieve the full record for the final vs Katerina Maleeva
+- Executed SQL: SELECT * FROM public.isabel_cueto WHERE "opponent in the final" = 'katerina maleeva' ORDER BY date DESC LIMIT 1;
+- Result: date: 31 July 1989; tournament: Sofia, Bulgaria; surface: Clay; opponent in the final: Katerina Maleeva; score: 6 - 2, 7 - 6 (3)
+
+Step 3: Confirm there are no other finals vs a Maleeva with different scores
+- Executed SQL (details): SELECT tournament, date, score FROM public.isabel_cueto WHERE "opponent in the final" ILIKE '%maleeva%';
+- Executed SQL (count): SELECT COUNT(*) AS final_count FROM public.isabel_cueto WHERE "opponent in the final" ILIKE '%maleeva%';
+- Result: 1 final found; details: Sofia, Bulgaria; 31 July 1989; score: 6 - 2, 7 - 6 (3)
+
+Findings:
+- The only final in the dataset involving Katerina Maleeva has the score recorded as 6 - 2, 7 - 6 (3), not 6 - 2, 7 - 5.
+
+Conclusion:
+- The claim that the score was “6 - 2 , 7 - 5” against Katerina Maleeva in the final is contradicted by the data, which shows “6 - 2, 7 - 6 (3)”.
+
+Assumptions made:
+- The claim refers to the final recorded in the available dataset (Isabel Cueto’s finals) where the opponent is Katerina Maleeva (Sofia, Bulgaria, 31 July 1989). The dataset is treated as authoritative per the instructions.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

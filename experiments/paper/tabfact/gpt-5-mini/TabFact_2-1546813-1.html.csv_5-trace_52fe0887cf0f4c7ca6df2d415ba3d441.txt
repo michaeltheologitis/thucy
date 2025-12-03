@@ -1,0 +1,71 @@
+
+<userQuery>
+<query>
+the solheim cup be host outside the us on 7 occasion from 1990 - 2013
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “the solheim cup be host outside the us on 7 occasion from 1990 - 2013.”
+
+Finding: The data show 6 occasions outside the US during 1990–2013, not 7.
+
+Data source discovery:
+- Available database: TabFact (postgres_tabfact24)
+- Relevant table: public.solheim_cup (columns: year, venue, winning team, score, usa captain, europe captain)
+
+Evidence:
+1) List editions and venues for 1990–2013
+- SQL executed:
+  SELECT year, venue FROM public.solheim_cup WHERE year BETWEEN 1990 AND 2013 ORDER BY year ASC;
+- Result rows:
+  - 1990 — lake nona golf & country club , florida , usa
+  - 1992 — dalmahoy country club , scotland
+  - 1994 — the greenbrier , west virginia , usa
+  - 1996 — st pierre golf & country club , wales
+  - 1998 — muirfield village , ohio , usa
+  - 2000 — loch lomond golf club , scotland
+  - 2002 — interlachen country club , minnesota , usa
+  - 2003 — barsebäck golf & country club , sweden
+  - 2005 — crooked stick golf club , indiana , usa
+  - 2007 — halmstad gk , sweden
+  - 2009 — rich harvest farms , illinois , usa
+  - 2011 — killeen castle golf resort , ireland
+  - 2013 — colorado golf club , colorado , usa
+
+2) Count total editions in range (context)
+- SQL executed:
+  SELECT count(*) AS total_editions FROM public.solheim_cup WHERE year BETWEEN 1990 AND 2013;
+- Result:
+  total_editions: 13
+
+3) Count hosted outside the United States (venue does not contain 'usa')
+- SQL executed:
+  SELECT count(*) AS outside_us FROM public.solheim_cup WHERE year BETWEEN 1990 AND 2013 AND lower(venue) NOT LIKE '%usa%';
+- Result:
+  outside_us: 6
+
+4) List which editions were counted as outside the US
+- SQL executed:
+  SELECT year, venue FROM public.solheim_cup WHERE year BETWEEN 1990 AND 2013 AND lower(venue) NOT LIKE '%usa%' ORDER BY year;
+- Result rows:
+  - 1992 — dalmahoy country club , scotland
+  - 1996 — st pierre golf & country club , wales
+  - 2000 — loch lomond golf club , scotland
+  - 2003 — barsebäck golf & country club , sweden
+  - 2007 — halmstad gk , sweden
+  - 2011 — killeen castle golf resort , ireland
+
+Conclusion:
+- Outside-US hostings from 1990–2013: 6
+- The claim of 7 occasions is not supported by the data.
+
+Assumptions:
+- Year range interpreted as inclusive (1990 through 2013).
+- “Outside the US” determined by venue text not containing the substring “usa” (case-insensitive), which aligns with how US venues are recorded in this dataset.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

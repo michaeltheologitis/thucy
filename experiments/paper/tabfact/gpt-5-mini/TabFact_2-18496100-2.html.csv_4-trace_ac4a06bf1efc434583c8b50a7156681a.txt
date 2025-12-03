@@ -1,0 +1,54 @@
+
+<userQuery>
+<query>
+datia 's constituency number be higher than gohad 's by 9
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of approach
+- Discovered available data sources and examined the schema to ground the verification in real data.
+- Queried the constituency numbers for Datia and Gohad from the available table.
+- Computed the numeric difference between the two constituency numbers.
+
+Data discovery and schema
+- Available source: PostgreSQL database postgres_tabfact2 (TabFact), schema public.
+- Table: public.bhind_lok_sabha_constituency
+  Columns:
+  • "constituency number" (text)
+  • "name" (text)
+  • "reserved for ( sc / st / none)" (text)
+  • "district" (text)
+  • "number of electorates (2009)" (bigint)
+
+Evidence
+1) Retrieve constituency numbers for Datia and Gohad
+Executed SQL:
+SELECT "name", "constituency number" FROM public.bhind_lok_sabha_constituency WHERE "name" ILIKE '%Datia%' OR "name" ILIKE '%Gohad%';
+Results:
+- { "name": "gohad", "constituency number": "13" }
+- { "name": "datia", "constituency number": "22" }
+
+2) Compute the numeric difference (Datia − Gohad)
+Executed SQL:
+SELECT
+CAST((SELECT "constituency number" FROM public.bhind_lok_sabha_constituency WHERE "name"='datia') AS integer)
+-
+CAST((SELECT "constituency number" FROM public.bhind_lok_sabha_constituency WHERE "name"='gohad') AS integer)
+AS difference;
+Result:
+- { "difference": 9 }
+
+Conclusion
+- Datia’s constituency number is 22 and Gohad’s is 13. The difference (22 − 13) equals 9, confirming the claim that Datia’s constituency number is higher than Gohad’s by 9.
+
+Assumptions
+- “Constituency number” refers to the column "constituency number" in public.bhind_lok_sabha_constituency.
+- The names “datia” and “gohad” in the table match the entities in the claim; the table stores them in lowercase.
+- Casting the text-based constituency numbers to integers for arithmetic is appropriate.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

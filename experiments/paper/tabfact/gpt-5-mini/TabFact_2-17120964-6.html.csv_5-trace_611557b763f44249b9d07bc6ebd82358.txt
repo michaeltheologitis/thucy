@@ -1,0 +1,88 @@
+
+<userQuery>
+<query>
+stuart potts wasn't the man of the match in the league / cup
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “stuart potts wasn't the man of the match in the league / cup.”
+
+Data source discovery
+- Discovered PostgreSQL database: postgres_tabfact24 (TabFact), schema: public
+- Relevant table: public.t_2008_09_guildford_flames_season
+  - Columns: date, opponent, venue, result, attendance, competition, man of the match
+
+Schema notes
+- No separate players or awards tables; “man of the match” is a free-text column in this table.
+- Competition values observed include: “league” and “league / cup”.
+
+Evidence and executed SQL
+1) Exact-case check for “Stuart Potts” anywhere
+SQL:
+SELECT COUNT(*) AS cnt FROM public.t_2008_09_guildford_flames_season WHERE "man of the match" = 'Stuart Potts';
+Result:
+cnt = 0
+
+2) Case-insensitive, flexible check for “stuart potts” (to account for casing/spacing)
+SQL:
+SELECT count(*) AS total_matches
+FROM public.t_2008_09_guildford_flames_season
+WHERE TRIM("man of the match") ILIKE '%stuart%potts%';
+Result:
+- total_matches: 1
+
+Breakdown by competition
+SQL:
+SELECT competition, count(*) AS matches
+FROM public.t_2008_09_guildford_flames_season
+WHERE TRIM("man of the match") ILIKE '%stuart%potts%'
+GROUP BY competition
+ORDER BY matches DESC;
+Result:
+- competition: league / cup, matches: 1
+
+List matching row(s)
+SQL:
+SELECT date, opponent, venue, result, attendance, competition, "man of the match"
+FROM public.t_2008_09_guildford_flames_season
+WHERE TRIM("man of the match") ILIKE '%stuart%potts%'
+ORDER BY date;
+Result:
+- date: 22nd, opponent: wightlink raiders, venue: away, result: lost 5 - 4, attendance: 509, competition: league / cup, man of the match: stuart potts
+
+3) Cross-check: list all “league / cup” matches and their man of the match values
+SQL:
+SELECT date, opponent, competition, "man of the match" FROM public.t_2008_09_guildford_flames_season WHERE competition = 'league / cup' ORDER BY date;
+Result (excerpt):
+- 15th — sheffield scimitars — man of the match: rick plant
+- 16th — milton keynes lightning — man of the match: david savage
+- 19th — romford raiders — man of the match: alex mettam
+- 1st — slough jets — man of the match: lukas smital
+- 22nd — wightlink raiders — man of the match: stuart potts
+- 30th — bracknell bees — man of the match: joe watkins
+- 8th — swindon wildcats — man of the match: lukas smital
+- 9th — swindon wildcats — man of the match: neil liddiard
+
+4) Optional check: Was he man of the match in “league” (not “league / cup”)?
+SQL:
+SELECT COUNT(*) AS match_count
+FROM public.t_2008_09_guildford_flames_season
+WHERE lower(competition) = 'league'
+  AND lower("man of the match") = 'stuart potts';
+Result:
+- match_count = 0
+
+Conclusion
+- The dataset shows at least one “league / cup” match where the man of the match is “stuart potts” (22nd vs Wightlink Raiders). Therefore, the claim that “stuart potts wasn't the man of the match in the league / cup” is contradicted by the evidence.
+
+Assumptions
+- The verification context is the available dataset: Guildford Flames 2008–09 season table (public.t_2008_09_guildford_flames_season).
+- “league / cup” refers to the competition value exactly as recorded in the dataset.
+- Name matching used a case-insensitive search to account for casing differences (e.g., “stuart potts” vs “Stuart Potts”).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+3.8 (26) be the away team score against a home team that score 5.12 (42)
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- I explored the available data sources and found a PostgreSQL database (TabFact) with a table public.t_1960_vfl_season containing VFL match results for the 1960 season, including home/away teams and scores in the format goals.behinds (total points).
+
+Evidence and Queries
+1) Existence of a match with home score 5.12 (42) and away score 3.8 (26)
+- Executed SQL:
+SELECT "home team","home team score","away team","away team score","date","venue"
+FROM public.t_1960_vfl_season
+WHERE "home team score" = '5.12 (42)'
+  AND "away team score" = '3.8 (26)';
+- Result: One match found
+  {"home team":"north melbourne","home team score":"5.12 (42)","away team":"richmond","away team score":"3.8 (26)","date":"7 may 1960","venue":"arden street oval"}
+- Interpretation: In this match, the home team scored 5.12 (42) and the away team scored 3.8 (26), confirming the claim.
+
+2) Validation that the score strings’ totals are correct
+- Executed SQL:
+SELECT
+  "home team",
+  "home team score" AS home_score_str,
+  split_part("home team score",'.',1)::int AS home_goals,
+  split_part(split_part("home team score",'.',2),' ',1)::int AS home_behinds,
+  regexp_replace(split_part("home team score",' ',2),'[()]','','g')::int AS home_points,
+  (split_part("home team score",'.',1)::int)*6 + (split_part(split_part("home team score",'.',2),' ',1)::int) AS home_calc,
+  ((split_part("home team score",'.',1)::int)*6 + (split_part(split_part("home team score",'.',2),' ',1)::int) = (regexp_replace(split_part("home team score",' ',2),'[()]','','g')::int)) AS home_matches,
+  "away team",
+  "away team score" AS away_score_str,
+  split_part("away team score",'.',1)::int AS away_goals,
+  split_part(split_part("away team score",'.',2),' ',1)::int AS away_behinds,
+  regexp_replace(split_part("away team score",' ',2),'[()]','', 'g')::int AS away_points,
+  (split_part("away team score",'.',1)::int)*6 + (split_part(split_part("away team score",'.',2),' ',1)::int) AS away_calc,
+  ((split_part("away team score",'.',1)::int)*6 + (split_part(split_part("away team score",'.',2),' ',1)::int) = (regexp_replace(split_part("away team score",' ',2),'[()]','','g')::int)) AS away_matches
+FROM public.t_1960_vfl_season
+WHERE "home team score" = '5.12 (42)'
+  AND "away team score" = '3.8 (26)';
+- Returned values (key fields):
+  - Home: goals=5, behinds=12, points=42, computed 5*6+12=42, match=true
+  - Away: goals=3, behinds=8, points=26, computed 3*6+8=26, match=true
+- Interpretation: The totals in both score strings are internally consistent with Australian rules football scoring (goal=6 points, behind=1 point).
+
+Conclusion
+- The statement that 3.8 (26) is the away team score against a home team that scored 5.12 (42) is supported by the 1960 VFL season data (North Melbourne vs Richmond on 7 May 1960 at Arden Street Oval).
+
+Assumptions
+- I assumed the user’s claim pertains to the available dataset (1960 VFL season) and to the standard AFL/VFL scoring notation goals.behinds (total).
+- I treated the TabFact database as authoritative for the 1960 season records, per the provided grounding principles.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

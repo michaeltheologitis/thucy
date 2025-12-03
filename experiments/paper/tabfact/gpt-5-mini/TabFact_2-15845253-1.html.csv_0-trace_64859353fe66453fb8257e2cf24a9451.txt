@@ -1,0 +1,68 @@
+
+<userQuery>
+<query>
+9 viral family have a replication site in the nucleus
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Data sources explored
+- PostgreSQL instance (TabFact, schema public). One relevant table discovered: viral_disease with columns: family, baltimore group, envelopment, virion shape, replication site.
+
+What the data shows
+1) Distinct replication-site values and record counts
+- Evidence (executed SQL):
+  SELECT "replication site" AS replication_site, COUNT(*) AS count
+  FROM viral_disease
+  GROUP BY "replication site"
+  ORDER BY count DESC;
+- Result:
+  - cytoplasm: 14 records
+  - nucleus: 9 records
+
+2) How many distinct viral families have a replication site that includes the nucleus (case-insensitive substring match)
+- Evidence (executed SQL):
+  SELECT COUNT(DISTINCT family) AS count FROM viral_disease WHERE "replication site" ILIKE '%nucleus%';
+- Result: 9
+
+3) Which families are these (alphabetical)
+- Evidence (executed SQL):
+  SELECT DISTINCT "family" FROM viral_disease WHERE "replication site" ILIKE '%nucleus%' ORDER BY "family";
+- Result (as stored in data):
+  - ad enoviridae
+  - hepadnaviridae
+  - herpesviridae
+  - orthomyxoviridae
+  - papillomaviridae
+  - parvoviridae
+  - polyomaviridae
+  - retroviridae
+  - unassigned
+
+4) Count of families with nucleus replication excluding the non-family label "unassigned"
+- Evidence (executed SQL):
+  SELECT COUNT(DISTINCT "family") AS count
+  FROM viral_disease
+  WHERE "replication site" ILIKE '%nucleus%'
+    AND "family" IS NOT NULL
+    AND lower("family") <> 'unassigned';
+- Result: 8
+
+Assessment of the claim
+- The dataset contains 9 rows labeled with replication site = nucleus, and 9 distinct values in the family column for those rows. However, one of these is "unassigned", which is not a recognized viral family. Excluding "unassigned" yields 8 recognized viral families with nucleus replication.
+
+Conclusion
+- If counting all entries in this dataset where replication site is nucleus (including the non-taxonomic label "unassigned"), the number is 9.
+- If strictly counting recognized viral families, the number is 8.
+
+Assumptions and notes
+- Each row in viral_disease was treated as one family entry; replication site values observed were exactly 'cytoplasm' or 'nucleus'.
+- "Includes the nucleus" was implemented via case-insensitive substring match, though in this dataset the value appears as exactly 'nucleus'.
+- The entry "ad enoviridae" appears to be a typographical variant of Adenoviridae in the source data; results are reported exactly as stored.
+- "Unassigned" is not a viral family; whether to include it depends on interpretation of "viral family" in the claim.
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

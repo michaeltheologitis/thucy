@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+there be no building with less than 196 feet
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Scope of verification
+- Data source: PostgreSQL database tabfact18, schema public.
+- Table used: public.list_of_tallest_buildings_in_africa (columns: name, city, years as tallest, metres, feet, floors).
+- Interpretation of the claim: "There is no building with less than 196 feet" refers to the feet column (strictly < 196) within this table.
+
+Evidence and executed SQL
+1) Minimum height in feet
+SQL executed:
+SELECT MIN(feet) AS min_feet FROM public.list_of_tallest_buildings_in_africa;
+Result: min_feet = 196
+
+2) Count of buildings with feet < 196
+SQL executed:
+SELECT COUNT(*) AS count_lt_196 FROM public.list_of_tallest_buildings_in_africa WHERE feet < 196;
+Result: count_lt_196 = 0
+
+3) List any buildings with feet < 196
+SQL executed:
+SELECT name, city, feet FROM public.list_of_tallest_buildings_in_africa WHERE feet < 196 ORDER BY feet ASC, name;
+Result: no rows returned
+
+4) Check for unknown heights (NULL feet)
+SQL executed:
+SELECT COUNT(*) AS count_null_feet FROM public.list_of_tallest_buildings_in_africa WHERE feet IS NULL;
+Result: count_null_feet = 0
+
+Conclusion
+- The minimum feet value is 196.
+- There are zero records with feet strictly less than 196, and no NULL heights.
+- Therefore, within this dataset, the claim is supported by the evidence.
+
+Assumptions made
+- The claim is evaluated against the available dataset (public.list_of_tallest_buildings_in_africa) rather than all buildings globally.
+- "Less than 196 feet" is interpreted strictly as < 196, not ≤ 196.
+- The feet column represents total building height in feet for each listed building.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

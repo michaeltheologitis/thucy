@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+after 2012 the winner 's share be never less than 15000
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “After 2012 the winner's share is never less than 15000.”
+
+Data source explored
+- Database: public (PostgreSQL)
+- Table: northeast_delta_dental_international
+- Relevant columns: year (bigint), champion (text), purse (bigint), "winner 's share" (bigint)
+
+Evidence
+1) Count of rows after 2012
+- SQL: SELECT COUNT(*) AS row_count FROM public.northeast_delta_dental_international WHERE year > 2012;
+- Result: 1 row
+
+2) Minimum winner's share after 2012
+- SQL: SELECT MIN("winner 's share") AS min_winner_share FROM public.northeast_delta_dental_international WHERE year > 2012;
+- Result: 15000
+
+3) Any rows after 2012 with winner's share < 15000
+- SQL: SELECT year, champion, "winner 's share" FROM public.northeast_delta_dental_international WHERE year > 2012 AND "winner 's share" < 15000;
+- Result: 0 rows returned (none found)
+
+4) Context: years and winner's share values
+- SQL: SELECT DISTINCT year, "winner 's share" FROM public.northeast_delta_dental_international ORDER BY year ASC;
+- Result (year -> winner's share):
+  - 2004 -> 9100
+  - 2005 -> 9100
+  - 2006 -> 9800
+  - 2007 -> 10500
+  - 2008 -> 11200
+  - 2009 -> 12600
+  - 2010 -> 15400
+  - 2011 -> 14000
+  - 2012 -> 15000
+  - 2013 -> 15000
+
+Assessment
+- For all records with year > 2012 (i.e., 2013 in this dataset), the minimum winner's share is 15000 and there are no entries below 15000. This supports the claim.
+
+Assumptions
+- “After 2012” is interpreted as year > 2012 within the northeast_delta_dental_international table.
+- “Winner's share” refers to the column named exactly "winner 's share".
+- The dataset covers 2004–2013; no records exist beyond 2013 in the available data.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

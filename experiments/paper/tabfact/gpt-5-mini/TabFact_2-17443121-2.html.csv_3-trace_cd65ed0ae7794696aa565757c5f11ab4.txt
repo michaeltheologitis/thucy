@@ -1,0 +1,60 @@
+
+<userQuery>
+<query>
+4 episode title of gary unmarried feature the name of both gary and allison in season 1
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim being checked: There are 4 episode titles in Season 1 of “Gary Unmarried” that feature both the names “Gary” and “Allison.”
+
+Data source exploration:
+- Available database: postgres_tabfact28 (public schema)
+- Relevant table discovered: public.gary_unmarried (columns: episode text, air date text, timeslot text, "18 - 49" text, viewers double precision). This table contains Season 1 episode entries (based on air dates and row count).
+
+Evidence and SQL (exact statements and results):
+1) Confirm the table’s coverage and size (to ensure it reflects a single season)
+- SQL:
+  SELECT COUNT(*) AS row_count FROM public.gary_unmarried;
+- Result:
+  [{"row_count":20}]
+
+- SQL (normalize and parse air dates to confirm span):
+  SELECT
+    MIN(parsed) AS min_air_date,
+    MAX(parsed) AS max_air_date
+  FROM (
+    SELECT to_date(initcap(regexp_replace("air date", '\\s+,\\s+', ', ', 'g')), 'FMMonth FMDD, YYYY') AS parsed
+    FROM public.gary_unmarried
+  ) t;
+- Result:
+  [{"max_air_date":"2009-05-20T00:00:00Z","min_air_date":"2008-09-24T00:00:00Z"}]
+
+Interpretation: The table contains 20 episodes airing from 2008-09-24 to 2009-05-20, which aligns with Season 1.
+
+2) Retrieve episodes whose titles include both “gary” and “allison” (case-insensitive)
+- SQL:
+  SELECT episode, "air date" FROM public.gary_unmarried WHERE lower(episode) LIKE '%gary%' AND lower(episode) LIKE '%allison%';
+- Result rows:
+  - {episode: "gary and allison 's restaurant", "air date": "november 12 , 2008"}
+  - {episode: "gary and allison brooks", "air date": "november 19 , 2008"}
+  - {episode: "gary hooks up allison", "air date": "march 18 , 2009"}
+  - {episode: "gary fixes allison 's garbage disposal", "air date": "may 20 , 2009"}
+
+3) Count those episodes
+- SQL:
+  SELECT COUNT(*) FROM public.gary_unmarried WHERE lower(episode) LIKE '%gary%' AND lower(episode) LIKE '%allison%';
+- Result:
+  - {count: 4}
+
+Conclusion: There are exactly 4 Season 1 episodes with titles containing both “Gary” and “Allison.” The titles are listed above with their air dates.
+
+Assumptions:
+- The table public.gary_unmarried represents Season 1 episodes of “Gary Unmarried,” as indicated by the 2008–2009 air-date range and standard season length.
+- Matching was done using case-insensitive substring search on the episode title field.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

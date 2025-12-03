@@ -1,0 +1,68 @@
+
+<userQuery>
+<query>
+englewood , illinois have 2 translator
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “englewood , illinois have 2 translator.”
+
+Data sources discovered
+- PostgreSQL database: postgres_tabfact4 (schema: public)
+- Available table: public.whlp (columns: call sign, frequency mhz, city of license, erp w, class, fcc info)
+
+What I checked
+- Counted and listed all entries in public.whlp whose city of license corresponds to Englewood, Illinois.
+
+Findings
+- The data contains exactly 1 entry for Englewood, Illinois, not 2.
+- Matching record: call sign w264bf, frequency 100.7 MHz, class d (FCC info: fcc).
+
+Executed SQL (evidence)
+1) Equality check for exact string (to understand formatting):
+SELECT count(*) AS match_count
+FROM public.whlp
+WHERE lower(trim("city of license")) = 'englewood, illinois';
+Result: match_count = 0
+
+2) Case-insensitive substring match requiring both tokens “englewood” and “illinois”:
+SELECT "call sign", "frequency mhz", "city of license", "class", "fcc info"
+FROM public.whlp
+WHERE lower("city of license") LIKE '%englewood%'
+  AND lower("city of license") LIKE '%illinois%';
+Returned rows: 1
+- w264bf | 100.7 | englewood , illinois | d | fcc
+
+3) Broader Illinois match (accepting ‘Illinois’ or ‘, IL’ or ‘ IL’):
+SELECT "call sign", "frequency mhz", "city of license", "class"
+FROM public.whlp
+WHERE lower("city of license") LIKE '%englewood%'
+  AND (
+    lower("city of license") LIKE '%illinois%'
+    OR lower("city of license") LIKE '%, il%'
+    OR lower("city of license") LIKE '% il%'
+  );
+Returned rows: 1
+- w264bf | 100.7 | englewood , illinois | d
+
+4) Count of entries requiring both tokens “englewood” and “illinois”:
+SELECT COUNT(*)
+FROM public.whlp
+WHERE lower("city of license") LIKE '%englewood%'
+  AND lower("city of license") LIKE '%illinois%';
+Result: 1
+
+Conclusion
+- The available authoritative dataset shows 1 Englewood, Illinois entry, not 2. Therefore, the claim is not supported by the data.
+
+Assumptions
+- “Translator” is interpreted in the context of radio facilities; class “d” entries in FCC-style datasets typically correspond to translators/low-power services.
+- City matching was done case-insensitively and allowed minor punctuation/spacing variations (e.g., “englewood , illinois”).
+- The public.whlp table is treated as the authoritative dataset for this verification within the accessible data environment.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

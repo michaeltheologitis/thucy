@@ -1,0 +1,54 @@
+
+<userQuery>
+<query>
+coherence be the name when window and web interface be partial
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Data source discovery
+- Available source: PostgreSQL database (TabFact). Contains table public.comparison_of_upnp_av_media_servers.
+
+Schema overview (from the data source)
+- Columns: name (text), license (text), os x (text), unix - like (text), windows (text), web interface (text).
+
+Evidence collected
+1) How “partial” appears in the relevant columns
+- SQL: SELECT DISTINCT windows FROM public.comparison_of_upnp_av_media_servers;
+  Result: [yes, partial, no, windows]
+- SQL: SELECT DISTINCT "web interface" FROM public.comparison_of_upnp_av_media_servers;
+  Result: [yes, web interface, partial, no]
+
+2) Check if any software has both windows = 'partial' and web interface = 'partial'
+- SQL: SELECT name, windows, "web interface" FROM public.comparison_of_upnp_av_media_servers WHERE windows = 'partial' AND "web interface" = 'partial';
+  Result: No rows returned.
+
+3) Inspect the row for Coherence
+- SQL: SELECT name, "windows", "web interface" FROM public.comparison_of_upnp_av_media_servers WHERE name ILIKE '%Coherence%';
+  Result: name = coherence; windows = partial; web interface = yes.
+
+4) All software with windows = 'partial'
+- SQL: SELECT name, "windows", "web interface" FROM public.comparison_of_upnp_av_media_servers WHERE "windows" ILIKE 'partial';
+  Result: coherence | windows: partial | web interface: yes.
+
+5) All software with web interface = 'partial'
+- SQL: SELECT "name", "windows", "web interface" FROM public.comparison_of_upnp_av_media_servers WHERE lower("web interface") = 'partial';
+  Result: minidlna | windows: yes | web interface: partial.
+
+Assessment of the claim
+- The statement implies that the software whose name applies when both the Windows and Web interface fields are “partial” is Coherence.
+- The data shows no software has both fields marked “partial”. Specifically, Coherence has windows = partial but web interface = yes.
+
+Conclusion
+- The claim is contradicted by the data.
+
+Assumptions
+- Interpreted the user’s phrasing as a verification task over the comparison_of_upnp_av_media_servers table, seeking the software whose Windows and Web interface fields are both marked “partial,” and asserting it is Coherence.
+- Treated the token 'partial' literally (case-insensitive) as the indicator of partial support within this dataset.
+- Scope limited to the TabFact table described above, which is treated as authoritative per instructions.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

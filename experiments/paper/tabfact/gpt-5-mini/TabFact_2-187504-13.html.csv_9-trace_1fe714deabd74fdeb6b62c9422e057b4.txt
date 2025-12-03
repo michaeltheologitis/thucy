@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+the soviet union receive 6 more medal than east germany in the total medal count
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "the soviet union receive 6 more medal than east germany in the total medal count"
+
+Data source discovery
+- Available source: PostgreSQL TabFact instance (postgres_tabfact9), public schema.
+- Relevant table found: t_1988_winter_olympics with columns: rank, nation, gold, silver, bronze, total.
+
+Evidence from data
+1) List of nations and totals to identify USSR and East Germany entries
+SQL executed:
+SELECT nation, total FROM t_1988_winter_olympics ORDER BY total DESC, nation ASC;
+Result (excerpt):
+- soviet union (urs) — 29
+- east germany (gdr) — 25
+
+2) Focused lookup and explicit difference calculation
+SQL executed:
+SELECT nation, gold, silver, bronze, total FROM t_1988_winter_olympics WHERE nation ILIKE '%Soviet%' OR nation ILIKE '%East%' OR nation ILIKE '%German%';
+Result:
+- soviet union (urs): gold=11, silver=9, bronze=9, total=29
+- east germany (gdr): gold=9, silver=10, bronze=6, total=25
+- west germany (frg): gold=2, silver=4, bronze=2, total=8
+
+SQL executed:
+SELECT 
+ (SELECT total FROM t_1988_winter_olympics WHERE nation = 'soviet union (urs)') AS ussr_total,
+ (SELECT total FROM t_1988_winter_olympics WHERE nation = 'east germany (gdr)') AS gdr_total,
+ ( (SELECT total FROM t_1988_winter_olympics WHERE nation = 'soviet union (urs)') - (SELECT total FROM t_1988_winter_olympics WHERE nation = 'east germany (gdr)') ) AS difference;
+Result:
+- ussr_total = 29, gdr_total = 25, difference = 4
+
+Conclusion
+- In the available dataset (1988 Winter Olympics), the Soviet Union earned 4 more total medals than East Germany, not 6. Therefore, the claim is not supported by the evidence we have.
+
+Assumptions and scope
+- The only accessible, relevant dataset concerns the 1988 Winter Olympics. I interpreted “total medal count” as the total medals at that edition. If a different Games or an all-time total was intended, that context is not present in the available data; within this data, the claim is incorrect.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

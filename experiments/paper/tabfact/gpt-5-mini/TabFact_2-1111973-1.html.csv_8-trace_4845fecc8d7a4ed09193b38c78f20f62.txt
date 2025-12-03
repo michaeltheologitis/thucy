@@ -1,0 +1,81 @@
+
+<userQuery>
+<query>
+vclc 32t (35.3tons) have the same vcpc but vclc 160 mm (6.3in) or 350 mm (13.8in) rocket have a vcrt of 7.62 mm (0.3in) fn mag 60 - 20 machine gun
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted (broken into checkable parts):
+- VCLC weighs 32 t (35.3 tons).
+- VCLC armament includes 160 mm (6.3 in) or 350 mm (13.8 in) rockets.
+- VCRT armament includes a 7.62 mm (0.3 in) FN MAG 60-20 machine gun.
+- “have the same VCPC” interpreted as VCLC and VCPC share at least one key performance figure; I test maximum speed and note any differences in other figures.
+
+Data sources discovered:
+- Database: postgres_tabfact8 (schema: public)
+  - Table: tam_tank with columns: vctp, "vca 155", vctm, vcpc, vclc, vcrt (text fields)
+
+Primary evidence (exact SQL and returned results)
+1) Full table inspection
+SQL:
+SELECT * FROM public.tam_tank;
+Key returned rows relevant to this claim (abbreviated to pertinent columns):
+- Row (weights): vclc = "32t (35.3tons)", vcpc = "25t (27.6tons)", vcrt = "32t (35.3tons)"
+- Row (armament): vclc = "160 mm (6.3in) or 350 mm (13.8in) rockets"; vcpc = "7.62 mm (0.3in) fn mag 60 - 20 machine gun"; vcrt = "7.62 mm (0.3in) fn mag 60 - 20 machine gun"
+- Row (power-to-weight): vclc = "22.5hp / t (20.4hp / ton)", vcpc = "28.8hp / t (25.1hp / ton)", vcrt = "22.5hp / t (20.4hp / ton)"
+- Row (max speed): vclc = "75 km / h (47 mph)", vcpc = "75 km / h (47 mph)", vcrt = "75 km / h (47 mph)"
+
+2) Verify VCLC weight = 32t (35.3 tons)
+SQL:
+SELECT * FROM tam_tank WHERE vclc ILIKE '%32t%' OR vclc ILIKE '%35.3%';
+Result (matching row): vclc = "32t (35.3tons)" (and other variants’ weights shown alongside)
+Conclusion: Supported.
+
+3) Verify VCLC rockets = 160 mm or 350 mm
+SQL:
+SELECT * FROM tam_tank WHERE vclc ILIKE '%160 mm%' OR vclc ILIKE '%6.3in%' OR vclc ILIKE '%350 mm%' OR vclc ILIKE '%13.8in%';
+Result (matching row): vclc = "160 mm (6.3in) or 350 mm (13.8in) rockets"
+Conclusion: Supported.
+
+4) Verify VCRT armament = 7.62 mm FN MAG 60-20
+SQL:
+SELECT * FROM tam_tank WHERE vcrt ILIKE '%FN MAG%';
+Result (matching row): vcrt = "7.62 mm (0.3in) fn mag 60 - 20 machine gun"
+Conclusion: Supported.
+
+5) Interpret “have the same VCPC” – test maximum speed parity between VCLC and VCPC
+5a) Extract max VCLC speed
+SQL:
+SELECT max((substring(vclc from '([0-9]+(?:\\.[0-9]+)?)'))::double precision) AS max_vclc FROM tam_tank WHERE vclc ILIKE '%km%';
+Result: max_vclc = 75
+5b) Retrieve the row showing 75 km/h for VCLC and compare VCPC
+SQL:
+SELECT *, (substring(vclc from '([0-9]+(?:\\.[0-9]+)?)'))::double precision AS vclc_num FROM tam_tank WHERE vclc ILIKE '%km%' AND (substring(vclc from '([0-9]+(?:\\.[0-9]+)?)'))::double precision = 75;
+Result row: vclc = "75 km / h (47 mph)", vcpc = "75 km / h (47 mph)"
+5c) Extract max VCPC speed
+SQL:
+SELECT max((substring(vcpc from '([0-9]+(?:\\.[0-9]+)?)'))::double precision) AS max_vcpc FROM tam_tank WHERE vcpc ILIKE '%km%';
+Result: max_vcpc = 75
+5d) Retrieve the row showing 75 km/h for VCPC and compare VCLC
+SQL:
+SELECT *, (substring(vcpc from '([0-9]+(?:\\.[0-9]+)?)'))::double precision AS vcpc_num FROM tam_tank WHERE vcpc ILIKE '%km%' AND (substring(vcpc from '([0-9]+(?:\\.[0-9]+)?)'))::double precision = 75;
+Result row: vcpc = "75 km / h (47 mph)", vclc = "75 km / h (47 mph)"
+Conclusion: VCLC and VCPC share the same maximum speed (75 km/h). Note: They do not share the same weight (VCLC 32t vs VCPC 25t) and have different power-to-weight figures in the dataset.
+
+Assessment of each claim component
+- VCLC 32t (35.3 tons): Verified by evidence (Queries 1 and 2).
+- VCLC rockets 160 mm or 350 mm: Verified by evidence (Queries 1 and 3).
+- VCRT 7.62 mm FN MAG 60-20 machine gun: Verified by evidence (Queries 1 and 4).
+- “have the same VCPC”: Ambiguous; if interpreted as sharing the same maximum speed, it is supported (Query set 5). They are not the same in weight or power-to-weight, so any broader interpretation of “the same” would not be fully supported by the data.
+
+Assumptions made
+- I treated “have the same VCPC” as referring to a shared key performance figure; I tested maximum speed specifically (since the table clearly lists comparable speed values by variant).
+- I considered the five rows in tam_tank as different attribute categories (weights, armament, range placeholder, power-to-weight, max speed), with each variant represented by a column.
+
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

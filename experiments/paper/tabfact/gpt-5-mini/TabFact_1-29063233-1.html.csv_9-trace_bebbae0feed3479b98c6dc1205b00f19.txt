@@ -1,0 +1,44 @@
+
+<userQuery>
+<query>
+beauty and the beast (part 2) have less uk viewer than beauty and the beast (part 1)
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “beauty and the beast (part 2) have less uk viewer than beauty and the beast (part 1)”.
+
+Evidence from data (Merlin Series 2 episode table with UK viewers):
+
+Executed SQL 1:
+SELECT "title", "uk viewers (million)" FROM public.merlin_series_2 WHERE "title" ILIKE '%Beauty and the Beast%' ORDER BY "no for series";
+
+Result:
+- title: beauty and the beast (part 1) — uk viewers (million): 5.53
+- title: beauty and the beast (part 2) — uk viewers (million): 6.14
+
+Executed SQL 2 (comparison and difference):
+SELECT
+MAX(CASE WHEN "title" ILIKE '%part 1%' THEN "uk viewers (million)" END) AS part1_viewers,
+MAX(CASE WHEN "title" ILIKE '%part 2%' THEN "uk viewers (million)" END) AS part2_viewers,
+(MAX(CASE WHEN "title" ILIKE '%part 2%' THEN "uk viewers (million)" END) - MAX(CASE WHEN "title" ILIKE '%part 1%' THEN "uk viewers (million)" END)) AS difference_million,
+CASE WHEN MAX(CASE WHEN "title" ILIKE '%part 1%' THEN "uk viewers (million)" END) > 0 THEN ((MAX(CASE WHEN "title" ILIKE '%part 2%' THEN "uk viewers (million)" END) - MAX(CASE WHEN "title" ILIKE '%part 1%' THEN "uk viewers (million)" END)) / MAX(CASE WHEN "title" ILIKE '%part 1%' THEN "uk viewers (million)" END) * 100) END AS percent_change
+FROM public.merlin_series_2
+WHERE "title" ILIKE '%Beauty and the Beast%';
+
+Result:
+- part1_viewers: 5.53
+- part2_viewers: 6.14
+- difference_million: 0.61
+- percent_change: ~11.03%
+
+Conclusion: Part 2 had more UK viewers (6.14 million) than Part 1 (5.53 million). Therefore, the claim that Part 2 had fewer UK viewers is contradicted by the data.
+
+Assumptions:
+- “beauty and the beast (part 1/part 2)” refers to the two-part episodes in Merlin Series 2, which include UK viewership figures in the available dataset.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

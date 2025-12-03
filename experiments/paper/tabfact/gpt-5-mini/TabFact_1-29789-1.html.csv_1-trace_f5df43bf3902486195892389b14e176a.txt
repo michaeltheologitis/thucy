@@ -1,0 +1,62 @@
+
+<userQuery>
+<query>
+in the unwto region of asia , 57.7 million international tourist arrival (2012) which be less than in 2011
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “In the UNWTO region of Asia, there were 57.7 million international tourist arrivals in 2012, which was less than in 2011.”
+
+What the data shows
+- The available dataset (public.tourism) is country-level and includes a UNWTO region classification per country. It does not provide region-level aggregates. The only row labeled with UNWTO region = asia is for China.
+- For China (UNWTO region: asia), international tourist arrivals were 57.7 million in 2012 and 57.6 million in 2011. Therefore, 2012 was slightly higher than 2011, not less.
+
+Evidence and executed SQL
+1) Distinct UNWTO regions and their row counts
+- SQL executed:
+  SELECT "unwto region", COUNT(*) AS row_count
+  FROM public.tourism
+  GROUP BY "unwto region"
+  ORDER BY row_count DESC;
+- Result summary:
+  - europe: 7
+  - north america: 1
+  - asia: 1
+  (This shows there is exactly one row tagged as asia.)
+
+2) Details for the row where UNWTO region = 'asia'
+- SQL executed:
+  SELECT country, "international tourist arrivals (2012)", "international tourist arrivals (2011)"
+  FROM public.tourism
+  WHERE "unwto region" = 'asia';
+- Result:
+  - country: china
+    international tourist arrivals (2012): 57.7 million
+    international tourist arrivals (2011): 57.6 million
+  (2012 > 2011, not less.)
+
+3) Full table context (top destinations by rank)
+- SQL executed:
+  SELECT rank, country, "unwto region", "international tourist arrivals (2012)", "international tourist arrivals (2011)" FROM public.tourism ORDER BY rank;
+- Result excerpt (rank | country | unwto region | 2012 | 2011):
+  1 | france | europe | 83.0 million | 81.6 million
+  2 | united states | north america | 67.0 million | 62.7 million
+  3 | china | asia | 57.7 million | 57.6 million
+  4 | spain | europe | 57.7 million | 56.2 million
+  ...
+  (Confirms the 57.7 million figure is for China, a country in the UNWTO region asia.)
+
+Conclusion
+- The statement that 2012 was “less than 2011” is contradicted by the data: for China (the only entry under UNWTO region asia in this dataset), 57.7 million (2012) is higher than 57.6 million (2011).
+- Additionally, the 57.7 million figure in the dataset refers to China specifically, not to the entire Asia region. The table does not provide a region-wide total for Asia.
+
+Assumptions made
+- “UNWTO region of Asia” was interpreted using the table’s "unwto region" column, which classifies countries by region; the dataset does not include regional aggregates.
+- Exact string matching was used for 'asia' as stored in the table.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

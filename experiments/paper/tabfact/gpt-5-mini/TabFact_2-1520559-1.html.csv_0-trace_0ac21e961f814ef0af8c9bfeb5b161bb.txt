@@ -1,0 +1,57 @@
+
+<userQuery>
+<query>
+annika sörenstam and yani tseng win with the lowest number of stroke
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+What I verified
+- Interpreted the claim within the scope of the available authoritative dataset (public.women_s_british_open), which documents Women’s British Open champions, their winning scores (aggregate strokes), and related details.
+- Tested whether Annika Sörenstam and Yani Tseng share or hold the lowest winning aggregate (fewest strokes) in the Women’s British Open.
+
+Findings from data
+1) Lowest winning aggregate in the Women’s British Open
+- Result: 269 strokes, achieved by Karen Stupples (2004).
+
+Executed SQL and results
+- Query to find the minimum winning score:
+  SELECT MIN(score) AS min_score FROM public.women_s_british_open;
+  Result: min_score = 269
+
+- Query to list champions and years with that minimum score:
+  SELECT year, champion, score FROM public.women_s_british_open WHERE score = 269 ORDER BY year;
+  Result: year = 2004, champion = karen stupples, score = 269
+
+2) Annika Sörenstam and Yani Tseng winning scores compared to the minimum
+- Annika Sörenstam: 2003 — 278 strokes (9 more than the minimum)
+- Yani Tseng: 2010 — 277 strokes (8 more than the minimum)
+- Yani Tseng: 2011 — 272 strokes (3 more than the minimum)
+
+Executed SQL and results
+- Query to get the overall minimum score (for comparison reference):
+  SELECT MIN(score) AS min_score FROM public.women_s_british_open;
+  Result: {"min_score":269}
+
+- Query to retrieve their entries and compare to the minimum:
+  SELECT year, champion, score, score - 269 AS score_minus_min FROM public.women_s_british_open 
+  WHERE lower(champion) LIKE '%annika%' OR lower(champion) LIKE '%sorenstam%' 
+     OR lower(champion) LIKE '%yani%' OR lower(champion) LIKE '%tseng%'
+  ORDER BY year;
+  Results:
+  { year: 2003, champion: "annika sörenstam", score: 278, score_minus_min: 9 }
+  { year: 2010, champion: "yani tseng",        score: 277, score_minus_min: 8 }
+  { year: 2011, champion: "yani tseng",        score: 272, score_minus_min: 3 }
+
+Conclusion
+- Within the Women’s British Open data, the lowest winning aggregate is 269 by Karen Stupples (2004). Annika Sörenstam (278 in 2003) and Yani Tseng (277 in 2010; 272 in 2011) did win the championship, but neither holds the lowest winning strokes. Therefore, the specific claim that Annika Sörenstam and Yani Tseng “win with the lowest number of stroke” is not supported by the data.
+
+Assumptions
+- The claim is evaluated specifically for the Women’s British Open because that is the authoritative dataset available. The column score is taken as the 72-hole aggregate strokes for the champion.
+- Name matching used case-insensitive LIKE to capture the entries for “Annika Sörenstam” and “Yani Tseng.”
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

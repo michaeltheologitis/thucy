@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+darryl dawkins play for the jazz 7 year before paul dawkins
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “darryl dawkins play for the jazz 7 year before paul dawkins.”
+
+Data source overview
+- Available database: PostgreSQL (public schema)
+- Relevant table: public.utah_jazz_all_time_roster (columns: player, nationality, position, "years for jazz", "school / club team")
+
+Evidence
+1) Identify the Utah Jazz seasons for Darryl Dawkins and Paul Dawkins
+SQL executed:
+SELECT player, "years for jazz" FROM public.utah_jazz_all_time_roster WHERE lower(player) IN ('darryl dawkins', 'paul dawkins');
+Result:
+- Darryl Dawkins — Years for Jazz: 1987 - 88
+- Paul Dawkins — Years for Jazz: 1979 - 80
+
+Corroborating lookup (name pattern search)
+SQL executed:
+SELECT player, "years for jazz" FROM public.utah_jazz_all_time_roster WHERE lower(player) LIKE '%dawk%';
+Result:
+- Darryl Dawkins — 1987 - 88
+- Paul Dawkins — 1979 - 80
+
+2) Compute the difference in their start years (Darryl minus Paul)
+SQL executed:
+WITH dawkins AS (
+  SELECT player, CAST(substring("years for jazz" FROM '^[0-9]{4}') AS int) AS start_year
+  FROM public.utah_jazz_all_time_roster
+  WHERE lower(player) IN ('darryl dawkins','paul dawkins')
+)
+SELECT 
+  MAX(CASE WHEN lower(player)='darryl dawkins' THEN start_year END) AS darryl_start,
+  MAX(CASE WHEN lower(player)='paul dawkins' THEN start_year END) AS paul_start,
+  (MAX(CASE WHEN lower(player)='darryl dawkins' THEN start_year END) - MAX(CASE WHEN lower(player)='paul dawkins' THEN start_year END)) AS darryl_minus_paul
+FROM dawkins;
+Result:
+- Darryl start year: 1987
+- Paul start year: 1979
+- Difference (Darryl minus Paul): 8 years (Darryl started 8 years after Paul)
+
+Conclusion
+- The data shows Paul Dawkins played for the Utah Jazz in 1979–80, and Darryl Dawkins played in 1987–88. Therefore, Darryl did not play for the Jazz 7 years before Paul; instead, he started 8 years after Paul. The claim is contradicted by the evidence.
+
+Assumptions
+- “Jazz” refers to the Utah Jazz NBA franchise.
+- “before” is evaluated by comparing the players’ Jazz start seasons as recorded in the roster table.
+- Player name entries in the roster correspond to the known NBA players Darryl Dawkins and Paul Dawkins.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

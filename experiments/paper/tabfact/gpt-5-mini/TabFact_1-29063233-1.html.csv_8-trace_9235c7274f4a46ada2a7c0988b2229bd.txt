@@ -1,0 +1,57 @@
+
+<userQuery>
+<query>
+lucy watkins only write 6 episode of series 2
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "lucy watkins only write 6 episode of series 2"
+
+Data sources discovered
+- Available database: TabFact (PostgreSQL), schema: public
+- Relevant table: public.merlin_series_2 (columns: no overall, no for series, title, directed by, written by, original air date, uk viewers (million))
+- Interpretation: This table contains episode-level data for the TV show Merlin, Series 2.
+
+Evidence and executed SQL
+1) Total number of episodes in Series 2
+- SQL executed:
+  SELECT COUNT(*) AS total_episodes FROM merlin_series_2;
+- Result: 12 total episodes
+
+2) Count of Series 2 episodes crediting Lucy Watkins as writer
+- SQL executed:
+  SELECT COUNT(*) AS lucy_count FROM merlin_series_2 WHERE "written by" ILIKE '%Lucy Watkins%';
+- Result: 1 episode credits Lucy Watkins
+
+3) Which episode(s) credit Lucy Watkins
+- SQL executed:
+  SELECT "no for series", "no overall", title, "written by" FROM merlin_series_2 WHERE "written by" ILIKE '%Lucy Watkins%' ORDER BY "no for series";
+- Result:
+  - no for series: 10, no overall: 23, title: sweet dreams, written by: lucy watkins
+
+4) Context: counts by writer across Series 2
+- SQL executed:
+  SELECT "written by", COUNT(*) AS episodes
+  FROM merlin_series_2
+  GROUP BY "written by"
+  ORDER BY episodes DESC;
+- Result:
+  - julian jones: 3
+  - howard overman: 3
+  - jake michie: 3
+  - ben vanstone: 2
+  - lucy watkins: 1
+
+Conclusion
+- The data shows Lucy Watkins is credited with writing 1 episode in Merlin Series 2, not 6. Therefore, the claim is contradicted by the evidence.
+
+Assumptions
+- “series 2” refers to Merlin Series 2 as represented by the public.merlin_series_2 table, which is the only relevant TV-series table available in the connected data source.
+- Writer attribution is taken directly from the "written by" column, matched case-insensitively to the substring "Lucy Watkins".
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

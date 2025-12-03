@@ -1,0 +1,58 @@
+
+<userQuery>
+<query>
+114 be play when point be 107 and when 1987 - 88 be 31
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Played equals 114 when points equals 107, and (also) when 1987-88 equals 31.”
+
+Data source explored
+- Database: TabFact
+- Schema: public
+- Table: public.t_1988_89_argentine_primera_divisi_n (columns: played, average, points, "1988 - 89", "1986 - 87", "1987 - 88", team)
+
+Schema/sample confirmation (context)
+- SQL:
+  SELECT column_name, data_type 
+  FROM information_schema.columns 
+  WHERE table_name = 't_1988_89_argentine_primera_divisi_n';
+- SQL:
+  SELECT * 
+  FROM public.t_1988_89_argentine_primera_divisi_n 
+  LIMIT 5;
+
+Evidence 1: When points = 107, played = 114
+- SQL:
+  SELECT team, points, played 
+  FROM public.t_1988_89_argentine_primera_divisi_n 
+  WHERE points = 107;
+- Result summary: Ferro Carril Oeste has points = 107 and played = 114.
+
+Evidence 2: When 1987-88 = 31, played = 114
+- SQL:
+  SELECT team, "1987 - 88", played, points 
+  FROM public.t_1988_89_argentine_primera_divisi_n 
+  WHERE "1987 - 88" = '31';
+- Result summary: Racing de Córdoba has "1987 - 88" = 31 and played = 114 (points = 97).
+
+Additional check (for the stricter, single-row interpretation)
+- SQL:
+  SELECT team, played, points, "1987 - 88" 
+  FROM public.t_1988_89_argentine_primera_divisi_n 
+  WHERE points = 107 AND "1987 - 88" = '31' 
+  LIMIT 1;
+- Result: No row satisfies both conditions simultaneously.
+
+Conclusion
+- The table shows that in the row where points = 107, played = 114, and in the (separate) row where 1987-88 = 31, played = 114. Under the interpretation that these are two separate cases, the claim is supported by the data.
+
+Assumptions
+- Interpreted the statement as asserting two separate conditions that each imply played = 114, not that a single row simultaneously satisfies both conditions.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,54 @@
+
+<userQuery>
+<query>
+the yugoslavian national team score 7 goal and allow 3 against in the 3 1982 world cup qualify match
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "the yugoslavian national team score 7 goal and allow 3 against in the 3 1982 world cup qualify match"
+
+Data source: TabFact PostgreSQL database (public.yugoslavia_national_football_team_results)
+
+Step 1 — Identify relevant matches (1982 World Cup qualifiers)
+SQL executed:
+SELECT "type of game", COUNT(*) AS count
+FROM public.yugoslavia_national_football_team_results
+GROUP BY "type of game"
+ORDER BY count DESC;
+Result:
+- 1982 wcq — 3 rows (others: balkan cup=2, friendly=2)
+
+Step 2 — List the 1982 WCQ matches and scores
+SQL executed:
+SELECT date, city, opponent, results
+FROM public.yugoslavia_national_football_team_results
+WHERE "type of game" = '1982 wcq';
+Returned rows:
+1) date: september 10 — city: luxembourg — opponent: luxembourg — results: 5:0
+2) date: september 27 — city: ljubljana — opponent: denmark — results: 2:1
+3) date: november 15 — city: torino , italy — opponent: italy — results: 0:2
+
+Step 3 — Compute goals for and against across those matches
+SQL executed:
+SELECT COUNT(*) AS matches,
+       SUM((split_part(results, ':', 1))::int) AS goals_for,
+       SUM((split_part(results, ':', 2))::int) AS goals_against
+FROM public.yugoslavia_national_football_team_results
+WHERE "type of game" = '1982 wcq';
+Result:
+- matches: 3
+- goals_for: 7
+- goals_against: 3
+
+Conclusion: The data shows Yugoslavia played 3 matches in the 1982 World Cup qualifiers listed here, scoring 7 goals and conceding 3. This matches the claim.
+
+Assumptions:
+- The results field is in Yugoslavia-first format (Yugoslavia_goals:opponent_goals) for these rows.
+- The label "1982 wcq" denotes 1982 FIFA World Cup qualification matches.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

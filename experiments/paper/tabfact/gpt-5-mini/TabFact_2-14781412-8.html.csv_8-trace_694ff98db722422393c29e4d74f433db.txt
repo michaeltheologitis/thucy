@@ -1,0 +1,79 @@
+
+<userQuery>
+<query>
+the gold medalist for equestrian at the asian game have be different in every year they have occur except 1994 and 1998
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the gold medalist for equestrian at the Asian Games have been different in every year they occurred except 1994 and 1998.”
+
+Data source discovery:
+- Using the connected PostgreSQL database (TabFact), I found one relevant table: public.equestrian_at_the_asian_games.
+
+Schema checked:
+- Table: public.equestrian_at_the_asian_games
+  - Columns: year (bigint), location (text), gold (text), silver (text), bronze (text)
+  - No event-level column; gold is a single winner per listed year.
+
+Evidence from the data:
+1) List all years and gold medalists
+SQL executed:
+SELECT year, location, gold, silver, bronze
+FROM public.equestrian_at_the_asian_games
+ORDER BY year ASC;
+Results (year → gold):
+- 1982 → nadia al - moutawaa
+- 1986 → takashi tomura
+- 1994 → konoshin kuwahara
+- 1998 → jin kanno
+- 2002 → mikaela marãxada jaworski (encoding artifact in name; treated as distinct string)
+- 2006 → ali yousuf al - rumaihi
+- 2010 → ramzy al duhami
+
+2) Check if any gold medalist name repeats
+SQL executed:
+SELECT COUNT(*) AS row_count FROM public.equestrian_at_the_asian_games;
+Result: row_count = 7
+
+SQL executed:
+SELECT COUNT(DISTINCT gold) AS distinct_gold_count FROM public.equestrian_at_the_asian_games;
+Result: distinct_gold_count = 7
+
+SQL executed (duplicates by exact string):
+SELECT count(*) AS duplicate_names
+FROM (
+  SELECT gold
+  FROM public.equestrian_at_the_asian_games
+  WHERE gold IS NOT NULL AND gold <> ''
+  GROUP BY gold
+  HAVING count(*) > 1
+) AS t;
+Result: duplicate_names = 0
+
+SQL executed (duplicates after lowercasing and trimming):
+SELECT count(*) AS duplicate_normalized
+FROM (
+  SELECT lower(trim(gold))
+  FROM public.equestrian_at_the_asian_games
+  WHERE gold IS NOT NULL AND gold <> ''
+  GROUP BY lower(trim(gold))
+  HAVING count(*) > 1
+) AS t;
+Result: duplicate_normalized = 0
+
+Assessment:
+- The table shows unique gold medalist names for every listed year. Specifically, 1994 (konoshin kuwahara) and 1998 (jin kanno) are different individuals. There are no repeat gold medalists in the dataset across all listed years.
+
+Conclusion: The claim is contradicted by the data. The gold medalist is different in every listed year, including 1994 and 1998.
+
+Assumptions made:
+- “Equestrian at the Asian Games” refers to the event represented by the table public.equestrian_at_the_asian_games, which provides a single gold medalist per edition (no event-level breakdown). 
+- Names are compared as provided in the data (with an additional normalized check); minor encoding artifacts do not affect the distinctness of 1994 vs 1998 names.
+- The verification is limited to the years present in the authoritative dataset (1982, 1986, 1994, 1998, 2002, 2006, 2010).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

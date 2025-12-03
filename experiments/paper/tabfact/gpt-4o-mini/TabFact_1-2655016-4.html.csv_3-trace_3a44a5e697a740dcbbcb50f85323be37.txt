@@ -1,0 +1,51 @@
+
+<userQuery>
+<query>
+2 episode title consist entirely of number
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of data sources and schema
+- Discovered a PostgreSQL database with a public schema containing a table: public.list_of_all_that_episodes.
+- Relevant columns: season (bigint), series (bigint), "episode title" (text), "original air date" (text), "nick prod" (bigint).
+
+Verification steps and evidence
+1) Count episode titles consisting only of digits (after trimming whitespace)
+Executed SQL:
+SELECT COUNT(*) AS count_of_numeric_titles
+FROM public.list_of_all_that_episodes
+WHERE TRIM("episode title") ~ '^[0-9]+$';
+Result: 2
+
+2) List distinct numeric-only episode titles and their counts
+Executed SQL:
+SELECT "episode title", COUNT(*) AS count
+FROM public.list_of_all_that_episodes
+WHERE TRIM("episode title") ~ '^[0-9]+'$
+GROUP BY "episode title";
+Result:
+- "702": 1
+- "112": 1
+
+3) Distinct numeric-only titles (for completeness)
+Executed SQL:
+SELECT DISTINCT "episode title"
+FROM public.list_of_all_that_episodes
+WHERE TRIM("episode title") ~ '^[0-9]+$';
+Result:
+- "702"
+- "112"
+
+Conclusion
+- There are exactly 2 episode titles in the dataset that consist entirely of digits, matching the claim.
+
+Assumptions
+- Interpreted the claim over the table public.list_of_all_that_episodes (All That episodes dataset).
+- “Consist entirely of number” interpreted as titles composed solely of digits 0–9 after trimming whitespace.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

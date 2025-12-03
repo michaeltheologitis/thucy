@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+lake oval be the venue of the game that the home team score 15.20 (110)
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Data sources discovered:
+- PostgreSQL database: TabFact
+- Table: public.t_1981_vfl_season (VFL 1981 season)
+  Columns: "home team" (text), "home team score" (text), "away team" (text), "away team score" (text), "venue" (text), "crowd" (bigint), "date" (text)
+
+What I checked
+1) Identify any game where the home team scored exactly 15.20 (110), then see its venue.
+Executed SQL:
+SELECT "home team", "away team", "date", "venue", "home team score", "away team score"
+FROM public.t_1981_vfl_season
+WHERE "home team score" = '15.20 (110)';
+Result:
+- home team: hawthorn | away team: melbourne | date: 29 august 1981 | venue: princes park | home team score: 15.20 (110) | away team score: 8.9 (57)
+Finding: The only match with a home team score of 15.20 (110) in this dataset was played at Princes Park, not Lake Oval.
+
+2) Verify what venues exist in this table and list the match(es) played at Lake Oval for context.
+Executed SQL (venues list):
+SELECT DISTINCT "venue" FROM public.t_1981_vfl_season ORDER BY "venue";
+Result venues: lake oval, mcg, moorabbin oval, princes park, vfl park, victoria park
+
+Executed SQL (Lake Oval matches):
+SELECT "date", "home team", "away team", "venue", "home team score", "away team score"
+FROM public.t_1981_vfl_season
+WHERE lower("venue") = 'lake oval'
+ORDER BY "date";
+Result:
+- date: 29 august 1981 | home team: south melbourne | away team: north melbourne | venue: lake oval | home team score: 10.14 (74) | away team score: 15.17 (107)
+Finding: The Lake Oval game in this dataset does not have a home team score of 15.20 (110).
+
+Conclusion
+- The game where the home team scored 15.20 (110) took place at Princes Park, not Lake Oval. Therefore, the claim that Lake Oval was the venue for that game is contradicted by the data.
+
+Assumptions
+- The claim refers to the 1981 VFL season as represented in the table public.t_1981_vfl_season.
+- The score “15.20 (110)” is matched exactly as stored in the "home team score" text field.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

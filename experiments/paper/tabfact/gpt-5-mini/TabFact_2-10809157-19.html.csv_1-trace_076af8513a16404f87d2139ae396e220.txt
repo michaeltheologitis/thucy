@@ -1,0 +1,50 @@
+
+<userQuery>
+<query>
+carlton score 20.7 when they play richmond at prince park
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "carlton score 20.7 when they play richmond at prince(s) park"
+
+Data source discovery
+- Available database: postgres_tabfact27 (public schema)
+- Relevant table: t_1969_vfl_season (columns: home team, home team score, away team, away team score, venue, crowd, date)
+
+Step 1: Identify exact team and venue strings used in the dataset
+Executed SQL:
+SELECT DISTINCT "home team" AS team FROM public.t_1969_vfl_season UNION SELECT DISTINCT "away team" FROM public.t_1969_vfl_season ORDER BY team;
+Result (teams): carlton; collingwood; essendon; fitzroy; footscray; geelong; hawthorn; melbourne; north melbourne; richmond; south melbourne; st kilda
+
+Executed SQL:
+SELECT DISTINCT venue FROM public.t_1969_vfl_season ORDER BY venue;
+Result (venues): kardinia park; mcg; moorabbin oval; princes park; victoria park; western oval
+
+Step 2: Retrieve Carlton vs Richmond match(es) at Princes Park
+Executed SQL:
+SELECT "date", "home team", "home team score", "away team", "away team score", "venue"
+FROM public.t_1969_vfl_season
+WHERE ((lower("home team") = 'carlton' AND lower("away team") = 'richmond') OR (lower("home team") = 'richmond' AND lower("away team") = 'carlton'))
+  AND lower("venue") = 'princes park';
+
+Result (1 row):
+- date: 23 august 1969
+- home team: carlton
+- home team score: 20.7 (127)
+- away team: richmond
+- away team score: 24.12 (156)
+- venue: princes park
+
+Conclusion
+- The dataset shows a Carlton vs Richmond match at Princes Park on 23 August 1969 in which Carlton scored 20.7 (127). This supports the claim within the scope of the available data.
+
+Assumptions
+- The claim refers to the 1969 VFL season data available in the connected database. The phrase "prince park" is interpreted as "Princes Park," matching the venue string in the data.
+
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

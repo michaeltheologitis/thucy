@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+steve stricker have a score lower than phil mickelson
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “steve stricker have a score lower than phil mickelson.”
+
+Data sources explored
+- Discovered a PostgreSQL database (TabFact) with a relevant table: t_2006_u_s_open_golf (columns: place, player, country, score, to par). This table appears to contain player results for the 2006 U.S. Open golf event.
+
+Evidence from data
+- The table contains entries for both Steve Stricker and Phil Mickelson. We compared their scores and to-par values.
+
+Executed SQL queries and results
+1) Lookup rows for Steve Stricker and Phil Mickelson
+SQL:
+SELECT player, place, score, "to par"
+FROM t_2006_u_s_open_golf
+WHERE player ILIKE '%Stricker%' OR player ILIKE '%Mickelson%';
+
+Results:
+- player: steve stricker | place: 1  | score: 70 + 69 = 139 | to par: - 1
+- player: phil mickelson | place: t7 | score: 70 + 73 = 143 | to par: + 3
+
+2) Parse numeric totals for score and to-par for direct comparison
+SQL:
+SELECT player, place, score, "to par",
+CASE
+ WHEN split_part(score,'=',2) ~ '^\s*[-+]?\d+(\.\d+)?\s*$' THEN trim(split_part(score,'=',2))::numeric
+ WHEN score ~ '^\s*[-+]?\d+(\.\d+)?\s*$' THEN trim(score)::numeric
+ WHEN score = 'E' THEN 0::numeric
+ ELSE NULL END AS score_num,
+CASE WHEN replace(trim("to par"),' ','') ~ '^[-+]?\d+(\.\d+)?$' THEN replace(trim("to par"),' ','')::numeric WHEN "to par" = 'E' THEN 0::numeric ELSE NULL END AS to_par_num
+FROM t_2006_u_s_open_golf
+WHERE player ILIKE '%Stricker%' OR player ILIKE '%Mickelson%';
+
+Parsed results:
+- Steve Stricker: score_num = 139, to_par_num = -1
+- Phil Mickelson: score_num = 143, to_par_num = 3
+
+Conclusion
+- In the 2006 U.S. Open (as represented by this dataset), Steve Stricker’s total strokes (139) are lower than Phil Mickelson’s (143), and his to-par (−1) is lower than Mickelson’s (+3). This supports the claim in this context.
+
+Assumptions
+- “Score lower than” is interpreted within the only available golf dataset (the 2006 U.S. Open table) and refers to lower total strokes; to-par values are provided as corroboration.
+- Name matching used case-insensitive contains logic for “Stricker” and “Mickelson.”
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

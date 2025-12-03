@@ -1,0 +1,51 @@
+
+<userQuery>
+<query>
+bell media 's call sign be chsu - fm on the frequency 99.9 fm
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The user asserts that a Bell Media radio station uses the call sign CHSU-FM and broadcasts on 99.9 FM.
+
+Data sources consulted:
+- PostgreSQL database, public schema, table: media_in_kelowna (columns: frequency, call sign, branding, format, owner)
+
+Evidence from executed SQL:
+1) Exact call-sign lookup (no rows returned)
+SQL:
+SELECT "call sign", frequency, branding, format, owner FROM media_in_kelowna WHERE "call sign" = 'CHSU-FM';
+
+2) Broader search by frequency/owner/call-sign fragment (returned one matching row)
+SQL:
+SELECT * FROM media_in_kelowna WHERE frequency LIKE '%99.9%' OR owner LIKE '%Bell%' OR "call sign" LIKE '%CHSU%';
+Result:
+- frequency: "00 99.9 fm"
+- call sign: "chsu - fm"
+- branding: "99.9 sun fm"
+- format: "contemporary hits radio"
+- owner: "bell media"
+
+3) Targeted normalized match for owner and call sign (confirmed the same row)
+SQL:
+SELECT "call sign", frequency, owner FROM media_in_kelowna WHERE lower(owner) LIKE '%bell media%' AND lower("call sign") LIKE '%chsu%';
+Result:
+- call sign: "chsu - fm"
+- frequency: "00 99.9 fm"
+- owner: "bell media"
+
+Assessment:
+- The table lists a station with owner "bell media", call sign written as "chsu - fm" (case and spacing variations), and frequency text containing "99.9 fm". These data points substantively match the claim that Bell Media’s station CHSU-FM operates on 99.9 FM.
+
+Conclusion: The claim is supported by the data in the available source.
+
+Assumptions made:
+- Variations in case and spacing/hyphenation (e.g., "chsu - fm" vs. "CHSU-FM") refer to the same call sign.
+- The frequency value "00 99.9 fm" is a formatting artifact and indicates the 99.9 FM frequency.
+- The claim pertains to media in Kelowna, consistent with the scope of the available dataset.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+china have win 40 more gold medal than iran for wushu at the asian game
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "china have win 40 more gold medal than iran for wushu at the asian game"
+
+Step 1 — Discover available data sources
+- Discovered database: TabFact (postgres_tabfact8)
+- Schema: public
+- Table: public.wushu_at_the_asian_games
+- Columns: rank (text), nation (text), gold (bigint), silver (bigint), bronze (bigint), total (bigint)
+
+Step 2 — Retrieve the relevant data
+Query A — Get gold medal counts for China and Iran
+Executed SQL:
+SELECT nation, gold FROM public.wushu_at_the_asian_games WHERE nation ILIKE 'china%' OR nation ILIKE 'iran%';
+Results:
+- nation: "china (chn)", gold: 43
+- nation: "iran (iri)", gold: 4
+
+Query B — Compute the difference (China minus Iran)
+Executed SQL:
+SELECT
+  SUM(gold) FILTER (WHERE nation ILIKE 'china%') AS china_gold,
+  SUM(gold) FILTER (WHERE nation ILIKE 'iran%') AS iran_gold,
+  SUM(gold) FILTER (WHERE nation ILIKE 'china%') - SUM(gold) FILTER (WHERE nation ILIKE 'iran%') AS china_minus_iran
+FROM public.wushu_at_the_asian_games;
+Results:
+- china_gold: 43
+- iran_gold: 4
+- china_minus_iran: 39
+
+Findings
+- China has 43 Wushu gold medals at the Asian Games in this dataset.
+- Iran has 4 Wushu gold medals.
+- The difference is 39, not 40.
+
+Conclusion
+- The statement that China has won 40 more Wushu gold medals than Iran at the Asian Games is not supported by the data; the correct difference is 39.
+
+Assumptions
+- Nation labels in the table are matched by case-insensitive prefixes: "china (chn)" for China and "iran (iri)" for Iran.
+- The table aggregates total Wushu medals for each nation across Asian Games and is treated as authoritative for this verification.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

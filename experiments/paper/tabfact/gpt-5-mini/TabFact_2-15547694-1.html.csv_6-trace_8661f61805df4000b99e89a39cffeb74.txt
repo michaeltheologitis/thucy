@@ -1,0 +1,45 @@
+
+<userQuery>
+<query>
+the party with 21 total member have 9 more member than the party with the second most member
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of verification
+- Claim: “the party with 21 total member have 9 more member than the party with the second most member.”
+- Interpreted as: In the available party membership dataset, the party with a total of 21 members exceeds the second-largest party’s total by 9 (implying second-highest total = 12).
+
+Data source discovery
+- Database: TabFact (PostgreSQL)
+- Relevant table: public.members_of_the_5th_seanad
+  - Columns: party (text), administrative panel (bigint), agricultural panel (bigint), cultural and educational panel (bigint), industrial and commercial panel (bigint), labour panel (bigint), national university of ireland (bigint), university of dublin (bigint), nominated by the taoiseach (bigint), total (bigint)
+
+Evidence and executed SQL
+1) Identify the top two parties by total membership
+- SQL:
+  SELECT party, total FROM public.members_of_the_5th_seanad WHERE lower(party) <> 'total' ORDER BY total DESC, party ASC LIMIT 2;
+- Result:
+  - party: fianna fáil, total: 21
+  - party: fine gael, total: 9
+- Finding: The highest total is 21 (Fianna Fáil). The second-highest total is 9 (Fine Gael). The difference is 21 − 9 = 12.
+
+2) Confirm any party with total = 21
+- SQL:
+  SELECT party, total FROM public.members_of_the_5th_seanad WHERE total = 21 AND lower(party) <> 'total' ORDER BY party ASC;
+- Result:
+  - party: fianna fáil, total: 21
+- Finding: The party with 21 total members is Fianna Fáil.
+
+Conclusion
+- The difference between the top party (21) and the second-most (9) is 12, not 9. Therefore, the claim is contradicted by the data.
+
+Assumptions
+- “Party” and “total members” are interpreted using the table public.members_of_the_5th_seanad, column “party” and “total.”
+- Rows where party = 'total' (an aggregate row) are excluded to focus on actual parties.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

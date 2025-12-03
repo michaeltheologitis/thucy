@@ -92,8 +92,5 @@ try: from nbdev.imports import IN_NOTEBOOK
 except: IN_NOTEBOOK=False
 
 # %% ../nbs/04_main.ipynb 8
-import asyncio
-
-# %% ../nbs/04_main.ipynb 9
 if __name__ == '__main__' and not IN_NOTEBOOK:
     main()

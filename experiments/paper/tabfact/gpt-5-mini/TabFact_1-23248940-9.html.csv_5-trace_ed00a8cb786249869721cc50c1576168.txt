@@ -1,0 +1,79 @@
+
+<userQuery>
+<query>
+the second low attendance figure for a game be 12376
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim evaluated: “the second low attendance figure for a game be 12376.”
+
+Summary conclusion: The data shows 12,376 is the lowest attendance, not the second-lowest. The second-lowest distinct attendance is 13,352.
+
+Key evidence from the database
+- Data source discovered: tabfact12 (public schema), table t_2009_10_charlotte_bobcats_season with a “location attendance” text column that contains venue and trailing attendance digits.
+
+1) Listing games with extracted numeric attendance (ascending)
+Executed SQL:
+SELECT game, date,
+       regexp_replace("location attendance", ' *[0-9]+ *$', '') AS venue,
+       CAST(regexp_replace("location attendance", '[^0-9]', '', 'g') AS INTEGER) AS attendance
+FROM public.t_2009_10_charlotte_bobcats_season
+ORDER BY attendance ASC, game ASC;
+
+Result (attendance ascending):
+- game 50 | date: february 9  | venue: time warner cable arena | attendance: 12376
+- game 51 | date: february 10 | venue: target center           | attendance: 13352
+- game 52 | date: february 16 | venue: time warner cable arena | attendance: 13712
+- game 55 | date: february 22 | venue: staples center          | attendance: 15892
+- game 54 | date: february 20 | venue: bradley center         | attendance: 17174
+- game 48 | date: february 3  | venue: staples center          | attendance: 18997
+- game 49 | date: february 6  | venue: time warner cable arena | attendance: 19164
+- game 53 | date: february 19 | venue: time warner cable arena | attendance: 19568
+- game 56 | date: february 24 | venue: energysolutions arena   | attendance: 19911
+- game 47 | date: february 1  | venue: rose garden             | attendance: 20106
+
+Observation: The lowest attendance is 12,376. The next (second-lowest) is 13,352.
+
+2) Confirming second-lowest distinct attendance value
+Executed SQL (distinct attendance list):
+SELECT DISTINCT NULLIF(regexp_replace("location attendance", '[^0-9]', '', 'g'), '')::int AS attendance
+FROM public.t_2009_10_charlotte_bobcats_season
+WHERE NULLIF(regexp_replace("location attendance", '[^0-9]', '', 'g'), '') IS NOT NULL
+ORDER BY attendance ASC;
+
+Result (distinct attendance values):
+[12376, 13352, 13712, 15892, 17174, 18997, 19164, 19568, 19911, 20106]
+
+Executed SQL (rows at the second-lowest value 13352):
+SELECT game, date, team, score, "high points", "high rebounds", "high assists", "location attendance", record,
+NULLIF(regexp_replace("location attendance", '[^0-9]', '', 'g'), '')::int AS attendance_int
+FROM public.t_2009_10_charlotte_bobcats_season
+WHERE NULLIF(regexp_replace("location attendance", '[^0-9]', '', 'g'), '')::int = 13352;
+
+Result (matching row):
+- game: 51
+- date: february 10
+- team: minnesota
+- score: w 93 - 92 (ot)
+- high points: stephen jackson (33)
+- high rebounds: nazr mohammed (20)
+- high assists: dj augustin (7)
+- location attendance: target center 13352
+- record: 26 - 25
+- attendance_int: 13352
+
+Assessment of the claim
+- The statement that the second-lowest attendance is 12,376 is contradicted by the data.
+- 12,376 is the lowest attendance, not the second-lowest.
+- The second-lowest distinct attendance is 13,352.
+
+Assumptions
+- “Second low attendance figure” is interpreted as the second-lowest distinct numeric attendance across all rows in the table public.t_2009_10_charlotte_bobcats_season.
+- Attendance was extracted by removing non-digit characters from the “location attendance” text field and casting to integer. All rows contained trailing digits interpretable as attendance.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,58 @@
+
+<userQuery>
+<query>
+sewda have the lowest number of electorate in 2009
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "sewda have the lowest number of electorate in 2009"
+
+Data source discovery
+- Available database: TabFact (public schema). Treated as authoritative per instructions.
+
+Schema exploration
+- Relevant table: bhind_lok_sabha_constituency
+  - Columns: "constituency number" (text), "name" (text), "reserved for ( sc / st / none)" (text), "district" (text), "number of electorates (2009)" (bigint)
+  - Contains per-constituency electorates for 2009 and one aggregate "total :" row.
+
+Evidence and executed SQL
+1) List all constituency names and their 2009 electorates
+- SQL executed:
+SELECT "constituency number", "name", "number of electorates (2009)" FROM bhind_lok_sabha_constituency ORDER BY "name";
+- Key rows returned:
+  - {constituency number: "9",  name: "ater",   number of electorates (2009): 177334}
+  - {constituency number: "21", name: "bhander", number of electorates (2009): 139600}
+  - {constituency number: "10", name: "bhind",   number of electorates (2009): 197183}
+  - {constituency number: "22", name: "datia",   number of electorates (2009): 143593}
+  - {constituency number: "13", name: "gohad",   number of electorates (2009): 166893}
+  - {constituency number: "11", name: "lahar",   number of electorates (2009): 205839}
+  - {constituency number: "12", name: "mehgaon", number of electorates (2009): 210649}
+  - {constituency number: "20", name: "sewda",   number of electorates (2009): 130161}
+  - {constituency number: "total :", name: "total :", number of electorates (2009): 1371252}
+
+2) Compute the minimum number of electorates among constituencies (excluding the aggregate row)
+- SQL executed:
+SELECT MIN("number of electorates (2009)") AS min_electorates FROM bhind_lok_sabha_constituency WHERE LOWER("name") != 'total :';
+- Result:
+  - {min_electorates: 130161}
+
+3) Identify the constituency(ies) with that minimum
+- SQL executed:
+SELECT "constituency number","name","number of electorates (2009)" FROM bhind_lok_sabha_constituency WHERE "number of electorates (2009)" = 130161;
+- Result rows:
+  - {constituency number: "20", name: "sewda", number of electorates (2009): 130161}
+
+Conclusion
+- The minimum 2009 electorate figure among constituency rows is 130161, and it belongs to "sewda". Therefore, the claim that "sewda have the lowest number of electorate in 2009" is supported by the data.
+
+Assumptions
+- Interpreted "sewda" case-insensitively as the constituency named "sewda" in the table.
+- Treated the row with name "total :" as a summary/aggregate and excluded it when determining the minimum.
+- Scope limited to the bhind_lok_sabha_constituency table available in the TabFact database.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

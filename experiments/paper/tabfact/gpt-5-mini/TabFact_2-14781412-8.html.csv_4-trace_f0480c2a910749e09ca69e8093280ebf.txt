@@ -1,0 +1,82 @@
+
+<userQuery>
+<query>
+south korea be the only country to have host equestrian at the asian game more than 1 time , in seoul and doha (and incheon , but that be only find elsewhere on the source page)
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify:
+“South Korea is the only country to have hosted equestrian at the Asian Games more than once, in Seoul and Doha (and Incheon, but that is only found elsewhere on the source page).”
+
+What the data shows
+1) Full list of editions and locations in the dataset
+- Evidence (executed SQL):
+  SELECT year, location FROM public.equestrian_at_the_asian_games ORDER BY year ASC;
+- Result (year — location):
+  1982 — new delhi
+  1986 — seoul
+  1994 — hiroshima
+  1998 — bangkok
+  2002 — busan
+  2006 — doha
+  2010 — guangzhou
+
+2) Distinct locations and checks for specific cities
+- Evidence (executed SQL):
+  SELECT COUNT(*) AS total_rows FROM public.equestrian_at_the_asian_games;
+  SELECT DISTINCT location FROM public.equestrian_at_the_asian_games ORDER BY location;
+  SELECT 
+    EXISTS(SELECT 1 FROM public.equestrian_at_the_asian_games WHERE lower(location)='seoul') AS seoul,
+    EXISTS(SELECT 1 FROM public.equestrian_at_the_asian_games WHERE lower(location)='busan') AS busan,
+    EXISTS(SELECT 1 FROM public.equestrian_at_the_asian_games WHERE lower(location)='doha') AS doha,
+    EXISTS(SELECT 1 FROM public.equestrian_at_the_asian_games WHERE lower(location)='incheon') AS incheon
+  ;
+- Results:
+  • total_rows = 7
+  • Distinct locations: bangkok, busan, doha, guangzhou, hiroshima, new delhi, seoul
+  • Presence check: seoul = true, busan = true, doha = true, incheon = false
+
+3) Country-level counts (via explicit city-to-country mapping)
+- Evidence (executed SQL):
+  SELECT country, COUNT(*) AS count
+  FROM (
+    SELECT CASE
+      WHEN lower(location) IN ('seoul','busan') THEN 'South Korea'
+      WHEN lower(location) = 'doha' THEN 'Qatar'
+      WHEN lower(location) = 'bangkok' THEN 'Thailand'
+      WHEN lower(location) = 'hiroshima' THEN 'Japan'
+      WHEN lower(location) = 'guangzhou' THEN 'China'
+      WHEN lower(location) = 'new delhi' THEN 'India'
+      ELSE NULL
+    END AS country
+    FROM public.equestrian_at_the_asian_games
+  ) t
+  WHERE country IS NOT NULL
+  GROUP BY country
+  ORDER BY COUNT(*) DESC, country ASC;
+- Result (country — count):
+  South Korea — 2
+  China — 1
+  India — 1
+  Japan — 1
+  Qatar — 1
+  Thailand — 1
+
+Assessment of the claim
+- “South Korea is the only country to have hosted equestrian at the Asian Games more than once.” Supported by the dataset (1982–2010): the only country with more than one entry is South Korea (seoul 1986, busan 2002). All other mapped countries appear once.
+- “in Seoul and Doha”: Incorrect. In the data, Doha appears, but it is mapped to Qatar. The second South Korean host city in the dataset is Busan, not Doha.
+- “(and Incheon)”: The dataset does not contain an Incheon entry (explicitly verified: incheon = false). Therefore, this part cannot be confirmed from the available data.
+
+Conclusion
+- The core idea that South Korea is the only country with multiple equestrian Asian Games hostings (within this dataset’s scope) is supported. However, the supporting detail naming Doha as a South Korean instance is incorrect, and the mention of Incheon is not reflected in the dataset provided.
+
+Assumptions and scope
+- City-to-country mapping used in the country-level count (Seoul/Busan → South Korea; Doha → Qatar; Bangkok → Thailand; Hiroshima → Japan; Guangzhou → China; New Delhi → India). This mapping was implemented explicitly in SQL for transparency.
+- Scope is limited to the available dataset (1982–2010). No inference is made about editions not present in the data (e.g., any post-2010 hostings such as Incheon).
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

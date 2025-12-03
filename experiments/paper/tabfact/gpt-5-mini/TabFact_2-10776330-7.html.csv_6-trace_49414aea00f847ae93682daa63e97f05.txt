@@ -1,0 +1,68 @@
+
+<userQuery>
+<query>
+kardinia park be 1 of the 4 venue that be put to use on 3 june 1961
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “Kardinia Park was one of the four venues used on 3 June 1961.”
+
+Data source exploration
+- Discovered a single accessible database: TabFact (postgres_tabfact9), public schema.
+- Relevant table: public.t_1961_vfl_season with columns: "home team", "home team score", "away team", "away team score", "venue", "crowd", "date".
+
+Evidence
+1) Matches played on 3 June 1961, including venues
+- Result (from the database):
+  • North Melbourne 9.14 (68) vs St Kilda 11.16 (82) — Arden Street Oval
+  • Hawthorn 10.13 (73) vs Richmond 8.12 (60) — Glenferrie Oval
+  • Collingwood 18.11 (119) vs Essendon 8.10 (58) — Victoria Park
+  • Geelong 13.13 (91) vs Footscray 4.14 (38) — Kardinia Park
+  • South Melbourne 7.8 (50) vs Fitzroy 17.15 (117) — Lake Oval
+  • Melbourne 15.14 (104) vs Carlton 11.13 (79) — MCG
+- Number of distinct venues used that day: 6
+- Executed SQL:
+  SELECT "home team","home team score","away team","away team score","venue","crowd","date"
+  FROM public.t_1961_vfl_season
+  WHERE date ILIKE '%3 June 1961%';
+
+  SELECT COUNT(DISTINCT venue) AS distinct_venues
+  FROM public.t_1961_vfl_season
+  WHERE date ILIKE '%3 june 1961%';
+
+2) Distinct venues and match counts on 3 June 1961 (date format check + exact list)
+- Date format verification (executed SQL):
+  SELECT DISTINCT "date" FROM public.t_1961_vfl_season WHERE "date" ILIKE '%June%1961%' ORDER BY "date";
+  Result: [ {"date": "3 june 1961"} ]
+
+- Distinct venues with counts (executed SQL):
+  SELECT venue, COUNT(*) AS matches
+  FROM public.t_1961_vfl_season
+  WHERE "date" = '3 june 1961'
+  GROUP BY venue
+  ORDER BY matches DESC, venue;
+
+- Result:
+  • arden street oval — 1 match
+  • glenferrie oval — 1 match
+  • kardinia park — 1 match
+  • lake oval — 1 match
+  • mcg — 1 match
+  • victoria park — 1 match
+
+Assessment
+- True: Kardinia Park was used on 3 June 1961 (Geelong vs Footscray).
+- False: Only four venues were used. The data shows six distinct venues hosted matches that day.
+
+Conclusion
+- The claim mixes a correct element (Kardinia Park was used that day) with an incorrect one (there were not four but six venues). Therefore, the claim is partly inaccurate.
+
+Assumptions
+- Interpreted the claim as referring to the Victorian Football League (VFL) matches scheduled on 3 June 1961, as represented in the t_1961_vfl_season table. Dates are stored as text (e.g., '3 june 1961'), and the TabFact dataset is treated as authoritative within scope.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

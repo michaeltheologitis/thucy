@@ -1,0 +1,47 @@
+
+<userQuery>
+<query>
+there be more than 12.42 million viewer for the entry with rating / share 3.2 / 8
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “there be more than 12.42 million viewer for the entry with rating / share 3.2 / 8.”
+
+Data source discovery
+- Available database: PostgreSQL
+- Relevant table: public.my_info_table
+- Columns (as discovered): rating (double precision), share (bigint), rating / share (18 - 49) (text), viewers (millions) (double precision), rank (overall) (bigint)
+
+Evidence
+1) Locate entries whose 18–49 rating/share text equals 3.2/8 (allowing optional space around the slash) and check viewers
+- Executed SQL:
+  SELECT rating, share, "rating / share (18 - 49)", "viewers (millions)", "rank (overall)", ("viewers (millions)" > 12.42) AS viewers_gt_12_42
+  FROM public.my_info_table
+  WHERE "rating / share (18 - 49)" LIKE '3.2 / 8' OR "rating / share (18 - 49)" LIKE '3.2/8'
+  ORDER BY "viewers (millions)" DESC;
+- Result: 1 row
+  • rating: 7.2; share: 11; rating / share (18 - 49): 3.2 / 8; viewers (millions): 12.42; rank (overall): 15; viewers_gt_12_42: false
+- Interpretation: The entry whose 18–49 rating/share is “3.2 / 8” has exactly 12.42 million viewers, not more than 12.42.
+
+2) Check if any row has numeric rating = 3.2 and share = 8 and whether its viewers exceed 12.42
+- Executed SQL:
+  SELECT rating, share, "rating / share (18 - 49)", "viewers (millions)", ("viewers (millions)" > 12.42) AS viewers_gt_12_42
+  FROM my_info_table
+  WHERE rating = 3.2 AND share = 8;
+- Result: 0 rows
+- Interpretation: There is no separate record where numeric rating=3.2 and share=8 that could contradict the finding above.
+
+Conclusion
+- The only entry matching the stated rating/share of 3.2/8 (via the 18–49 text column) has 12.42 million viewers. The claim that it has more than 12.42 million viewers is not supported by the data; it is equal to 12.42 million, not greater.
+
+Assumptions
+- “rating / share 3.2 / 8” refers to the 18–49 rating/share value stored in the text column rating / share (18 - 49).
+- “More than 12.42 million” is interpreted as strictly greater than 12.42, not greater-than-or-equal.
+- If multiple rows matched, all would be checked; only one matching text entry exists.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

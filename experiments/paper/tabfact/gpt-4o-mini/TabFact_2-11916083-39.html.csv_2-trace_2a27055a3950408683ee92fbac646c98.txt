@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+a mintage of 31997 have an issue price of 59.95
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Data source discovered: PostgreSQL database with table public.royal_canadian_mint_numismatic_coins_2000s (Royal Canadian Mint numismatic coins in the 2000s).
+
+Table schema (evidence)
+- Columns identified:
+  - year (bigint)
+  - theme (text)
+  - artist (text)
+  - mintage (text)
+  - issue price (double precision)
+- SQL used:
+  SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'royal_canadian_mint_numismatic_coins_2000s' AND table_schema = 'public';
+
+Verification steps and evidence
+1) Locate any coins with mintage text containing 31,997 (with or without comma) and inspect their issue price.
+- Result: 1 matching row found.
+- Details returned:
+  - Year: 2003
+  - Theme: HMCS Bras d'Or
+  - Mintage: 31997
+  - Issue Price: 59.95
+- SQL used:
+  SELECT year, theme, mintage, "issue price"
+  FROM public.royal_canadian_mint_numismatic_coins_2000s
+  WHERE mintage ILIKE '%31,997%' OR mintage ILIKE '%31997%';
+
+2) Confirm there is exactly one such entry.
+- Result: 1 row.
+- SQL used:
+  SELECT COUNT(*)
+  FROM public.royal_canadian_mint_numismatic_coins_2000s
+  WHERE mintage ILIKE '%31997%' OR mintage ILIKE '%31,997%';
+
+3) Verify that the matching entry’s issue price equals 59.95.
+- Result: The entry has issue price 59.95.
+- SQL used:
+  SELECT year, theme, mintage, "issue price"
+  FROM public.royal_canadian_mint_numismatic_coins_2000s
+  WHERE (mintage ILIKE '%31997%' OR mintage ILIKE '%31,997%')
+    AND "issue price" = 59.95;
+
+Conclusion
+- The dataset shows a 2003 Royal Canadian Mint numismatic coin (HMCS Bras d'Or) with mintage 31,997 and issue price 59.95. This supports the claim that a mintage of 31,997 has an issue price of 59.95.
+
+Assumptions
+- The claim refers to Royal Canadian Mint numismatic products in the 2000s available in the referenced dataset.
+- Issue price is interpreted as the face catalog “issue price” field in the dataset; currency is presumed CAD based on the dataset’s domain.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

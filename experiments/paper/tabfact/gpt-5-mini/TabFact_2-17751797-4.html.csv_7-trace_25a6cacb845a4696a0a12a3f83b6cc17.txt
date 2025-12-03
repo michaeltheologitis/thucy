@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+1 - 0 be the score the home team be bolton wanderer
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “The score was 1–0 and the home team was Bolton Wanderers.” I interpret this as asserting there exists a match with Bolton Wanderers as the HOME team and a 1–0 score.
+
+Data source discovery
+- Accessible source: TabFact database
+- Available table: public.t_1990_91_fa_cup (appears to contain 1990–91 FA Cup match data)
+
+Table schema (from discovery)
+- Columns: "tie no" (text), "home team" (text), "score" (text), "away team" (text), "date" (text)
+
+Evidence
+1) Sample rows to confirm data content and whether Bolton appears
+Executed SQL:
+SELECT "tie no", "home team", score, "away team", date FROM public.t_1990_91_fa_cup LIMIT 50;
+Observed relevant row in results:
+- tie no: 11 | home team: manchester united | score: 1 - 0 | away team: bolton wanderers | date: 26 / 01 / 1991
+Interpretation: Bolton Wanderers appear as the AWAY team in a 1–0 match; this does not support the claim that Bolton Wanderers were the HOME team in a 1–0 match.
+
+2) Direct check: Does any row have Bolton Wanderers as HOME team with a 1–0 score?
+Executed SQL:
+SELECT "tie no", "home team", "score", "away team", "date"
+FROM public.t_1990_91_fa_cup
+WHERE "home team" ILIKE '%bolton wanderers%'
+  AND translate("score", '–—', '--') ~ '^[[:space:]]*1[[:space:]]*-[[:space:]]*0[[:space:]]*$';
+Result: No rows returned.
+Interpretation: No match in this table has Bolton Wanderers as the home team with a 1–0 score.
+
+3) Sanity check: Does Bolton appear as HOME team at all in this dataset?
+Executed SQL:
+SELECT "tie no", "home team", "score", "away team", "date"
+FROM public.t_1990_91_fa_cup
+WHERE "home team" ILIKE '%bolton%';
+Result: No rows returned.
+Interpretation: In this dataset, Bolton Wanderers do not appear as the home team in any listed match.
+
+Conclusion
+- The available data does not support the claim. While there is a 1–0 match involving Bolton Wanderers, they are the AWAY team (vs. Manchester United) rather than the HOME team. No entries exist with Bolton Wanderers as the home side in a 1–0 result in this table.
+
+Assumptions
+- “Bolton wanderer” is interpreted as the club Bolton Wanderers.
+- “1 - 0” is treated flexibly (allowing spaces and different dash characters) when matching score text.
+- The claim is evaluated against the only available authoritative dataset (public.t_1990_91_fa_cup), presumed to represent 1990–91 FA Cup matches.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

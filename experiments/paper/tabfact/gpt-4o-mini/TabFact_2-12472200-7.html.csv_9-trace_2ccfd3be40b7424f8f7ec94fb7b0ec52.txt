@@ -1,0 +1,66 @@
+
+<userQuery>
+<query>
+olga govortsova advance to the third round in the french open 5 year in a row
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "Olga Govortsova advanced to the third round at the French Open 5 years in a row."
+
+Data source discovery
+- Available database: PostgreSQL (schema: public)
+- Relevant table: public.olga_govortsova (columns: tournament, 2007, 2008, 2009, 2010, 2011). Rows represent tournament results for Olga Govortsova by year.
+
+Evidence collected
+1) Full table retrieval (to confirm structure and available tournaments)
+SQL executed:
+SELECT * FROM public.olga_govortsova;
+Key relevant row observed:
+- french open: 2007=a, 2008=3r, 2009=3r, 2010=2r, 2011=2r
+
+2) Direct retrieval of French Open results
+SQL executed:
+SELECT "2007", "2008", "2009", "2010", "2011" FROM public.olga_govortsova WHERE tournament = 'french open';
+Result:
+- 2007: a
+- 2008: 3r (Third Round)
+- 2009: 3r (Third Round)
+- 2010: 2r (Second Round)
+- 2011: 2r (Second Round)
+
+3) Unpivot of French Open results into year/result pairs (to make the streak explicit)
+SQL executed:
+SELECT year, result FROM (
+  SELECT '2007' as year, "2007" as result FROM olga_govortsova WHERE tournament = 'french open' UNION ALL
+  SELECT '2008', "2008" FROM olga_govortsova WHERE tournament = 'french open' UNION ALL
+  SELECT '2009', "2009" FROM olga_govortsova WHERE tournament = 'french open' UNION ALL
+  SELECT '2010', "2010" FROM olga_govortsova WHERE tournament = 'french open' UNION ALL
+  SELECT '2011', "2011" FROM olga_govortsova WHERE tournament = 'french open'
+) AS temp
+WHERE result IS NOT NULL
+ORDER BY year ASC;
+Returned pairs:
+- 2007: a
+- 2008: 3r
+- 2009: 3r
+- 2010: 2r
+- 2011: 2r
+
+Findings
+- Within the available years (2007–2011), Olga Govortsova reached the French Open third round only in 2008 and 2009 (a two-year consecutive streak). She did not reach the third round in 2010 or 2011.
+- There is no five-year consecutive streak of third-round appearances in the dataset.
+
+Conclusion
+- The claim is contradicted by the data: the longest observed streak is 2 years, not 5.
+
+Assumptions noted
+- "3r" denotes third round; "2r" denotes second round; "a" denotes absent or did not participate.
+- "French Open" refers to Roland Garros.
+- The authoritative dataset available covers 2007–2011; conclusions are based on these years, as no other years are present in the accessible data.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

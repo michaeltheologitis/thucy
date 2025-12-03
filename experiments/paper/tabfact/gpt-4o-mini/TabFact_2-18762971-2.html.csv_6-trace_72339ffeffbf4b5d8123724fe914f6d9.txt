@@ -1,0 +1,66 @@
+
+<userQuery>
+<query>
+the match with the highest attendance be against birmingham city
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim being checked: “the match with the highest attendance be against Birmingham City.”
+
+Data source explored
+- Database: main (PostgreSQL)
+- Schema: public
+- Table: public.t_2000_01_sheffield_wednesday_f_c_season (Sheffield Wednesday FC 2000–01 season matches)
+
+Step 1 — Inspect the table
+Executed SQL:
+SELECT * FROM public.t_2000_01_sheffield_wednesday_f_c_season LIMIT 5;
+Observed key columns: Attendance, Date, Opponent, Result, Venue.
+
+Step 2 — Identify the highest-attendance match(es)
+Executed SQL:
+SELECT Opponent, Attendance, Date, Venue, Result 
+FROM public.t_2000_01_sheffield_wednesday_f_c_season 
+WHERE Attendance = (SELECT MAX(Attendance) FROM public.t_2000_01_sheffield_wednesday_f_c_season);
+Result:
+- Opponent: Sheffield United; Attendance: 38,433; Date: 1 April 2001; Venue: H; Result: 1 - 2.
+Interpretation: The single highest-attendance match in the dataset was against Sheffield United, not Birmingham City.
+
+Step 3 — Context: top attendances
+Executed SQL:
+SELECT Opponent, Attendance, Date, Venue, Result 
+FROM public.t_2000_01_sheffield_wednesday_f_c_season 
+ORDER BY Attendance DESC 
+LIMIT 5;
+Top results returned:
+1) Sheffield United — 38,433 (1 April 2001, H, 1 - 2)
+2) Crewe Alexandra — 28,007 (6 May 2001, H, 0 - 0)
+3) Sheffield United — 25,156 (16 December 2000, A, 1 - 1)
+4) Barnsley — 23,498 (21 April 2001, H, 2 - 1)
+5) Nottingham Forest — 23,266 (21 February 2001, A, 1 - 0)
+
+Step 4 — Check matches vs Birmingham City
+Executed SQL (case-insensitive search to avoid formatting/casing issues):
+SELECT Opponent, Date, Attendance 
+FROM public.t_2000_01_sheffield_wednesday_f_c_season 
+WHERE Opponent ILIKE '%Birmingham%';
+Results:
+- Birmingham City — 22 October 2000 — Attendance: 14,695
+- Birmingham City — 24 March 2001 — Attendance: 19,733
+Interpretation: Neither Birmingham City fixture matches the season’s maximum attendance; both are well below 38,433.
+
+Conclusion
+- The dataset shows the highest attendance match was Sheffield Wednesday vs Sheffield United (38,433, 1 April 2001, Home).
+- Matches vs Birmingham City had attendances of 14,695 and 19,733.
+- Therefore, the claim is contradicted by the data.
+
+Assumptions
+- The claim refers to the 2000–01 season represented by the table public.t_2000_01_sheffield_wednesday_f_c_season.
+- “Highest attendance” refers to the single largest Attendance value recorded in this dataset.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

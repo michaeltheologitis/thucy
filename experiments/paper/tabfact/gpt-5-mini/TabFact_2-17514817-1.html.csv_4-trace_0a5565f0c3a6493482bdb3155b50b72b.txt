@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+west berkshire brewery 's maggs magnificent mild 2 time win an award at the siba national beer competition between 1995 and 2009
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “West Berkshire Brewery’s Maggs Magnificent Mild won an award at the SIBA National Beer Competition two times between 1995 and 2009.”
+
+Data discovery and schema context
+- Data sources discovered: One PostgreSQL source (postgres_tabfact23), public schema.
+- Relevant table: public.west_berkshire_brewery with columns: year (bigint), beer name (text), prize (text), category (text), competition (text).
+
+Step 1 — Confirm how SIBA competitions are recorded
+Executed SQL:
+SELECT DISTINCT competition FROM public.west_berkshire_brewery ORDER BY competition;
+Result (excerpt):
+- siba national beer competition
+- siba south east region beer competition
+(Establishes the exact naming used for the national competition.)
+
+Step 2 — Locate all entries for Maggs Magnificent Mild and identify SIBA National results
+Executed SQL:
+SELECT year, "beer name", prize, category, competition FROM public.west_berkshire_brewery WHERE LOWER("beer name") LIKE '%magg%' ORDER BY year, "beer name";
+Key results for the SIBA National Beer Competition:
+- 2003 | maggs magnificent mild | gold medal | mild and porter | siba national beer competition
+- 2006 | maggs magnificent mild | silver medal | mild | siba national beer competition
+(Other rows show regional SIBA awards and CAMRA/festival awards, which are not part of this claim.)
+
+Step 3 — Explicitly count SIBA National awards for the beer within 1995–2009
+Executed SQL:
+SELECT COUNT(*) FROM west_berkshire_brewery WHERE "beer name" ILIKE 'maggs magnificent mild' AND competition ILIKE 'siba national beer competition' AND year BETWEEN 1995 AND 2009;
+Result:
+[{"count":2}]
+
+Conclusion
+- The data shows Maggs Magnificent Mild received two awards at the SIBA National Beer Competition within the 1995–2009 timeframe (2003 gold; 2006 silver). This directly supports the claim.
+
+Assumptions
+- “Win an award” is interpreted to include any medal (gold/silver/bronze) at the competition, not only overall champion.
+- The year range “between 1995 and 2009” is treated as inclusive.
+- Matching is case-insensitive; competition naming exactly follows the table’s stored value “siba national beer competition.”
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,70 @@
+
+<userQuery>
+<query>
+only 1 person have be a member of the party of labour of albania political party and be elect
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: Only one person who was a member of the Party of Labour of Albania (PLA) has been elected/served as Prime Minister (based on the available prime ministers dataset).
+
+Summary conclusion: Supported by the available data. The table of Albanian prime ministers (1991 onwards) contains exactly one prime minister entry whose political party is recorded as “party of labour of albania”: Fatos Nano (first term, 22 February 1991 – 5 June 1991).
+
+Evidence from data and executed SQL
+
+1) Verify table structure (column names):
+Executed SQL:
+SELECT column_name, data_type FROM information_schema.columns WHERE table_name='list_of_prime_ministers_of_albania';
+Result:
+[{"column_name":"name","data_type":"text"},{"column_name":"born - died","data_type":"text"},{"column_name":"term start","data_type":"text"},{"column_name":"term end","data_type":"text"},{"column_name":"political party","data_type":"text"}]
+
+2) Inspect distinct political party values present:
+Executed SQL:
+SELECT DISTINCT "political party" FROM list_of_prime_ministers_of_albania;
+Result:
+[{"political party":"party of labour of albania"},{"political party":"prime ministers 1991 onwards"},{"political party":"socialist party of albania"},{"political party":"democratic party of albania"},{"political party":"non - party"}]
+
+3) List all rows (to understand scope and any header artifacts):
+Executed SQL:
+SELECT name, "term start", "term end", "political party"
+FROM public.list_of_prime_ministers_of_albania
+ORDER BY "term start";
+Key rows in result (abridged):
+- fatos nano (1st time) | 22 february 1991 – 5 june 1991 | party of labour of albania
+- ylli bufi | 5 june 1991 – 10 december 1991 | socialist party of albania
+- vilson ahmeti | 10 december 1991 – 13 april 1992 | non - party
+- …
+Note: One row appears to be a header artifact: "prime ministers 1991 onwards" repeated across columns.
+
+4) Retrieve PMs whose political party equals Party of Labour of Albania:
+Executed SQL:
+SELECT name, "term start", "term end", "political party" FROM list_of_prime_ministers_of_albania WHERE "political party" = 'party of labour of albania' ORDER BY "term start";
+Result:
+[{"name":"fatos nano (1st time)","political party":"party of labour of albania","term end":"5 june 1991","term start":"22 february 1991"}]
+
+5) Count how many rows match that party label:
+Executed SQL:
+SELECT COUNT(*) FROM list_of_prime_ministers_of_albania WHERE "political party" = 'party of labour of albania';
+Result:
+[{"count":1}]
+
+6) Count distinct names with that party label (to ensure not double-counted terms):
+Executed SQL:
+SELECT COUNT(DISTINCT "name") AS count FROM public.list_of_prime_ministers_of_albania WHERE LOWER("political party") = 'party of labour of albania';
+Result:
+[{"count":1}]
+
+Conclusion
+- The available dataset (prime ministers of Albania, 1991 onwards) shows exactly one person listed under the Party of Labour of Albania: Fatos Nano (first term). Therefore, the claim is supported by the data at hand.
+
+Assumptions and scope notes
+- Interpreted “be elect” as “be elected/serve as Prime Minister,” because the only available relevant table is a list of prime ministers.
+- The table covers prime ministers from 1991 onwards; earlier historical periods are not represented here. Within this dataset’s scope, only one PLA-affiliated PM appears.
+- One row is a header artifact ("prime ministers 1991 onwards"); it was not considered a valid record.
+- Matching was done on the exact stored label “party of labour of albania” (also cross-checked case-insensitively).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

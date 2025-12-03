@@ -1,0 +1,41 @@
+
+<userQuery>
+<query>
+rio ave 's head coach be carlos brito and club sport cp have josé peseiro
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Rio Ave’s head coach is Carlos Brito and Sporting CP have José Peseiro.”
+
+Data discovery and schema grounding
+- Discovered a single accessible PostgreSQL database: postgres_tabfact15 (TabFact connector), public schema.
+- Relevant table identified via schema inspection: public.t_2004_05_primeira_liga with columns: club (text), head coach (text), city (text), stadium (text), 2003 - 2004 season (text).
+
+Evidence from executed SQL
+1) Quick scan to confirm stored club/head coach names:
+SQL:
+SELECT club, "head coach" FROM public.t_2004_05_primeira_liga LIMIT 20;
+Excerpt of returned rows included (as provided by the tool): {"club":"sporting cp","head coach":"josé peseiro"}, {"club":"rio ave","head coach":"carlos brito"}
+
+2) Direct retrieval for the two clubs (case-insensitive match used by the tool):
+SQL:
+SELECT club, "head coach" FROM public.t_2004_05_primeira_liga WHERE LOWER(club) IN ('rio ave','sporting cp');
+Returned rows:
+[{"club":"sporting cp","head coach":"josé peseiro"}, {"club":"rio ave","head coach":"carlos brito"}]
+
+Assessment
+- Rio Ave — head coach: Carlos Brito. Supported by row: {club: rio ave, head coach: carlos brito}.
+- Sporting CP — head coach: José Peseiro. Supported by row: {club: sporting cp, head coach: josé peseiro}.
+
+Conclusion: Both parts of the claim are supported by the data in the 2004–05 Primeira Liga table.
+
+Assumptions
+- The verification is grounded in the public.t_2004_05_primeira_liga dataset, which appears to reflect the 2004–05 season. The claim is therefore verified for that season.
+- Club name matching is case-insensitive, as club names are stored in lowercase in the table.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

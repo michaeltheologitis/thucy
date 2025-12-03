@@ -1,0 +1,77 @@
+
+<userQuery>
+<query>
+washington have a record of 41 - 36 and play at the verizon center 20173 people in attendance
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+What was claimed
+- “washington have a record of 41 - 36 and play at the verizon center 20173 people in attendance.”
+
+How I searched the data
+- Discovered available sources: a PostgreSQL database (TabFact, schema public) exposing one table t_2008_09_miami_heat_season, described as a game-by-game log for the 2008–09 Miami Heat with columns: game, date, team, score, high points, high rebounds, high assists, location attendance, record.
+- Queried this table for rows involving Washington and/or “Verizon Center.”
+
+Evidence from the data
+1) Query to find rows with Washington or Verizon Center
+Executed SQL:
+SELECT game, date, team, "location attendance", record
+FROM public.t_2008_09_miami_heat_season
+WHERE team ILIKE '%washington%' OR "location attendance" ILIKE '%verizon center%';
+
+Result:
+- game: 77; date: april 4; team: washington; location attendance: verizon center 20173; record: 41 - 36
+
+Interpretation: This row shows that in game 77 of the 2008–09 Miami Heat season, the opponent was Washington, the game was played at “verizon center” with attendance 20,173, and the “record” at that point was 41–36.
+
+2) What does the “record” column refer to?
+To confirm that “record” reflects the Miami Heat’s running season record (not Washington’s), I examined adjacent rows and record changes.
+
+Executed SQL:
+SELECT game, team, "location attendance", record
+FROM public.t_2008_09_miami_heat_season
+ORDER BY game::integer
+LIMIT 5;
+
+Results (first 5 rows by numeric game order):
+- game 75: team dallas; location attendance american airlines center 20021; record 39 - 36
+- game 76: team charlotte; location attendance time warner cable arena 19568; record 40 - 36
+- game 77: team washington; location attendance verizon center 20173; record 41 - 36
+- game 78: team new orleans; location attendance american airlines arena 19600; record 41 - 37
+- game 79: team boston; location attendance td banknorth garden 18624; record 41 - 38
+
+Executed SQL (to show record changes by game):
+SELECT game, team, "location attendance", record,
+       split_part(record, ' - ', 1)::int AS wins,
+       split_part(record, ' - ', 2)::int AS losses,
+       (split_part(record, ' - ', 1)::int - lag(split_part(record, ' - ', 1)::int) OVER (ORDER BY game::integer)) AS win_change,
+       (split_part(record, ' - ', 2)::int - lag(split_part(record, ' - ', 2)::int) OVER (ORDER BY game::integer)) AS loss_change,
+       CASE
+         WHEN (split_part(record, ' - ', 1)::int - lag(split_part(record, ' - ', 1)::int) OVER (ORDER BY game::integer)) = 1 THEN 'W'
+         WHEN (split_part(record, ' - ', 2)::int - lag(split_part(record, ' - ', 2)::int) OVER (ORDER BY game::integer)) = 1 THEN 'L'
+         ELSE NULL
+       END AS result
+FROM public.t_2008_09_miami_heat_season
+WHERE game::integer BETWEEN 75 AND 79
+ORDER BY game::integer;
+
+Result highlights:
+- Record moves 39–36 → 40–36 → 41–36 → 41–37 → 41–38, consistent with Miami’s cumulative wins/losses changing after each game.
+
+Conclusion based on evidence
+- “play at the verizon center 20173 people in attendance”: Supported for that specific game. The data shows the game versus “washington” took place at “verizon center” with attendance 20,173.
+- “washington have a record of 41 - 36”: Not supported. In this dataset, the “record” column is the Miami Heat’s season record after each game, not Washington’s record. At the time of the Washington game (game 77), Miami’s record was 41–36. The claim misattributes the record to Washington.
+
+Final assessment
+- The venue/attendance part is correct for that game.
+- The record part is incorrect because it refers to Miami’s cumulative record, not Washington’s.
+
+Assumptions noted
+- I interpreted “washington” as the Washington opponent listed in the Miami Heat’s 2008–09 season log (i.e., the Washington Wizards in the NBA). The verification is constrained to what this table records about that specific game context.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

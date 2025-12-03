@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+the match between south melbourne and richmond draw the smallest crowd of the day
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary conclusion: The claim is not supported by the data. On the date covered by the dataset (23 June 1962), the smallest crowd was for North Melbourne vs Hawthorn (8,470). The South Melbourne vs Richmond match drew 17,000, which was not the smallest of the day.
+
+Data source discovery
+- Database: TabFact
+- Schema: public
+- Table: public.t_1962_vfl_season
+- Relevant columns: "home team" (text), "away team" (text), "crowd" (bigint), "date" (text)
+
+Evidence 1: All matches that day ordered by crowd (smallest to largest)
+Executed SQL:
+SELECT date, "home team", "away team", crowd FROM public.t_1962_vfl_season ORDER BY crowd ASC;
+
+Returned rows:
+- 23 June 1962 | North Melbourne vs Hawthorn | crowd = 8470
+- 23 June 1962 | South Melbourne vs Richmond | crowd = 17000
+- 23 June 1962 | Collingwood vs Fitzroy | crowd = 26488
+- 23 June 1962 | Carlton vs Footscray | crowd = 32400
+- 23 June 1962 | Essendon vs Geelong | crowd = 35000
+- 23 June 1962 | Melbourne vs St Kilda | crowd = 48952
+
+Observation: The smallest crowd is 8,470 for North Melbourne vs Hawthorn. South Melbourne vs Richmond drew 17,000, which is higher than 8,470.
+
+Evidence 2: Match with the smallest crowd per date
+Executed SQL:
+SELECT date, "home team", "away team", crowd
+FROM public.t_1962_vfl_season
+WHERE (date, crowd) IN (
+    SELECT date, MIN(crowd)
+    FROM public.t_1962_vfl_season
+    GROUP BY date
+);
+
+Returned result:
+- Date: 23 June 1962 | Home Team: North Melbourne | Away Team: Hawthorn | Crowd: 8,470
+
+Conclusion
+- The match between South Melbourne and Richmond did not draw the smallest crowd of the day. The smallest crowd on 23 June 1962 was at North Melbourne vs Hawthorn (8,470). South Melbourne vs Richmond had 17,000 attendees.
+
+Assumptions
+- “Of the day” refers to the single date present in the dataset (23 June 1962), which appears to cover one round/day of matches.
+- “Draw the smallest crowd” is interpreted as having the minimum value in the "crowd" column among all matches on that date.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

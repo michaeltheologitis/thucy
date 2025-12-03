@@ -1,0 +1,50 @@
+
+<userQuery>
+<query>
+the pga championship have 3 more cut made than the us open
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim interpreted: The PGA Championship has 3 more cuts made than the U.S. Open.
+- Scope: Verified against the available dataset for Brian Watts (table: public.brian_watts).
+
+Data source discovery
+- Available database: TabFact (PostgreSQL), schema: public.
+- Relevant table: public.brian_watts with columns: tournament, wins, top - 5, top - 25, events, cuts made.
+
+Evidence and executed SQL
+1) Identify exact tournament names present
+SQL:
+SELECT DISTINCT "tournament" FROM public.brian_watts ORDER BY "tournament";
+Result:
+[{"tournament":"masters tournament"},{"tournament":"pga championship"},{"tournament":"the open championship"},{"tournament":"totals"},{"tournament":"us open"}]
+
+2) Retrieve cuts made for the PGA Championship and U.S. Open
+SQL:
+SELECT "tournament", "cuts made" FROM public.brian_watts WHERE "tournament" IN ('pga championship', 'us open');
+Result:
+[{"cuts made":1,"tournament":"us open"},{"cuts made":4,"tournament":"pga championship"}]
+
+3) Compute the difference (PGA - US Open)
+SQL:
+SELECT
+  (SELECT "cuts made" FROM public.brian_watts WHERE "tournament" = 'pga championship') AS pga_cuts,
+  (SELECT "cuts made" FROM public.brian_watts WHERE "tournament" = 'us open') AS usopen_cuts,
+  ((SELECT "cuts made" FROM public.brian_watts WHERE "tournament" = 'pga championship') - (SELECT "cuts made" FROM public.brian_watts WHERE "tournament" = 'us open')) AS difference;
+Result:
+[{"difference":3,"pga_cuts":4,"usopen_cuts":1}]
+
+Conclusion
+- According to the brian_watts table, the PGA Championship has 4 cuts made and the U.S. Open has 1 cut made; the difference is 3. This supports the claim within this dataset.
+
+Assumptions
+- The claim refers to the cuts made by Brian Watts (the only relevant data available) rather than to tournaments in general or another player.
+- "cut made" is interpreted as the "cuts made" statistic in the table.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

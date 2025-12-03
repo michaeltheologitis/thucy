@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+the geo id for a township with 0.717 square mile of water be 3806741020
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify
+“The geo id for a township with 0.717 square mile of water is 3806741020.”
+
+Data sources explored
+- Database: TabFact (public schema)
+- Table discovered: public.list_of_townships_in_north_dakota
+  Columns: "township" (text), "county" (text), "pop (2010)" (bigint), "land ( sqmi )" (double precision), "water (sqmi)" (double precision), "latitude" (double precision), "longitude" (text), "geo id" (bigint), "ansi code" (bigint)
+
+Verification steps and evidence
+1) Check for any township with water area exactly 0.717 sq mi
+SQL executed:
+SELECT "township", "county", "water (sqmi)", "geo id"
+FROM public.list_of_townships_in_north_dakota
+WHERE "water (sqmi)" = 0.717
+ORDER BY "township";
+Result: 0 rows returned.
+
+2) Check for any township with water area approximately 0.717 sq mi (between 0.716 and 0.718)
+SQL executed:
+SELECT "township", "county", "water (sqmi)", "geo id"
+FROM public.list_of_townships_in_north_dakota
+WHERE "water (sqmi)" BETWEEN 0.716 AND 0.718
+ORDER BY "water (sqmi)" DESC, "township";
+Result: 0 rows returned.
+
+3) Find the township closest to 0.717 sq mi of water and inspect its geo id
+SQL executed:
+SELECT "township", "county", "water (sqmi)", "geo id", ABS("water (sqmi)" - 0.717) AS diff
+FROM public.list_of_townships_in_north_dakota
+ORDER BY diff
+LIMIT 10;
+Top result returned:
+- township: joliette | county: pembina | water (sqmi): 0.771 | geo id: 3806741020 | diff: 0.054
+
+4) Retrieve the record for geo id 3806741020
+SQL executed:
+SELECT "township", "county", "water (sqmi)", "geo id"
+FROM public.list_of_townships_in_north_dakota
+WHERE "geo id" = 3806741020;
+Result:
+- township: joliette | county: pembina | water (sqmi): 0.771 | geo id: 3806741020
+
+Conclusion
+- The database contains no township with exactly (or within 0.001–0.002 tolerance) 0.717 sq mi of water.
+- The specific geo id 3806741020 corresponds to Joliette Township, Pembina County, with 0.771 sq mi of water, not 0.717.
+Therefore, the claim is contradicted by the data.
+
+Assumptions
+- The claim refers to North Dakota townships, consistent with the available table and the state code “38” in the provided geo id.
+- The “geo id” column represents the authoritative geographic identifier for these townships in this dataset.
+- Water areas are taken as stored double-precision values in “water (sqmi)”.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

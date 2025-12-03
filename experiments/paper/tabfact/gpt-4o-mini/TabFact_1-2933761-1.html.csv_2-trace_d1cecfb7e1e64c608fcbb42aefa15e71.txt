@@ -1,0 +1,66 @@
+
+<userQuery>
+<query>
+only 1 female have a prison connection in the usa
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of verification
+- Interpreted claim: Within the available data, exactly one female has a prison connection located in the USA.
+- Data source discovery confirmed a single available table: public.cube_film_series, which includes columns for gender and "prison connection".
+
+Data source explored
+- Discovered data sources: A PostgreSQL database with table public.cube_film_series.
+
+Schema details (queried)
+- Table: public.cube_film_series (name text, occupation text, gender text, "prison connection" text, "played by" text, status text)
+
+Evidence from executed SQL
+1) Distinct values for gender and prison connection
+- SQL:
+  SELECT DISTINCT gender FROM public.cube_film_series;
+- SQL:
+  SELECT DISTINCT "prison connection" FROM public.cube_film_series;
+- Result excerpts:
+  • gender: {female, male}
+  • prison connection includes: {leavenworth prison (usa), san quentin state prison (usa), holloway women's prison (uk), kazan prison (russia), centre pénitentiaire de rennes (france)}
+
+2) Females with USA prison connections (names and prisons)
+- SQL:
+  SELECT name, gender, "prison connection" 
+  FROM public.cube_film_series 
+  WHERE gender = 'female' AND "prison connection" ILIKE '%(usa)%';
+- Result:
+  • joan leaven | female | leavenworth prison (usa)
+
+3) Count of USA prison connections by gender
+- SQL:
+  SELECT gender, COUNT(*) AS count FROM cube_film_series WHERE "prison connection" LIKE '%(usa)%' GROUP BY gender;
+- Result:
+  • female: 1
+  • male: 2
+
+4) All rows with USA prison connections (to show context)
+- SQL:
+  SELECT name, gender, "prison connection" 
+  FROM cube_film_series 
+  WHERE "prison connection" ILIKE '%(usa)%';
+- Result:
+  • David Worth | male | Leavenworth Prison (USA)
+  • Quentin | male | San Quentin State Prison (USA)
+  • Joan Leaven | female | Leavenworth Prison (USA)
+
+Conclusion
+- The data shows exactly one female (Joan Leaven) with a prison connection in the USA. This supports the claim as stated within the available dataset.
+
+Assumptions
+- The claim refers to the available table public.cube_film_series.
+- “Prison connection in the usa” is operationalized as the "prison connection" column containing the substring “(usa)”.
+- Gender is matched exactly on the value 'female'.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,69 @@
+
+<userQuery>
+<query>
+galina voskoboeva play 20% of her game on a clay top tennis court
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Galina Voskoboeva plays 20% of her games on a clay top tennis court.”
+
+Data source discovery
+- Using the connected data environment, I discovered one relevant PostgreSQL database (postgres_tabfact11 / TabFact) with a single pertinent table:
+  - public.galina_voskoboeva (columns: outcome, date, tournament, surface, opponent, score; all text)
+
+Schema details (from inspection)
+- Table: public.galina_voskoboeva
+  - Columns: outcome (text), date (text), tournament (text), surface (text), opponent (text), score (text)
+  - No primary/foreign keys reported.
+
+Evidence collected
+1) Total matches, clay matches, and percentage of clay
+Executed SQL:
+WITH totals AS (
+  SELECT COUNT(*)::bigint AS total
+  FROM public.galina_voskoboeva
+),
+clay AS (
+  SELECT COUNT(*)::bigint AS clay
+  FROM public.galina_voskoboeva
+  WHERE LOWER(TRIM(surface)) = 'clay'
+)
+SELECT clay.clay, totals.total, ROUND(100.0 * clay.clay / NULLIF(totals.total,0), 2) AS pct_clay
+FROM totals CROSS JOIN clay;
+
+Result:
+- clay = 2
+- total = 5
+- pct_clay = 40.00
+
+2) Distribution by surface (to confirm surface labels)
+Executed SQL:
+SELECT
+  COALESCE(NULLIF(TRIM(surface),''),'Unknown') AS surface_normalized,
+  COUNT(*) AS count
+FROM public.galina_voskoboeva
+GROUP BY surface_normalized
+ORDER BY count DESC, surface_normalized;
+
+Result rows:
+- clay -> 2
+- hard (i) -> 2
+- hard -> 1
+
+Analysis
+- In the authoritative dataset available, Galina Voskoboeva has 5 recorded matches, 2 of which are on clay. This yields 40.00% on clay, not 20%.
+
+Conclusion
+- The claim is not supported by the data. The observed percentage of matches on clay is 40%, which contradicts the stated 20%.
+
+Assumptions and interpretation
+- Interpreted “play 20% of her game” as “20% of her matches.”
+- Interpreted “clay top tennis court” as the clay surface (surface = 'clay').
+- Treated the connected dataset (public.galina_voskoboeva) as authoritative for verification, per instructions.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

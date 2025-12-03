@@ -1,0 +1,52 @@
+
+<userQuery>
+<query>
+alabama be the opponent when the attendance be 81079
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim interpreted: The opponent was Alabama when the attendance was 81,079.
+- Dataset used: public.east_carolina_pirates_football_1990_99 (East Carolina Pirates football games, 1990–1999).
+- Finding: No game in this dataset has attendance 81,079. The only game vs Alabama has attendance 80,079.
+
+Data source discovery
+- Available source: A PostgreSQL database with table public.east_carolina_pirates_football_1990_99.
+
+Schema details
+- Columns: date (text), opponent (text), site (text), result (text), attendance (text).
+
+Evidence 1: Check for attendance = 81,079
+SQL executed:
+SELECT date, opponent, site, result, attendance FROM public.east_carolina_pirates_football_1990_99 WHERE REPLACE(attendance, ',', '')::int = 81079;
+Result: No rows returned.
+
+Evidence 2: Identify any games vs Alabama
+SQL executed:
+SELECT date, opponent, site, result, attendance 
+FROM east_carolina_pirates_football_1990_99 
+WHERE LOWER(opponent) LIKE '%alabama%';
+Result:
+- Date: October 17; Opponent: Alabama; Site: Legion Field, Birmingham, AL; Result: L 22 - 23; Attendance: 80,079.
+
+Evidence 3: Confirm exact attendance value for the Alabama game
+SQL executed:
+SELECT COUNT(*) FROM public.east_carolina_pirates_football_1990_99 WHERE REPLACE(attendance, ',', '')::int = 80079;
+Result: 1
+SQL executed:
+SELECT date, opponent, site, result, attendance FROM public.east_carolina_pirates_football_1990_99 WHERE REPLACE(attendance, ',', '')::int = 80079;
+Result:
+- Date: October 17; Opponent: Alabama; Site: Legion Field Birmingham, AL; Result: L 22 - 23; Attendance: 80079
+
+Conclusion
+- The dataset shows no game with attendance 81,079. The Alabama game listed has attendance 80,079. Therefore, the claim that Alabama was the opponent when attendance was 81,079 is not supported by the data.
+
+Assumptions
+- The question refers to the East Carolina Pirates football dataset for 1990–1999 and "attendance" is the game attendance field in this table. No other datasets were available to cross-check.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,57 @@
+
+<userQuery>
+<query>
+gary beach be 1 of 4 winner of a tony award
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The statement appears to assert that “Gary Beach [is] one of four winners of a Tony Award.” Given our available data source focuses on La Cage aux Folles awards, I verify whether Gary Beach is recorded as a Tony Award winner in that context and whether any “one of four winners” characterization is supported.
+
+Data sources discovered
+- Database: TabFact (schema: public)
+- Table: la_cage_aux_folles_musical (columns: year bigint, award text, category text, nominee text, result text)
+
+Evidence collected
+1) Presence of Gary Beach in the dataset and his Tony Award result
+- Executed SQL:
+  SELECT * FROM public.la_cage_aux_folles_musical WHERE LOWER(nominee) LIKE '%gary beach%';
+- Result (single row):
+  Year: 2005 | Award: Tony Award | Category: Best Performance by a Leading Actor in a Musical | Nominee: Gary Beach | Result: nominated
+
+2) All 2005 Tony Award entries for La Cage aux Folles
+- Executed SQL:
+  SELECT * FROM public.la_cage_aux_folles_musical WHERE year = 2005;
+- Result (Tony Award subset):
+  • Best Revival of a Musical | Nominee: Best Revival of a Musical | Result: won
+  • Best Performance by a Leading Actor in a Musical | Nominee: Gary Beach | Result: nominated
+  • Best Choreography | Nominee: Jerry Mitchell | Result: won
+  • Best Costume Design | Nominee: William Ivey Long | Result: nominated
+
+3) All Tony Award winners recorded in the dataset
+- Executed SQL:
+  SELECT year, category, nominee FROM public.la_cage_aux_folles_musical WHERE LOWER(award) = 'tony award' AND LOWER(result) = 'won';
+- Result:
+  • 2005 | Best Revival of a Musical | Best Revival of a Musical
+  • 2005 | Best Choreography | Jerry Mitchell
+
+4) Count of Tony Award winners in the dataset
+- Executed SQL:
+  SELECT COUNT(*) FROM public.la_cage_aux_folles_musical WHERE LOWER(award) = 'tony award' AND LOWER(result) = 'won';
+- Result: 2
+
+Assessment
+- The dataset records Gary Beach as a 2005 Tony Award nominee (not a winner) for Best Performance by a Leading Actor in a Musical for La Cage aux Folles.
+- The dataset shows two Tony Award wins tied to La Cage aux Folles in 2005 (Best Revival of a Musical; Best Choreography) and does not list Gary Beach among the winners.
+- The claim that Gary Beach is “one of four winners” is not supported by this data. No evidence here indicates either that he won a Tony in this context or that there were four relevant winners among which he is included.
+
+Conclusion: Based strictly on the accessible, authoritative dataset, the claim is not supported.
+
+Assumptions and scope notes
+- The only available data source covers awards data for La Cage aux Folles. If the intended claim referenced Gary Beach’s broader career (e.g., The Producers), that information is outside this dataset. This verification is necessarily scoped to the data we can access, which lists Gary Beach only as a nominee (not a winner) for the 2005 Tony Awards related to La Cage aux Folles.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

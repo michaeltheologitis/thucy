@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+from 1965 - 1970 , there be 998000 death per year and 3330000 live birth per year
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “From 1965–1970, there were 998,000 deaths per year and 3,330,000 live births per year.”
+
+Data source exploration
+- Discovered one accessible PostgreSQL database: TabFact (postgres_tabfact33), schema public.
+- Relevant table: public.my_info_table, which contains period and per-year vital statistics (live births per year, deaths per year, natural change per year, etc.).
+
+Evidence collected
+1) Locate the record for the 1965–1970 period and read per-year values
+- Executed SQL:
+SELECT period, "live births per year", "deaths per year", "natural change per year"
+FROM public.my_info_table
+WHERE trim(period) ~* '^(1965\s*-\s*1970|1965\s*–\s*1970|1965\s*—\s*1970|1965\s+to\s+1970)$';
+- Result:
+  - period: 1965 - 1970
+  - live births per year: 3 330 000
+  - deaths per year: 998 000
+  - natural change per year: 2 332 000
+
+2) Cast the textual per-year values to integers to confirm exact numbers
+- Executed SQL:
+SELECT period,
+       CAST(REPLACE("live births per year", ' ', '') AS INTEGER) AS live_births_per_year,
+       CAST(REPLACE("deaths per year", ' ', '') AS INTEGER) AS deaths_per_year,
+       CAST(REPLACE("natural change per year", ' ', '') AS INTEGER) AS natural_change_per_year
+FROM public.my_info_table
+WHERE period = '1965 - 1970';
+- Result:
+  - period: 1965 - 1970
+  - live_births_per_year: 3330000
+  - deaths_per_year: 998000
+  - natural_change_per_year: 2332000
+
+Assessment
+- The database record for the period 1965–1970 reports exactly 3,330,000 live births per year and 998,000 deaths per year. This directly supports the claim.
+
+Verdict: Verified
+
+Assumptions
+- The claim refers to the same scope as the dataset’s “1965 - 1970” period (which presents per-year figures averaged over that multi-year period). The dataset does not specify geographic scope in the schema; I treated the table as the authoritative source for the claim as stated.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

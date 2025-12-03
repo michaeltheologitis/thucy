@@ -1,0 +1,66 @@
+
+<userQuery>
+<query>
+the dolphins' final 10 game be victory
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Interpretation of the claim: I interpret “the dolphins' final 10 game be victory” as asserting that the Miami Dolphins’ final 10 games of the season were all victories. Given the available data source, I evaluate this for the 1983 Miami Dolphins regular season.
+
+Data discovery and schema
+- Discovered data source: TabFact database with a table for the Miami Dolphins’ 1983 season.
+- Table: public.t_1983_miami_dolphins_season (week bigint, date text, opponent text, result text, attendance bigint).
+
+Evidence
+1) Full 1983 regular-season game results (ordered by week)
+Executed SQL:
+SELECT week, date, opponent, result 
+FROM public.t_1983_miami_dolphins_season 
+ORDER BY week ASC;
+
+Key rows for the final 10 games (weeks 7–16):
+- Week 7: New York Jets — W 32 - 14
+- Week 8: Baltimore Colts — W 21 - 7
+- Week 9: Los Angeles Rams — W 30 - 14
+- Week 10: San Francisco 49ers — W 20 - 17
+- Week 11: New England Patriots — L 17 - 6
+- Week 12: Baltimore Colts — W 37 - 0
+- Week 13: Cincinnati Bengals — W 38 - 14
+- Week 14: Houston Oilers — W 24 - 17
+- Week 15: Atlanta Falcons — W 31 - 24
+- Week 16: New York Jets — W 34 - 14
+
+2) Count of wins and losses in weeks 7–16
+Executed SQL:
+SELECT result, COUNT(*) AS count
+FROM public.t_1983_miami_dolphins_season
+WHERE week BETWEEN 7 AND 16
+GROUP BY result;
+
+Result summary: 9 wins, 1 loss.
+
+3) Final (week 16) game result
+Executed SQL:
+SELECT week, date, opponent, result 
+FROM public.t_1983_miami_dolphins_season 
+WHERE week = (SELECT MAX(week) FROM public.t_1983_miami_dolphins_season)
+
+Returned: Week 16 vs. New York Jets — W 34 - 14.
+
+Assessment
+- The last 10 regular-season games (weeks 7–16) were not all victories due to a loss in Week 11 (L 17–6 vs. New England). The record over that span was 9–1.
+- Note: The final game itself (Week 16) was a victory, but the assertion about the final 10 games all being victories is contradicted by the data.
+
+Conclusion: The claim that the Dolphins’ final 10 games were victories is not supported by the 1983 season data.
+
+Assumptions
+- “Dolphins” refers to the NFL’s Miami Dolphins.
+- “Final 10 game” refers to the last 10 regular-season games in the only available dataset (1983 season). Postseason games are not present in the table and thus not considered.
+- A result string starting with “W” denotes a win and “L” denotes a loss.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

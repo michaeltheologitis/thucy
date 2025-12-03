@@ -1,0 +1,66 @@
+
+<userQuery>
+<query>
+st kilda be the away team when the home team score 12.11 (83)
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The user asserts that St Kilda were the away team in a match where the home team scored 12.11 (83).
+
+Data source consulted
+- Database: TabFact (postgres_tabfact33)
+- Schema: public
+- Table: t_1946_vfl_season (columns: "home team" text, "home team score" text, "away team" text, "away team score" text, "venue" text, "crowd" bigint, "date" text)
+
+Evidence and SQL
+1) Check for any match where the home team score equals '12.11 (83)'
+SQL:
+SELECT "home team", "home team score", "away team", "away team score", "venue", "date" 
+FROM public.t_1946_vfl_season
+WHERE "home team score" = '12.11 (83)';
+Result: 0 rows (no such home-team score in the table)
+
+2) Allowing whitespace variations around the dot and inside parentheses for the home-team score
+SQL:
+SELECT "home team", "home team score", "away team", "away team score", "venue", "date"
+FROM public.t_1946_vfl_season
+WHERE "home team score" ~ '^\s*12\s*\.\s*11\s*\(\s*83\s*\)\s*$';
+Result: 0 rows
+
+3) Check if any home-team score totals 83 (contains the substring '(83)')
+SQL:
+SELECT COUNT(*) AS cnt
+FROM public.t_1946_vfl_season
+WHERE "home team score" LIKE '%(83)%';
+Result: cnt = 0
+
+4) Check for any match where the away team score equals '12.11 (83)' (to see if this score appears at all)
+SQL:
+SELECT "home team","home team score","away team","away team score","date","venue"
+FROM public.t_1946_vfl_season
+WHERE "away team score" = '12.11 (83)';
+Result: 1 row — home team: st kilda | home team score: 10.14 (74) | away team: north melbourne | away team score: 12.11 (83) | date: 13 july 1946 | venue: junction oval
+
+5) Explicitly test the exact claim: home team score = '12.11 (83)' AND away team is St Kilda
+SQL:
+SELECT "home team", "home team score", "away team", "away team score", "date"
+FROM public.t_1946_vfl_season
+WHERE "home team score" = '12.11 (83)'
+  AND lower("away team") = 'st kilda';
+Result: 0 rows
+
+Conclusion
+- In the 1946 VFL season dataset, there is no match where the home team scored 12.11 (83). Therefore, there is no case where St Kilda were the away team under that specific home-team score. The only occurrence of 12.11 (83) found is as an AWAY-team score by North Melbourne against St Kilda, with St Kilda as the HOME team.
+
+Assumptions
+- Scope limited to the available table public.t_1946_vfl_season (1946 season only).
+- Score strings are matched as stored (text) with exact numbers 12, 11, and 83.
+- Team names are matched as stored (case-insensitive used where noted).
+- The claim was interpreted literally as concerning a home-team score of exactly 12.11 (83).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,50 @@
+
+<userQuery>
+<query>
+week 4 have a higher attendance than week 3
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: Week 4 has a higher attendance than Week 3.
+
+Data discovery and context:
+- Available data source: PostgreSQL database with table public.t_1997_oakland_raiders_season capturing the 1997 Oakland Raiders season.
+- Relevant schema (public.t_1997_oakland_raiders_season):
+  - week (bigint), date (text), opponent (text), result (text), tv time (text), attendance (bigint)
+
+Evidence from executed SQL:
+1) Retrieve attendance for weeks 3 and 4
+SQL:
+SELECT week, attendance FROM public.t_1997_oakland_raiders_season WHERE week IN (3, 4);
+Result:
+- Week 3: 47922
+- Week 4: 72586
+
+2) Compute week 3 attendance, week 4 attendance, boolean comparison, and difference in a single query
+SQL:
+SELECT 
+    MAX(CASE WHEN week = 3 THEN attendance END) AS week_3_attendance, 
+    MAX(CASE WHEN week = 4 THEN attendance END) AS week_4_attendance, 
+    MAX(CASE WHEN week = 4 THEN attendance END) > MAX(CASE WHEN week = 3 THEN attendance END) AS week_4_greater_than_week_3, 
+    (MAX(CASE WHEN week = 4 THEN attendance END) - MAX(CASE WHEN week = 3 THEN attendance END)) AS attendance_difference 
+FROM public.t_1997_oakland_raiders_season 
+WHERE week IN (3, 4);
+Result:
+- week_3_attendance: 47922
+- week_4_attendance: 72586
+- week_4_greater_than_week_3: true
+- attendance_difference: 24664
+
+Conclusion:
+- Week 4 attendance (72,586) is higher than Week 3 attendance (47,922) by 24,664. The claim is supported by the data.
+
+Assumptions:
+- “Attendance” refers to the attendance column in public.t_1997_oakland_raiders_season.
+- “Week 3” and “Week 4” correspond to rows where week = 3 and week = 4 in the 1997 Oakland Raiders dataset.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

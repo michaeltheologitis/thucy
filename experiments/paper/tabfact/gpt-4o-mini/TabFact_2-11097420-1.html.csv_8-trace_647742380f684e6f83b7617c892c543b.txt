@@ -1,0 +1,54 @@
+
+<userQuery>
+<query>
+potter co in copiah be the first project propose , but the last to be list
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Data sources explored
+- Database: TabFact
+- Table: public.list_of_superfund_sites_in_mississippi (columns: cerclis id, name, county, proposed, listed, construction completed, partially deleted, deleted)
+
+What the data shows
+1) How many Superfund sites are in Copiah County?
+- Executed SQL:
+  SELECT COUNT(*) AS count FROM public.list_of_superfund_sites_in_mississippi WHERE county ILIKE '%Copiah%';
+- Result: 1
+
+2) Which site is in Copiah and what are its proposed and listed fields?
+- Executed SQL:
+  SELECT name, proposed, listed FROM list_of_superfund_sites_in_mississippi WHERE LOWER(county) LIKE '%copiah%';
+- Result:
+  - Name: Potter Co; Proposed: 05 / 10 / 1993; Listed: -
+
+Interpretation for Copiah County
+- Since Potter Co is the only Copiah County entry, it is trivially the first (and only) project proposed in Copiah.
+- Its listed field is '-' (i.e., not listed). With no other Copiah entries, it is also trivially the last to be listed in Copiah (and, in fact, not listed at all).
+
+Statewide context (to clarify scope)
+- Executed SQL to find earliest proposed entries statewide:
+  SELECT name, county, proposed, SUBSTRING(proposed FROM '\\d{4}')::int AS extracted_year, listed
+  FROM list_of_superfund_sites_in_mississippi
+  WHERE proposed <> '-' AND proposed ~ '\\d{4}'
+  ORDER BY extracted_year ASC, proposed ASC
+  LIMIT 10;
+- Partial results (earliest rows):
+  - Flowood Site (Rankin) — Proposed: 09 / 08 / 1983; Listed: 09 / 21 / 1984; Year: 1983
+  - Newsom Brothers / Old Reichhold Chemicals, Inc (Marion) — Proposed: 10 / 15 / 1984; Listed: 06 / 10 / 1986; Year: 1984
+  - Potter Co (Copiah) — Proposed: 05 / 10 / 1993; Listed: -; Year: 1993
+- Therefore, Potter Co is not the first proposed site statewide; it is only the first proposed within Copiah because it is the only Copiah entry.
+
+Conclusion
+- Within Copiah County, the data supports that Potter Co is the first project proposed and (given it remains unlisted and there are no other Copiah entries) effectively the last to be listed.
+- This statement would not be true if interpreted statewide, since earlier proposed sites exist (e.g., 1983 Flowood Site).
+
+Assumptions
+- Interpreted the claim’s scope as within Copiah County because the claim explicitly says “in copiah.”
+- Interpreted “last to be list” as meaning “among sites in Copiah, it is last in order of being listed,” which is vacuously true since there are no other Copiah sites and Potter Co is not listed (-).
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

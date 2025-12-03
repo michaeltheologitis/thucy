@@ -1,0 +1,64 @@
+
+<userQuery>
+<query>
+at auckland , new zealand on october 10 , 2004 , the playing surface be hard
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “At Auckland, New Zealand on October 10, 2004, the playing surface was hard.”
+
+Data source exploration
+- Available database: TabFact
+- Relevant table: public.ji_nov_k with columns: date (text), tournament (text), surface (text), opponent (text), score (text)
+
+Evidence collected (with executed SQL)
+1) Check all entries mentioning Auckland
+SQL:
+SELECT date, tournament, surface, opponent, score FROM ji_nov_k WHERE tournament ILIKE '%Auckland%';
+Result:
+- Date: January 14, 1996; Tournament: Auckland, New Zealand; Surface: Hard; Opponent: Brett Steven; Score: 6 - 4, 6 - 4
+
+2) Check for an entry exactly on October 10, 2004
+SQL:
+SELECT date, tournament, surface, opponent, score FROM ji_nov_k WHERE date = 'October 10, 2004';
+Result: No rows returned
+
+3) Find all entries in 2004 (to locate what occurred on October 10, 2004)
+SQL:
+SELECT date, tournament, surface
+FROM ji_nov_k
+WHERE date LIKE '%2004%';
+Results:
+- Date: October 10, 2004; Tournament: Tokyo, Japan; Surface: Hard
+- Date: November 3, 2004; Tournament: Basel, Switzerland; Surface: Carpet (i)
+
+4) Specifically check for Auckland entries in 2004
+SQL:
+SELECT date, tournament, surface FROM ji_nov_k WHERE tournament ILIKE '%Auckland%' AND date ILIKE '%2004%';
+Result: No rows returned
+
+5) Confirm the October 10, 2004 entry is Tokyo
+SQL:
+SELECT date, tournament, surface FROM ji_nov_k WHERE tournament ILIKE '%Tokyo%';
+Result:
+- Date: October 10, 2004; Tournament: Tokyo, Japan; Surface: Hard
+
+Assessment
+- The database has an Auckland, New Zealand entry, but it is on January 14, 1996, and the surface is Hard.
+- For the date October 10, 2004, the recorded tournament is Tokyo, Japan (surface Hard), not Auckland, New Zealand.
+- There are no records showing an Auckland tournament on October 10, 2004 in this dataset.
+
+Conclusion
+- The specific claim tying Auckland, New Zealand to the date October 10, 2004 is not supported by the data. While Auckland entries show a Hard surface (at least for 1996), the only October 10, 2004 match in the dataset occurred in Tokyo on Hard courts. Therefore, the claim as stated (location + date + surface) is not supported.
+
+Assumptions
+- “Playing surface” refers to the “surface” column in the ji_nov_k table.
+- “At Auckland, New Zealand” corresponds to tournament values that mention “Auckland, New Zealand.”
+- Dates are interpreted as stored text in the date column; variations in whitespace/casing were accounted for using LIKE/ILIKE where needed.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

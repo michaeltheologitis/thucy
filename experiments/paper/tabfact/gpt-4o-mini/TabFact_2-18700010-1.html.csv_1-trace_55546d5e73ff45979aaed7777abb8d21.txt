@@ -1,0 +1,70 @@
+
+<userQuery>
+<query>
+the 2 player with the highest league apps be malcolm brown and peter hart
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “The 2 players with the highest league apps are Malcolm Brown and Peter Hart.” Context inferred from available data: the 1979–80 Huddersfield Town F.C. season table.
+
+Data sources explored
+- Discovered data: A PostgreSQL database with table public.t_1979_80_huddersfield_town_f_c_season (1979–80 Huddersfield Town F.C. season).
+- Schema (key columns): name (text), position (text), "league apps" (text), "league goals" (bigint), "fa cup apps" (bigint), "league cup apps" (text), "total apps" (text), etc. Note: "league apps" stores values like "46" or "39 (1)" (starts and substitute appearances).
+
+Evidence
+1) Raw league apps per player
+Executed SQL:
+SELECT name, "league apps" FROM public.t_1979_80_huddersfield_town_f_c_season;
+
+Key returned values (subset shown):
+- malcolm brown — 46
+- peter hart — 46
+- dave sutton — 46
+- ian robins — 45
+- mick laverick — 45
+- brian stanton — 41
+- david cowling — 39 (1)
+- peter fletcher — 30 (8)
+...
+
+2) Compute total league appearances (treating values like "30 (8)" as 30+8)
+Executed SQL:
+SELECT name,
+       "league apps" AS league_apps_raw,
+       SUM(CASE WHEN val ~ '^\s*$' THEN 0 ELSE CAST(val AS int) END) AS league_apps_total
+FROM (
+  SELECT name, "league apps",
+         regexp_split_to_table("league apps", '[^0-9]+') AS val
+  FROM public.t_1979_80_huddersfield_town_f_c_season
+) x
+GROUP BY name, "league apps"
+ORDER BY league_apps_total DESC, name;
+
+Relevant results:
+- dave sutton — league_apps_raw: 46, league_apps_total: 46
+- malcolm brown — league_apps_raw: 46, league_apps_total: 46
+- peter hart — league_apps_raw: 46, league_apps_total: 46
+- ian robins — 45 → 45
+- mick laverick — 45 → 45
+- david cowling — 39 (1) → 40
+- peter fletcher — 30 (8) → 38
+...
+
+Findings
+- The maximum league appearances total is 46.
+- Three players share this maximum: Dave Sutton, Malcolm Brown, and Peter Hart.
+- Therefore, while Malcolm Brown and Peter Hart are indeed among the players with the highest league apps, they are not the only ones; Dave Sutton also has the same highest total.
+
+Conclusion
+- The claim that “the 2 players with the highest league apps are Malcolm Brown and Peter Hart” is not fully correct. There are three joint-highest players: Dave Sutton, Malcolm Brown, and Peter Hart.
+
+Assumptions
+- The claim refers to the 1979–80 Huddersfield Town F.C. season dataset identified in the connected data source.
+- “League apps” represents total league appearances, interpreted as starts plus substitute appearances when the format is “X (Y)”.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

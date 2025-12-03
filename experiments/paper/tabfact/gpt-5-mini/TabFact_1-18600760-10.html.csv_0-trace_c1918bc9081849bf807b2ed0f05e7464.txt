@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+joliette have 0.771 square mile of water , and can be find with geo id 3806741020
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of approach
+- Discovered available data sources and identified a relevant table: public.list_of_townships_in_north_dakota in a PostgreSQL database (TabFact).
+- Inspected the table schema to confirm presence of water area (in square miles) and a geographic identifier column (geo id).
+- Queried the table directly by the provided geo id and by township name to verify both parts of the claim.
+
+Data source discovery
+- Accessible data sources found: one PostgreSQL instance (TabFact) with public.list_of_townships_in_north_dakota.
+
+Schema inspection
+- Table: public.list_of_townships_in_north_dakota
+- Columns (relevant):
+  - township (text)
+  - county (text)
+  - water (sqmi) (double precision)
+  - land ( sqmi ) (double precision)
+  - geo id (bigint)
+- No primary key or constraints.
+
+Evidence and executed SQL
+1) Verify by geo id
+SQL executed:
+SELECT township, county, "water (sqmi)" AS water_sqmi, "land ( sqmi )" AS land_sqmi
+FROM list_of_townships_in_north_dakota
+WHERE "geo id" = 3806741020;
+Result:
+- township: joliette
+- county: pembina
+- water area (sq mi): 0.771
+- land area (sq mi): 70.044
+
+2) Cross-check by township name
+SQL executed:
+SELECT township, "geo id", "water (sqmi)" FROM public.list_of_townships_in_north_dakota WHERE lower(township) = 'joliette';
+Result:
+- township: joliette
+- geo id: 3806741020
+- water (sqmi): 0.771
+
+Assessment of the claim
+- “joliette have 0.771 square mile of water”: Supported. The water area is 0.771 sq mi for the Joliette township record.
+- “and can be find with geo id 3806741020”: Supported. The record for Joliette has geo id = 3806741020.
+
+Conclusion
+- Both parts of the claim are fully supported by the queried data.
+
+Assumptions
+- Interpreted “joliette” as the township in North Dakota (Pembina County), not the city in Quebec, due to the presence of a matching record in the North Dakota townships table and the geo id format consistent with a county subdivision GEOID in North Dakota.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

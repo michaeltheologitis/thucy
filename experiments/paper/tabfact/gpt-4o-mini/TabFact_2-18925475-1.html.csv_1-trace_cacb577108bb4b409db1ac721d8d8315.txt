@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+when the computer have the feature of vlan setting for intel amt network interface it do not have amt 3.0
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “If a computer has the VLAN setting feature for the Intel AMT network interface, then it does not have (or is not supported by) AMT 3.0.”
+
+What the data shows:
+- We located a features-by-AMT-version reference table: public.intel_amt_versions.
+- The row for “VLAN settings for Intel AMT network interfaces” explicitly shows that AMT 3.0 (desktop) supports this feature (value = yes).
+
+Evidence and executed SQL:
+1) Retrieve the VLAN-related feature row and version support values
+SQL:
+SELECT feature, "amt 1.0 (desktop)", "amt 2.0 / 2.1 (desktop)", "amt 2.5 / 2.6 (mobile)", "amt 3.0 (desktop)", "amt 4.0 (mobile)", "amt 5.0 (desktop)", "6.0 (desktop & mobile)", "7.0 & 8.0 (desktop & mobile)"
+FROM intel_amt_versions
+WHERE feature ILIKE '%VLAN%';
+
+Result (relevant part):
+- Feature: VLAN settings for Intel AMT network interfaces
+- amt 3.0 (desktop): yes
+- Other versions (for context):
+  - amt 1.0 (desktop): no
+  - amt 2.0 / 2.1 (desktop): no
+  - amt 2.5 / 2.6 (mobile): no
+  - amt 4.0 (mobile): no
+  - amt 5.0 (desktop): yes
+  - 6.0 (desktop & mobile): yes
+  - 7.0 & 8.0 (desktop & mobile): yes
+
+2) Confirm only one VLAN-related row exists
+SQL:
+SELECT COUNT(*) AS row_count FROM public.intel_amt_versions WHERE feature ILIKE '%VLAN%';
+
+Result: 1 row
+
+Assessment of the claim:
+- The claim states that having the VLAN setting feature for Intel AMT network interface implies not having AMT 3.0. The data contradicts this: for the VLAN settings feature, the AMT 3.0 (desktop) column is “yes,” indicating support.
+
+Conclusion: The claim is not supported by the data.
+
+Assumptions made:
+- “it do not have amt 3.0” is interpreted as “AMT 3.0 does not support this feature.”
+- The intel_amt_versions table is treated as authoritative for feature support across AMT versions (desktop/mobile distinctions as labeled in the table).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,54 @@
+
+<userQuery>
+<query>
+錢 and 斤 be the only character that have metric value measure in g
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim: “錢 and 斤 be the only character that have metric value measure in g.”
+- Finding: Not correct. The database shows that 兩 also has a metric value expressed in grams, in addition to 錢 and 斤.
+
+Data source discovery
+- Available data source: PostgreSQL database with table public.chinese_units_of_measurement (columns: jyutping, character, portuguese, relative value, metric value, imperial value). The column metric value maps units to metric quantities.
+
+Evidence and executed SQL
+1) Retrieve entries for 錢 and 斤
+- SQL:
+SELECT character, "relative value", "metric value", "imperial value" FROM chinese_units_of_measurement WHERE character IN ('錢', '斤')
+- Result:
+  • 錢 — Relative Value: 1 / 160; Metric Value: 3.779936375 g; Imperial Value: ~2.1333 dr
+  • 斤 — Relative Value: 1; Metric Value: 604.78982 g; Imperial Value: ~1.3333 lb
+
+2) List all characters with metric values explicitly in grams (metric value string ends with ' g')
+- SQL:
+SELECT character, "metric value" FROM chinese_units_of_measurement WHERE "metric value" LIKE '% g';
+- Result:
+  • 錢 — 3.779936375 g
+  • 兩 — 37.79936375 g
+  • 斤 — 604.78982 g
+
+3) Context: units mapped to other metric magnitudes (to show broader coverage)
+- SQL:
+SELECT character, "metric value" FROM chinese_units_of_measurement WHERE "metric value" ILIKE '%g%' ORDER BY character;
+- Result (subset):
+  • 兩 — 37.79936375 g
+  • 斤 — 604.78982 g
+  • 錢 — 3.779936375 g
+  • 分 — 377.9936375 mg
+  • 厘 — 37.79931 mg
+  • 担 / 擔 — 60.478982 kg
+
+Conclusion
+- Since 兩 also has a metric value measured in grams, 錢 and 斤 are not the only characters with metric values in grams. The claim is contradicted by the data.
+
+Assumptions
+- “character” refers to the character column in public.chinese_units_of_measurement.
+- “metric value measure in g” is interpreted as entries where the metric value is expressed in grams (string ends with " g").
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

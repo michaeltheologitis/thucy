@@ -1,0 +1,86 @@
+
+<userQuery>
+<query>
+there be only 2 new episode of gary unmarried in december 2009
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “there be only 2 new episode of gary unmarried in december 2009.”
+
+Summary conclusion: The available data show zero Gary Unmarried episodes with air dates in December 2009. The table does include two December episodes, but they are in 2008, not 2009. Therefore, the claim is contradicted by the data.
+
+Data source discovery
+- Tool: discover_data_sources
+- Result: A PostgreSQL database (TabFact) with a public schema is available.
+
+Schema inspection
+- Tool: schema_query
+- Context: TV shows, episodes, air dates
+- Result: Single relevant table public.gary_unmarried with columns:
+  - episode (text)
+  - air date (text)
+  - timeslot (text)
+  - 18 - 49 (text)
+  - viewers (double precision)
+
+Evidence and executed SQL
+1) Inspect all distinct air date values to understand formatting and spot December entries
+SQL:
+SELECT DISTINCT "air date" FROM public.gary_unmarried ORDER BY "air date" NULLS LAST;
+Key results (excerpt):
+- april 8 , 2009
+- december 10 , 2008
+- december 17 , 2008
+- february 11 , 2009
+- february 18 , 2009
+- january 14 , 2009
+- january 21 , 2009
+- march 11 , 2009
+- march 18 , 2009
+- may 20 , 2009
+- may 6 , 2009
+- november 12 , 2008
+Observation: December entries in this dataset appear for 2008; none observed for 2009.
+
+2) List all December entries (any year) to verify what December episodes exist
+SQL:
+SELECT episode, "air date" FROM public.gary_unmarried WHERE "air date" ILIKE '%december%';
+Results:
+- episode: gary goes first, air date: december 10 , 2008
+- episode: gary toughens up tom, air date: december 17 , 2008
+Observation: Two December episodes exist, both in 2008.
+
+3) Directly test for December 2009 entries and count them
+SQL:
+SELECT COUNT(*) AS count_dec_2009 FROM public.gary_unmarried WHERE "air date" ILIKE '%december%' AND "air date" ILIKE '%2009%';
+Result:
+- count_dec_2009: 0
+Conclusion: No episodes in December 2009 are present in the dataset.
+
+4) List all 2009 episodes to show which months of 2009 are present
+SQL:
+SELECT episode, "air date" FROM public.gary_unmarried WHERE "air date" ILIKE '%2009%' ORDER BY "air date";
+Results:
+- april 8 , 2009 — gary and the trophy
+- february 11 , 2009 — gary and dennis' sister
+- february 18 , 2009 — gary 's ex - brother - in - law
+- january 14 , 2009 — gary dates louise 's teacher
+- january 21 , 2009 — gary moves back in
+- march 11 , 2009 — gary uses his veto
+- march 18 , 2009 — gary hooks up allison
+- may 20 , 2009 — gary fixes allison 's garbage disposal
+- may 6 , 2009 — gary and his half brother
+Observation: 2009 entries in this table are in January, February, March, April, and May—no December.
+
+Final assessment
+- The claim asserts there were two new episodes in December 2009. The authoritative dataset shows zero episodes with air dates in December 2009. It does show exactly two December episodes, but in 2008. Therefore, the claim is not supported by the data.
+
+Assumptions made
+- “New episode” is interpreted as an episode whose original air date falls in December 2009. The table’s “air date” column is taken as the original air date. The air date is stored as text; matching was done via case-insensitive substring searches for 'december' and '2009'.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+the score on 15 / 04 / 07 in super league xii be 52 to 22 with an attendance of 9000
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the score on 15 / 04 / 07 in super league xii be 52 to 22 with an attendance of 9000.”
+
+Data source discovery:
+- Available database: TabFact (public schema)
+- Relevant table: t_2007_bradford_bulls_season
+
+Schema (from inspection):
+- Columns: date (text), home team (text), score (text), away team (text), goals (text), attendance (bigint), competition (text)
+
+Evidence queries and results:
+1) Retrieve the match on 15 / 04 / 07 in Super League XII
+SQL:
+SELECT "date", "home team", score, "away team", attendance, competition
+FROM public.t_2007_bradford_bulls_season
+WHERE "date" = '15 / 04 / 07' AND LOWER(competition) = 'super league xii';
+Result (one row):
+{ "date": "15 / 04 / 07", "home team": "bradford", "score": "52 - 22", "away team": "hull kr", "attendance": 10881, "competition": "super league xii" }
+
+2) Check exact score formatting and attendance 9000
+SQL:
+SELECT score, attendance, (score IN ('52-22', '52–22')) AS score_is_52_22_exact, (attendance = 9000) AS attendance_is_9000
+FROM public.t_2007_bradford_bulls_season
+WHERE "date" = '15 / 04 / 07' AND LOWER(competition) = 'super league xii';
+Result:
+{ "score": "52 - 22", "attendance": 10881, "score_is_52_22_exact": false, "attendance_is_9000": false }
+
+3) Distinct competition values (to confirm casing)
+SQL:
+SELECT DISTINCT competition FROM public.t_2007_bradford_bulls_season;
+Result:
+["rugby league challenge cup", "super league xii"]
+
+Assessment:
+- Score: The match on 15 / 04 / 07 in Super League XII finished 52 - 22. This matches the claim’s “52 to 22” (formatting differs only by the hyphen vs. “to”). Supported by Query 1.
+- Attendance: The recorded attendance is 10,881, not 9,000. This contradicts the claim. Supported by Queries 1 and 2.
+
+Conclusion: The score is correct; the attendance is incorrect.
+
+Assumptions:
+- The date format “15 / 04 / 07” refers to 15 April 2007 as stored in the table with spaces around slashes.
+- “52 to 22” is treated as equivalent to the recorded “52 - 22” score formatting.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,67 @@
+
+<userQuery>
+<query>
+the match with the longest time be win against eugene jackson
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of approach
+- Discovered available data sources and examined the relevant schema.
+- Queried the fights table to identify the single match with the longest recorded time, then checked whether it was a win against Eugene Jackson.
+- Cross-checked by listing all rows against Eugene Jackson.
+
+Data source discovery
+- Accessible database: TabFact
+- Discovered table: public.tim_lajcik (owner: guest_user)
+
+Schema details for public.tim_lajcik
+- Columns: res (text), record (text), opponent (text), method (text), event (text), round (bigint), time (text)
+- No primary keys or foreign keys.
+
+Evidence and executed SQL
+1) Longest-time match overall (time parsed as M:SS or MM:SS to total seconds)
+SQL executed:
+SELECT res, opponent, event, round, time,
+CASE WHEN trim(time) ~ '^[0-9]{1,2}:[0-9]{2}$' THEN (split_part(trim(time), ':', 1)::int * 60 + split_part(trim(time), ':', 2)::int) ELSE NULL END AS seconds
+FROM public.tim_lajcik
+WHERE trim(time) ~ '^[0-9]{1,2}:[0-9]{2}$'
+ORDER BY seconds DESC
+LIMIT 1;
+
+Result (single row):
+- res: win
+- opponent: eugene jackson
+- event: ifc wc 2 - warriors challenge 2
+- round: 1
+- time: 9:49
+- seconds: 589
+
+2) All rows where opponent contains 'Eugene Jackson' (case-insensitive)
+SQL executed:
+SELECT res, opponent, event, round, time,
+CASE WHEN trim(time) ~ '^[0-9]{1,2}:[0-9]{2}$' THEN (split_part(trim(time), ':', 1)::int * 60 + split_part(trim(time), ':', 2)::int) ELSE NULL END AS seconds
+FROM public.tim_lajcik
+WHERE opponent ILIKE '%Eugene Jackson%'
+ORDER BY seconds DESC NULLS LAST;
+
+Result rows:
+- res: win
+- opponent: eugene jackson
+- event: ifc wc 2 - warriors challenge 2
+- round: 1
+- time: 9:49
+- seconds: 589
+
+Conclusion
+- The match with the longest recorded time in public.tim_lajcik is indeed a win against Eugene Jackson. This directly supports the claim.
+
+Assumptions
+- Interpreted the claim as: “In the available fight record (public.tim_lajcik), the match with the longest recorded fight time is a win against Eugene Jackson.”
+- Time parsing considered only values matching M:SS or MM:SS; rows with non-matching time formats were excluded from the max-time computation.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

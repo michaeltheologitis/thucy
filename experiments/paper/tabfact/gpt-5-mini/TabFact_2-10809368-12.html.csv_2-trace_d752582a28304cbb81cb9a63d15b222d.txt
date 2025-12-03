@@ -1,0 +1,67 @@
+
+<userQuery>
+<query>
+footscray score 14.8 when they visit essendon on july 13 1946
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “footscray score 14.8 when they visit essendon on july 13 1946.”
+
+Data source discovery
+- Available database: TabFact (public schema) with a table t_1946_vfl_season containing VFL 1946 match data.
+
+Schema inspection (summary)
+- t_1946_vfl_season columns: "home team" (text), "home team score" (text), "away team" (text), "away team score" (text), "venue" (text), "crowd" (bigint), "date" (text). Team names are stored in lowercase.
+
+Evidence and SQL
+1) Initial attempt with capitalized team names (returned no rows)
+SQL:
+SELECT "home team","home team score","away team","away team score","venue","crowd","date"
+FROM public.t_1946_vfl_season
+WHERE ("home team" = 'Essendon' AND "away team" = 'Footscray') OR ("home team" = 'Footscray' AND "away team" = 'Essendon')
+ORDER BY "date" ASC;
+Result: No rows.
+
+2) Identify exact team name strings used in the table
+SQL:
+SELECT DISTINCT team
+FROM (
+  SELECT "home team" AS team FROM public.t_1946_vfl_season
+  UNION
+  SELECT "away team" AS team FROM public.t_1946_vfl_season
+) t
+ORDER BY team;
+Result (partial): essendon, footscray, … (all lowercase team names).
+
+3) Retrieve Essendon vs Footscray matches
+SQL:
+SELECT "home team", "home team score", "away team", "away team score", venue, crowd, date
+FROM public.t_1946_vfl_season
+WHERE ("home team" = 'essendon' AND "away team" = 'footscray')
+   OR ("home team" = 'footscray' AND "away team" = 'essendon')
+ORDER BY date ASC;
+Result:
+- Date: 13 july 1946
+- Home team: essendon
+- Home score: 16.24 (120)
+- Away team: footscray
+- Away score: 14.8 (92)
+- Venue: windy hill
+- Crowd: 29000
+
+Assessment
+- The data shows that on 13 July 1946, Footscray played away at Essendon (venue: Windy Hill) and Footscray’s score was 14.8 (92). This directly supports the claim.
+
+Conclusion
+- The claim is supported by the data.
+
+Assumptions
+- “score 14.8” refers to the goals.behinds notation standard in VFL/AFL (total points 92).
+- “visit Essendon” means Essendon was the home team (match at Windy Hill). The date string “13 july 1946” is equivalent to “July 13, 1946.”
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

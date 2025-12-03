@@ -1,0 +1,67 @@
+
+<userQuery>
+<query>
+galina voskoboeva have an equal winrate between both clay and hard court
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim: “Galina Voskoboeva have an equal winrate between both clay and hard court.”
+- Finding: Not supported by the available data. In the dataset, her win rate differs between clay and hard surfaces.
+
+Evidence from data
+1) Inspect available outcomes and surfaces
+Executed SQL:
+SELECT outcome, COUNT(*) AS count
+FROM public.galina_voskoboeva
+GROUP BY outcome
+ORDER BY count DESC, outcome;
+
+Result:
+- runner - up — 3
+- winner — 2
+
+Executed SQL:
+SELECT surface, COUNT(*) AS count
+FROM public.galina_voskoboeva
+GROUP BY surface
+ORDER BY count DESC NULLS LAST, surface;
+
+Result:
+- clay — 2
+- hard (i) — 2
+- hard — 1
+
+2) Compute win rate by normalized surface category (hard includes “hard” and “hard (i)”) 
+Executed SQL:
+SELECT
+  CASE WHEN lower(surface) IN ('hard','hard (i)') THEN 'hard'
+       WHEN lower(surface) = 'clay' THEN 'clay'
+       ELSE surface END AS surface_category,
+  COUNT(*) FILTER (WHERE outcome = 'winner') AS wins,
+  COUNT(*) AS total,
+  (COUNT(*) FILTER (WHERE outcome = 'winner'))::float / COUNT(*) AS win_rate
+FROM public.galina_voskoboeva
+GROUP BY CASE WHEN lower(surface) IN ('hard','hard (i)') THEN 'hard'
+              WHEN lower(surface) = 'clay' THEN 'clay'
+              ELSE surface END
+ORDER BY surface_category;
+
+Result:
+- clay: wins = 1, total = 2, win_rate = 0.5
+- hard: wins = 1, total = 3, win_rate = 0.3333333333333333
+
+Conclusion
+- The calculated win rates are 50% (clay) vs ~33.33% (hard). These are not equal. Therefore, the claim is not supported by the data.
+
+Assumptions
+- The only available authoritative source in the connected data environment is the table public.galina_voskoboeva. It contains tournament outcomes with fields: outcome, date, tournament, surface, opponent, score.
+- “Winrate” was interpreted as the proportion of entries labeled “winner” among all entries on a surface in this table (since match-level win/loss data are not available here). 
+- “Hard (i)” (indoor hard) and “hard” were treated as the same “hard” category for comparison with “clay.”
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

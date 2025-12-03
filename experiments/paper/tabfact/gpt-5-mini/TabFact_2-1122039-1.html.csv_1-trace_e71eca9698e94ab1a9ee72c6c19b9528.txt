@@ -1,0 +1,77 @@
+
+<userQuery>
+<query>
+ecurie espadon be the entrant when sva - fiat be the constructor and sva 1500 be the chassis and scuderia ambrosiana be the entrant when maserati be the constructor and maserati 4clt - 48 be the chassis
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify:
+- Ecurie Espadon is the entrant when the constructor is SVA - Fiat and the chassis is SVA 1500.
+- Scuderia Ambrosiana is the entrant when the constructor is Maserati and the chassis is Maserati 4CLT - 48.
+
+Data source explored:
+- Database: TabFact (Postgres)
+- Table: public.t_1950_swiss_grand_prix (columns: driver, entrant, constructor, chassis, engine, tyre)
+
+Evidence:
+1) Broad search to surface relevant rows (case-insensitive pattern matching)
+SQL:
+SELECT driver, entrant, constructor, chassis
+FROM public.t_1950_swiss_grand_prix
+WHERE entrant ILIKE '%espadon%'
+   OR entrant ILIKE '%ambrosiana%'
+   OR constructor ILIKE '%SVA%'
+   OR constructor ILIKE '%Fiat%'
+   OR constructor ILIKE '%Maserati%'
+   OR chassis ILIKE '%SVA%'
+   OR chassis ILIKE '%4CLT%';
+Result (selected relevant rows):
+- rudi fischer | ecurie espadon | sva - fiat | sva 1500
+- reg parnell | scuderia ambrosiana | maserati | maserati 4clt - 48
+
+2) Direct check for SVA - Fiat / SVA 1500 entrant (case-insensitive)
+SQL:
+SELECT driver, entrant, constructor, chassis
+FROM public.t_1950_swiss_grand_prix
+WHERE lower(constructor) = 'sva - fiat' AND lower(chassis) = 'sva 1500';
+Result:
+- driver: rudi fischer | entrant: ecurie espadon | constructor: sva - fiat | chassis: sva 1500
+
+Alternatively, entrant-only lookup:
+SQL:
+SELECT DISTINCT entrant FROM public.t_1950_swiss_grand_prix
+WHERE constructor ILIKE 'sva - fiat' AND chassis ILIKE 'sva 1500';
+Result:
+- ecurie espadon
+
+3) Direct check for Maserati / Maserati 4CLT - 48 entrants (case-insensitive)
+SQL:
+SELECT DISTINCT entrant FROM public.t_1950_swiss_grand_prix
+WHERE lower(trim(constructor)) = 'maserati' AND lower(trim(chassis)) = 'maserati 4clt - 48'
+ORDER BY entrant;
+Result (distinct entrants):
+- enrico platé
+- officine alfieri maserati
+- scuderia achille varzi
+- scuderia ambrosiana
+
+4) Specific confirmation of Scuderia Ambrosiana row
+SQL:
+SELECT driver, entrant, constructor, chassis FROM public.t_1950_swiss_grand_prix
+WHERE lower(constructor)='maserati' AND lower(chassis)='maserati 4clt - 48' AND lower(entrant)='scuderia ambrosiana';
+Result:
+- driver: reg parnell | entrant: scuderia ambrosiana | constructor: maserati | chassis: maserati 4clt - 48
+
+Conclusion:
+- The table explicitly shows Ecurie Espadon as the entrant for an SVA - Fiat with chassis SVA 1500.
+- The table also shows Scuderia Ambrosiana as one of the entrants for a Maserati with chassis Maserati 4CLT - 48 (with an example row for driver Reg Parnell).
+
+Assumptions:
+- Matching performed case-insensitively to account for lowercased values in the data (e.g., 'sva - fiat', 'maserati 4clt - 48').
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

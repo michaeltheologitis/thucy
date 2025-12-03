@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+担 / 擔 be 1 of 3 character that have a metric value measure in kg
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of approach
+- Explored available data sources and identified a single relevant table: public.chinese_units_of_measurement in the TabFact (postgres_tabfact1) database. This table maps Chinese unit characters to metric/imperial conversions.
+- Verified whether 担/擔 appears and how many characters have a metric value explicitly expressed in kilograms ("kg").
+
+Evidence from data
+1) Direct lookup for exact characters 担 or 擔
+SQL executed:
+SELECT jyutping, "character", portuguese, "relative value", "metric value", "imperial value" FROM public.chinese_units_of_measurement WHERE "character" IN ('担','擔');
+
+Result: No rows returned.
+
+Follow-up note: The table stores the entry as a combined form "担 / 擔" (with spaces and a slash), so the exact match above did not return a row.
+
+2) Count how many distinct characters have a metric value containing the substring 'kg' (case-insensitive) and list them
+SQL executed (list):
+SELECT DISTINCT character, "metric value" FROM chinese_units_of_measurement WHERE "metric value" ILIKE '%kg%';
+
+Result:
+- character: 担 / 擔
+  metric value: 60.478982 kg
+
+SQL executed (count):
+SELECT COUNT(DISTINCT character) AS cnt FROM chinese_units_of_measurement WHERE "metric value" ILIKE '%kg%';
+
+Result:
+- cnt: 1
+
+3) Full table listing for context
+SQL executed:
+SELECT "character", jyutping, portuguese, "relative value", "metric value", "imperial value"
+FROM public.chinese_units_of_measurement
+ORDER BY "character";
+
+Results (abridged to the columns shown):
+- 兩 | loeng2 | tael | 1 / 16 | 37.79936375 g | ~1.3333oz
+- 分 | fan1 | condorim | 1 / 1600 | 377.9936375 mg | ~0.2133 dr
+- 厘 | lei4 | liz | 1 / 1600 | 37.79931 mg | ~0.2133 dr
+- 斤 | gan1 | cate | 1 | 604.78982 g | ~1.3333lb
+- 錢 | cin4 | maz | 1 / 160 | 3.779936375 g | ~2.1333dr
+- 担 / 擔 | daam3 | pico | 100 | 60.478982 kg | ~133.3333lb
+
+Findings
+- Only one entry in the table has its metric value explicitly expressed in kilograms (“kg”): 担 / 擔, with 60.478982 kg.
+- No other character in this dataset has the metric value field expressed with the unit “kg”; the other entries are expressed in grams (g) or milligrams (mg).
+
+Conclusion
+- The claim that “担 / 擔 [is] 1 of 3 character that have a metric value measure in kg” is not supported by the available data. In this dataset, there is exactly one character with a metric value expressed in kilograms, and it is 担 / 擔.
+
+Assumptions
+- Interpreted “have a metric value measure in kg” as the table’s metric value field explicitly containing the unit label “kg”.
+- Verification is limited to the authoritative dataset available (public.chinese_units_of_measurement) discovered in the connected TabFact database.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,69 @@
+
+<userQuery>
+<query>
+gary unmarried come on friday at 8:00 pm
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The TV show “Gary Unmarried” comes on Friday at 8:00 pm.
+
+Data source discovery
+- Available database: TabFact (postgres_tabfact32), public schema.
+- Relevant table identified: gary_unmarried (episode text, air date text, timeslot text, "18 - 49" text, viewers double precision).
+
+Schema confirmation
+- Tool confirmed exactly one table relevant to this show: gary_unmarried.
+
+Evidence
+1) Distinct timeslots and episode counts
+Executed SQL:
+SELECT timeslot, COUNT(*) AS episode_count
+FROM gary_unmarried
+GROUP BY timeslot
+ORDER BY episode_count DESC NULLS LAST, timeslot;
+Result:
+- timeslot: "wednesday 8:30 pm" — episode_count: 20
+
+2) Sample episodes to verify formatting and consistency
+Executed SQL:
+SELECT episode, "air date", timeslot
+FROM gary_unmarried
+ORDER BY "air date"
+LIMIT 10;
+Results (abbrev.): All samples show timeslot = "wednesday 8:30 pm" (e.g., "gary and the trophy", air date: "april 8 , 2009").
+
+3) Direct check for any “Friday” or “8:00 pm” entries
+Executed SQL:
+SELECT COUNT(*) FILTER (WHERE timeslot ILIKE '%friday%') AS friday_count,
+       COUNT(*) FILTER (WHERE timeslot ILIKE '%8:00 pm%') AS eight_pm_count,
+       COUNT(*) FILTER (WHERE timeslot ILIKE '%8:00%') AS eight_colon_count
+FROM gary_unmarried;
+Result:
+- friday_count = 0, eight_pm_count = 0, eight_colon_count = 0
+
+Executed SQL:
+SELECT DISTINCT timeslot FROM gary_unmarried WHERE timeslot ILIKE '%friday%' OR timeslot ILIKE '%8:00%';
+Result: no rows returned.
+
+4) Coverage check (row count and air date strings)
+Executed SQL:
+SELECT COUNT(*) AS total_episodes FROM gary_unmarried;
+Result: total_episodes = 20
+
+Executed SQL:
+SELECT MIN("air date") AS min_air_date, MAX("air date") AS max_air_date FROM gary_unmarried;
+Result (lexicographic on text): min_air_date = "april 8 , 2009"; max_air_date = "september 24 , 2008"
+
+Conclusion
+- The dataset shows a single timeslot for “Gary Unmarried”: Wednesday 8:30 pm. There are zero occurrences of Friday or 8:00 pm in the timeslot field. Therefore, the claim that it comes on Friday at 8:00 pm is not supported by the available data and is contradicted by the evidence.
+
+Assumptions
+- Interpreted the user statement as a claim about the airing day/time of the TV show “Gary Unmarried.”
+- Treated the provided TabFact dataset as authoritative within the scope accessible here.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

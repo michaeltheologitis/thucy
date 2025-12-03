@@ -1,0 +1,51 @@
+
+<userQuery>
+<query>
+the duration of 02x03 - 03x05 be list for max martini
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The user asserts that the duration for Max Martini is “02x03 - 03x05” (season-episode range). I verified this against the available data.
+
+Data sources discovered:
+- Database: postgres_tabfact23 (public schema)
+- Table: list_of_csi_miami_characters (columns include character, actor, first episode, final episode, duration, final episode count)
+
+Evidence and executed SQL:
+1) Locate Max Martini and inspect recorded duration
+SQL:
+SELECT character, actor, "first episode", "final episode", duration, "final episode count"
+FROM list_of_csi_miami_characters
+WHERE actor ILIKE '%max%martini%';
+
+Result:
+- character: bob keaton
+  actor: max martini
+  first episode: big brother
+  final episode: vengeance
+  duration: 02x08 , 03x20 - 03x22
+  final episode count: 3
+
+2) Check explicitly for a Max Martini row whose duration contains both 02x03 and 03x05
+SQL:
+SELECT COUNT(*) AS match_count
+FROM list_of_csi_miami_characters
+WHERE actor ILIKE 'max martini'
+  AND duration LIKE '%02x03%'
+  AND duration LIKE '%03x05%';
+
+Result:
+- match_count: 0
+
+Conclusion: The data lists Max Martini’s duration as “02x08 , 03x20 - 03x22,” not “02x03 - 03x05.” There are no rows for Max Martini whose duration includes both 02x03 and 03x05.
+
+Assumptions:
+- Duration refers to the appearance range string stored in the duration column, using season x episode notation.
+- Actor name matched case-insensitively as “max martini.”
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,68 @@
+
+<userQuery>
+<query>
+saint - louis fc game have the highest combined agg of any of the featured game
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “saint - louis fc game have the highest combined agg of any of the featured game.”
+
+Interpretation of the claim
+- “saint - louis fc game” refers to the two-legged tie in the available dataset involving the team Saint - Louis FC.
+- “combined agg” is interpreted as the sum of the two teams’ aggregate goals for the tie (i.e., the two numbers before any penalty-shootout parentheses in the agg field).
+- “featured game” is interpreted as any tie listed in the available table public.t_1992_african_cup_of_champions_clubs (the only available dataset).
+
+Data discovery
+- Available data source: a PostgreSQL database with a public schema containing table t_1992_african_cup_of_champions_clubs for the 1992 African Cup of Champions Clubs.
+- Table columns: team 1 (text), agg (text), team 2 (text), 1st leg (text), 2nd leg (text). No keys.
+
+Evidence and executed SQL
+1) Inspect sample rows to confirm presence and formatting (shows “saint - louis fc” and its aggregate)
+SQL executed:
+SELECT "team 1", "agg", "team 2", "1st leg", "2nd leg" FROM public.t_1992_african_cup_of_champions_clubs LIMIT 50;
+Key observed row from results:
+- team 1: saint - louis fc; agg: 2 - 7; team 2: young africans (1st leg: 1 - 3; 2nd leg: 1 - 4)
+
+2) Compute combined aggregates and view ordering (shows Saint - Louis FC tie at top with total 9)
+SQL executed:
+SELECT "team 1", "team 2", "agg",
+       (CAST(SUBSTRING("agg" FROM '^[0-9]+') AS INTEGER) +
+        CAST(SUBSTRING("agg" FROM '\s[0-9]+') AS INTEGER)) AS combined_agg
+FROM public.t_1992_african_cup_of_champions_clubs
+ORDER BY combined_agg DESC
+LIMIT 20;
+Key results excerpt (combined_agg = sum of first two numbers in agg):
+- Saint - Louis FC vs Young Africans: agg 2 - 7, combined_agg 9
+- CD Elá Nguema vs Primeiro de Agosto: agg 2 - 6, combined_agg 8
+- Sahel SC vs Postel Sport: agg 4 - 2, combined_agg 6
+- Saint - George SA vs Al Ittihad: agg 2 - 4, combined_agg 6
+(others lower)
+
+3) Definitively identify all ties with the maximum combined aggregate
+SQL executed:
+SELECT "team 1", "team 2", "agg",
+(CAST(SPLIT_PART(agg, ' ', 1) AS INT) + CAST(SPLIT_PART(agg, ' ', 3) AS INT)) AS combined_agg
+FROM public.t_1992_african_cup_of_champions_clubs
+WHERE (CAST(SPLIT_PART(agg, ' ', 1) AS INT) + CAST(SPLIT_PART(agg, ' ', 3) AS INT))
+= (SELECT MAX(CAST(SPLIT_PART(agg, ' ', 1) AS INT) + CAST(SPLIT_PART(agg, ' ', 3) AS INT))
+   FROM public.t_1992_african_cup_of_champions_clubs)
+ORDER BY combined_agg DESC;
+Result:
+- Team 1: Saint-Louis FC; Team 2: Young Africans; Aggregate: 2 - 7; Combined Aggregate Goals: 9
+This query returns only this tie at the maximum combined aggregate of 9.
+
+Conclusion
+- The tie involving Saint - Louis FC has the highest combined aggregate (9) among all ties in the featured dataset. The evidence shows no other tie matches or exceeds 9.
+
+Verdict: Verified
+
+Assumptions
+- “Featured game” refers to all ties in the table public.t_1992_african_cup_of_champions_clubs.
+- “Combined agg” means A + B from the agg text “A - B …”, ignoring any penalty shootout numbers in parentheses.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

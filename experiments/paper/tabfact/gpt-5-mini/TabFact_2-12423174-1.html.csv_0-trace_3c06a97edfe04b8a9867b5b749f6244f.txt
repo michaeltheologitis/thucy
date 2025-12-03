@@ -1,0 +1,50 @@
+
+<userQuery>
+<query>
+asc diaraf lose to stade malien in the 1971 african cup of champion club
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: ASC Diaraf lost to Stade Malien in the 1971 African Cup of Champions Clubs.
+
+Data source discovery:
+- Discovered one PostgreSQL database (TabFact) with a public schema.
+- Relevant table identified: public.t_1971_african_cup_of_champions_clubs
+  Columns: "team 1" (text), "agg" (text), "team 2" (text), "1st leg" (text), "2nd leg" (text)
+
+Evidence from data:
+- The table contains a tie between ASC Diaraf and Stade Malien with an aggregate score showing ASC Diaraf lost.
+
+Executed SQL (and results):
+1) Query to find ties involving ASC Diaraf in the 1971 African Cup of Champions Clubs:
+SELECT "team 1", agg, "team 2", "1st leg", "2nd leg" FROM public.t_1971_african_cup_of_champions_clubs WHERE lower("team 1") LIKE '%diaraf%' OR lower("team 2") LIKE '%diaraf%';
+Result row:
+{ "team 1": "asc diaraf", "agg": "3 - 4", "team 2": "stade malien", "1st leg": "3 - 0", "2nd leg": "0 - 4" }
+
+2) Query to parse the aggregate and determine whether ASC Diaraf lost the tie:
+SELECT "team 1", "team 2", agg,
+CAST(split_part(regexp_replace(agg,'\\s','', 'g'),'-',1) AS integer) AS team1_score,
+CAST(split_part(regexp_replace(agg,'\\s','', 'g'),'-',2) AS integer) AS team2_score,
+(CAST(split_part(regexp_replace(agg,'\\s','', 'g'),'-',1) AS integer) < CAST(split_part(regexp_replace(agg,'\\s','', 'g'),'-',2) AS integer)) AS team1_lost
+FROM public.t_1971_african_cup_of_champions_clubs
+WHERE lower("team 1") LIKE '%diaraf%' OR lower("team 2") LIKE '%diaraf%';
+Result row:
+{ "team 1": "asc diaraf", "team 2": "stade malien", "agg": "3 - 4", "team1_score": 3, "team2_score": 4, "team1_lost": true }
+
+Interpretation:
+- The tie lists ASC Diaraf as team 1 and Stade Malien as team 2.
+- Aggregate score is 3-4, so ASC Diaraf lost on aggregate.
+- Legs: ASC Diaraf won 3-0 in the 1st leg but lost 0-4 in the 2nd leg, resulting in a 3-4 aggregate loss.
+
+Conclusion: The claim is supported by the data.
+
+Assumptions:
+- Case-insensitive matching was used for team names.
+- The table t_1971_african_cup_of_champions_clubs represents ties from the 1971 African Cup of Champions Clubs, with the aggregate formatted as "team 1 goals - team 2 goals".
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

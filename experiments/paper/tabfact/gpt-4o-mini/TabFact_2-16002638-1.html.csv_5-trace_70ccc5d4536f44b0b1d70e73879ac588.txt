@@ -1,0 +1,57 @@
+
+<userQuery>
+<query>
+the hurricane only win 50% of their game in 2007 and do not get promote to a higher division
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "the hurricane only win 50% of their game in 2007 and do not get promote to a higher division"
+
+Data sources explored
+- Discovered a PostgreSQL database with a table public.dundee_hurricanes containing season outcomes for the Dundee Hurricanes (season, division, wins, losses, ties, final position, notes).
+
+Evidence
+1) Dundee Hurricanes 2007 season record
+- Executed SQL:
+SELECT wins, losses, ties, (wins + losses + ties) AS total_games, 
+    (wins::decimal / (wins + losses + ties)) * 100 AS win_percentage, 
+    division, "final position", notes 
+FROM dundee_hurricanes 
+WHERE season = 2007;
+- Result:
+  • Wins: 9
+  • Losses: 1
+  • Ties: 0
+  • Total Games: 10
+  • Win Percentage: 90.00%
+  • Division: BAF League Division 2 North
+  • Final Position: 1 / 6
+  • Notes: Promoted to Division 1 North.
+
+2) Context around 2007 (seasons 2006–2008)
+- Executed SQL:
+SELECT season, division, wins, losses, ties, "final position", notes 
+FROM dundee_hurricanes 
+WHERE season BETWEEN 2006 AND 2008;
+- Result:
+  • 2006: Division = bafl division 2 scottish; Wins–Losses–Ties = 3–4–0; Final Position = 2/3; Notes = -
+  • 2007: Division = bafl division 2 north; Wins–Losses–Ties = 9–1–0; Final Position = 1/6; Notes = promoted to division 1 north
+  • 2008: Division = bafl division 1 north; Wins–Losses–Ties = 5–2–3; Final Position = 3/6; Notes = -
+
+Assessment
+- Win rate in 2007: 9 wins out of 10 games = 90%, not 50%.
+- Promotion: Notes explicitly state “Promoted to Division 1 North,” and the subsequent 2008 season shows the team in Division 1 North, confirming promotion to a higher division.
+
+Conclusion
+- The claim is contradicted by the data: the Dundee Hurricanes won 90% of their games in 2007 and were promoted to a higher division afterward.
+
+Assumptions
+- “the hurricane” refers to the Dundee Hurricanes (British American football team).
+- “promote to a higher division” refers to moving from BAFL Division 2 to Division 1, as indicated by the notes and the 2008 division listing.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

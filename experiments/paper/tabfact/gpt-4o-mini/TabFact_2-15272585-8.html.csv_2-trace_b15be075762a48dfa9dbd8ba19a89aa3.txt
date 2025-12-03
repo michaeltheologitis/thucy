@@ -1,0 +1,82 @@
+
+<userQuery>
+<query>
+galina voskoboeva have an equal winrate between both clay and hard court
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “galina voskoboeva have an equal winrate between both clay and hard court.”
+
+Summary conclusion: Not supported by the available data. In the available dataset for Galina Voskoboeva, the win rates differ between clay (0.5000) and hard (0.3333) after normalizing “hard (i)” as hard.
+
+Data source discovery
+- Available data source: PostgreSQL database with schema public and table public.galina_voskoboeva.
+
+Table structure
+- SQL executed:
+  SELECT column_name, data_type 
+  FROM information_schema.columns 
+  WHERE table_name = 'galina_voskoboeva' 
+  AND table_schema = 'public';
+- Result columns: outcome (text), date (text), tournament (text), surface (text), opponent (text), score (text).
+
+Row count and raw records
+- SQL executed:
+  SELECT COUNT(*) AS total_rows FROM public.galina_voskoboeva;
+- Result: 5 rows
+- SQL executed:
+  SELECT * FROM public.galina_voskoboeva;
+- Returned rows:
+  1) 28 January 2003 | Matea Mezak | runner - up | 6 - 4 , 4 - 6 , 4 - 6 | Hard (I) | Tipton
+  2) 29 June 2003 | Oleksandra Kravets | winner | 6 - 4 , 6 - 2 | Hard (I) | Mont - de - Marsan
+  3) 3 October 2003 | Roberta Vinci | runner - up | 3 - 6 , 4 - 6 | Clay | Latina
+  4) 8 November 2005 | Lilia Osterloh | runner - up | 6 - 7 , 4 - 6 | Hard | Pittsburgh
+  5) 6 June 2006 | Alice Canepa | winner | 6 - 1 , 6 - 2 | Clay | Cuneo, Italy
+
+Outcome values check (to ensure correct matching)
+- SQL executed:
+  SELECT TRIM(outcome) AS trimmed_outcome, COUNT(*) AS count, LENGTH(TRIM(outcome)) AS length
+  FROM public.galina_voskoboeva
+  GROUP BY trimmed_outcome;
+- Result: winner = 2, runner - up = 3 (values are lowercase; no leading/trailing whitespace)
+
+Surface values check (normalized)
+- SQL executed:
+  SELECT LOWER(TRIM(surface)) AS normalized_surface, COUNT(*) AS count
+  FROM public.galina_voskoboeva
+  GROUP BY normalized_surface;
+- Result: hard (i) = 2, hard = 1, clay = 2
+
+Win rate by normalized surface (mapping hard and hard (i) → hard; lowercase comparison for outcome)
+- SQL executed:
+  SELECT 
+      CASE 
+          WHEN LOWER(TRIM(surface)) IN ('hard', 'hard (i)') THEN 'hard' 
+          WHEN LOWER(TRIM(surface)) = 'clay' THEN 'clay' 
+          ELSE LOWER(TRIM(surface)) 
+      END AS normalized_surface, 
+      COUNT(*) AS total_matches, 
+      SUM(CASE WHEN LOWER(TRIM(outcome)) = 'winner' THEN 1 ELSE 0 END) AS wins, 
+      SUM(CASE WHEN LOWER(TRIM(outcome)) != 'winner' THEN 1 ELSE 0 END) AS losses, 
+      ROUND(CAST(SUM(CASE WHEN LOWER(TRIM(outcome)) = 'winner' THEN 1 ELSE 0 END) AS NUMERIC) / NULLIF(COUNT(*), 0), 4) AS win_rate 
+  FROM 
+      public.galina_voskoboeva 
+  GROUP BY 
+      normalized_surface;
+- Results:
+  • Surface: hard — total_matches = 3, wins = 1, losses = 2, win_rate = 0.3333
+  • Surface: clay — total_matches = 2, wins = 1, losses = 1, win_rate = 0.5000
+
+Interpretation
+- Within the available dataset, Galina Voskoboeva’s win rate on clay (0.5000) is not equal to her win rate on hard (0.3333). Therefore, the claim of equal win rates between clay and hard is not supported by this data.
+
+Assumptions and limitations
+- Hard and hard (i) (indoor hard) were grouped under “hard” for comparison.
+- The table contains 5 final-match records; it may not represent her full career match history. The conclusion applies strictly to the available data in public.galina_voskoboeva.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

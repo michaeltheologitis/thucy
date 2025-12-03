@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+lukáš melich place third place or higher in 1 competition
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “lukáš melich place third place or higher in 1 competition.”
+
+Step 1 — Data sources discovered
+- Available asset: PostgreSQL database postgres_tabfact21 with a single table public.luk_melich.
+
+Step 2 — Relevant schema
+- Table: public.luk_melich
+  - Columns: year (bigint), competition (text), venue (text), position (text), notes (text)
+
+Step 3 — Evidence: list all podium (top-3) finishes
+- Logic: Parse any leading integer from the position text and select rows where that integer ≤ 3.
+- Executed SQL:
+SELECT year, competition, venue, position, (substring(position from '^[0-9]+'))::int AS pos_num
+FROM public.luk_melich
+WHERE (substring(position from '^[0-9]+')) IS NOT NULL
+  AND (substring(position from '^[0-9]+'))::int <= 3
+ORDER BY year ASC;
+- Result:
+  - year: 2013; competition: world championships; venue: moscow , russia; position: 3rd; pos_num: 3
+  Interpretation: Exactly one record shows a top-3 finish (3rd at the 2013 World Championships in Moscow).
+
+Step 4 — Evidence: count of top-3 finishes
+- Executed SQL:
+SELECT count(*) AS top3_count FROM public.luk_melich WHERE (substring(position from '^[0-9]+')) IS NOT NULL AND substring(position from '^[0-9]+')::int IN (1,2,3);
+- Result: top3_count = 1
+- Breakdown check:
+  Executed SQL:
+  SELECT substring(position from '^[0-9]+') AS leading_digits, substring(position from '^[0-9]+')::int AS leading_int, count(*) AS cnt FROM public.luk_melich WHERE (substring(position from '^[0-9]+')) IS NOT NULL AND substring(position from '^[0-9]+')::int IN (1,2,3) GROUP BY leading_digits, leading_int ORDER BY leading_int;
+  Result: leading_digits = '3', leading_int = 3, cnt = 1
+
+Step 5 — Supplemental check for medal words (in case positions are recorded as words)
+- Executed SQL (count):
+SELECT count(*) AS cnt FROM public.luk_melich WHERE position ILIKE '%gold%' OR position ILIKE '%silver%' OR position ILIKE '%bronze%';
+- Result: 0 rows matched (no additional podium finishes encoded as medal words).
+
+Conclusion
+- The data show exactly one competition where Lukáš Melich finished third place or higher (3rd at the 2013 World Championships). This supports the claim that he placed third place or higher in 1 competition.
+
+Assumptions
+- I interpreted “in 1 competition” as an existence statement and also verified the exact count in this dataset; both are satisfied (there is at least one, and exactly one in this table).
+- “Third place or higher” was operationalized as a parsed leading numeric position of 1, 2, or 3. Entries without leading digits and without medal words were assumed not to indicate a podium finish.
+- Verification is limited to the authoritative dataset available (postgres_tabfact21.public.luk_melich).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

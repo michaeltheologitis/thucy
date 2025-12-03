@@ -1,0 +1,110 @@
+
+<userQuery>
+<query>
+after 2000 england , the united state , brazil , and and puerto rico each contribute 1 player
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "after 2000 england , the united state , brazil , and puerto rico each contribute 1 player"
+
+Data source explored
+- Discovered database: TabFact (public schema)
+- Relevant table: public.utah_jazz_all_time_roster with columns: player, nationality, position, years for jazz, school / club team
+
+Quick look at the data (to understand formats)
+Executed SQL:
+SELECT player, nationality, "years for jazz" FROM public.utah_jazz_all_time_roster LIMIT 40;
+Key rows returned (9 total rows in table):
+- john amaechi | england | 2001 - 03
+- louis amundson | united states | 2007
+- rafael araãjo | brazil | 2006 - 2007
+- carlos arroyo | puerto rico | 2002 - 05
+... (plus U.S. players from pre-2000 spans)
+
+Core check: Count players after 2000 by nationality (England, United States, Brazil, Puerto Rico)
+Method: Parse the textual year span into start_year and end_year, handling formats "YYYY", "YYYY - YY" (with century logic), and "YYYY - YYYY". Count distinct players whose end_year > 2000.
+
+Executed SQL (exact):
+SELECT lower(nationality) as nationality,
+       COUNT(DISTINCT player) as cnt
+FROM (
+  SELECT player, nationality,
+    trim("years for jazz") as y,
+    CASE 
+      WHEN trim("years for jazz") ~ '^\d{4}$' THEN CAST(trim("years for jazz") AS int)
+      WHEN trim("years for jazz") ~ '^\d{4}\s*-\s*\d{2,4}$' THEN CAST(regexp_replace(split_part(trim("years for jazz"),'-',1),'\s','', 'g') AS int)
+      ELSE NULL END as start_year,
+    CASE
+      WHEN trim("years for jazz") ~ '^\d{4}$' THEN CAST(trim("years for jazz") AS int)
+      WHEN trim("years for jazz") ~ '^\d{4}\s*-\s*\d{2,4}$' THEN
+         (CASE WHEN length(regexp_replace(split_part(trim("years for jazz"),'-',2),'\s','', 'g'))=2 THEN
+            ((CAST(regexp_replace(split_part(trim("years for jazz"),'-',1),'\s','', 'g') AS int)
+               - (CAST(regexp_replace(split_part(trim("years for jazz"),'-',1),'\s','', 'g') AS int) % 100)
+              )
+              + (CASE WHEN CAST(regexp_replace(split_part(trim("years for jazz"),'-',2),'\s','', 'g') AS int)
+                         < (CAST(regexp_replace(split_part(trim("years for jazz"),'-',1),'\s','', 'g') AS int) % 100)
+                      THEN 100 ELSE 0 END)
+              + CAST(regexp_replace(split_part(trim("years for jazz"),'-',2),'\s','', 'g') AS int)
+            )
+          ELSE CAST(regexp_replace(split_part(trim("years for jazz"),'-',2),'\s','', 'g') AS int) END)
+      ELSE NULL END as end_year
+  FROM public.utah_jazz_all_time_roster
+  WHERE lower(nationality) IN ('england','united states','brazil','puerto rico')
+) sub
+WHERE end_year IS NOT NULL AND end_year > 2000
+GROUP BY nationality
+ORDER BY nationality;
+
+Results:
+- brazil: 1
+- england: 1
+- puerto rico: 1
+- united states: 1
+
+Supporting detail: Which players are counted (with parsed years)
+Executed SQL (exact):
+SELECT player, nationality, years_for_jazz, start_year, end_year
+FROM (
+  SELECT player, nationality, "years for jazz" AS years_for_jazz,
+    CASE
+      WHEN "years for jazz" ~ '^\s*\d{4}\s*$' THEN CAST(trim("years for jazz") AS integer)
+      WHEN "years for jazz" ~ '^\s*\d{4}\s*-\s*\d{2}\s*$' THEN CAST(substring("years for jazz" from '^\s*(\d{4})') AS integer)
+      WHEN "years for jazz" ~ '^\s*\d{4}\s*-\s*\d{4}\s*$' THEN CAST(substring("years for jazz" from '^\s*(\d{4})') AS integer)
+      ELSE NULL
+    END AS start_year,
+    CASE
+      WHEN "years for jazz" ~ '^\s*\d{4}\s*$' THEN CAST(trim("years for jazz") AS integer)
+      WHEN "years for jazz" ~ '^\s*\d{4}\s*-\s*\d{2}\s*$' THEN (
+        (CAST(substring("years for jazz" from '^\s*(\d{4})') AS integer) - (CAST(substring("years for jazz" from '^\s*(\d{4})') AS integer) % 100))
+        + CAST(substring("years for jazz" from '-\s*(\d{2})\s*$') AS integer)
+        + CASE WHEN CAST(substring("years for jazz" from '-\s*(\d{2})\s*$') AS integer) < (CAST(substring("years for jazz" from '^\s*(\d{4})') AS integer) % 100) THEN 100 ELSE 0 END
+      )
+      WHEN "years for jazz" ~ '^\s*\d{4}\s*-\s*\d{4}\s*$' THEN CAST(substring("years for jazz" from '-\s*(\d{4})\s*$') AS integer)
+      ELSE NULL
+    END AS end_year
+  FROM public.utah_jazz_all_time_roster
+  WHERE lower(nationality) IN ('england','united states','brazil','puerto rico')
+) t
+WHERE end_year > 2000
+ORDER BY end_year, start_year;
+
+Returned rows:
+- john amaechi | england | 2001 - 03 | 2001 | 2003
+- carlos arroyo | puerto rico | 2002 - 05 | 2002 | 2005
+- rafael araãjo | brazil | 2006 - 2007 | 2006 | 2007
+- louis amundson | united states | 2007 | 2007 | 2007
+
+Conclusion
+- The data show that after 2000, each of the specified nationalities—England, United States, Brazil, and Puerto Rico—contributed exactly 1 player to the Utah Jazz (within the available roster table). Therefore, the claim is supported by the evidence from this dataset.
+
+Assumptions
+- "After 2000" interpreted as any player whose parsed Jazz tenure extends into 2001 or later (end_year > 2000).
+- The claim was grounded in the available table public.utah_jazz_all_time_roster; thus, the scope of verification is limited to this dataset.
+- Nationalities were matched exactly in lowercase to: 'england', 'united states', 'brazil', 'puerto rico'. Minor typographical differences in the claim (e.g., "the united state") were mapped to the data's 'united states'.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+the score of the sheffield wednesday versus southampton game be 0 - 0
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the score of the Sheffield Wednesday versus Southampton game be 0 - 0.”
+
+Data source exploration
+- Available tables
+  - Result: Found a single table holding FA Cup 1983–84 match data.
+  - SQL executed:
+    SELECT table_schema, table_name, table_type 
+    FROM information_schema.tables 
+    WHERE table_schema NOT IN ('information_schema', 'pg_catalog');
+
+- Table schema inspection (public.t_1983_84_fa_cup)
+  - Columns discovered: tie no (text), home team (text), score (text), away team (text), date (text)
+  - SQL executed:
+    SELECT column_name, data_type, is_nullable 
+    FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+      AND table_name = 't_1983_84_fa_cup';
+
+Evidence from the data
+- Query: Retrieve any matches where the teams are Sheffield Wednesday and Southampton.
+  - SQL executed:
+    SELECT "home team", score, "away team", date 
+    FROM public.t_1983_84_fa_cup 
+    WHERE ("home team" ILIKE 'Sheffield Wednesday' AND "away team" ILIKE 'Southampton') 
+       OR ("home team" ILIKE 'Southampton' AND "away team" ILIKE 'Sheffield Wednesday');
+  - Results returned:
+    1) Date: 11 March 1984 | Home Team: Sheffield Wednesday | Score: 0 - 0 | Away Team: Southampton
+    2) Date: 20 March 1984 | Home Team: Southampton         | Score: 5 - 1 | Away Team: Sheffield Wednesday
+
+Conclusion
+- The dataset shows that Sheffield Wednesday vs Southampton in the 1983–84 FA Cup ended 0–0 on 11 March 1984 (followed by a replay on 20 March 1984 that ended 5–1 to Southampton). Therefore, within the scope of the available data, there is at least one Sheffield Wednesday vs Southampton game that finished 0–0.
+
+Assumptions and scope
+- The only available data source covers the FA Cup 1983–84 season. I interpret the claim as referring to whether there exists a Sheffield Wednesday vs Southampton game that finished 0–0; within this dataset, the 11 March 1984 tie did finish 0–0. Other fixtures between these clubs in other seasons or competitions are outside the available data and not considered here.
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

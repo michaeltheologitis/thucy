@@ -1,0 +1,51 @@
+
+<userQuery>
+<query>
+there be more than one classic rock station
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim assessed: “there be more than one classic rock station.”
+
+Scope and data source
+- I verified this claim against the only available authoritative dataset: TabFact (public schema), table media_in_kelowna, which lists radio stations in Kelowna with their formats.
+
+Step 1: Inspect all stations
+Executed SQL:
+SELECT * FROM media_in_kelowna;
+Result (frequency | call sign | branding | format | owner):
+1) 1150 am | ckfr | am 1150 | news / talk | astral media
+2) 00 88.9 fm | cbtk - fm | cbc radio one | public news / talk | canadian broadcasting corporation
+3) 00 89.7 fm | cbu - fm - 3 | cbc radio 2 | public music | canadian broadcasting corporation
+4) 00 90.5 fm | cbuf - fm - 2 | première chaîne | public news / talk | canadian broadcasting corporation
+5) 00 96.3 fm | ckko - fm | k96.3 | classic rock | sun country cablevision
+6) 00 99.9 fm | chsu - fm | 99.9 sun fm | contemporary hits radio | bell media
+7) 0 101.5 fm | cilk - fm | 101.5 ez rock | adult contemporary | bell media
+8) 0 103.1 fm | ckqq - fm | q103 | hot adult contemporary | jim pattison group
+9) 0 103.9 fm | cjui - fm | 103.9 the juice | adult hits | vista broadcast group
+10) 0 104.7 fm | cklz - fm | power 104 | active rock | jim pattison group
+
+Step 2: Find stations with “classic rock” format
+Executed SQL:
+SELECT frequency, "call sign", branding, format FROM media_in_kelowna WHERE format ILIKE '%classic rock%';
+Result:
+- frequency: 00 96.3 fm | call sign: ckko - fm | branding: k96.3 | format: classic rock
+
+Step 3: Count “classic rock” stations
+Executed SQL:
+SELECT COUNT(*) FROM media_in_kelowna WHERE format ILIKE '%classic rock%';
+Result: 1
+
+Conclusion
+- The dataset shows exactly one classic rock station in Kelowna (CKKO-FM, K96.3). Therefore, the claim that there is more than one classic rock station is not supported by the available data.
+
+Assumptions
+- Interpreted the claim within the scope of the available dataset (media stations in Kelowna).
+- Used the format field with a case-insensitive match for the exact phrase “classic rock”; related but different formats (e.g., “active rock,” “adult hits,” “classic hits”) were not counted as classic rock.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

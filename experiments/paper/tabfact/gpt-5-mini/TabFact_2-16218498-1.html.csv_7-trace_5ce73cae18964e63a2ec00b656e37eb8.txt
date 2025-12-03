@@ -1,0 +1,73 @@
+
+<userQuery>
+<query>
+a total of 2 game and 2 leg that have the score of 0 - 0
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "a total of 2 game and 2 leg that have the score of 0 - 0"
+
+Data sources discovered
+- Database: TabFact (postgres_tabfact3), Schema: public
+- Relevant table: public.t_1992_african_cup_of_champions_clubs with columns: "team 1" (text), "agg" (text), "team 2" (text), "1st leg" (text), "2nd leg" (text)
+
+Operational interpretation
+- "game" interpreted as a two-legged tie (aggregate), represented by the "agg" column.
+- "leg" interpreted as an individual match instance in the tie, represented by "1st leg" or "2nd leg" columns.
+- Normalization of 0-0: treat any value that begins with 0 and 0 separated by a dash-like separator (allowing spaces and common dash variants; ignoring trailing annotations such as penalties) as a 0-0 score.
+
+Evidence and results
+1) Count of ties (games) with aggregate 0-0
+- SQL executed:
+  SELECT COUNT(*) AS agg_0_0_count
+  FROM public.t_1992_african_cup_of_champions_clubs
+  WHERE "agg" ~ '^\s*0\s*[-–—‑]\s*0';
+- Result: {"agg_0_0_count": 1}
+
+2) Count of individual legs with score 0-0
+- SQL executed (1st leg):
+  SELECT COUNT(*) AS first_leg_0_0_count
+  FROM public.t_1992_african_cup_of_champions_clubs
+  WHERE "1st leg" ~ '^\s*0\s*[-–—‑]\s*0';
+- Result: {"first_leg_0_0_count": 2}
+
+- SQL executed (2nd leg):
+  SELECT COUNT(*) AS second_leg_0_0_count
+  FROM public.t_1992_african_cup_of_champions_clubs
+  WHERE "2nd leg" ~ '^\s*0\s*[-–—‑]\s*0';
+- Result: {"second_leg_0_0_count": 1}
+
+- Total 0-0 legs: 3
+
+3) Rows illustrating the matches that matched (for transparency)
+- SQL executed (agg 0-0 rows):
+  SELECT "team 1","team 2","agg","1st leg","2nd leg" FROM public.t_1992_african_cup_of_champions_clubs WHERE "agg" ~ '0[[:space:]]*[-–—:][[:space:]]*0';
+- Row returned:
+  - port autonome | sporting clube da praia | 0 - 0 (1 - 3) | 0 - 0 | 0 - 0
+
+- SQL executed (1st leg 0-0 rows):
+  SELECT "team 1","team 2","agg","1st leg","2nd leg" FROM public.t_1992_african_cup_of_champions_clubs WHERE "1st leg" ~ '0[[:space:]]*[-–—:][[:space:]]*0';
+- Rows returned:
+  - port autonome | sporting clube da praia | 0 - 0 (1 - 3) | 0 - 0 | 0 - 0
+  - tourbillon fc | forces armées ca | 1 - 1 | 0 - 0 | 1 - 1
+
+- SQL executed (2nd leg 0-0 rows):
+  SELECT "team 1","team 2","agg","1st leg","2nd leg" FROM public.t_1992_african_cup_of_champions_clubs WHERE "2nd leg" ~ '0[[:space:]]*[-–—:][[:space:]]*0';
+- Row returned:
+  - port autonome | sporting clube da praia | 0 - 0 (1 - 3) | 0 - 0 | 0 - 0
+
+Conclusion
+- The data shows 1 tie (game) with an aggregate starting 0-0 and 3 individual legs that are 0-0. The claim of "2 game and 2 leg" with 0-0 is not supported.
+
+Assumptions noted
+- "game" = two-legged tie aggregate (column "agg").
+- "leg" = individual match leg (columns "1st leg" and "2nd leg").
+- Scores normalized to match leading 0-0 regardless of dash variants and ignoring trailing annotations such as penalty shootout notes.
+- If “exactly '0 - 0' with no trailing text” were required, the aggregate count would be 0 rather than 1; this would make the claim even less supported.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

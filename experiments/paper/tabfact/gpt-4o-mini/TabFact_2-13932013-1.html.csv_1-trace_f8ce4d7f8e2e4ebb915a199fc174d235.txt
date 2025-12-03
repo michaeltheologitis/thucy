@@ -1,0 +1,79 @@
+
+<userQuery>
+<query>
+3 of the cleveland brown start quarterback have 2 different uniform number
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “3 of the Cleveland Browns starting quarterbacks have 2 different uniform numbers.”
+
+Data sources discovered:
+- PostgreSQL database with table: public.list_of_cleveland_browns_starting_quarterbacks
+
+Schema (relevant columns):
+- quarterback (text)
+- uniform no (s) (text)
+- games started (bigint)
+- wins (bigint)
+- losses (bigint)
+- ties (bigint)
+- winning pct (double precision)
+
+Evidence 1: Sample of quarterbacks and their uniform numbers
+SQL executed:
+SELECT quarterback, "uniform no (s)"
+FROM public.list_of_cleveland_browns_starting_quarterbacks
+LIMIT 20;
+
+Result excerpt (showing examples with multiple numbers):
+- graham , otto | 60 , 14
+- ninowski , jim | 15 , 11
+(...others in sample have single numbers...)
+
+Evidence 2: Robust parsing to find all QBs with more than one number and how many
+SQL executed:
+SELECT quarterback, COUNT(DISTINCT number) AS distinct_number_count, ARRAY_AGG(DISTINCT number ORDER BY number) AS sorted_numbers
+FROM (
+    SELECT quarterback,
+           REGEXP_SPLIT_TO_ARRAY("uniform no (s)", '[^0-9]+') AS numbers
+    FROM public.list_of_cleveland_browns_starting_quarterbacks
+) AS qb_numbers
+CROSS JOIN UNNEST(numbers) AS number
+GROUP BY quarterback
+HAVING COUNT(DISTINCT number) > 1;
+
+Results:
+- Graham, Otto | distinct_number_count = 2 | sorted_numbers = [14, 60]
+- Ninowski, Jim | distinct_number_count = 2 | sorted_numbers = [11, 15]
+- Ratterman, George | distinct_number_count = 2 | sorted_numbers = [12, 16]
+
+Evidence 3: Robust parsing to list QBs who have exactly two distinct numbers (names and numbers)
+SQL executed:
+SELECT quarterback, STRING_AGG(DISTINCT uniform_no, ',' ORDER BY uniform_no) AS uniform_numbers
+FROM (
+    SELECT quarterback, UNNEST(REGEXP_SPLIT_TO_ARRAY("uniform no (s)", '[^0-9]+')) AS uniform_no
+    FROM public.list_of_cleveland_browns_starting_quarterbacks
+    WHERE "uniform no (s)" IS NOT NULL
+) AS split_numbers
+WHERE uniform_no <> ''
+GROUP BY quarterback
+HAVING COUNT(DISTINCT uniform_no) = 2;
+
+Results:
+- Graham, Otto | 14,60
+- Ninowski, Jim | 11,15
+- Ratterman, George | 12,16
+
+Conclusion:
+- The data shows exactly three Cleveland Browns starting quarterbacks with two distinct uniform numbers: Otto Graham (14, 60), Jim Ninowski (11, 15), and George Ratterman (12, 16). This directly supports the claim.
+
+Assumptions:
+- “Starting quarterbacks” refers to those listed in the table public.list_of_cleveland_browns_starting_quarterbacks.
+- “Have 2 different uniform number” is interpreted as having exactly two distinct uniform numbers listed in the “uniform no (s)” field for that quarterback.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

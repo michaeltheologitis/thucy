@@ -1,0 +1,50 @@
+
+<userQuery>
+<query>
+the wimbledon have the same result in the year 1986 and 1999
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The statement asserts that Wimbledon has the same result in 1986 and 1999 (within the available tennis results data). Based on the accessible data source (TabFact: public.katrina_adams), this corresponds to the Wimbledon row (tournament) and its entries for years 1986 and 1999 for player Katrina Adams.
+
+Data source discovery:
+- Discovered PostgreSQL instance: postgres_tabfact19 (TabFact), schema public.
+- Relevant table: katrina_adams (columns include tournament, "1986", "1999", etc.).
+
+Evidence and executed SQL:
+1) Direct check of Wimbledon values for 1986 and 1999
+SQL:
+SELECT "1986", "1999" FROM public.katrina_adams WHERE tournament = 'wimbledon';
+Result:
+- 1986 = 'a'
+- 1999 = '1r'
+Conclusion: Not the same.
+
+2) Context: list all tournaments with 1986 and 1999 values
+SQL:
+SELECT tournament, "1986", "1999" FROM katrina_adams ORDER BY tournament;
+Results (abbrev.):
+- australian open: 1986 = a, 1999 = 1r
+- french open: 1986 = a, 1999 = 1r
+- grand slam tournaments: 1986 = grand slam tournaments, 1999 = grand slam tournaments
+- us open: 1986 = 1r, 1999 = 1r
+- wimbledon: 1986 = a, 1999 = 1r
+
+3) Explicit Wimbledon row via case-insensitive match
+SQL:
+SELECT tournament, "1986", "1999" FROM katrina_adams WHERE lower(tournament) LIKE '%wimbledon%';
+Result:
+- tournament: wimbledon, 1986: a, 1999: 1r
+
+Conclusion:
+- For Wimbledon, the 1986 and 1999 results differ ('a' vs '1r'). Therefore, the claim that they are the same is contradicted by the data.
+
+Assumptions:
+- “the wimbledon” refers to the Wimbledon row in the katrina_adams table (tennis tournament results for Katrina Adams). The table uses lowercase tournament names and abbreviations (e.g., 'a' for absent, '1r' for first round).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

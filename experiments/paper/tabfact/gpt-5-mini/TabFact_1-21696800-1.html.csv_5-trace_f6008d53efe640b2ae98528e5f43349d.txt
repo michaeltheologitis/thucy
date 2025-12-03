@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+2.3 million people in africa saw the episode title rabid
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “2.3 million people in Africa saw the episode titled ‘Rabid.’”
+
+Summary of data sources explored
+- Discovered databases: 1 (PostgreSQL: TabFact, public schema)
+- Available table: public.smallville_season_9 (episode-level metadata and U.S. viewership)
+- No other tables or sources indicating Africa-specific viewership were found.
+
+What the data shows
+1) The table structure does not include any Africa (or non-U.S.) viewership fields. The only viewership field is “us viewers (million).”
+   - Executed SQL (to list columns):
+     SELECT column_name, data_type, ordinal_position
+     FROM information_schema.columns
+     WHERE table_schema = 'public'
+       AND table_name = 'smallville_season_9'
+     ORDER BY ordinal_position;
+   - Result (ordered):
+     1. no — bigint
+     2. - — bigint
+     3. title — text
+     4. directed by — text
+     5. written by — text
+     6. us air date — text
+     7. production code — text
+     8. us viewers (million) — double precision
+   - Executed SQL (to check for any “Africa” columns):
+     SELECT column_name
+     FROM information_schema.columns
+     WHERE table_schema = 'public'
+       AND table_name = 'smallville_season_9'
+       AND column_name ILIKE '%africa%'
+     ORDER BY ordinal_position;
+   - Result: no rows (no Africa-specific column).
+
+2) The episode titled “Rabid” exists and has a recorded U.S. viewership of 2.3 million, not Africa.
+   - Executed SQL:
+     SELECT "title", "us viewers (million)" FROM public.smallville_season_9 WHERE "title" ILIKE '%Rabid%';
+   - Result: title = "rabid", us viewers (million) = 2.3
+
+Assessment
+- The available data records 2.3 million U.S. viewers for the episode “Rabid” and provides no measure of Africa viewership. Therefore, while the number 2.3 million appears for this episode, it explicitly refers to U.S. viewers, not viewers in Africa.
+
+Conclusion
+- The claim is not supported by the available data. The figure 2.3 million is for U.S. viewership; there is no evidence in the dataset for Africa-specific viewership.
+
+Assumptions
+- Interpreted “episode titled ‘Rabid’” as the Smallville Season 9 episode listed in public.smallville_season_9.
+- Assumed the connected TabFact database is the authoritative and only available source for this verification task; no other datasets with Africa viewership metrics are accessible through the provided tools.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

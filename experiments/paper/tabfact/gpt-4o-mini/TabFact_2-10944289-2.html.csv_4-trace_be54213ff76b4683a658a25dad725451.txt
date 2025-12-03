@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+the denver bronco and the chicago bear play at the rca dome , end in the broncos' favor with a score of 23 - 8
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify:
+"the denver bronco and the chicago bear play at the rca dome , end in the broncos' favor with a score of 23 - 8"
+
+Data source explored:
+- Database: TabFact
+- Table: public.nbc_sunday_night_football_results_2006_present (columns: date, visiting team, final score, host team, stadium)
+
+Evidence from database queries:
+1) Were there any Sunday Night Football games since 2006 where the Denver Broncos played the Chicago Bears?
+- Result: No rows found.
+- Executed SQL:
+SELECT date, "visiting team", "host team", "final score", stadium
+FROM public.nbc_sunday_night_football_results_2006_present
+WHERE ("visiting team" = 'Denver Broncos' AND "host team" = 'Chicago Bears')
+   OR ("visiting team" = 'Chicago Bears' AND "host team" = 'Denver Broncos');
+
+2) Were there any Sunday Night Football games at the RCA Dome in this dataset, and did they involve Broncos or Bears?
+- RCA Dome games found (none involve Broncos or Bears):
+  • Date: November 26 | Visiting: Philadelphia Eagles | Host: Indianapolis Colts | Final Score: 21 - 45 | Stadium: RCA Dome
+  • Date: January 6 | Visiting: Kansas City Chiefs | Host: Indianapolis Colts | Final Score: 8 - 23 | Stadium: RCA Dome
+- Executed SQL:
+SELECT date, "visiting team", "host team", "final score", stadium
+FROM public.nbc_sunday_night_football_results_2006_present
+WHERE stadium ILIKE '%RCA Dome%';
+
+- Check specifically for Broncos at RCA Dome:
+  • Result: No rows found.
+  • Executed SQL:
+SELECT date, "visiting team", "host team", "final score", stadium
+FROM public.nbc_sunday_night_football_results_2006_present
+WHERE stadium LIKE '%RCA Dome%'
+AND ("visiting team" = 'Denver Broncos' OR "host team" = 'Denver Broncos');
+
+3) Did any Sunday Night Football game end 23-8 (in either score order), and if so, who played and where?
+- Result: One match — Kansas City Chiefs at Indianapolis Colts, Final Score: 8 - 23, Stadium: RCA Dome (date listed as January 6).
+- Executed SQL:
+SELECT date, "visiting team", "host team", "final score", stadium
+FROM public.nbc_sunday_night_football_results_2006_present
+WHERE "final score" IN ('23 - 8', '8 - 23');
+
+Assessment:
+- The dataset shows no Denver Broncos vs Chicago Bears Sunday Night Football games since 2006.
+- The only 23-8 score at the RCA Dome in this dataset was Kansas City Chiefs at Indianapolis Colts (8 - 23), not involving the Broncos or Bears.
+- Therefore, within the authoritative data available, the claim that the Broncos and Bears played at the RCA Dome with the Broncos winning 23-8 is not supported and is contradicted by the actual game recorded with that score and venue.
+
+Assumptions:
+- Available data covers NBC Sunday Night Football results from 2006 onward. If the claim refers to a non-SNF game or outside this period, it would be outside the scope of this dataset. However, since the RCA Dome was in use through the 2007 season, any such event would likely fall within this timeframe; no supporting record exists in this SNF dataset.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

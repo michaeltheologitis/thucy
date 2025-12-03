@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+there be 3 c - 95 brazilian aircraft currently in service
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “there be 3 c - 95 brazilian aircraft currently in service.”
+
+Data source explored: TabFact PostgreSQL (postgres_tabfact22), table public.uruguayan_air_force.
+
+What I looked for: Entries indicating the C-95 variant, its origin (Brazil), and the count “in service.”
+
+Evidence and executed SQL:
+1) Schema exploration (discover relevant aircraft entries)
+SQL:
+SELECT DISTINCT aircraft FROM public.uruguayan_air_force ORDER BY aircraft;
+Relevant result excerpt:
+{"aircraft":"embraer emb 110 bandeirante"}
+
+2) Identify rows related to the C-95 variant via the aircraft name/variant
+SQL:
+SELECT aircraft, origin, type, versions, "in service" FROM public.uruguayan_air_force WHERE aircraft ILIKE '%emb 110%' OR aircraft ILIKE '%bandeirante%';
+Result:
+{"aircraft":"embraer emb 110 bandeirante","in service":"3","origin":"brazil","type":"transport / utility","versions":"c - 95"}
+
+3) Directly confirm entries where the version is exactly “c - 95”
+SQL:
+SELECT aircraft, origin, type, versions, "in service" FROM public.uruguayan_air_force WHERE versions = 'c - 95';
+Result:
+- aircraft: embraer emb 110 bandeirante
+- origin: brazil
+- type: transport / utility
+- versions: c - 95
+- in service: 3
+
+Conclusion: The dataset shows that the Embraer EMB 110 Bandeirante (origin: Brazil) with version “c - 95” has an “in service” value of 3. This supports the claim that there are 3 C-95 Brazilian aircraft currently in service (in the context of the Uruguayan Air Force data in this source).
+
+Assumptions made:
+- “currently in service” refers to the “in service” field in the public.uruguayan_air_force table, representing the Uruguayan Air Force’s status.
+- “c - 95 brazilian aircraft” is interpreted as the C-95 variant (version) of the Brazilian-origin Embraer EMB 110 Bandeirante listed in the table.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

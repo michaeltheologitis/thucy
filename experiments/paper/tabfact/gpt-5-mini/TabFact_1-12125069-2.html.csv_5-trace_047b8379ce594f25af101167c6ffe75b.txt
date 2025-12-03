@@ -1,0 +1,52 @@
+
+<userQuery>
+<query>
+1 game be on may 20 in houston
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Scope and data sources
+- Explored available data sources and found a single PostgreSQL database: TabFact (postgres_tabfact19), schema public.
+- Relevant table discovered: public.t_2005_texas_rangers_season with columns: date (text), winning team (text), score (text), winning pitcher (text), losing pitcher (text), attendance (bigint), location (text).
+
+Claim interpreted
+- Claim: “1 game be on May 20 in Houston.” Interpreted as asserting that there is exactly one game on May 20 located in Houston, within the available dataset.
+
+Verification steps and evidence
+1) Check for games on May 20 with location Houston
+- Executed SQL:
+  SELECT count(*) FROM public.t_2005_texas_rangers_season WHERE date ILIKE 'May 20%' AND location ILIKE '%Houston%';
+- Result: count = 0
+- Executed SQL:
+  SELECT * FROM public.t_2005_texas_rangers_season WHERE date ILIKE 'May 20%' AND location ILIKE '%Houston%';
+- Result: no rows
+- Conclusion: No game on May 20 in Houston in this dataset.
+
+2) Context check: games on May 20 (any location)
+- Executed SQL:
+  SELECT date, "winning team", score, location FROM t_2005_texas_rangers_season WHERE date ILIKE '%May 20%';
+- Result row:
+  { date: "may 20", winning team: "texas", score: "7 - 3", location: "arlington" }
+- Conclusion: There is a game on May 20, but it was in Arlington, not Houston.
+
+3) Context check: games located in Houston (any date)
+- Executed SQL:
+  SELECT date, location, "winning team", score FROM t_2005_texas_rangers_season WHERE location ILIKE '%houston%';
+- Result rows:
+  { date: "june 24", location: "houston", winning team: "houston", score: "5 - 2" }
+  { date: "june 25", location: "houston", winning team: "texas", score: "6 - 5" }
+- Conclusion: Houston-hosted games exist on June 24 and June 25, not on May 20.
+
+Overall conclusion
+- The dataset shows zero games on May 20 in Houston. Therefore, the claim is contradicted by the available data.
+
+Assumptions
+- The claim refers to the available dataset (2005 Texas Rangers season) as the authoritative source.
+- Dates and locations are matched case-insensitively (ILIKE) due to text storage of date/location fields.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

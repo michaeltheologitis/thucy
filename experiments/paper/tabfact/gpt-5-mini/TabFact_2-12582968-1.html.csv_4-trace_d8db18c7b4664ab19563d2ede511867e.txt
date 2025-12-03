@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+in lukáš melich 's last 2 competition he throw an average distance of 78.27 m
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim: In Lukáš Melich’s last 2 competitions he threw an average distance of 78.27 m.
+- Finding: Verified by computing the mean of the two most recent competition distances in the authoritative dataset.
+
+Data source explored
+- Database: TabFact (postgres_tabfact24)
+- Table: public.luk_melich
+- Columns: year (bigint), competition (text), venue (text), position (text), notes (text)
+- Distances are stored in the notes column as text like "79.36 m".
+
+Evidence and SQL
+1) Identify the last two competitions (highest year values) and extract distances
+SQL:
+SELECT year, competition, notes,
+       NULLIF(regexp_replace(notes, '[^0-9.]', '', 'g'), '')::numeric AS distance_m
+FROM public.luk_melich
+WHERE notes ~ '[0-9]'
+ORDER BY year DESC
+LIMIT 2;
+Results:
+- year: 2013, competition: world championships, distance_m: 79.36
+- year: 2012, competition: olympic games, distance_m: 77.17
+
+2) Compute the average of those two distances, rounded to 2 decimals
+SQL:
+SELECT ROUND(AVG(distance_m)::numeric, 2) AS avg_distance_m
+FROM (
+  SELECT NULLIF(regexp_replace(notes, '[^0-9.]', '', 'g'), '')::numeric AS distance_m
+  FROM public.luk_melich
+  WHERE notes ~ '[0-9]'
+  ORDER BY year DESC
+  LIMIT 2
+) t;
+Result:
+- avg_distance_m: 78.27
+
+Conclusion
+- The average distance across Lukáš Melich’s last two competitions in the dataset is 78.27 m, matching the claim.
+
+Assumptions
+- “Last 2 competitions” are interpreted as the two rows with the highest year values (2013 and 2012) in public.luk_melich.
+- Throw distance is the numeric value recorded in the notes column (e.g., “79.36 m”).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

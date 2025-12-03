@@ -1,0 +1,70 @@
+
+<userQuery>
+<query>
+glo mobile of nigeria have 11000 subscriber in 2006
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “glo mobile of nigeria have 11000 subscriber in 2006.”
+
+Data source discovery
+- I discovered one authoritative relational data source: TabFact (postgres_tabfact16), schema public, with a table named mobile_telephony_in_africa.
+
+Schema overview (for grounding)
+- Table: public.mobile_telephony_in_africa
+  - provider — text
+  - country — text
+  - subscribers (2005) (thousands) — bigint
+  - subscribers (2006) (thousands) — bigint
+  - growth % — double precision
+- Note: Subscriber counts are explicitly labeled “(thousands)”.
+
+Evidence gathered (with exact executed SQL and results)
+1) Check that Nigeria exists in the dataset
+- SQL executed:
+  SELECT DISTINCT country FROM public.mobile_telephony_in_africa ORDER BY country;
+- Result (relevant excerpt):
+  - nigeria appears among distinct country values.
+
+- SQL executed:
+  SELECT COUNT(*) AS nigeria_count FROM public.mobile_telephony_in_africa WHERE country ILIKE 'Nigeria';
+- Result:
+  - nigeria_count: 2
+
+2) Retrieve all Nigeria rows to see providers and subscriber counts (2005/2006)
+- SQL executed:
+  SELECT provider, country, "subscribers (2005) (thousands)", "subscribers (2006) (thousands)" 
+  FROM public.mobile_telephony_in_africa 
+  WHERE country ILIKE 'Nigeria';
+- Results:
+  - provider: mtn | country: nigeria | subscribers (2005) (thousands): 8370 | subscribers (2006) (thousands): 12281
+  - provider: glo mobile | country: nigeria | subscribers (2005) (thousands): 9000 | subscribers (2006) (thousands): 11000
+
+3) Confirm the Glo/Globacom row specifically
+- SQL executed:
+  SELECT provider, country, "subscribers (2005) (thousands)", "subscribers (2006) (thousands)" 
+  FROM public.mobile_telephony_in_africa 
+  WHERE country ILIKE 'Nigeria' AND provider ILIKE '%glo%';
+- Result:
+  - provider: glo mobile | country: nigeria | subscribers (2005) (thousands): 9000 | subscribers (2006) (thousands): 11000
+
+Analysis
+- The dataset contains a provider named “glo mobile” for Nigeria. In 2006, the value recorded is 11000 in the column “subscribers (2006) (thousands)”. This means 11,000 thousand subscribers, i.e., 11,000,000 subscribers.
+- The claim as stated says “11000 subscriber” (singular, and without indicating thousands). Interpreted literally, that is 11,000 subscribers, which is off by a factor of 1,000 relative to the dataset’s recorded 11,000 thousand (11 million) subscribers.
+
+Conclusion
+- The numeric figure 11000 matches the dataset’s value, but the unit is wrong in the claim. According to the data, Glo Mobile Nigeria had 11,000 thousand subscribers (11,000,000) in 2006, not 11,000 subscribers.
+
+Verdict rationale
+- Because the number appears without the correct unit and implies 11,000 rather than 11,000 thousand, the statement is materially inaccurate in its units despite matching the raw numeral.
+
+Assumptions made
+- “glo mobile” in the dataset refers to Globacom (Glo) in Nigeria.
+- Country matching used case-insensitive comparison (ILIKE), as country values are stored in lowercase in this dataset.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

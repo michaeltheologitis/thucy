@@ -1,0 +1,85 @@
+
+<userQuery>
+<query>
+mark cavendish be the only person to win 2 consecutive stage
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Mark Cavendish is the only person to win two consecutive stages.”
+
+Scope of verification: Based on the available authoritative data source we have (2010 Vuelta a España stages and winners), we verify whether Mark Cavendish is the only rider with back-to-back stage wins in that race.
+
+Data sources discovered
+- public.t_2010_vuelta_a_espa_a (2010 Vuelta a España): columns = stage, winner, general classification, points classification, mountains classification, combination classification, team classification.
+
+Evidence
+1) All stages and winners (2010 Vuelta a España)
+Executed SQL:
+SELECT stage, winner FROM public.t_2010_vuelta_a_espa_a ORDER BY stage;
+Result excerpt (stage: winner):
+- 1: Team HTC - Columbia
+- 2: Yauheni Hutarovich
+- 3: Philippe Gilbert
+- 4: Igor Antón
+- 5: Tyler Farrar
+- 6: Thor Hushovd
+- 7: Alessandro Petacchi
+- 8: David Moncoutié
+- 9: David López
+- 10: Imanol Erviti
+- 11: Igor Antón
+- 12: Mark Cavendish
+- 13: Mark Cavendish
+- 14: Joaquim Rodríguez
+- 15: Carlos Barredo
+- 16: Mikel Nieve
+- 17: Peter Velits
+- 18: Mark Cavendish
+- 19: Philippe Gilbert
+- 20: Ezequiel Mosquera
+- 21: Tyler Farrar
+
+2) Identify consecutive stage wins by the same rider
+Executed SQL:
+SELECT a.stage AS stage1, b.stage AS stage2, a.winner
+FROM public.t_2010_vuelta_a_espa_a a
+JOIN public.t_2010_vuelta_a_espa_a b
+  ON a.winner = b.winner
+WHERE a.stage + 1 = b.stage
+ORDER BY a.stage;
+Finding: The only consecutive win pair is Mark Cavendish on stages 12 and 13.
+
+3) Count riders with any back-to-back win pairs
+Executed SQL:
+SELECT winner, COUNT(*) AS consecutive_wins
+FROM (
+  SELECT winner,
+         stage,
+         LEAD(winner) OVER (ORDER BY stage) AS next_winner
+  FROM t_2010_vuelta_a_espa_a
+) AS subquery
+WHERE winner = next_winner
+GROUP BY winner;
+Finding: Only Mark Cavendish appears, with 1 consecutive-win pair.
+
+4) Mark Cavendish’s stage wins in this race
+Executed SQL:
+SELECT stage AS stage_number, winner
+FROM public.t_2010_vuelta_a_espa_a
+WHERE winner = 'Mark Cavendish'
+ORDER BY stage;
+Finding: Cavendish won stages 12, 13 (consecutive), and 18.
+
+Conclusion
+- Within the 2010 Vuelta a España dataset, Mark Cavendish is the only rider who won two consecutive stages (stages 12 and 13). The data supports the claim in this context.
+
+Assumptions and scope notes
+- The user’s wording is ambiguous about the event/timeframe. I interpreted it to mean within the scope of the available dataset (2010 Vuelta a España). Broader claims about all races or all years are outside the scope of the accessible data here and are not asserted.
+
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

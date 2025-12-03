@@ -1,0 +1,62 @@
+
+<userQuery>
+<query>
+when twickenham stoop be the venue on 28 march 2009 , the score be 22 - 12
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary conclusion: Verified. In the available data, a match at Twickenham Stoop on 28 March 2009 has the result 22 - 12.
+
+Data sources explored
+- Discovered a PostgreSQL database (postgres_tabfact31) with one table in the public schema: public.craig_hall_rugby_league_born_1988.
+- This table contains match entries with columns: date, venue, opponent, result, tournament, scored.
+
+Evidence and executed SQL
+1) List tables
+SQL:
+SELECT table_name FROM information_schema.tables WHERE table_schema='public' ORDER BY table_name;
+Result:
+[{"table_name":"craig_hall_rugby_league_born_1988"}]
+
+2) Inspect table schema
+SQL:
+SELECT column_name, data_type, is_nullable, ordinal_position
+FROM information_schema.columns
+WHERE table_schema='public' AND table_name='craig_hall_rugby_league_born_1988'
+ORDER BY ordinal_position;
+Result:
+[{"column_name":"date","data_type":"text","is_nullable":"YES","ordinal_position":1},
+ {"column_name":"venue","data_type":"text","is_nullable":"YES","ordinal_position":2},
+ {"column_name":"opponent","data_type":"text","is_nullable":"YES","ordinal_position":3},
+ {"column_name":"result","data_type":"text","is_nullable":"YES","ordinal_position":4},
+ {"column_name":"tournament","data_type":"text","is_nullable":"YES","ordinal_position":5},
+ {"column_name":"scored","data_type":"bigint","is_nullable":"YES","ordinal_position":6}]
+
+3) Targeted query for 28 March 2009 at Twickenham Stoop
+SQL:
+SELECT date, venue, opponent, result FROM public.craig_hall_rugby_league_born_1988
+WHERE venue ILIKE '%Twickenham Stoop%'
+AND (
+  date ILIKE '%28 March 2009%' OR date ILIKE '%28 Mar 2009%' OR date ILIKE '%2009-03-28%' OR date ILIKE '%28/03/2009%' OR date ILIKE '%03/28/2009%' OR date ILIKE '%28 March, 2009%' OR date ILIKE '%28-Mar-2009%' OR date ILIKE '%2009/03/28%'
+);
+Result:
+Row: date: 28 march 2009, venue: twickenham stoop, opponent: harlequins rl, result: 22 - 12
+
+Additional corroboration from sample rows (showing the same entry among first 20 rows)
+SQL:
+SELECT * FROM public.craig_hall_rugby_league_born_1988 LIMIT 20;
+Excerpt of relevant row in result set:
+{"date":"28 march 2009","opponent":"harlequins rl","result":"22 - 12","scored":1,"tournament":"super league","venue":"twickenham stoop"}
+
+Conclusion
+- The data shows that on 28 March 2009 at Twickenham Stoop, the recorded result was 22 - 12. This directly supports the user's claim.
+
+Assumptions
+- Interpreted the claim as referring to the match entry in the available rugby league dataset (Craig Hall match log), where “Twickenham Stoop” is the venue and the date is 28 March 2009, and “the score be 22 - 12” refers to the match result field in that row.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

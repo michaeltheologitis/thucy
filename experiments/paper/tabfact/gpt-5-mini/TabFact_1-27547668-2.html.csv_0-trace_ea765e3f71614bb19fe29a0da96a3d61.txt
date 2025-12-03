@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+there be 3 episode that air in january , while only 2 air in february
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “there be 3 episode that air in january, while only 2 air in february.”
+
+Data sources explored
+- Discovered data source: PostgreSQL instance (TabFact, public schema)
+- Relevant table: public.list_of_republic_of_doyle_episodes (contains TV episode titles and original air dates)
+  - Columns: Unnamed: 0 (bigint), title (text), directed by (text), written by (text), viewers (bigint), original airdate (text), prod code (bigint)
+
+Evidence
+1) Inspect sample rows and date format
+- SQL:
+  SELECT "title", "original airdate" FROM public.list_of_republic_of_doyle_episodes LIMIT 20;
+- Result (partial):
+  1. fathers and sons — january 6 , 2010
+  2. the return of the grievous angel — january 13 , 2010
+  3. duchess of george — january 20 , 2010
+  4. hit and rum — february 3 , 2010
+  5. the one who got away — february 10 , 2010
+  6–10. five entries in march 2010
+- SQL (table size check):
+  SELECT COUNT(*) AS total_rows FROM public.list_of_republic_of_doyle_episodes;
+- Result: total_rows = 10
+
+2) Count episodes by month (based on first token of original airdate)
+- SQL:
+  SELECT LOWER(TRIM(SPLIT_PART("original airdate", ' ', 1))) AS month, COUNT(*) AS cnt
+  FROM public.list_of_republic_of_doyle_episodes
+  GROUP BY month
+  ORDER BY cnt DESC, month;
+- Results:
+  - march: 5
+  - january: 3
+  - february: 2
+
+3) Distinct airdate values (sanity check)
+- SQL:
+  SELECT "original airdate", COUNT(*) AS cnt
+  FROM public.list_of_republic_of_doyle_episodes
+  GROUP BY "original airdate"
+  ORDER BY cnt DESC NULLS LAST, "original airdate";
+- Results include: "january 6 , 2010", "january 13 , 2010", "january 20 , 2010", "february 3 , 2010", "february 10 , 2010", and five in March 2010.
+
+Conclusion
+- The data shows 3 episodes aired in January and 2 aired in February. The claim is supported by the evidence from the episodes table.
+
+Assumptions
+- “air” refers to the column original airdate.
+- The claim pertains to the entire contents of the table public.list_of_republic_of_doyle_episodes (not restricted by season/year beyond what’s present).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

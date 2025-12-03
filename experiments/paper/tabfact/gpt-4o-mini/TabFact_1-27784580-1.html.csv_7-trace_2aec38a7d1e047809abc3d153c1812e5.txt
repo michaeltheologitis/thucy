@@ -1,0 +1,74 @@
+
+<userQuery>
+<query>
+fukusyū no puropōzu have the 2nd most recent broadcast date
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “fukusyū no puropōzu have the 2nd most recent broadcast date.”
+
+Data source discovery
+- Available database: TabFact
+- Schema: public
+- Table: tsuki_no_koibito (episodes with romanized title and broadcast date)
+
+Step 1: Confirm table structure
+Executed SQL:
+SELECT column_name, data_type 
+FROM information_schema.columns 
+WHERE table_schema = 'public' AND table_name = 'tsuki_no_koibito';
+
+Result (columns):
+- Unnamed: 0 (text)
+- episode title (text)
+- romanized title (text)
+- translation of title (text)
+- broadcast date (text)
+- ratings (text)
+
+Step 2: Rank episodes by actual broadcast date (most recent = 1)
+Note: broadcast date is stored as text like “may 24 , 2010”. We parse it to a proper date and then rank by that parsed date.
+
+Executed SQL:
+SELECT 
+  "romanized title", 
+  "broadcast date", 
+  TO_DATE("broadcast date", 'Month DD , YYYY') AS parsed_date,
+  ROW_NUMBER() OVER (ORDER BY TO_DATE("broadcast date", 'Month DD , YYYY') DESC) AS rank
+FROM public.tsuki_no_koibito;
+
+Result (romanized title, broadcast date, parsed_date, rank):
+1. saishūshōjomakuwakare | june 14 , 2010 | 2010-06-14 | 1
+2. suki to ietara iinoni | june 7 , 2010 | 2010-06-07 | 2
+3. konna ni suki dattanda… | may 31 , 2010 | 2010-05-31 | 3
+4. fukusyū no puropōzu | may 24 , 2010 | 2010-05-24 | 4
+5. arienai kisu | may 17 , 2010 | 2010-05-17 | 5
+6. omae ga hosii | may 10 , 2010 | 2010-05-10 | 6
+
+Step 3: Retrieve the rank of “fukusyū no puropōzu” directly
+Executed SQL:
+SELECT rank
+FROM (
+  SELECT ROW_NUMBER() OVER (ORDER BY TO_DATE("broadcast date", 'Month DD , YYYY') DESC) AS rank,
+         "romanized title"
+  FROM public.tsuki_no_koibito
+) AS ranked
+WHERE "romanized title" = 'fukusyū no puropōzu';
+
+Result:
+- rank = 4
+
+Conclusion
+- The episode “fukusyū no puropōzu” ranks 4th most recent by broadcast date, not 2nd. Therefore, the claim is not supported by the data.
+
+Assumptions
+- “2nd most recent” means sorted by broadcast date in descending order (most recent = 1).
+- The field “broadcast date” was parsed using the format Month DD , YYYY.
+- Matching was done against the exact romanized title string present in the dataset: “fukusyū no puropōzu”.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

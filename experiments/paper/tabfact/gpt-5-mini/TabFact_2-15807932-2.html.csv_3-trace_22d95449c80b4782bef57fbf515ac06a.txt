@@ -1,0 +1,37 @@
+
+<userQuery>
+<query>
+south korea get 2 gold award in total
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “South Korea get 2 gold award in total.” I verified this against the available authoritative data source (TabFact PostgreSQL, public schema), which contains a medal table for the 1967 World Judo Championships.
+
+Evidence from data
+- Data source: TabFact (PostgreSQL) → public.t_1967_world_judo_championships
+- Query objective: Retrieve South Korea’s medal counts (gold, silver, bronze, total), allowing for naming variants and excluding North Korea.
+
+Executed SQL (as returned by the tool):
+SELECT nation, gold, silver, bronze, total
+FROM public.t_1967_world_judo_championships
+WHERE (
+  LOWER(nation) LIKE '%korea%' AND LOWER(nation) NOT LIKE '%north%'
+) OR LOWER(nation) = 'kor'
+LIMIT 10;
+
+Result returned:
+[ { "nation": "south korea", "gold": 0, "silver": 1, "bronze": 2, "total": 3 } ]
+
+Findings
+- In the 1967 World Judo Championships table, South Korea has 0 gold medals, not 2. Therefore, the claim is contradicted by the available data.
+
+Assumptions
+- Scope: I used the only available dataset exposed by the tools (the 1967 World Judo Championships medal table). If the claim intended a different event or a broader timeframe, that information is not present in the accessible data.
+- Naming: I matched common variants for South Korea (e.g., containing “korea” but excluding “north”; also allowing “KOR”). No other matching entries appeared beyond “south korea.”
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

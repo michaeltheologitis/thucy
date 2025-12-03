@@ -1,0 +1,54 @@
+
+<userQuery>
+<query>
+6.2 be the total of rebound average with more than 124 game and a rank of 10
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “6.2 be the total of rebound average with more than 124 game and a rank of 10.”
+
+Data source discovery
+- Accessible database: TabFact (PostgreSQL), schema: public
+- Relevant table: public.my_info_table with columns: rank (bigint), player (text), years (text), games (bigint), "reb avg" (double precision), "total rebounds" (bigint)
+
+Verification steps and evidence
+1) Check whether any row exists with rank = 10 and games > 124
+- Executed SQL:
+  SELECT count(*) FROM public.my_info_table WHERE rank = 10 AND games > 124;
+- Result:
+  count = 0
+- Interpretation: No rows satisfy rank = 10 AND games > 124.
+
+2) Compute the sum ("total") of rebound average for rows with rank = 10 and games > 124
+- Executed SQL:
+  SELECT SUM("reb avg") AS sum_reb_avg FROM public.my_info_table WHERE rank = 10 AND games > 124;
+- Result:
+  sum_reb_avg = NULL (no matching rows)
+- Interpretation: Since there are zero matching rows, the sum is NULL (not 6.2).
+
+3) Inspect the row(s) with rank = 10 to see the actual games and rebound average values
+- Executed SQL:
+  SELECT player, years, games, "reb avg", "total rebounds"
+  FROM public.my_info_table
+  WHERE rank = 10;
+- Result:
+  player: jesse young; years: 1999 - 2003; games: 115; reb avg: 6.2; total rebounds: 708
+- Interpretation: The rank-10 player’s rebound average is 6.2, but he has 115 games, which is not more than 124.
+
+Conclusion
+- There are no rows with rank = 10 and games > 124; therefore, the “total of rebound average” over that set is not 6.2 (it’s NULL due to no records).
+- While the rank-10 player’s rebound average is indeed 6.2, he does not meet the “more than 124 games” condition (he has 115 games). Thus, the claim as stated is not supported by the data.
+
+Assumptions made
+- “rebound average” refers to the column named "reb avg" in public.my_info_table.
+- “more than 124 game” is interpreted as games > 124.
+- “rank of 10” refers to the column rank = 10.
+- “total of rebound average” is interpreted as SUM("reb avg") over rows matching the filters.
+
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

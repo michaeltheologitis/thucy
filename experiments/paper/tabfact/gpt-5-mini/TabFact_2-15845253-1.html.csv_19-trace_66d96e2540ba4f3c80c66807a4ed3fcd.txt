@@ -1,0 +1,80 @@
+
+<userQuery>
+<query>
+only 1 of the viral disease have be assign to a family
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "only 1 of the viral disease have be assign to a family"
+
+Data source discovery
+- Explored available data sources and found a PostgreSQL database (TabFact via postgres_tabfact7), public schema.
+- Relevant table identified via schema inspection:
+  - Table: public.viral_disease
+    - Columns: family (text), baltimore group (text), envelopment (text), virion shape (text), replication site (text)
+
+Evidence from executed SQL
+1) Total number of records in public.viral_disease
+- SQL: SELECT count(*) AS total_records FROM public.viral_disease;
+- Result: total_records = 23
+
+2) Number of records where family is assigned (non-null and not empty)
+- SQL: SELECT count(*) AS family_assigned FROM public.viral_disease WHERE family IS NOT NULL AND trim(both from family) <> '';
+- Result: family_assigned = 23
+
+3) Distinct non-empty family values with counts
+- SQL: SELECT trim(both from family) AS family, count(*) AS cnt FROM public.viral_disease WHERE family IS NOT NULL AND trim(both from family) <> '' GROUP BY trim(both from family) ORDER BY cnt DESC, family;
+- Result (family : count):
+  adenoviridae : 1
+  arenaviridae : 1
+  astroviridae : 1
+  bunyaviridae : 1
+  caliciviridae : 1
+  coronaviridae : 1
+  filoviridae : 1
+  flaviviridae : 1
+  hepadnaviridae : 1
+  hepeviridae : 1
+  herpesviridae : 1
+  orthomyxoviridae : 1
+  papillomaviridae : 1
+  paramyxoviridae : 1
+  parvoviridae : 1
+  picornaviridae : 1
+  polyomaviridae : 1
+  poxviridae : 1
+  reoviridae : 1
+  retroviridae : 1
+  rhabdoviridae : 1
+  togaviridae : 1
+  unassigned : 1
+
+4) Specific check for 'unassigned' vs named families
+- SQL: SELECT COUNT(*) AS count_unassigned_exact FROM viral_disease WHERE family = 'unassigned';
+- Result: 1
+- SQL: SELECT COUNT(*) AS count_not_unassigned_ci FROM viral_disease WHERE lower(coalesce(family, '')) <> 'unassigned';
+- Result: 22
+
+5) Count rows with a specific named family (non-null, not empty, not 'unassigned')
+- SQL: SELECT count(*) AS named_family_count FROM public.viral_disease WHERE family IS NOT NULL AND trim(family) <> '' AND lower(trim(family)) <> 'unassigned';
+- Result: named_family_count = 22
+- SQL: SELECT count(*) AS null_family_count FROM public.viral_disease WHERE family IS NULL;
+- Result: 0
+- SQL: SELECT count(*) AS empty_family_count FROM public.viral_disease WHERE family IS NOT NULL AND trim(family) = '';
+- Result: 0
+- SQL: SELECT count(*) AS unassigned_family_count FROM public.viral_disease WHERE family IS NOT NULL AND lower(trim(family)) = 'unassigned';
+- Result: 1
+
+Assessment
+- The data shows 23 viral_disease records. All 23 have a non-empty value in the family column; 22 are assigned to specific named families, and 1 record’s family value is literally 'unassigned'.
+- Therefore, the claim that only 1 viral disease has been assigned to a family is contradicted by the data. In reality, 22 have assigned families, and only 1 is marked unassigned.
+
+Assumptions
+- Interpreted “assigned to a family” as having a specific family name: non-null, non-empty, and not equal to the literal 'unassigned' (case-insensitive).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

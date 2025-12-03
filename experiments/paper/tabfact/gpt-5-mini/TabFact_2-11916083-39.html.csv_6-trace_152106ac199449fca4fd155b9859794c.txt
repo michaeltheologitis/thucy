@@ -1,0 +1,47 @@
+
+<userQuery>
+<query>
+the 31997 mintage be release in 2001
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the 31997 mintage be release in 2001.”
+
+Interpretation: I interpret this as asking whether a Royal Canadian Mint numismatic coin with a mintage of 31,997 was released in 2001.
+
+Data source explored:
+- Database: postgres_tabfact10 (TabFact)
+- Table: public.royal_canadian_mint_numismatic_coins_2000s
+- Columns: year (bigint), theme (text), artist (text), mintage (text), issue price (double precision)
+
+Evidence and executed SQL:
+1) List all entries for year = 2001 to check their mintage values.
+SQL:
+SELECT * FROM public.royal_canadian_mint_numismatic_coins_2000s WHERE year = 2001;
+Result:
+- { year: 2001, theme: "the russell light four", artist: "john mardon", mintage: "41828", issue price: 59.95 }
+- { year: 2001, theme: "the marco polo", artist: "j franklin wright", mintage: "included in the russell", issue price: 59.95 }
+- { year: 2001, theme: "the scotia", artist: "don curley", mintage: "included in the russell", issue price: 59.95 }
+Observation: None show a mintage of 31,997.
+
+2) Search the entire table for any entry whose mintage equals or contains the digits 31997, and return the year.
+SQL:
+SELECT year, theme, artist, mintage FROM public.royal_canadian_mint_numismatic_coins_2000s
+WHERE regexp_replace(mintage, '\\D', '', 'g') = '31997' OR mintage LIKE '%31997%';
+Result:
+- 2003 | hmcs bras dor | don curley | 31997
+Observation: The only entry with mintage 31,997 is for the year 2003, not 2001.
+
+Conclusion:
+- The dataset shows no 2001 coin with mintage 31,997. The sole 31,997 mintage entry is the 2003 “HMCS Bras d'Or” coin. Therefore, the claim that the 31,997 mintage was released in 2001 is contradicted by the data.
+
+Assumptions:
+- “Release” corresponds to the “year” column in the Royal Canadian Mint numismatic coins table.
+- “31997 mintage” refers to a mintage count of 31,997, matched by removing punctuation from the text mintage field or searching for the substring 31997.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

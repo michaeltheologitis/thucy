@@ -1,0 +1,60 @@
+
+<userQuery>
+<query>
+the term end for vilson ahmeti be after the term end for ylli bufi
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the term end for vilson ahmeti be after the term end for ylli bufi.”
+
+Data source discovery
+- Available source: PostgreSQL database “TabFact” (public schema). No other data sources were detected.
+
+Relevant schema
+- Table: public.list_of_prime_ministers_of_albania
+  - Columns (text): name; born - died; term start; term end; political party
+
+Evidence
+1) Locate both individuals and their raw term end values
+- Executed SQL:
+  SELECT *
+  FROM public.list_of_prime_ministers_of_albania
+  WHERE name ILIKE '%Ahmeti%' OR name ILIKE '%Bufi%';
+- Returned rows:
+  {"born - died":"1948 -","name":"ylli bufi","political party":"socialist party of albania","term end":"10 december 1991","term start":"5 june 1991"}
+  {"born - died":"1951 -","name":"vilson ahmeti","political party":"non - party","term end":"13 april 1992","term start":"10 december 1991"}
+
+2) Parse the term end values as dates and compare
+- Executed SQL:
+  SELECT
+    v.name AS vilson_name,
+    v."term end" AS vilson_term_end_text,
+    to_date(v."term end", 'DD Month YYYY') AS vilson_term_end_date,
+    y.name AS ylli_name,
+    y."term end" AS ylli_term_end_text,
+    to_date(y."term end", 'DD Month YYYY') AS ylli_term_end_date,
+    (to_date(v."term end", 'DD Month YYYY') > to_date(y."term end", 'DD Month YYYY')) AS vilson_after_ylli
+  FROM public.list_of_prime_ministers_of_albania v
+  JOIN public.list_of_prime_ministers_of_albania y ON true
+  WHERE v.name ILIKE 'vilson ahmeti' AND y.name ILIKE 'ylli bufi';
+- Result:
+  vilson_name: vilson ahmeti; vilson_term_end_text: 13 april 1992; vilson_term_end_date: 1992-04-13
+  ylli_name: ylli bufi; ylli_term_end_text: 10 december 1991; ylli_term_end_date: 1991-12-10
+  vilson_after_ylli: true
+
+Analysis
+- Parsed dates show Ylli Bufi’s term ended on 1991-12-10 and Vilson Ahmeti’s term ended on 1992-04-13. Since 1992-04-13 is after 1991-12-10, the claim is supported by the data.
+
+Conclusion
+- The term end for Vilson Ahmeti is after the term end for Ylli Bufi.
+
+Assumptions
+- Names were matched case-insensitively using ILIKE.
+- The term end text values use a parseable format ‘DD Month YYYY’, handled by to_date().
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

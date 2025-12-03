@@ -1,0 +1,102 @@
+
+<userQuery>
+<query>
+all 3 of the complete project be complete between 1993 - 1997
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “all 3 of the complete project be complete between 1993 - 1997.”
+
+Interpretation of the claim:
+- “complete project” is interpreted as sites whose “construction completed” field indicates a completion date (i.e., it contains a 4-digit year).
+- The claim asserts there are exactly three such completed sites and that all of them have completion years between 1993 and 1997 (inclusive).
+
+Data sources discovered:
+- One PostgreSQL data source (TabFact). Relevant table in public schema: public.list_of_superfund_sites_in_mississippi.
+
+Schema details consulted:
+- Table: public.list_of_superfund_sites_in_mississippi
+  - Columns (all text): cerclis id, name, county, proposed, listed, construction completed, partially deleted, deleted.
+
+Evidence
+1) Initial exploration of “construction completed” values
+Executed SQL:
+SELECT name, "construction completed" AS construction_completed, substring("construction completed" FROM '([0-9]{4})') AS year_extracted
+FROM public.list_of_superfund_sites_in_mississippi
+WHERE "construction completed" IS NOT NULL AND trim("construction completed") <> '';
+
+Key output rows:
+- flowood site | 09 / 17 / 1993 | 1993
+- newsom brothers / old reichhold chemicals , inc | 08 / 08 / 1997 | 1997
+- walcotte chemical co warehouses | 12 / 30 / 1982 | 1982
+- Several other rows had a placeholder '-' and no year extracted (NULL).
+
+2) Formal verification queries
+a) Total number of sites with a 4-digit year in the “construction completed” field
+Executed SQL:
+SELECT count(*) AS total_construction_completed_sites
+FROM public.list_of_superfund_sites_in_mississippi
+WHERE substring("construction completed" FROM '(\d{4})') IS NOT NULL;
+
+Output: total_construction_completed_sites = 3
+
+b) List those sites and their extracted year
+Executed SQL:
+SELECT name,
+       "construction completed" AS completion_text,
+       substring("construction completed" FROM '(\d{4})') AS extracted_year
+FROM public.list_of_superfund_sites_in_mississippi
+WHERE substring("construction completed" FROM '(\d{4})') IS NOT NULL
+ORDER BY name;
+
+Output:
+- flowood site | 09 / 17 / 1993 | 1993
+- newsom brothers / old reichhold chemicals , inc | 08 / 08 / 1997 | 1997
+- walcotte chemical co warehouses | 12 / 30 / 1982 | 1982
+
+c) Min and max of the extracted completion years
+Executed SQL:
+SELECT min((substring("construction completed" FROM '(\d{4})'))::int) AS min_year,
+       max((substring("construction completed" FROM '(\d{4})'))::int) AS max_year
+FROM public.list_of_superfund_sites_in_mississippi
+WHERE substring("construction completed" FROM '(\d{4})') IS NOT NULL;
+
+Output: min_year = 1982, max_year = 1997
+
+d) Count of such sites with years between 1993 and 1997 (inclusive)
+Executed SQL:
+SELECT count(*) AS count_between_1993_1997
+FROM public.list_of_superfund_sites_in_mississippi
+WHERE substring("construction completed" FROM '(\d{4})') IS NOT NULL
+  AND (substring("construction completed" FROM '(\d{4})'))::int BETWEEN 1993 AND 1997;
+
+Output: count_between_1993_1997 = 2
+
+e) Count with years outside 1993–1997
+Executed SQL:
+SELECT count(*) AS count_outside_1993_1997
+FROM public.list_of_superfund_sites_in_mississippi
+WHERE substring("construction completed" FROM '(\d{4})') IS NOT NULL
+  AND ((substring("construction completed" FROM '(\d{4})'))::int < 1993
+       OR (substring("construction completed" FROM '(\d{4})'))::int > 1997);
+
+Output: count_outside_1993_1997 = 1
+
+Findings:
+- There are exactly three sites with a valid completion year (1982, 1993, 1997).
+- Only two of them fall within 1993–1997 inclusive; one is from 1982.
+
+Conclusion:
+- The claim that “all 3 of the complete project be complete between 1993 - 1997” is contradicted by the data. Of the three completed sites, one (walcotte chemical co warehouses) was completed in 1982, outside the specified range.
+
+Assumptions made:
+- “Complete project” corresponds to sites where the “construction completed” field contains a 4-digit year (ignoring placeholder values like ‘-’).
+- The year range 1993–1997 is interpreted as inclusive.
+- Only the Mississippi Superfund sites table was considered, as it is the sole available relevant dataset.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

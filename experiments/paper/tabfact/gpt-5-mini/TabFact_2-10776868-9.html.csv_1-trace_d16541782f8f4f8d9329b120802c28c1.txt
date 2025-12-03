@@ -1,0 +1,54 @@
+
+<userQuery>
+<query>
+the game between footscray and carlton be play at princess park
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the game between Footscray and Carlton be play at princess park.”
+
+Data sources explored:
+- Database: TabFact (postgres_tabfact18)
+- Table: public.t_1962_vfl_season (columns: home team, away team, venue, scores, crowd, date)
+
+Evidence gathered:
+1) Broad search for any matches involving Carlton or Footscray
+- Executed SQL:
+  SELECT "date", "home team", "away team", "venue", "home team score", "away team score"
+  FROM public.t_1962_vfl_season
+  WHERE "home team" ILIKE '%carl%' OR "away team" ILIKE '%carl%'
+     OR "home team" ILIKE '%foot%' OR "away team" ILIKE '%foot%'
+  ORDER BY "date";
+- Result row returned:
+  - date: 23 june 1962
+  - home team: carlton
+  - away team: footscray
+  - venue: princes park
+  - home team score: 12.9 (81)
+  - away team score: 9.10 (64)
+
+2) Case-insensitive exact match for Carlton vs Footscray fixtures
+- Executed SQL:
+  SELECT date, "home team", "away team", venue, "home team score", "away team score"
+  FROM public.t_1962_vfl_season
+  WHERE (lower("home team") = 'carlton' AND lower("away team") = 'footscray')
+     OR (lower("home team") = 'footscray' AND lower("away team") = 'carlton')
+  ORDER BY date;
+- Result row returned:
+  - 23 june 1962 — home: Carlton (12.9 (81)), away: Footscray (9.10 (64)), venue: princes park
+
+Assessment:
+- The 1962 VFL season data shows a Carlton vs Footscray match on 23 June 1962 at “princes park,” which corresponds to Princes Park (Carlton’s traditional home ground). This directly supports the claim for that fixture.
+
+Conclusion: The claim is supported by the data for the 23 June 1962 Carlton vs Footscray game.
+
+Assumptions made:
+- I interpreted “the game” as referring to the fixture recorded in the available dataset (1962 VFL season). If a different season or a future fixture was intended, that is outside the scope of the accessible data.
+- The venue string “princes park” in the dataset corresponds to Princes Park (correct spelling is “Princes Park,” not “Princess Park”).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

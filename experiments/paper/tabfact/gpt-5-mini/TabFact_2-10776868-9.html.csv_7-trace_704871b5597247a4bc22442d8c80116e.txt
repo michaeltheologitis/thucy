@@ -1,0 +1,71 @@
+
+<userQuery>
+<query>
+the match between south melbourne and richmond draw the smallest crowd of the day
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary conclusion: In the available 1962 VFL season data, the South Melbourne vs Richmond match on 23 June 1962 did not draw the smallest crowd of the day; the smallest crowd that day was North Melbourne vs Hawthorn.
+
+Data sources explored
+- Discovered data source: TabFact (PostgreSQL), schema: public
+- Relevant table: public.t_1962_vfl_season
+  - Columns: "home team" (text), "home team score" (text), "away team" (text), "away team score" (text), "venue" (text), "crowd" (bigint), "date" (text)
+
+Evidence and executed SQL
+1) Identify South Melbourne vs Richmond match(es)
+SQL:
+SELECT "date", "home team", "away team", crowd, venue
+FROM public.t_1962_vfl_season
+WHERE ("home team" = 'south melbourne' AND "away team" = 'richmond')
+   OR ("home team" = 'richmond' AND "away team" = 'south melbourne');
+Result:
+{"date":"23 june 1962","home team":"south melbourne","away team":"richmond","crowd":17000,"venue":"lake oval"}
+
+2) List all matches on that date (23 june 1962)
+SQL:
+SELECT "home team", "away team", venue, crowd FROM public.t_1962_vfl_season WHERE date = '23 june 1962';
+Results:
+- melbourne vs st kilda — venue: mcg — crowd: 48952
+- essendon vs geelong — venue: windy hill — crowd: 35000
+- collingwood vs fitzroy — venue: victoria park — crowd: 26488
+- carlton vs footscray — venue: princes park — crowd: 32400
+- south melbourne vs richmond — venue: lake oval — crowd: 17000
+- north melbourne vs hawthorn — venue: arden street oval — crowd: 8470
+
+3) Compute the minimum crowd on that date
+SQL:
+SELECT "date", MIN(crowd) AS min_crowd, COUNT(*) AS matches_on_date
+FROM public.t_1962_vfl_season
+WHERE "date" = '23 june 1962'
+GROUP BY "date";
+Result:
+{"date":"23 june 1962","matches_on_date":6,"min_crowd":8470}
+
+4) Order matches that day by crowd to identify the smallest explicitly
+SQL:
+SELECT "date", "home team", "away team", venue, crowd
+FROM public.t_1962_vfl_season
+WHERE "date" = '23 june 1962'
+ORDER BY crowd ASC;
+Results (ascending by crowd):
+1) north melbourne vs hawthorn — arden street oval — 8470
+2) south melbourne vs richmond — lake oval — 17000
+3) collingwood vs fitzroy — victoria park — 26488
+4) carlton vs footscray — princes park — 32400
+5) essendon vs geelong — windy hill — 35000
+6) melbourne vs st kilda — mcg — 48952
+
+Finding
+- The South Melbourne vs Richmond crowd (17,000) was not the smallest that day; the smallest was 8,470 (North Melbourne vs Hawthorn).
+
+Assumptions
+- The claim refers to the matchday on which South Melbourne played Richmond in the 1962 VFL season (23 june 1962) as represented in the available dataset.
+- Team names and dates are matched exactly as stored (lowercase strings).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

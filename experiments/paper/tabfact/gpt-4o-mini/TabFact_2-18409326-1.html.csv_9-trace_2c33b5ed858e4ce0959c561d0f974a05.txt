@@ -1,0 +1,62 @@
+
+<userQuery>
+<query>
+vista broadcast group play all type of hit
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The user appears to assert that “Vista Broadcast Group play(s) all type(s) of hit,” implying Vista’s station(s) play an “all-hits” or all-types-of-hits format.
+
+Data sources checked
+- Available database: a PostgreSQL database with table public.media_in_kelowna (trusted per instructions).
+
+Schema inspection
+- Columns in public.media_in_kelowna (via executed SQL below) indicate fields to verify owner and format.
+
+Evidence from the database
+1) Table columns
+- Result: frequency (text), call sign (text), branding (text), format (text), owner (text)
+- SQL executed:
+  SELECT 
+      c.column_name, 
+      c.data_type, 
+      pg_catalog.col_description(c.table_name::text::regclass, c.ordinal_position) AS column_comment 
+  FROM 
+      information_schema.columns c 
+  WHERE 
+      c.table_schema = 'public' 
+      AND c.table_name = 'media_in_kelowna';
+
+2) All stations in Kelowna (to provide context and check formats across owners)
+- Key rows:
+  - 99.9 sun fm | contemporary hits radio | bell media
+  - 103.9 the juice | adult hits | vista broadcast group
+  - Others: news/talk, classic rock, adult contemporary, hot AC, active rock across other owners
+- SQL executed:
+  SELECT * FROM public.media_in_kelowna;
+
+3) Vista-owned station(s) only
+- Result (exact match):
+  - Frequency: 0 103.9 fm | Call Sign: cjui - fm | Branding: 103.9 the juice | Format: adult hits | Owner: vista broadcast group
+- SQL executed:
+  SELECT frequency, "call sign", branding, format, owner FROM public.media_in_kelowna WHERE owner ILIKE '%Vista%';
+
+Assessment
+- The Vista-owned Kelowna station (103.9 The Juice, CJUI-FM) is listed with the format “adult hits,” not “all hits” or “all types of hits.”
+- The “contemporary hits radio” (CHR/Top 40, closer to “all hits”) entry in this market belongs to Bell Media (99.9 Sun FM), not Vista.
+- Therefore, the data supports that Vista Broadcast Group’s Kelowna station has an adult hits format—a specific variety-hits/adult-leaning format—rather than playing “all types of hits.”
+
+Conclusion
+- The assertion that “Vista Broadcast Group play(s) all type(s) of hit” is not supported by the data. Vista’s station listed here is “adult hits,” which is more specific than “all types of hits.”
+
+Assumptions
+- The claim is about the Kelowna market, given the available dataset (public.media_in_kelowna).
+- “Play all type of hit” is interpreted as a broad “all-hits” or all-types-of-hits format rather than the specific “adult hits” format.
+- The database is considered authoritative and current for the scope of Kelowna media entries, per instructions.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,69 @@
+
+<userQuery>
+<query>
+there be 2 episode in the series that be direct by perry chafe
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "there be 2 episode in the series that be direct by perry chafe"
+
+What I checked
+- Identified the only available TV-episodes dataset in the connected data sources: a table of Republic of Doyle episodes including a "directed by" column.
+- Searched for any episodes whose director field contains Perry Chafe (including variations like any occurrence of "perry" or "chafe").
+
+Data sources discovered
+- Database: TabFact (public schema)
+- Relevant table: public.list_of_republic_of_doyle_episodes
+  - Columns include: title (text), "directed by" (text), "written by" (text), viewers (bigint), "original airdate" (text), "prod code" (bigint)
+
+Evidence (executed SQL and results)
+1) Count episodes directed by Perry Chafe (case-insensitive exact name substring)
+SQL:
+SELECT COUNT(*) AS count FROM public.list_of_republic_of_doyle_episodes WHERE lower("directed by") LIKE '%perry chafe%';
+Result:
+[{"count": 0}]
+
+2) List episode titles that match the above (for completeness)
+SQL:
+SELECT ARRAY_AGG(title) AS titles FROM public.list_of_republic_of_doyle_episodes WHERE lower("directed by") LIKE '%perry chafe%';
+Result:
+[{"titles": null}]
+
+3) Broader variation check in "directed by" for any occurrence of 'perry' or 'chafe'
+SQL:
+SELECT COUNT(*) AS match_count FROM public.list_of_republic_of_doyle_episodes WHERE lower("directed by") LIKE '%perry%' OR lower("directed by") LIKE '%chafe%';
+Result:
+match_count = 0
+
+SQL:
+SELECT COALESCE(array_agg(DISTINCT "directed by"), ARRAY[]::text[]) AS matches FROM public.list_of_republic_of_doyle_episodes WHERE lower("directed by") LIKE '%perry%' OR lower("directed by") LIKE '%chafe%';
+Result:
+matches = []
+
+Context (not part of the claim, but helps explain possible confusion)
+- Perry Chafe appears in the "written by" field for some episodes, confirming the person is in this series' credits but as a writer, not a director in this dataset.
+SQL:
+SELECT DISTINCT "written by" FROM public.list_of_republic_of_doyle_episodes WHERE "written by" ILIKE '%perry%' OR "written by" ILIKE '%chafe%';
+Results include:
+- allan hawco , perry chafe and malcolm macrury
+- perry chafe
+
+SQL:
+SELECT COUNT(*) AS episode_count FROM public.list_of_republic_of_doyle_episodes WHERE "written by" ILIKE '%perry%' OR "written by" ILIKE '%chafe%';
+Result:
+- episode_count: 3
+
+Conclusion
+- The table of Republic of Doyle episodes shows zero episodes directed by Perry Chafe. Therefore, the claim that there are 2 episodes in the series directed by Perry Chafe is not supported by the data.
+
+Assumptions
+- "the series" refers to Republic of Doyle, as it is the only TV-episode series data available in the connected data sources.
+- Case-insensitive substring matching was used to catch potential formatting variations (e.g., "Perry J. Chafe"). No matches were found even with broader "perry" or "chafe" search.
+- The connected data source is treated as authoritative within its scope, per instructions.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

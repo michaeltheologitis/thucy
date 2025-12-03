@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+the most highly attended game be against minnesota at the prudential center
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The most highly attended game at the Prudential Center was against Minnesota.
+
+Data sources discovered:
+- public.t_2010_11_new_jersey_nets_season (New Jersey Nets, 2010–11 season), with attendance encoded in the text column "location attendance" (format like: "Prudential Center 18711").
+
+Evidence gathered
+1) Sampling the table for context
+Executed SQL:
+SELECT * FROM public.t_2010_11_new_jersey_nets_season LIMIT 15;
+Result excerpt (rows returned by the tool):
+- April 3 | 76 | Miami | … | Location Attendance: Prudential Center 18711
+- April 5 | 77 | Minnesota | … | Location Attendance: Prudential Center 13461
+- April 8 | 79 | New York | … | Location Attendance: Prudential Center 18023
+- April 11 | 81 | Charlotte | … | Location Attendance: Prudential Center 13853
+
+2) List all Prudential Center games and their attendances
+Executed SQL:
+SELECT date, team, "location attendance"
+FROM public.t_2010_11_new_jersey_nets_season
+WHERE "location attendance" ILIKE '%Prudential Center%';
+Results:
+- April 3 | Miami | Prudential Center 18,711
+- April 5 | Minnesota | Prudential Center 13,461
+- April 8 | New York | Prudential Center 18,023
+- April 11 | Charlotte | Prudential Center 13,853
+
+3) Order Prudential Center games by attendance (string order suffices here because the venue prefix is identical and the numeric suffix drives lexicographic order)
+Executed SQL:
+SELECT date, team, "location attendance"
+FROM public.t_2010_11_new_jersey_nets_season
+WHERE "location attendance" ILIKE '%Prudential Center%'
+ORDER BY "location attendance" DESC;
+Results (highest first):
+- April 3 | Miami | Prudential Center 18711
+- April 8 | New York | Prudential Center 18023
+- April 11 | Charlotte | Prudential Center 13853
+- April 5 | Minnesota | Prudential Center 13461
+
+Assessment
+- The highest recorded attendance at the Prudential Center in this dataset is 18,711 for the game vs Miami (April 3).
+- The Minnesota game at the Prudential Center (April 5) had 13,461 attendance, which is not the highest among Prudential Center games shown.
+
+Conclusion
+- The claim that the most highly attended game was against Minnesota at the Prudential Center is not supported by the data; the top attendance in this dataset is vs Miami, not Minnesota.
+
+Assumptions
+- The claim refers to the New Jersey Nets’ 2010–11 season home games at the Prudential Center, as represented in the available table. The dataset is treated as authoritative within its scope.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

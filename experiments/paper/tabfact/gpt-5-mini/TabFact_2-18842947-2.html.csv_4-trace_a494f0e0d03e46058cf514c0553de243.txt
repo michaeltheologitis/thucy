@@ -1,0 +1,85 @@
+
+<userQuery>
+<query>
+the packer score the least amount of point (6) in a game versus the lion
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The Packers scored the fewest points (6) of any opponent in a game versus the Lions during the scoped data we can access.
+
+Data sources explored
+- Database: TabFact (Postgres), schema: public
+- Relevant table: t_1976_detroit_lions_season (columns: week, date, opponent, result, attendance)
+
+Step 1 — Identify Lions vs. Packers games in 1976
+Executed SQL:
+SELECT week, date, opponent, result, opponent AS raw_opponent, result AS raw_result
+FROM t_1976_detroit_lions_season
+WHERE opponent ILIKE '%Green Bay%' OR opponent ILIKE '%Packers%'
+ORDER BY week;
+
+Evidence returned:
+- Week 4 — october 3 , 1976 — opponent: green bay packers — result: l 24 - 14
+- Week 8 — october 31 , 1976 — opponent: green bay packers — result: w 27 - 6
+
+Interpretation: On October 31, 1976, the Lions beat the Packers 27–6, meaning the Packers scored 6 points in that game.
+
+Step 2 — Determine the minimum opponent points across all Lions games in 1976
+Parsing approach: Extract the two numeric scores from the result string. If result starts with 'w', the second score is the opponent's; if it starts with 'l', the first score is the opponent's.
+
+Executed SQL (verify extraction of the two numbers):
+SELECT week, result, regexp_matches(result, '(\\d+)\\s*-\\s*(\\d+)') AS arr
+FROM public.t_1976_detroit_lions_season
+ORDER BY week;
+
+Executed SQL (compute opponent_points for each game):
+SELECT week, date, opponent, result, first_score, second_score,
+ CASE WHEN lower(left(result,1))='w' THEN second_score WHEN lower(left(result,1))='l' THEN first_score ELSE NULL END AS opponent_points
+FROM (
+ SELECT week, date, opponent, result,
+  (regexp_matches(result, '(\\d+)\\s*-\\s*(\\d+)'))[1]::int AS first_score,
+  (regexp_matches(result, '(\\d+)\\s*-\\s*(\\d+)'))[2]::int AS second_score
+ FROM public.t_1976_detroit_lions_season
+) AS sub
+ORDER BY week;
+
+Executed SQL (find minimum opponent_points):
+SELECT MIN(CASE WHEN lower(left(result,1))='w' THEN second_score WHEN lower(left(result,1))='l' THEN first_score END) AS min_opponent_points
+FROM (
+ SELECT result, (regexp_matches(result, '(\\d+)\\s*-\\s*(\\d+)'))[1]::int AS first_score,
+        (regexp_matches(result, '(\\d+)\\s*-\\s*(\\d+)'))[2]::int AS second_score
+ FROM public.t_1976_detroit_lions_season
+) AS sub;
+
+Result: min_opponent_points = 6
+
+Executed SQL (list games with opponent_points = 6):
+SELECT week, date, opponent, result
+FROM (
+ SELECT week, date, opponent, result,
+  (regexp_matches(result, '(\\d+)\\s*-\\s*(\\d+)'))[1]::int AS first_score,
+  (regexp_matches(result, '(\\d+)\\s*-\\s*(\\d+)'))[2]::int AS second_score
+ FROM public.t_1976_detroit_lions_season
+) AS t
+WHERE CASE WHEN lower(left(result,1))='w' THEN second_score WHEN lower(left(result,1))='l' THEN first_score END = 6
+ORDER BY week;
+
+Evidence returned:
+- Week 8 — october 31 , 1976 — green bay packers — w 27 - 6
+
+Conclusion
+- Within the 1976 Detroit Lions season, the fewest points scored by any opponent in a game against the Lions was 6, and that opponent was the Green Bay Packers (Week 8, 27–6).
+
+Final assessment of the claim
+- The claim is supported by the available data when interpreted as referring to the 1976 Lions season.
+
+Assumptions
+- Scope: The claim is interpreted to pertain to the 1976 Detroit Lions season (the only season available in the data). No inference is made beyond 1976.
+- Parsing: In result strings, for 'w' entries the second number is the opponent’s score; for 'l' entries the first number is the opponent’s score.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

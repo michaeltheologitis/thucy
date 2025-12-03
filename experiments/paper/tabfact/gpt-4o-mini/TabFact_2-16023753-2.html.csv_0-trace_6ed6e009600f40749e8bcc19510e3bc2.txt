@@ -1,0 +1,54 @@
+
+<userQuery>
+<query>
+the dolphin finish the regular season with a 12 - 4 record
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “the dolphin finish the regular season with a 12 - 4 record.”
+
+Scope of verification: Based on the available data source, this claim is interpreted as referring to the Miami Dolphins’ 1983 NFL regular season.
+
+What the data shows:
+- The 1983 Miami Dolphins played 16 regular-season games.
+- Classification of game outcomes from the season table shows 12 wins and 4 losses (0 ties).
+
+Supporting evidence and exact executed SQL:
+1) Outcome classification (wins/losses/ties) from the result field
+SQL:
+SELECT
+    CASE
+        WHEN LOWER(SUBSTRING(result FROM 1 FOR 1)) = 'w' THEN 'Win'
+        WHEN LOWER(SUBSTRING(result FROM 1 FOR 1)) = 'l' THEN 'Loss'
+        WHEN LOWER(SUBSTRING(result FROM 1 FOR 1)) = 't' THEN 'Tie'
+        ELSE 'Unknown'
+    END AS game_outcome,
+    COUNT(*) AS total_count
+FROM
+    public.t_1983_miami_dolphins_season
+GROUP BY
+    game_outcome;
+Result summary: Win = 12, Loss = 4, Tie = 0
+
+2) Total number of regular-season games
+SQL:
+SELECT COUNT(*) AS total_rows FROM public.t_1983_miami_dolphins_season;
+Result: total_rows = 16
+
+3) Cross-check of wins and losses via prefix matching
+SQL:
+SELECT COUNT(CASE WHEN result LIKE 'w%' THEN 1 END) AS wins, COUNT(CASE WHEN result LIKE 'l%' THEN 1 END) AS losses FROM t_1983_miami_dolphins_season;
+Result: wins = 12, losses = 4
+
+Conclusion: The data supports that the Miami Dolphins finished the 1983 regular season with a 12–4 record.
+
+Assumptions made:
+- “the dolphin” refers to the NFL’s Miami Dolphins.
+- The claim pertains to the 1983 season because the available authoritative dataset is the table public.t_1983_miami_dolphins_season, which contains the 1983 season’s game results.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

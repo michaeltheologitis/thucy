@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+canon yaoundé score 5 more point than their opponent
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Scope and interpretation
+- I interpreted the claim within the only available data source: the 1971 African Cup of Champions Clubs table. I treat “point” as “goals” and assess whether Canon Yaoundé scored 5 more goals than their opponent in the recorded tie(s).
+
+Data source discovery
+- Available database: TabFact
+- Table: public.t_1971_african_cup_of_champions_clubs
+- Columns: team 1 (text), agg (text), team 2 (text), 1st leg (text), 2nd leg (text)
+
+Evidence 1: Identify Canon Yaoundé’s tie and aggregate score
+Executed SQL:
+SELECT "team 1", "team 2", agg, "1st leg", "2nd leg"
+FROM public.t_1971_african_cup_of_champions_clubs
+WHERE LOWER("team 1") LIKE '%canon%' OR LOWER("team 1") LIKE '%yaound%'
+   OR LOWER("team 2") LIKE '%canon%' OR LOWER("team 2") LIKE '%yaound%';
+
+Result:
+- team 1: canon yaoundé | team 2: as solidarité | agg: 9 - 4 | 1st leg: 7 - 3 | 2nd leg: 2 - 1
+
+Evidence 2: Compute aggregate goal difference
+Executed SQL:
+SELECT "team 1", "team 2", agg, 
+       (CAST(SPLIT_PART(agg, '-', 1) AS INTEGER) - CAST(SPLIT_PART(agg, '-', 2) AS INTEGER)) AS goal_difference 
+FROM public.t_1971_african_cup_of_champions_clubs 
+WHERE "team 1" = 'canon yaoundé';
+
+Result:
+- goal_difference: 5 (9 - 4)
+
+Assessment
+- The available data shows Canon Yaoundé beat AS Solidarité on aggregate 9–4, which is a +5 goal margin. This directly supports the claim that they “score 5 more point than their opponent,” interpreted as goals in this tie.
+
+Assumptions
+- “Point” is interpreted as “goals” in the context of match/tie scoring.
+- The claim refers to the recorded 1971 African Cup of Champions Clubs tie present in the dataset.
+- Matching is case- and accent-insensitive for identification of Canon Yaoundé.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

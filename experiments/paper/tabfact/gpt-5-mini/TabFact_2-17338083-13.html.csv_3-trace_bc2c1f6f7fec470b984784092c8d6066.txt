@@ -1,0 +1,60 @@
+
+<userQuery>
+<query>
+xi or xian be the name when the state be jin and the title be duke
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- I checked the available data source (TabFact PostgreSQL, public schema) and found one relevant table: public.list_of_state_leaders_in_820s_bc. It lists leaders by state, name, and title for the 820s BC.
+- In this dataset, the State of Jin has leaders named “xi” and “xian,” but their title is “marquis,” not “duke.” There are no entries where state = Jin and title = Duke.
+
+Evidence and executed SQL
+1) Inspect formatting of states and titles
+SQL:
+SELECT DISTINCT state FROM public.list_of_state_leaders_in_820s_bc ORDER BY state;
+Result states:
+- cai, cao, chen, chu, jin, lu, qi, qin, song, wey, yan
+
+SQL:
+SELECT DISTINCT title FROM public.list_of_state_leaders_in_820s_bc ORDER BY title;
+Result titles:
+- count, duke, marquis, ruler, viscount
+
+2) Show all rows for state = 'jin'
+SQL:
+SELECT name, title FROM public.list_of_state_leaders_in_820s_bc WHERE state = 'jin';
+Results:
+- name: xi, title: marquis
+- name: xian, title: marquis
+
+3) Check if any row has state = 'jin' AND title = 'duke'
+SQL:
+SELECT state, type, name, title, "royal house", "from" FROM public.list_of_state_leaders_in_820s_bc WHERE state = 'jin' AND title = 'duke';
+Result:
+- no rows returned
+
+4) Confirm that “duke” exists, but in other states
+SQL:
+SELECT state, type, name, title, "royal house", "from" FROM public.list_of_state_leaders_in_820s_bc WHERE title = 'duke';
+Results (excerpt):
+- chen — li — duke — 831 bc
+- lu — shen — duke — 854 bc
+- lu — wu — duke — 825 bc
+- qi — wu — duke — 850 bc
+- qi — li — duke — 824 bc
+- qin — zhuang — duke — 822 bc
+- song — hui — duke — 830 bc
+
+Conclusion
+- Within this authoritative dataset (leaders in the 820s BC), there are no cases where the State of Jin has a leader with the title “duke.” The Jin leaders with names “xi” and “xian” are titled “marquis,” not “duke.” Therefore, the claim that the name would be “xi or xian” when the state is Jin and the title is Duke is not supported by the data.
+
+Assumptions
+- The verification is constrained to the available dataset (list_of_state_leaders_in_820s_bc), which covers the 820s BC period. I used exact string matching as stored in the table (lowercase values for both state and title).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

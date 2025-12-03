@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+the highest attendance be 20066 , occur on 6 date
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "the highest attendance be 20066 , occur on 6 date"
+
+Data source explored
+- Database: public schema
+- Table: t_2003_04_detroit_red_wings_season
+- Relevant columns: date (text), attendance (bigint)
+
+Evidence and executed SQL
+1) What is the maximum attendance?
+SQL:
+SELECT MAX(attendance) AS max_attendance FROM public.t_2003_04_detroit_red_wings_season;
+Result: 20,066
+
+2) On which dates did the maximum attendance occur, and how many such dates are there?
+SQL (list dates):
+SELECT date FROM public.t_2003_04_detroit_red_wings_season WHERE attendance = (SELECT MAX(attendance) FROM public.t_2003_04_detroit_red_wings_season);
+Resulting dates: January 3, January 5, January 7, January 14, January 16, January 29, January 31
+
+SQL (count games with max attendance):
+SELECT COUNT(*) AS game_count
+FROM public.t_2003_04_detroit_red_wings_season
+WHERE attendance = (SELECT MAX(attendance) FROM public.t_2003_04_detroit_red_wings_season);
+Result: 7 games
+
+SQL (count distinct dates with max attendance):
+SELECT COUNT(DISTINCT date) AS distinct_date_count
+FROM public.t_2003_04_detroit_red_wings_season
+WHERE attendance = (SELECT MAX(attendance) FROM public.t_2003_04_detroit_red_wings_season);
+Result: 7 distinct dates
+
+3) Full context for the max-attendance rows
+SQL:
+SELECT date, visitor, home, attendance 
+FROM public.t_2003_04_detroit_red_wings_season 
+WHERE attendance = (SELECT MAX(attendance) FROM public.t_2003_04_detroit_red_wings_season) 
+ORDER BY date;
+Rows:
+- January 3 — Anaheim at Detroit — 20,066
+- January 5 — Nashville at Detroit — 20,066
+- January 7 — Boston at Detroit — 20,066
+- January 14 — Chicago at Detroit — 20,066
+- January 16 — Phoenix at Detroit — 20,066
+- January 29 — New Jersey at Detroit — 20,066
+- January 31 — Carolina at Detroit — 20,066
+
+Conclusion
+- True: The highest attendance is 20,066.
+- False: It occurred on 6 dates. The data show it occurred on 7 distinct dates.
+
+Assumptions
+- Interpreted the claim as referring to the connected dataset (Detroit Red Wings 2003–04 season) and that “occur on 6 date” means “occurred on six distinct dates.”
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

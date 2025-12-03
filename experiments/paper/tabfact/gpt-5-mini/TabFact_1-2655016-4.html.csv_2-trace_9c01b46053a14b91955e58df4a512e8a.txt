@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+the episode call aaliyah be show later than the episode that have nick production number 1 higher
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The episode titled "aaliyah" was shown (aired) later than the episode whose Nickelodeon production number is exactly 1 higher.
+
+Summary of finding: Supported by the data in the TabFact public.list_of_all_that_episodes table. "aaliyah" (nick prod 353) aired on October 4, 1997; the episode with nick prod 354 ("az yet") aired on September 27, 1997. Therefore, "aaliyah" aired later.
+
+Evidence and executed SQL
+1) Locate the episode titled "aaliyah"
+SQL:
+SELECT season, series, "episode title", "original air date", "nick prod"
+FROM list_of_all_that_episodes
+WHERE lower("episode title") = 'aaliyah';
+Result:
+[{"episode title":"aaliyah","nick prod":353,"original air date":"october 4 , 1997","season":16,"series":53}]
+
+2) Find the episode with Nickelodeon production number exactly one higher (353 + 1 = 354)
+SQL:
+SELECT season, series, "episode title", "original air date", "nick prod"
+FROM list_of_all_that_episodes
+WHERE "nick prod" = 354;
+Result:
+[{"episode title":"az yet","nick prod":354,"original air date":"september 27 , 1997","season":17,"series":54}]
+
+3) Parse dates and compare whether "aaliyah" aired later
+SQL:
+WITH a AS (
+  SELECT "original air date" AS a_text,
+         to_date(initcap(regexp_replace("original air date",'\\s*,\\s*',',')), 'FMMonth DD, YYYY') AS a_date,
+         "nick prod" AS a_nick
+  FROM list_of_all_that_episodes
+  WHERE lower("episode title") = 'aaliyah'
+), b AS (
+  SELECT "original air date" AS b_text,
+         to_date(initcap(regexp_replace("original air date",'\\s*,\\s*',',')), 'FMMonth DD, YYYY') AS b_date,
+         "nick prod" AS b_nick
+  FROM list_of_all_that_episodes
+  WHERE "nick prod" = (SELECT a_nick + 1 FROM a)
+)
+SELECT a.a_text, a.a_date, a.a_nick, b.b_text, b.b_date, b.b_nick, (a.a_date > b.b_date) AS a_aired_later
+FROM a CROSS JOIN b;
+Result:
+[{"a_text":"october 4 , 1997","a_date":"1997-10-04T00:00:00Z","a_nick":353,"b_text":"september 27 , 1997","b_date":"1997-09-27T00:00:00Z","b_nick":354,"a_aired_later":true}]
+
+Conclusion: The data show that "aaliyah" aired on 1997-10-04, which is later than 1997-09-27 for the episode with nick prod 354. This confirms the claim.
+
+Assumptions made:
+- "Episode call aaliyah" refers to the episode whose title text equals "aaliyah" (case-insensitive) in public.list_of_all_that_episodes.
+- "Nick production number 1 higher" means the row with "nick prod" exactly equal to (the "aaliyah" episode's nick prod) + 1.
+- "Be show later" refers to later original air date.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

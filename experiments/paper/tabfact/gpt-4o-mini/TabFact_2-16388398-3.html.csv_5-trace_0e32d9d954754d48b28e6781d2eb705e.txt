@@ -1,0 +1,46 @@
+
+<userQuery>
+<query>
+st kilda be the away team on monday , 14 february
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Scope and data sources
+- Discovered a single available dataset: a PostgreSQL table named t_2000_ansett_australia_cup (2000 AFL Ansett Australia Cup). Columns: "home team" (text), "home team score" (text), "away team" (text), "away team score" (text), ground (text), crowd (bigint), date (text).
+
+Claim interpreted
+- Claim: “St Kilda be the away team on Monday, 14 February.” Interpreted within the only available dataset (the 2000 Ansett Australia Cup) as asserting that St Kilda were the away team on 14 February in that competition.
+
+Evidence from the data (with executed SQL)
+1) Test for an exact date key format and St Kilda as away team
+SQL:
+SELECT * FROM t_2000_ansett_australia_cup WHERE date = '2000-02-14' AND "away team" = 'St Kilda';
+Result: No rows returned.
+
+2) Identify the fixture(s) on 14 February and see who the away team was
+SQL:
+SELECT date, "home team", "away team", ground 
+FROM t_2000_ansett_australia_cup 
+WHERE date LIKE '%14%';
+Result returned a match on 14 February with details: Home team: Geelong; Away team: Melbourne; Ground: Waverley Park. (This shows the away team on 14 February in this dataset was Melbourne, not St Kilda.)
+
+3) Check if weekday text exists in the date field (to confirm whether weekday is stored)
+SQL:
+SELECT DISTINCT date FROM t_2000_ansett_australia_cup WHERE date LIKE '%Mon%' OR date LIKE '%Monday%';
+Result: No rows returned (indicating weekday names are not stored in the date text field in this dataset).
+
+Assessment
+- The dataset shows that on 14 February (within the 2000 Ansett Australia Cup), the away team was Melbourne, not St Kilda. No record indicates St Kilda were the away team on that date in this dataset.
+
+Conclusion
+- The claim is not supported by the available data. In the only accessible dataset (2000 Ansett Australia Cup), St Kilda were not the away team on 14 February; Melbourne were.
+
+Assumptions
+- Since only the 2000 Ansett Australia Cup table is available, I assumed the claim pertains to that competition/year. The dataset’s date field is text and may not include the weekday; verification is based on the date string containing “14 February,” not the weekday label.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

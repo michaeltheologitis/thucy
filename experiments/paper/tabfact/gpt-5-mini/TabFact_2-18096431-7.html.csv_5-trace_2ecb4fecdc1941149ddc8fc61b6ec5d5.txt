@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+kenny perry be the player who earn the most money
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim evaluated: “Kenny Perry [is] the player who earned the most money.”
+
+Data source overview
+- Available database: TabFact (Postgres). Relevant table discovered: public.t_1996_pga_championship(place text, player text, country text, score text, "to par" text, money bigint). This table tracks players and prize money for the 1996 PGA Championship.
+
+Evidence from data
+1) Identify the maximum prize money awarded in the event
+SQL executed:
+SELECT MAX(money) AS max_money FROM public.t_1996_pga_championship;
+Result:
+max_money = 430000
+
+2) Find the player(s) who received the maximum money
+SQL executed:
+SELECT player, place, money, score FROM public.t_1996_pga_championship WHERE money = (SELECT MAX(money) FROM public.t_1996_pga_championship) ORDER BY money DESC;
+Result:
+player = mark brooks, place = 1, money = 430000, score = 68 + 70 + 69 + 70 = 277
+
+3) Locate Kenny Perry’s result and earnings
+SQL executed:
+SELECT place, player, money, score, "to par"
+FROM public.t_1996_pga_championship
+WHERE player ILIKE 'Kenny Perry' OR player ILIKE 'Perry, Kenny' OR player ILIKE '%Kenny Perry%' OR player ILIKE '%Perry, Kenny%';
+Result:
+place = 2, player = kenny perry, money = 260000, score = 66 + 72 + 71 + 68 = 277, to par = - 11
+
+4) Context: Top 5 earners in the event
+SQL executed:
+SELECT place, player, money FROM public.t_1996_pga_championship ORDER BY money DESC NULLS LAST LIMIT 5;
+Result:
+1 — mark brooks — 430000
+2 — kenny perry — 260000
+t3 — steve elkington — 140000
+t3 — tommy tolles — 140000
+t5 — justin leonard — 86667
+
+Conclusion
+- In the 1996 PGA Championship, the player who earned the most money was Mark Brooks ($430,000). Kenny Perry finished second with $260,000. Therefore, the claim is not supported by the available data.
+
+Assumptions
+- Because the only relevant available table concerns the 1996 PGA Championship, I interpret the claim as referring to this event’s prize money. The claim is not evaluated for other seasons or all-time earnings.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

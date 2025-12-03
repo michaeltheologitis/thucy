@@ -1,0 +1,63 @@
+
+<userQuery>
+<query>
+a mintage of 31997 have an issue price of 59.95
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “a mintage of 31997 have an issue price of 59.95.”
+
+Data source inspected
+- Database: TabFact (postgres_tabfact6), schema: public
+- Table: royal_canadian_mint_numismatic_coins_2000s
+  - Columns: year (bigint), theme (text), artist (text), mintage (text), "issue price" (double precision)
+
+Evidence from executed SQL
+1) Direct search for entries with mintage 31,997 and issue price 59.95
+SQL:
+SELECT year, theme, artist, mintage, "issue price"
+FROM public.royal_canadian_mint_numismatic_coins_2000s
+WHERE "issue price" = 59.95
+  AND (
+    REPLACE(TRIM(mintage), ',', '') = '31997'
+    OR TRIM(mintage) ILIKE '%31,997%'
+    OR TRIM(mintage) ILIKE '%31997%'
+  );
+Result:
+- year: 2003 | theme: hmcs bras dor | artist: don curley | mintage: 31997 | issue price: 59.95
+
+2) Cross-check by normalizing mintage to digits only
+SQL:
+SELECT year, theme, artist, mintage, "issue price"
+FROM public.royal_canadian_mint_numismatic_coins_2000s
+WHERE regexp_replace(mintage, '[^0-9]', '', 'g') = '31997';
+Result:
+- year: 2003 | theme: hmcs bras dor | artist: don curley | mintage: 31997 | issue price: 59.95
+
+3) Context: all entries with issue price 59.95
+SQL:
+SELECT year, theme, artist, mintage
+FROM public.royal_canadian_mint_numismatic_coins_2000s
+WHERE "issue price" = 59.95
+ORDER BY year;
+Excerpt of results (selected lines):
+- 2000 — steam buggy — john mardon — 44367
+- 2001 — the russell light four — john mardon — 41828
+- 2002 — the gray - dort — john mardon — 35944
+- 2003 — hmcs bras dor — don curley — 31997  ← matches the claim
+(Additional lines showed related “included in …” set components with the same issue price.)
+
+Conclusion
+- The dataset contains a coin entry with mintage 31,997 and an issue price of 59.95: the 2003 “HMCS Bras d'Or” (artist: Don Curley). This directly supports the claim.
+
+Assumptions made
+- The claim refers to at least one item (i.e., existence) rather than all items with that mintage.
+- Prices are in Canadian dollars and the context is Royal Canadian Mint numismatic issues from the 2000s, per the table’s scope.
+- Mintage is compared in normalized numeric form to account for potential comma formatting in the text field.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

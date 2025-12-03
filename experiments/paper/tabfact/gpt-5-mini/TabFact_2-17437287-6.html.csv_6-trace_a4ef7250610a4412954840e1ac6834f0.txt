@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+the score of the game when birmingham city be the home team be 0 - 0
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The user asserts that when Birmingham City are the home team, the score of the game is 0–0.
+
+Data sources discovered
+- Available source: postgres_tabfact32 (TabFact), public schema.
+- Relevant table discovered: public.t_1983_84_fa_cup with columns: "tie no" (text), "home team" (text), "score" (text), "away team" (text), "date" (text).
+
+What I checked
+1) Whether any record exists in the table with Birmingham City as the home team and a 0–0 score (handling dash/space variations).
+2) What the actual scores are for any rows where Birmingham City are the home team.
+
+Executed SQL evidence and results
+1) Inspect how Birmingham is recorded (case-insensitive search):
+SQL:
+SELECT DISTINCT "home team" FROM public.t_1983_84_fa_cup WHERE "home team" ILIKE '%Birmingham%';
+Result:
+- birmingham city
+
+2) Retrieve all rows where Birmingham City are the home team (to see the actual scores):
+SQL:
+SELECT "tie no", "home team", "score", "away team", "date"
+FROM public.t_1983_84_fa_cup
+WHERE "home team" ILIKE 'birmingham city'
+ORDER BY "date";
+Result:
+- tie no: 4 | home team: birmingham city | score: 1 - 3 | away team: watford | date: 10 march 1984
+
+3) Directly test for 0–0 after normalizing the score by removing non-digits (to allow for different dash characters and spaces):
+SQL:
+SELECT "tie no", "home team", "score", "away team", "date"
+FROM public.t_1983_84_fa_cup
+WHERE lower("home team") = 'birmingham city'
+  AND regexp_replace("score", '[^0-9]', '', 'g') = '00';
+Result: 0 rows returned
+
+4) Alternative exact-case attempt (to demonstrate normalization necessity):
+SQL:
+SELECT "tie no", "home team", "score", "away team", "date"
+FROM public.t_1983_84_fa_cup
+WHERE "home team" = 'Birmingham City'
+  AND regexp_replace("score", '[^0-9]', '', 'g') = '00';
+Result: 0 rows returned
+
+Assessment
+- In the available authoritative dataset (1983–84 FA Cup), Birmingham City have one home match recorded, and its score is 1–3 versus Watford (10 March 1984). There are no entries with Birmingham City as the home team and a 0–0 score.
+- Therefore, the claim that the score (when Birmingham City are the home team) is 0–0 is contradicted by the data in this source.
+
+Conclusion
+- The claim is not supported by the evidence found in the available data.
+
+Assumptions and scope notes
+- The only accessible football-related data in the connected source is the table public.t_1983_84_fa_cup; conclusions are made within this scope. If the claim referred to a different competition/season not present in this dataset, it cannot be assessed here. Names were matched case-insensitively because the table stores team names in lowercase.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+zoë wanamaker play the character ariadne oliver
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Zoë Wanamaker played the character Ariadne Oliver.”
+
+Data sources explored:
+- Discovered a PostgreSQL database (TabFact), public schema, containing the table: public.list_of_agatha_christie_s_poirot_episodes.
+
+Evidence gathered from executed SQL queries:
+1) Identify table columns
+- SQL:
+  SELECT ordinal_position, column_name, data_type, character_maximum_length, is_nullable
+  FROM information_schema.columns
+  WHERE table_schema = 'public'
+    AND table_name = 'list_of_agatha_christie_s_poirot_episodes'
+  ORDER BY ordinal_position;
+- Result (per column):
+  - 1: actor (text)
+  - 2: character (text)
+  - 3: title / rank (text)
+  - 4: series (text)
+  - 5: years (text)
+  This confirms the table captures actor-character mappings and related details.
+
+2) Directly check for Zoë Wanamaker or Ariadne Oliver
+- SQL:
+  SELECT *
+  FROM public.list_of_agatha_christie_s_poirot_episodes
+  WHERE actor ILIKE '%wanamaker%'
+     OR "character" ILIKE '%ariadne oliver%';
+- Result (1 row):
+  - actor: zoë wanamaker
+  - character: ariadne oliver
+  - title / rank: crime novelist
+  - series: 10 - 13
+  - years: 2006 - 2013
+
+Conclusion:
+- The table explicitly lists “zoë wanamaker” as the actor for the character “ariadne oliver,” confirming the claim.
+
+Assumptions:
+- Interpreted the user’s message as the claim that Zoë Wanamaker portrayed Ariadne Oliver (not merely sharing a scene or being associated with the character).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

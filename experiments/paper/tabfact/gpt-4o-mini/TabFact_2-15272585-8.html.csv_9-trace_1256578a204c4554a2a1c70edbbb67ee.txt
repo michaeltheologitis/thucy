@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+on average , galina voskoboeva lose with only 4 point against oleksandra kravets and alice canepa
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of finding
+The claim says: “On average, Galina Voskoboeva loses by only 4 points against Oleksandra Kravets and Alice Canepa.” In the authoritative dataset available, all recorded matches by Galina Voskoboeva against these two opponents are wins, not losses. Therefore, the claim is contradicted by the data.
+
+Evidence from the data (with executed SQL)
+1) Identify whether these opponents exist in the dataset
+- Result: Both opponents appear in the data as opponent names.
+- Executed SQL:
+SELECT DISTINCT opponent FROM public.galina_voskoboeva WHERE opponent ILIKE '%Kra%' OR opponent ILIKE '%Oleks%' OR opponent ILIKE '%Alex%' OR opponent ILIKE '%Alice%';
+- Returned values:
+  • oleksandra kravets
+  • alice canepa
+
+2) Retrieve all matches vs these opponents
+- Result: Two matches found, both wins for Voskoboeva.
+- Executed SQL:
+SELECT date, tournament, surface, opponent, outcome, score 
+FROM public.galina_voskoboeva 
+WHERE opponent IN ('oleksandra kravets', 'alice canepa') 
+ORDER BY date;
+- Returned rows:
+  • Date: 29 June 2003 | Opponent: Oleksandra Kravets | Tournament: Mont - de - Marsan | Surface: Hard (I) | Outcome: Winner | Score: 6 - 4, 6 - 2
+  • Date: 6 June 2006 | Opponent: Alice Canepa       | Tournament: Cuneo, Italy      | Surface: Clay     | Outcome: Winner | Score: 6 - 1, 6 - 2
+
+3) Check if there are any recorded losses vs these opponents
+- Result: Zero losses recorded vs either opponent.
+- Executed SQL:
+SELECT COUNT(*) AS match_count
+FROM galina_voskoboeva
+WHERE outcome ILIKE 'runner - up'
+AND opponent ILIKE ANY (ARRAY['oleksandra kravets', 'alice canepa']);
+- Returned value:
+  • match_count = 0
+
+Interpretation
+- The dataset shows that Galina Voskoboeva did not lose to either Oleksandra Kravets or Alice Canepa in the recorded matches; she won both encounters by comfortable margins (6-4, 6-2 and 6-1, 6-2). Consequently, the statement that she “loses … by only 4 points on average” against these opponents is not supported—there are no losses to average.
+
+Assumptions and notes
+- The term “4 point” is ambiguous in tennis context. If intended to mean “games” rather than points, the conclusion remains unchanged since the data shows wins, not losses.
+- All verification is grounded strictly in the available table public.galina_voskoboeva, which is treated as the authoritative source per instructions.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

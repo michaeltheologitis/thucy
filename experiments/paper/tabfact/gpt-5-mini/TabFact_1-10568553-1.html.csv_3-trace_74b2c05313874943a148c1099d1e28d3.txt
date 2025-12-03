@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+12.8 be 1 of the milepost list for the location rockland
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “12.8 be 1 of the milepost list for the location rockland.”
+
+Data source exploration
+- Discovered database: postgres_tabfact20 (TabFact), public schema.
+- Relevant table identified: massachusetts_route_139 with columns: county (text), location (text), street names (text), milepost (text), roads intersected (text), notes (text).
+
+Evidence gathered
+1) Retrieve all rows where location includes Rockland and inspect mileposts
+- Executed SQL:
+SELECT * FROM public.massachusetts_route_139 WHERE location ILIKE '%Rockland%';
+- Result (abridged):
+  - {county: "plymouth", location: "rockland", milepost: "12.2", street names: "north avenue plain street market street", roads intersected: "route 123", notes: "western terminus of route 123 / 139 concurrency"}
+  - {county: "plymouth", location: "rockland", milepost: "12.8", street names: "north avenue plain street market street", roads intersected: "route 123", notes: "eastern terminus of route 123 / 139 concurrency"}
+- Interpretation: For Rockland, the table lists mileposts 12.2 and 12.8.
+
+2) Confirm numeric equality to 12.8 (handling text storage of milepost)
+- Executed SQL:
+SELECT * FROM public.massachusetts_route_139 WHERE location ILIKE '%Rockland%' AND milepost ~ '^[0-9]+(\.[0-9]+)?$' AND CAST(milepost AS numeric) = 12.8;
+- Result: One row matches (milepost = "12.8"), same row as above.
+- Interpretation: There is a Rockland row whose milepost is numerically 12.8.
+
+3) Check textual containment of "12.8" in milepost
+- Executed SQL:
+SELECT * FROM public.massachusetts_route_139 WHERE location ILIKE '%Rockland%' AND milepost ILIKE '%12.8%';
+- Result: One row matches (milepost = "12.8").
+- Interpretation: The milepost list for Rockland includes the text "12.8".
+
+Conclusion
+- The data show that for location Rockland in the massachusetts_route_139 table, 12.8 is indeed one of the milepost values (alongside 12.2). This supports the claim.
+
+Assumptions
+- “Location rockland” refers to rows where the location column equals/contains “rockland” (case-insensitive) in the massachusetts_route_139 table.
+- “Be 1 of the milepost list” means there exists at least one row for Rockland whose milepost value equals 12.8 (as text and as numeric).
+- The massachusetts_route_139 table is the authoritative source for this route/location’s milepost listings within the accessible data.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

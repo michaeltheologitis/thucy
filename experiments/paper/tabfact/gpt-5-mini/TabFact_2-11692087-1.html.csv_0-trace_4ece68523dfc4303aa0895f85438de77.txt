@@ -1,0 +1,52 @@
+
+<userQuery>
+<query>
+the coquitlam adanacs have make 1177 point over 45 season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim being checked: "the coquitlam adanacs have make 1177 point over 45 season" (interpreted as: the franchise accumulated 1,177 standings points across 45 seasons).
+
+What the data shows:
+- There are 45 distinct season rows (years 1965–2009) for this franchise in the dataset, excluding a non-year aggregate row labeled "total".
+- Summing points across those 45 seasons yields 1,177 total points.
+- Within those 45 seasons, the team name appears as "coquitlam adanacs" in 44 seasons and "portland adanacs" in 1 season; together they total 1,177 points.
+
+Supporting evidence (with exact executed SQL and returned results):
+
+1) Identify season values (to detect and exclude non-year rows like "total")
+SQL:
+SELECT DISTINCT season FROM public.coquitlam_adanacs ORDER BY season;
+Results (truncated to relevant insight):
+[{"season":"1965"}, {"season":"1966"}, ..., {"season":"2009"}, {"season":"total"}]
+
+2) Count distinct seasons and sum points for real year rows only
+SQL:
+SELECT COUNT(DISTINCT season) AS season_count, SUM(points) AS total_points, MIN(season::int) AS first_season, MAX(season::int) AS last_season FROM public.coquitlam_adanacs WHERE season ~ '^[0-9]{4}$';
+Result:
+[{"season_count":45, "total_points":1177, "first_season":1965, "last_season":2009}]
+
+3) Break down seasons and points by recorded team name (for year rows only)
+SQL:
+SELECT "team name" AS team_name, COUNT(*) AS total_seasons, SUM(points) AS total_points
+FROM public.coquitlam_adanacs
+WHERE season ~ '^[0-9]{4}$'
+GROUP BY "team name"
+ORDER BY total_points DESC, team_name;
+Results:
+- coquitlam adanacs: total_seasons = 44, total_points = 1129
+- portland adanacs: total_seasons = 1, total_points = 48
+
+Conclusion: The dataset supports that this franchise recorded 1,177 total points across 45 seasons (1965–2009). If one restricts strictly to seasons where the team name is exactly "coquitlam adanacs," the totals are 1,129 points over 44 seasons, but the franchise total over 45 seasons is 1,177 points, matching the claim as commonly phrased.
+
+Assumptions made:
+- Excluded the non-year aggregate row season = "total" from counts and sums to avoid double counting.
+- Treated the single season labeled "portland adanacs" as part of the same franchise history reflected in the coquitlam_adanacs table when interpreting "coquitlam adanacs" in the claim.
+
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

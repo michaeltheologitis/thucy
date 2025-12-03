@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+curtis dickey and randy bielski be pick in round 2
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Curtis Dickey and Randy Bielski were picked in round 2.”
+
+Data source discovery
+- Accessible source: TabFact Postgres database, schema public.
+- Available table: indianapolis_colts_draft_history (round, pick, overall, name, position, college).
+
+Schema check (confirm available fields)
+Executed SQL:
+SELECT column_name, data_type FROM information_schema.columns WHERE table_name='indianapolis_colts_draft_history' ORDER BY ordinal_position;
+Returned:
+[{"column_name":"round","data_type":"bigint"}, {"column_name":"pick","data_type":"bigint"}, {"column_name":"overall","data_type":"bigint"}, {"column_name":"name","data_type":"text"}, {"column_name":"position","data_type":"text"}, {"column_name":"college","data_type":"text"}]
+Note: No year column; round information is present.
+
+Evidence: Curtis Dickey
+Executed SQL:
+SELECT round, pick, overall, name, position, college FROM indianapolis_colts_draft_history WHERE name ILIKE '%Curtis Dickey%';
+Returned:
+[{"college":"texas a&m","name":"curtis dickey","overall":5,"pick":5,"position":"running back","round":1}]
+Finding: Curtis Dickey is listed as a round 1 pick (not round 2).
+
+Evidence: Randy Bielski
+Executed SQL:
+SELECT round, pick, overall, name, position, college FROM indianapolis_colts_draft_history WHERE name ILIKE '%Randy Bielski%' OR name ILIKE '%Bielski%';
+Returned:
+[{"college":"towson","name":"randy bielski","overall":311,"pick":6,"position":"placekicker","round":12}]
+Finding: Randy Bielski is listed as a round 12 pick (not round 2).
+
+Conclusion
+- Curtis Dickey: Round 1 (not round 2).
+- Randy Bielski: Round 12 (not round 2).
+The claim that both were picked in round 2 is contradicted by the data.
+
+Assumptions
+- The claim refers to NFL draft selections for the Baltimore/Indianapolis Colts franchise, which is the scope of the available dataset.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

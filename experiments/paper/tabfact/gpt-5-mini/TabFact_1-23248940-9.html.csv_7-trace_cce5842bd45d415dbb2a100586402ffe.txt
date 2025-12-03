@@ -1,0 +1,69 @@
+
+<userQuery>
+<query>
+the second most rebound by a bobcat player in 1 game be 20
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+What I checked
+- Data source discovery identified a single relevant table: t_2009_10_charlotte_bobcats_season (TabFact / postgres_tabfact14), which contains per-game leaders including “high rebounds” for the 2009–10 Charlotte Bobcats season.
+
+Evidence from the data
+1) Top distinct single‑game rebound totals (parsed from the “high rebounds” column) and sample rows
+SQL executed:
+WITH parsed AS (
+  SELECT game, date, "high rebounds",
+    CASE WHEN "high rebounds" LIKE '%(%' THEN trim(trailing ')' FROM split_part("high rebounds", '(', 2))::int ELSE NULL END AS rebounds_int
+  FROM t_2009_10_charlotte_bobcats_season
+  WHERE "high rebounds" IS NOT NULL
+),
+ top5 AS (
+  SELECT DISTINCT rebounds_int FROM parsed WHERE rebounds_int IS NOT NULL ORDER BY rebounds_int DESC LIMIT 5
+)
+SELECT DISTINCT ON (p.rebounds_int) p.rebounds_int, p.game, p.date, p."high rebounds"
+FROM parsed p
+JOIN top5 t USING (rebounds_int)
+ORDER BY p.rebounds_int DESC, p.date ASC;
+
+Result (rebounds_int | game | date | "high rebounds"):
+- 20 | 51 | february 10 | nazr mohammed (20)
+- 17 | 48 | february 3  | nazr mohammed (17)
+- 12 | 53 | february 19 | tyrus thomas (12)
+- 11 | 54 | february 20 | tyrus thomas (11)
+- 10 | 47 | february 1  | gerald wallace (10)
+
+2) Player(s) and dates for the top two rebound totals
+SQL executed:
+WITH parsed AS (
+  SELECT game, date, "high rebounds",
+    CASE WHEN "high rebounds" LIKE '%(%' THEN trim(trailing ')' FROM split_part("high rebounds", '(', 2))::int ELSE NULL END AS rebounds_int,
+    trim(both ' ' FROM split_part("high rebounds", '(', 1)) AS player_text
+  FROM t_2009_10_charlotte_bobcats_season
+  WHERE "high rebounds" IS NOT NULL
+),
+ top2 AS (
+  SELECT DISTINCT rebounds_int FROM parsed WHERE rebounds_int IS NOT NULL ORDER BY rebounds_int DESC LIMIT 2
+ )
+SELECT p.rebounds_int, trim(both ' ' FROM regexp_split_to_table(p.player_text, ',')) AS player, p.date, p.game, p."high rebounds"
+FROM parsed p
+JOIN top2 t USING (rebounds_int)
+ORDER BY p.rebounds_int DESC, p.date ASC;
+
+Result (rebounds_int | player | date | game | "high rebounds"):
+- 20 | nazr mohammed | february 10 | 51 | nazr mohammed (20)
+- 17 | nazr mohammed | february 3  | 48 | nazr mohammed (17)
+
+Findings
+- In the available dataset (2009–10 Charlotte Bobcats season), the highest single‑game rebound total is 20 (Nazr Mohammed, Feb 10). The second‑highest is 17 (Nazr Mohammed, Feb 3).
+- Therefore, the statement that the second most rebounds by a Bobcats player in one game is 20 is contradicted by the data in this source.
+
+Assumptions
+- Interpreted “bobcat player” as a Charlotte Bobcats (NBA) player.
+- Verified within the scope of the only available relevant dataset (the 2009–10 season table). No franchise‑wide table was available in the connected data source.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

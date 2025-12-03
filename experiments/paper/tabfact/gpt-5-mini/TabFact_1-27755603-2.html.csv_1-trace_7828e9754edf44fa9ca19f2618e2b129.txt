@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+player greg monroe (7) score the highest number of rebound and player rodney stuckey (16) score the highest number of point in the game
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify
+- “player greg monroe (7) score the highest number of rebound and player rodney stuckey (16) score the highest number of point in the game.”
+
+What data I checked
+- Data source discovered: TabFact (postgres_tabfact10) → public.t_2010_11_detroit_pistons_season
+- Relevant columns: game, date, score, high points, high rebounds, high assists (text fields summarizing the game’s leading performers)
+
+Evidence from the database
+1) Locate Pistons 2010–11 games where Monroe or Stuckey appear as leaders
+SQL executed:
+SELECT game, date, score, "high points", "high rebounds", "high assists"
+FROM public.t_2010_11_detroit_pistons_season
+WHERE ("high rebounds" ILIKE '%Monroe%' OR "high rebounds" ILIKE '%Stuckey%' OR "high points" ILIKE '%Monroe%' OR "high points" ILIKE '%Stuckey%')
+ORDER BY game;
+
+Key returned row:
+- game: 3, date: october 11, score: w 94 - 85 (ot), high points: rodney stuckey (16), high rebounds: greg monroe (7), high assists: richard hamilton (7)
+
+2) Verify exact pairing (case-insensitive) of “greg monroe (7)” as high rebounds and “rodney stuckey (16)” as high points
+SQL executed:
+SELECT game, date, score, "high points", "high rebounds", "high assists"
+FROM public.t_2010_11_detroit_pistons_season
+WHERE LOWER("high rebounds") = LOWER('greg monroe (7)')
+  AND LOWER("high points") = LOWER('rodney stuckey (16)');
+
+Returned row:
+- game: 3, date: october 11, score: w 94 - 85 (ot), high points: rodney stuckey (16), high rebounds: greg monroe (7), high assists: richard hamilton (7)
+
+Assessment
+- For game 3 (october 11; score w 94 - 85 (ot)), the table explicitly records “high rebounds: greg monroe (7)” and “high points: rodney stuckey (16)”. This directly supports the claim that, in that game, Greg Monroe led in rebounds with 7 and Rodney Stuckey led in points with 16.
+
+Assumptions
+- The “high points” and “high rebounds” fields denote the leading performers for that game as stored in the team’s game log table. The claim is interpreted as referring to that specific game entry (game 3 on October 11) where these leaders are listed.
+
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

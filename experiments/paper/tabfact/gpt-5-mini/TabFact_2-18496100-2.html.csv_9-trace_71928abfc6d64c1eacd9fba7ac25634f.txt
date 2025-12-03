@@ -1,0 +1,58 @@
+
+<userQuery>
+<query>
+datia 's constituency number be lower than gohad 's by 10
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary:
+- Claim: “Datia’s constituency number is lower than Gohad’s by 10.”
+- Finding: According to the available constituency data, Datia’s number is 22 and Gohad’s is 13. Datia is not lower than Gohad by 10; it is higher by 9. The claim is contradicted by the data.
+
+Data source discovery:
+- Tool used: discover_data_sources
+- Finding: One PostgreSQL source (postgres_tabfact7) with a public table: public.bhind_lok_sabha_constituency, containing constituency names and numbers.
+
+Schema inspection:
+- Tool used: schema_query
+- Table: public.bhind_lok_sabha_constituency
+  - Columns: "constituency number" (text), "name" (text), "reserved for ( sc / st / none)" (text), "district" (text), "number of electorates (2009)" (bigint)
+
+Evidence queries and results (exact SQL shown):
+1) Retrieve entries for Datia and Gohad
+SQL executed:
+SELECT "name", "constituency number", "district" FROM public.bhind_lok_sabha_constituency WHERE lower("name") IN ('datia','gohad');
+Results:
+- Gohad — constituency number: 13; district: bhind
+- Datia — constituency number: 22; district: datia
+
+2) Independently fetch each and compute difference
+SQL executed:
+SELECT name, "constituency number" FROM public.bhind_lok_sabha_constituency WHERE name ILIKE '%Datia%';
+Result: [{"constituency number":"22","name":"datia"}]
+
+SQL executed:
+SELECT name, "constituency number" FROM public.bhind_lok_sabha_constituency WHERE name ILIKE '%Gohad%';
+Result: [{"constituency number":"13","name":"gohad"}]
+
+SQL executed:
+SELECT CAST(d."constituency number" AS integer) - CAST(g."constituency number" AS integer) AS difference
+FROM (SELECT "constituency number" FROM public.bhind_lok_sabha_constituency WHERE name ILIKE 'datia') d
+CROSS JOIN (SELECT "constituency number" FROM public.bhind_lok_sabha_constituency WHERE name ILIKE 'gohad') g;
+Result: [{"difference":9}]
+
+Assessment of the claim:
+- The claim requires: Datia = Gohad − 10.
+- Observed: Datia = 22, Gohad = 13. Therefore, Gohad − Datia = −9, not 10. Datia is higher than Gohad by 9, so the claim is false.
+
+Assumptions:
+- “Constituency number” refers to the number provided in the public.bhind_lok_sabha_constituency table’s "constituency number" field for the entries named “datia” and “gohad”.
+- Name matching is case-insensitive and matches the exact constituency names in the dataset.
+
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

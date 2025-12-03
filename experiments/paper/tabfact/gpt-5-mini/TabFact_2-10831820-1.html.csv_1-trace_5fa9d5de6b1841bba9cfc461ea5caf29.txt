@@ -1,0 +1,47 @@
+
+<userQuery>
+<query>
+the actor of the character ariadne oliver be hugh fraser
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “The actor who portrays the character Ariadne Oliver is Hugh Fraser.”
+
+Data sources discovered:
+- Database: TabFact (public schema)
+- Relevant table: list_of_agatha_christie_s_poirot_episodes (columns: actor, character, "title / rank", series, years)
+
+Evidence 1: Who plays Ariadne Oliver in this dataset?
+- Executed SQL:
+  SELECT actor, character FROM public.list_of_agatha_christie_s_poirot_episodes WHERE lower(trim(character)) = 'ariadne oliver';
+- Result:
+  zoë wanamaker | ariadne oliver
+
+Additional corroboration (broader match on name):
+- Executed SQL:
+  SELECT DISTINCT actor, character FROM public.list_of_agatha_christie_s_poirot_episodes WHERE lower(character) LIKE '%ariadne%';
+- Result:
+  {"actor":"zoë wanamaker","character":"ariadne oliver"}
+
+Evidence 2: What character(s) does Hugh Fraser play in this dataset?
+- Executed SQL (to confirm actor name format):
+  SELECT DISTINCT actor FROM public.list_of_agatha_christie_s_poirot_episodes WHERE actor ILIKE '%Hugh%';
+- Result:
+  {"actor":"hugh fraser"}
+- Executed SQL (list distinct characters for Hugh Fraser):
+  SELECT DISTINCT "character" FROM public.list_of_agatha_christie_s_poirot_episodes WHERE lower(actor) = 'hugh fraser' ORDER BY "character";
+- Result:
+  {"character":"arthur hastings"}
+
+Conclusion:
+- The table shows Ariadne Oliver is portrayed by Zoë Wanamaker, not Hugh Fraser. Hugh Fraser is associated with the character Arthur Hastings. Therefore, the claim is contradicted by the data.
+
+Assumptions:
+- “Actor of the character Ariadne Oliver” is interpreted within the scope of Agatha Christie’s Poirot TV episodes, as represented by the available dataset. Case-insensitive matching was used to ensure robust name comparison.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

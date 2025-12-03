@@ -1,0 +1,72 @@
+
+<userQuery>
+<query>
+the least watched episode number with an original airdate of 8 june 2008 be 4
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The user asserts that, among episodes with an original airdate of 8 June 2008, the least-watched episode number is 4.
+
+Data source discovery and structure:
+- Discovered database: TabFact (postgres_tabfact5)
+- Schema: public
+- Relevant table: public.my_info_table
+  - Columns: episode (bigint), original airdate (text), timeslot (approx) (text), viewers (millions) (double precision), nightly rank (bigint)
+
+Method:
+1) Identify all rows whose original airdate corresponds to 8 June 2008 using case-insensitive matching across common textual formats.
+2) Compute the minimum viewers (millions) among those rows and return the episode(s) with that minimum.
+
+Evidence and executed SQL:
+A) Retrieve rows matching 8 June 2008 (broad regex match)
+SQL:
+SELECT episode, "original airdate", "viewers (millions)", "nightly rank"
+FROM public.my_info_table
+WHERE "original airdate" ~* '(^|[^[:alnum:]])(8|08)[[:space:]]+(June|Jun)[[:space:]]+2008([^[:alnum:]]|$)'
+   OR "original airdate" ~* '(^|[^[:alnum:]])(June|Jun)[[:space:]]+(8|08),?[[:space:]]+2008([^[:alnum:]]|$)';
+Result:
+- episode: 4; original airdate: 8 june 2008; viewers (millions): 1.364; nightly rank: 4
+
+B) Targeted 3-step verification (strict regex for 8 June 2008)
+1) List matching rows
+SQL:
+SELECT episode, "original airdate", "viewers (millions)" 
+FROM public.my_info_table
+WHERE "original airdate" ~* '^\s*(?:0?8\s+June|June\s+0?8,?)\s+2008\s*$';
+Result:
+[ { episode: 4, original airdate: '8 june 2008', viewers (millions): 1.364 } ]
+
+2) Compute minimum viewers among those rows
+SQL:
+SELECT MIN("viewers (millions)") AS min_viewers
+FROM public.my_info_table
+WHERE "original airdate" ~* '^\s*(?:0?8\s+June|June\s+0?8,?)\s+2008\s*$';
+Result:
+[ { min_viewers: 1.364 } ]
+
+3) Return episode(s) whose viewers equal that minimum
+SQL:
+SELECT episode, "original airdate", "viewers (millions)"
+FROM public.my_info_table
+WHERE "original airdate" ~* '^\s*(?:0?8\s+June|June\s+0?8,?)\s+2008\s*$'
+  AND "viewers (millions)" = (
+    SELECT MIN("viewers (millions)")
+    FROM public.my_info_table
+    WHERE "original airdate" ~* '^\s*(?:0?8\s+June|June\s+0?8,?)\s+2008\s*$'
+  );
+Result:
+[ { episode: 4, original airdate: '8 june 2008', viewers (millions): 1.364 } ]
+
+Conclusion:
+- The data show a single episode on 8 June 2008: episode 4 with 1.364 million viewers. Consequently, the least-watched episode number on that date is 4. This supports the user’s claim.
+
+Assumptions:
+- The date field is textual; matching used case-insensitive regex to capture common forms of 8 June 2008 (e.g., '8 June 2008', 'June 8, 2008').
+- The claim pertains to the episodes contained in public.my_info_table (no show specified).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

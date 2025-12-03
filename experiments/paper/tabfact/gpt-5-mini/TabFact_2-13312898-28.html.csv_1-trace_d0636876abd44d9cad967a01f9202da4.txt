@@ -1,0 +1,45 @@
+
+<userQuery>
+<query>
+wes robert be pick by the indianapolis colt before ed whitley be choose
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Wes Roberts was picked by the Indianapolis Colts before Ed Whitley was chosen.”
+
+Data source consulted: TabFact (postgres_tabfact16) database, public schema, table: public.indianapolis_colts_draft_history (columns: round, pick, overall, name, position, college).
+
+Evidence from executed SQL:
+1) Flexible name search to locate both players in the Colts’ draft history
+SQL:
+SELECT name, round, pick, overall, position, college
+FROM public.indianapolis_colts_draft_history
+WHERE (name ILIKE '%wes%' AND name ILIKE '%rob%') OR name ILIKE '%whit%' OR name ILIKE '%whitley%'
+ORDER BY name, overall;
+Results:
+- name: ed whitley, round: 11, pick: 3, overall: 280, position: tight end, college: kansas state
+- name: wes roberts, round: 7, pick: 5, overall: 170, position: defensive end, college: tcu
+
+2) Order specifically by overall pick to show selection order
+SQL:
+SELECT name, overall, round, pick FROM public.indianapolis_colts_draft_history WHERE name ILIKE '%Wes%' OR name ILIKE '%Whitley%' ORDER BY overall ASC;
+Results (ordered by overall ascending):
+1) wes roberts | overall: 170 | round: 7  | pick: 5
+2) ed whitley  | overall: 280 | round: 11 | pick: 3
+
+Analysis:
+- Both players appear in the Indianapolis Colts draft history table, indicating each was drafted by the Colts.
+- The overall pick number indicates selection order within a draft: a smaller overall number means an earlier selection. Wes Roberts (overall 170) precedes Ed Whitley (overall 280).
+
+Conclusion: The data shows Wes Roberts was selected before Ed Whitley.
+
+Assumptions made:
+- “Before” is interpreted as earlier in draft selection order as indicated by the overall pick number. The available dataset does not include year; the claim does not specify year, so this interpretation is the most direct based on the provided table.
+- Case-insensitive matching (ILIKE) was used to find player names.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

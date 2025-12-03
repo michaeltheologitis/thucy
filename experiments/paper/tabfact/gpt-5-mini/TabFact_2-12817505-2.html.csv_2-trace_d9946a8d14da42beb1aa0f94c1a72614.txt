@@ -1,0 +1,66 @@
+
+<userQuery>
+<query>
+manchester unite have lose to the blackburn rover 2 out of 2 time since 13 august 2005
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Manchester United have lost to Blackburn Rovers 2 out of 2 times since 13 August 2005.”
+
+Data sources discovered
+- Database: TabFact (postgres_tabfact3)
+- Relevant table: public.t_2005_06_manchester_united_f_c_season — records Manchester United’s 2005–06 season match data (date, opponents, home/away, final score from Man United’s perspective, attendance, league position).
+
+Evidence
+1) Locate all matches vs Blackburn Rovers
+Executed SQL:
+SELECT date, opponents, "h / a", "result f - a", "league position" 
+FROM public.t_2005_06_manchester_united_f_c_season
+WHERE opponents ILIKE '%Blackburn%';
+
+Results:
+- 24 september 2005 | blackburn rovers | h | 1 - 2 | 6th
+- 1 february 2006   | blackburn rovers | a | 3 - 4 | 2nd
+
+2) Verify they occur on/after 13 August 2005 and count outcomes
+Executed SQL (counts):
+SELECT COUNT(*) AS total_games,
+       SUM(CASE WHEN split_part("result f - a",' - ',1)::int < split_part("result f - a",' - ',2)::int THEN 1 ELSE 0 END) AS losses
+FROM public.t_2005_06_manchester_united_f_c_season
+WHERE opponents ILIKE '%blackburn%'
+  AND to_date(date,'DD Month YYYY')::date >= DATE '2005-08-13';
+
+Result:
+- total_games: 2
+- losses: 2
+
+Executed SQL (detail with parsed dates/scores):
+SELECT date,
+       to_date(date,'DD Month YYYY')::date AS parsed_date,
+       "result f - a" AS score,
+       split_part("result f - a",' - ',1)::int AS goals_for,
+       split_part("result f - a",' - ',2)::int AS goals_against,
+       CASE WHEN split_part("result f - a",' - ',1)::int > split_part("result f - a",' - ',2)::int THEN 'win'
+            WHEN split_part("result f - a",' - ',1)::int = split_part("result f - a",' - ',2)::int THEN 'draw'
+            ELSE 'loss' END AS outcome
+FROM public.t_2005_06_manchester_united_f_c_season
+WHERE opponents ILIKE '%blackburn%'
+  AND to_date(date,'DD Month YYYY')::date >= DATE '2005-08-13';
+
+Rows returned:
+- 2005-09-24 | 1 - 2 | goals_for=1 | goals_against=2 | outcome=loss
+- 2006-02-01 | 3 - 4 | goals_for=3 | goals_against=4 | outcome=loss
+
+Conclusion
+- Since 13 August 2005 (inclusive), Manchester United played Blackburn Rovers twice in the 2005–06 season data available, and lost both matches. The claim is supported by the data: 2 losses out of 2 matches.
+
+Assumptions
+- “Since 13 August 2005” is treated as inclusive.
+- The dataset reflects Manchester United’s 2005–06 league season; the “result f - a” field is from Manchester United’s perspective. The claim is evaluated against this dataset (league matches).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

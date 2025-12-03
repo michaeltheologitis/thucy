@@ -1,0 +1,88 @@
+
+<userQuery>
+<query>
+season 2 and 10 both air in january , almost exactly 1 year apart
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “season 2 and 10 both air in january, almost exactly 1 year apart.”
+
+Data sources discovered:
+- Database: postgres_tabfact24 (schema: public)
+- Relevant table: list_of_all_that_episodes
+  - Columns: season (bigint), series (bigint), "episode title" (text), "original air date" (text), "nick prod" (bigint)
+
+Approach:
+- Identify seasons 2 and 10 in the table.
+- Parse their recorded "original air date" values into dates.
+- Determine whether both are in January and whether their dates are ~1 year apart.
+
+Evidence and executed SQL:
+1) Inspect raw original-air-date values for seasons 2 and 10
+SQL:
+SELECT season, "original air date", COUNT(*) AS cnt
+FROM list_of_all_that_episodes
+WHERE season IN (2,10)
+GROUP BY season, "original air date"
+ORDER BY season, "original air date";
+Result rows:
+- season: 2; original air date: "november 23 , 1996"; cnt: 1
+- season: 10; original air date: "january 11 , 1997"; cnt: 1
+
+2) Parse to actual dates for verification
+SQL:
+SELECT season, "original air date" AS raw,
+       to_date(regexp_replace(initcap(trim("original air date")), '\s+,', ','), 'Month DD, YYYY') AS parsed_date
+FROM list_of_all_that_episodes
+WHERE season IN (2,10)
+ORDER BY season, parsed_date;
+Result rows:
+- season: 2; raw: "november 23 , 1996"; parsed_date: 1996-11-23
+- season: 10; raw: "january 11 , 1997"; parsed_date: 1997-01-11
+
+3) Premiere/finale (min/max) parsed dates per season
+SQL:
+WITH parsed AS (
+ SELECT season,
+  to_date(regexp_replace(initcap(trim("original air date")), '\s+,', ','), 'Month DD, YYYY') AS parsed_date
+ FROM list_of_all_that_episodes
+ WHERE season IN (2,10)
+)
+SELECT season,
+ MIN(parsed_date) AS premiere_date,
+ to_char(MIN(parsed_date),'FMMonth') AS premiere_month,
+ MAX(parsed_date) AS finale_date,
+ to_char(MAX(parsed_date),'FMMonth') AS finale_month
+FROM parsed
+GROUP BY season
+ORDER BY season;
+Result rows:
+- season: 2; premiere_date: 1996-11-23; premiere_month: November; finale_date: 1996-11-23; finale_month: November
+- season: 10; premiere_date: 1997-01-11; premiere_month: January; finale_date: 1997-01-11; finale_month: January
+
+4) Difference in days between the premiere dates of seasons 2 and 10
+SQL:
+SELECT (
+  (SELECT MIN(to_date("original air date", 'FMMonth DD , YYYY')) FROM list_of_all_that_episodes WHERE season = 10)
+  -
+  (SELECT MIN(to_date("original air date", 'FMMonth DD , YYYY')) FROM list_of_all_that_episodes WHERE season = 2)
+) AS day_difference;
+Result:
+- day_difference: 49
+
+Assessment against the claim:
+- “both air in January”: Season 2’s date is November 23, 1996 (not January). Season 10’s date is January 11, 1997. This part of the claim is false for Season 2.
+- “almost exactly 1 year apart”: The dates are 49 days apart, not about one year. This part of the claim is false.
+
+Conclusion: The data contradicts the claim on both points.
+
+Assumptions made:
+- Interpreted “air in January” as referring to the season’s recorded air date in this dataset (treated as the season’s premiere/representative date). The table contains one row per referenced season in this subset.
+- Interpreted “almost exactly 1 year apart” as the time between those recorded dates.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

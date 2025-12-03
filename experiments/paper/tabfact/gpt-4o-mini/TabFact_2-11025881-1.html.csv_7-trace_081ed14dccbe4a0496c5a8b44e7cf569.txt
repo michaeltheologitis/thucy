@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+pierre lamine beat shinji someya by more than a point
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim assessed: “pierre lamine beat shinji someya by more than a point.”
+
+Data source discovery
+- Available dataset: PostgreSQL database with a single table: public.t_1976_world_junior_figure_skating_championships (1976 World Junior Figure Skating Championships).
+
+Schema details (via schema tool)
+- Table: public.t_1976_world_junior_figure_skating_championships
+  - Columns: rank (bigint), name (text), nation (text), sp + fs (bigint), points (double precision), places (double precision)
+
+Evidence
+1) Locate the two skaters and their results
+- SQL executed:
+  SELECT name, nation, rank, points FROM public.t_1976_world_junior_figure_skating_championships WHERE name ILIKE '%Pierre%' OR name ILIKE '%Lamine%' ORDER BY rank ASC;
+  Result:
+  - Name: Pierre Lamine | Nation: France | Rank: 8 | Points: 150.5
+
+- SQL executed:
+  SELECT name, nation, rank, points FROM public.t_1976_world_junior_figure_skating_championships WHERE name ILIKE '%Shinji%' OR name ILIKE '%Someya%' ORDER BY rank ASC;
+  Result:
+  - Name: Shinji Someya | Nation: Japan | Rank: 9 | Points: 150.34
+
+2) Compute the points margin
+- SQL executed:
+  WITH skater1 AS (
+      SELECT name, points 
+      FROM public.t_1976_world_junior_figure_skating_championships 
+      WHERE name ILIKE '%Pierre%' OR name ILIKE '%Lamine%'
+      LIMIT 1
+  ), skater2 AS (
+      SELECT name, points 
+      FROM public.t_1976_world_junior_figure_skating_championships 
+      WHERE name ILIKE '%Shinji%' OR name ILIKE '%Someya%'
+      LIMIT 1
+  )
+  SELECT skater1.name AS name1, skater1.points AS points1, 
+         skater2.name AS name2, skater2.points AS points2, 
+         ROUND((skater1.points - skater2.points)::numeric, 2) AS points_difference 
+  FROM skater1, skater2;
+  Result:
+  - Name1: Pierre Lamine | Points1: 150.5
+  - Name2: Shinji Someya | Points2: 150.34
+  - Points difference: 0.16
+
+Conclusion
+- The data shows Pierre Lamine ranked ahead of Shinji Someya (8 vs 9), so Lamine did beat Someya.
+- However, the margin was 0.16 points, which is not “more than a point.”
+
+Final assessment: The claim that he beat him “by more than a point” is not supported by the data; the margin was less than one point.
+
+Assumptions
+- Interpreted “beat” as finishing with a better rank (lower numerical rank) in the 1976 World Junior Figure Skating Championships dataset (the only available authoritative source).
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

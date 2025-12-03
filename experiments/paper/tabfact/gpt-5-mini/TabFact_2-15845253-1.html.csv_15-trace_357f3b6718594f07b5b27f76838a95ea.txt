@@ -1,0 +1,51 @@
+
+<userQuery>
+<query>
+9 of the viral disease replicate outside the nucleus
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim assessed: “9 of the viral disease replicate outside the nucleus.”
+
+Data source discovery
+- Available source: Postgres database TabFact (postgres_tabfact3)
+- Table used: public.viral_disease
+- Relevant column: "replication site" (text)
+
+Schema details (from tool inspection)
+- Columns: family (text), baltimore group (text), envelopment (text), virion shape (text), replication site (text)
+- Primary key: none
+
+Evidence
+1) Distinct replication sites and counts
+SQL:
+SELECT "replication site", COUNT(*) AS cnt
+FROM public.viral_disease
+GROUP BY "replication site"
+ORDER BY cnt DESC, "replication site" ASC;
+Result:
+- replication site = cytoplasm — 14 rows
+- replication site = nucleus — 9 rows
+
+2) Direct counts for outside-the-nucleus vs nucleus
+SQL:
+SELECT COUNT(*) AS cytoplasm_count FROM public.viral_disease WHERE "replication site" = 'cytoplasm';
+Result: cytoplasm_count = 14
+
+SQL:
+SELECT COUNT(*) AS nucleus_count FROM public.viral_disease WHERE "replication site" = 'nucleus';
+Result: nucleus_count = 9
+
+Conclusion
+- The data show 14 entries replicate in the cytoplasm (i.e., outside the nucleus) and 9 replicate in the nucleus. Therefore, the statement that 9 replicate outside the nucleus is contradicted by the data.
+
+Assumptions
+- “Outside the nucleus” is interpreted as replication site = “cytoplasm.”
+- Each row in public.viral_disease represents a distinct viral entity relevant to the claim (family/disease) within this dataset.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

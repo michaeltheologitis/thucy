@@ -1,0 +1,78 @@
+
+<userQuery>
+<query>
+13 viral family have an helical virion shape
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify
+"13 viral family have an helical virion shape."
+
+Data source discovery
+- Available database: public
+- Table: viral_disease
+- Columns: family (text), baltimore group (text), envelopment (text), virion shape (text), replication site (text)
+
+Evidence
+1) Distinct virion shape values and counts
+SQL executed:
+SELECT "virion shape", COUNT(*) AS count
+FROM public.viral_disease
+GROUP BY "virion shape"
+ORDER BY count DESC;
+Result:
+- icosahedral: 13
+- helical: 6
+- complex: 2
+- spherical: 1
+- helical , bullet shaped: 1
+
+2) Count of distinct families whose virion shape contains "helical"
+SQL executed:
+SELECT COUNT(DISTINCT family) AS distinct_family_count 
+FROM public.viral_disease 
+WHERE "virion shape" ILIKE '%helical%';
+Result: 7
+
+3) List of distinct families with virion shape containing "helical"
+SQL executed:
+SELECT DISTINCT family 
+FROM public.viral_disease 
+WHERE "virion shape" ILIKE '%helical%';
+Result:
+- arenaviridae
+- bunyaviridae
+- coronaviridae
+- filoviridae
+- orthomyxoviridae
+- paramyxoviridae
+- rhabdoviridae
+
+4) Families and exact virion shape values for verification
+SQL executed:
+SELECT family, "virion shape" 
+FROM public.viral_disease 
+WHERE "virion shape" ILIKE '%helical%'
+ORDER BY family;
+Result:
+- Arenaviridae: helical
+- Bunyaviridae: helical
+- Coronaviridae: helical
+- Filoviridae: helical
+- Orthomyxoviridae: helical
+- Paramyxoviridae: helical
+- Rhabdoviridae: helical , bullet shaped
+
+Conclusion
+Based on the public.viral_disease dataset, 7 virus families have a virion shape that includes the term "helical" (including one labeled "helical , bullet shaped"). This contradicts the claim that 13 viral families have a helical virion shape.
+
+Assumptions
+- Each row in public.viral_disease represents one virus family.
+- "Helical" classification is taken directly from the "virion shape" column; entries containing the substring "helical" (case-insensitive) are considered helical, including the specific label "helical , bullet shaped".
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

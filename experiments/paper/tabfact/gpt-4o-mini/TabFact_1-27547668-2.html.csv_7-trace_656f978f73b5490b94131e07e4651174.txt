@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+there be 2 episode in the series that be direct by perry chafe
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: There are 2 episodes in the series that were directed by Perry Chafe.
+
+Data source explored: public.list_of_republic_of_doyle_episodes (Republic of Doyle episodes)
+- Relevant columns include: title (text), directed by (text), written by (text), viewers (bigint), original airdate (text), prod code (bigint)
+
+Checks performed and evidence:
+1) Count episodes exactly credited to Perry Chafe as director
+Executed SQL:
+SELECT COUNT(*) AS episodes_count FROM list_of_republic_of_doyle_episodes WHERE "directed by" = 'Perry Chafe';
+Result: 0
+
+2) List titles exactly credited to Perry Chafe as director
+Executed SQL:
+SELECT title FROM list_of_republic_of_doyle_episodes WHERE "directed by" = 'Perry Chafe';
+Result: 0 rows
+
+3) Case-insensitive substring search for Perry Chafe in the director field (to catch multi-credit or formatting variations)
+Executed SQL:
+SELECT COUNT(*) AS count FROM public.list_of_republic_of_doyle_episodes WHERE LOWER("directed by") LIKE LOWER('%perry chafe%');
+Result: 0
+
+4) Inspect distinct director credits to confirm the set of credited directors in the dataset
+Executed SQL:
+SELECT DISTINCT "directed by" FROM public.list_of_republic_of_doyle_episodes;
+Result (sampled all distinct values):
+- Steve Dimarco
+- Phil Earnshaw
+- Steve Scaini
+- Mike Clattenburg
+- Larry McLean
+- Robert Lieberman
+- Jerry Ciccoritti
+(No entries for Perry Chafe.)
+
+Conclusion: The dataset shows zero episodes directed by Perry Chafe. Therefore, the claim that there are 2 such episodes is not supported by the data.
+
+Assumptions made:
+- “the series” refers to Republic of Doyle, which is the available authoritative dataset in the current data environment.
+- “perry chafe” refers to the individual Perry Chafe, spelled as shown. A case-insensitive search and substring match were used to account for stylistic variations or multiple-credit entries.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

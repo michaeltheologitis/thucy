@@ -1,0 +1,43 @@
+
+<userQuery>
+<query>
+the diameter of the value 100 ₧ with an equiv of 0.60 be 24.5 mm
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the diameter of the value 100 ₧ with an equiv of 0.60 be 24.5 mm.”
+
+Data sources explored
+- Discovered database: TabFact (PostgreSQL)
+- Relevant table: public.peseta (columns: value text, equiv text, diameter text, weight text, composition text)
+
+Evidence from the data (with exact executed SQL and results)
+1) Locate entries for 100 ₧ and check diameter
+SQL: SELECT value, equiv, diameter FROM peseta WHERE value LIKE '%100%';
+Result: [{"value":"100 ₧","equiv":"0.60","diameter":"24.5 mm"}]
+
+2) Verify there are no alternate diameters for value containing 100
+SQL: SELECT DISTINCT diameter FROM peseta WHERE value LIKE '%100%';
+Result: [{"diameter":"24.5 mm"}]
+
+3) Cross-check by exact equivalence value 0.60
+SQL: SELECT value, equiv, diameter FROM peseta WHERE equiv = '0.60';
+Result: [{"value":"100 ₧","equiv":"0.60","diameter":"24.5 mm"}]
+
+4) Retrieve the full record for 100 ₧ with equiv 0.60
+SQL: SELECT * FROM public.peseta WHERE value = '100 ₧' AND equiv = '0.60';
+Result (one row): value: 100 ₧; equiv: 0.60; diameter: 24.5 mm; weight: 9.25 g; composition: aluminium bronze
+
+Conclusion
+- The database contains a single row for 100 ₧ with equivalence 0.60, and it lists the diameter as 24.5 mm. No conflicting diameters were found. The claim is supported by the data.
+
+Assumptions
+- “value 100 ₧” refers to the 100 pesetas coin entry in public.peseta.
+- “equiv of 0.60” refers to the equiv field value '0.60' stored in the table (consistent with 100 ESP ≈ 0.60 EUR by fixed conversion).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

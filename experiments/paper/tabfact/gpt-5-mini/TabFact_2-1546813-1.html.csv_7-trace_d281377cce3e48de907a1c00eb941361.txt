@@ -1,0 +1,87 @@
+
+<userQuery>
+<query>
+patty sheehan , judy rankin and kathy whitworth be all captain that win the solheim cup 1 time
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Patty Sheehan, Judy Rankin, and Kathy Whitworth were all captains who won the Solheim Cup 1 time.”
+
+Data sources discovered
+- postgres_tabfact26, schema public, table: solheim_cup
+
+Schema of public.solheim_cup
+- Columns: year (bigint), venue (text), winning team (text), score (text), usa captain (text), europe captain (text)
+
+Evidence
+1) Distinct values for winning team
+- SQL executed:
+  SELECT DISTINCT "winning team" FROM public.solheim_cup ORDER BY "winning team";
+- Result:
+  europe
+  united states
+
+2) Distinct USA captains listed in the data
+- SQL executed:
+  SELECT DISTINCT "usa captain" FROM public.solheim_cup ORDER BY "usa captain" ASC;
+- Result includes: beth daniel; betsy king; joanne carner; judy rankin; kathy whitworth; meg mallon; nancy lopez; pat bradley; patty sheehan; rosie jones
+- This confirms all three individuals appear as USA captains in the dataset.
+
+3) All Solheim Cup rows for the three named captains (to see outcomes by year)
+- SQL executed:
+  SELECT year, "winning team", "usa captain" 
+  FROM public.solheim_cup
+  WHERE LOWER("usa captain") IN ('judy rankin','patty sheehan','kathy whitworth')
+  ORDER BY year ASC;
+- Result:
+  1990 | united states | kathy whitworth
+  1992 | europe        | kathy whitworth
+  1996 | united states | judy rankin
+  1998 | united states | judy rankin
+  2002 | united states | patty sheehan
+  2003 | europe        | patty sheehan
+
+4) Appearances and wins as USA captain for each person
+- Kathy Whitworth
+  - SQL (appearances):
+    SELECT COUNT(*) AS appearances FROM solheim_cup WHERE LOWER("usa captain") = 'kathy whitworth';
+    Result: appearances = 2
+  - SQL (wins):
+    SELECT COUNT(*) AS wins FROM solheim_cup WHERE LOWER("usa captain") = 'kathy whitworth' AND LOWER("winning team") = 'united states';
+    Result: wins = 1
+- Judy Rankin
+  - SQL (appearances):
+    SELECT COUNT(*) AS appearances FROM public.solheim_cup WHERE lower("usa captain") = 'judy rankin';
+    Result: appearances = 2
+  - SQL (wins):
+    SELECT COUNT(*) AS wins FROM public.solheim_cup WHERE lower("usa captain") = 'judy rankin' AND lower("winning team") = 'united states';
+    Result: wins = 2
+- Patty Sheehan
+  - SQL (appearances):
+    SELECT COUNT(*) AS appearances FROM solheim_cup WHERE lower("usa captain") = 'patty sheehan';
+    Result: appearances = 2
+  - SQL (wins):
+    SELECT COUNT(*) AS wins FROM solheim_cup WHERE lower("usa captain") = 'patty sheehan' AND lower("winning team") = 'united states';
+    Result: wins = 1
+
+Findings
+- All three served as USA captains (verified).
+- Wins as captain:
+  - Kathy Whitworth: 1 win (1990)
+  - Judy Rankin: 2 wins (1996, 1998)
+  - Patty Sheehan: 1 win (2002)
+- Therefore, it is incorrect that all three “won the Solheim Cup 1 time” as captain; Judy Rankin won twice.
+
+Conclusion
+- The claim is partly inaccurate: two of the three captains (Sheehan and Whitworth) won once, but Rankin won twice.
+
+Assumptions about the claim’s intent
+- Interpreted “be all captain that win the solheim cup 1 time” to mean: each of the three individuals served as captain and each won exactly once as captain.
+- Matching performed case-insensitively on names and winning team values as stored in the dataset.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

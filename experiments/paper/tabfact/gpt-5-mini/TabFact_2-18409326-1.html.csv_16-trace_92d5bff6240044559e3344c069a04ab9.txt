@@ -1,0 +1,54 @@
+
+<userQuery>
+<query>
+bell media own 3 separate radio station like the cbc
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “bell media own 3 separate radio station like the cbc.”
+
+Data sources explored
+- Discovered data sources: A PostgreSQL database (TabFact instance) with a public schema. Only one relevant table was found: public.media_in_kelowna (contains columns: frequency, call sign, branding, format, owner).
+
+Step 1: Inspect all rows to identify owners
+Executed SQL:
+SELECT frequency, "call sign", branding, format, owner FROM public.media_in_kelowna;
+
+Returned rows (abridged to owner-relevant details):
+1) owner: astral media
+2) owner: canadian broadcasting corporation (CBC Radio One)
+3) owner: canadian broadcasting corporation (CBC Radio 2)
+4) owner: canadian broadcasting corporation (Première Chaîne)
+5) owner: sun country cablevision
+6) owner: bell media (99.9 Sun FM)
+7) owner: bell media (101.5 EZ Rock)
+8) owner: jim pattison group
+9) owner: vista broadcast group
+10) owner: jim pattison group
+
+Step 2: Count stations owned by Bell Media and CBC in this dataset
+Executed SQL:
+SELECT owner, count(*) AS station_count FROM public.media_in_kelowna WHERE owner ILIKE '%bell%' OR owner ILIKE '%canadian%' GROUP BY owner;
+
+Results:
+- bell media — station_count: 2
+- canadian broadcasting corporation — station_count: 3
+
+Findings
+- In the Kelowna market (as represented by the available dataset), Bell Media owns 2 radio stations, while the Canadian Broadcasting Corporation (CBC) owns 3.
+- Therefore, within this dataset, the statement that “Bell Media own 3 separate radio station like the CBC” is not supported; the evidence shows Bell Media has fewer (2) than CBC (3).
+
+Conclusion
+- Based on the authoritative data available (Kelowna radio stations), the claim is inaccurate in this context.
+
+Assumptions and scope notes
+- Due to available data, verification is scoped to the Kelowna radio market represented in public.media_in_kelowna.
+- “like the cbc” was interpreted as “also owning three radio stations in the same market.”
+- CBC entries are recorded under the full name “canadian broadcasting corporation” in the dataset and were matched accordingly.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

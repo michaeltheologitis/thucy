@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+the actor of the character ariadne oliver be hugh fraser
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “The actor who plays the character Ariadne Oliver is Hugh Fraser.”
+
+Data sources explored:
+- Database: TabFact (schema: public)
+- Table: list_of_agatha_christie_s_poirot_episodes
+- Relevant columns: actor (text), character (text), title / rank (text), series (text), years (text)
+
+Evidence:
+1) Identify the actor for character “Ariadne Oliver” (normalized)
+SQL:
+SELECT actor, character FROM public.list_of_agatha_christie_s_poirot_episodes WHERE LOWER(TRIM(character)) = 'ariadne oliver'
+Result:
+- actor: Zoë Wanamaker; character: Ariadne Oliver
+
+2) Identify the character(s) played by actor “Hugh Fraser” (normalized)
+SQL:
+SELECT actor, character FROM public.list_of_agatha_christie_s_poirot_episodes WHERE LOWER(actor) = 'hugh fraser';
+Result:
+- actor: Hugh Fraser; character: Arthur Hastings
+
+3) Cross-check via case-insensitive keyword search for relevant names
+SQL:
+SELECT actor, character, series FROM public.list_of_agatha_christie_s_poirot_episodes
+WHERE LOWER(actor) LIKE ANY (ARRAY[LOWER('%Ariadne%'), LOWER('%Oliver%'), LOWER('%Zoe%'), LOWER('%Wanamaker%'), LOWER('%Hugh Fraser%')])
+OR LOWER(character) LIKE ANY (ARRAY[LOWER('%Ariadne%'), LOWER('%Oliver%'), LOWER('%Zoe%'), LOWER('%Wanamaker%'), LOWER('%Hugh Fraser%')]);
+Results include:
+- actor: Zoë Wanamaker; character: Ariadne Oliver; series: 10 - 13
+- actor: Hugh Fraser; character: Arthur Hastings; series: 1 - 8, 13
+
+Conclusion:
+- The data shows Ariadne Oliver is portrayed by Zoë Wanamaker, not Hugh Fraser. Hugh Fraser portrays Arthur Hastings.
+
+Assumptions made:
+- The user’s phrasing was interpreted as a claim about the actor for the character “Ariadne Oliver” in Agatha Christie’s Poirot adaptations contained in the provided dataset.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+only 1 of the viral disease have a spherical virion shape
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: "only 1 of the viral disease have a spherical virion shape"
+
+Data sources explored
+- Database: PostgreSQL
+- Schema: public
+- Table: viral_disease
+- Columns: family (text), baltimore group (text), envelopment (text), virion shape (text), replication site (text)
+
+Evidence gathered
+1) Distinct virion shapes and counts
+- Result: Spherical appears exactly 1 time among distinct shapes.
+- Executed SQL:
+  SELECT "virion shape", COUNT(*) AS "count"
+  FROM viral_disease
+  GROUP BY "virion shape";
+
+2) Exact case-insensitive match to 'spherical'
+- Result: 1 record matches exactly; family = 'unassigned'.
+- Executed SQL:
+  SELECT COUNT(*) AS record_count, family FROM viral_disease WHERE LOWER("virion shape") = LOWER('spherical') GROUP BY family;
+
+3) Substring match containing the word 'spherical' (case-insensitive)
+- Result: 1 total record contains 'spherical'; distinct matching shape = 'spherical' with count 1.
+- Executed SQL:
+  -- Total records containing 'spherical'
+  SELECT COUNT(*) AS total_records
+  FROM public.viral_disease
+  WHERE "virion shape" ILIKE '%spherical%';
+
+  -- Distinct matching shapes with counts
+  SELECT "virion shape", COUNT(*) AS count
+  FROM public.viral_disease
+  WHERE "virion shape" ILIKE '%spherical%'
+  GROUP BY "virion shape";
+
+Conclusion
+- The data shows exactly one record in the viral_disease table with a spherical virion shape. This supports the claim.
+
+Assumptions
+- Interpreted the claim as referring to the count of records in the public.viral_disease table where the "virion shape" value is labeled 'spherical'.
+- Considered both exact (case-insensitive) equality and substring matching to ensure no alternate casing or composite labels were missed.
+- Treated the available database as authoritative and complete for this verification.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

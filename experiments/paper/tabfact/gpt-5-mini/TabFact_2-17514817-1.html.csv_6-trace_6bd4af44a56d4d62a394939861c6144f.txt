@@ -1,0 +1,50 @@
+
+<userQuery>
+<query>
+west berkshire brewery 's dr hexter healer beer have only receive a silver medal between 1995 and 2009
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “West Berkshire Brewery's Dr Hexter's Healer beer has only received a silver medal between 1995 and 2009.”
+
+Data sources explored
+- Discovered data environment: TabFact (PostgreSQL), public schema. Accessible table: public.west_berkshire_brewery.
+- Schema (public.west_berkshire_brewery): columns — year (bigint), "beer name" (text), prize (text), category (text), competition (text).
+
+Step 1 — Identify exact beer-name variants for Dr Hexter’s Healer
+Executed SQL:
+SELECT DISTINCT "beer name" FROM public.west_berkshire_brewery WHERE "beer name" ILIKE '%hexter%';
+Results:
+- dr hexter 's healer
+- dr hexter 's wedding ale
+
+Step 2 — Retrieve all awards for Dr Hexter’s Healer between 1995 and 2009
+Executed SQL:
+SELECT year, "beer name", prize, category, competition
+FROM west_berkshire_brewery
+WHERE "beer name" ILIKE 'Dr Hexter%Healer'
+ORDER BY year;
+Results:
+- 1997 — dr hexter 's healer — runner up — beer of the festival — camra northamptonshire branch beer festival
+- 2002 — dr hexter 's healer — silver medal — strong ale — siba south east region beer competition
+- 2008 — dr hexter 's healer — gold medal — best local beer — camra reading branch beer festival
+- 2009 — dr hexter 's healer — gold medal — best local beer — camra reading branch beer festival
+- 2009 — dr hexter 's healer — gold medal — in category — camra london and south east regional competition
+
+Assessment
+- The beer did receive a silver medal (in 2002). However, within 1995–2009 it also received runner up (1997) and multiple gold medals (2008, 2009). Therefore, it did not “only” receive a silver medal during that period.
+
+Conclusion
+- The claim is contradicted by the data.
+
+Assumptions
+- “Only received a silver medal” is interpreted as receiving silver-tier awards exclusively (and no other award tiers) within 1995–2009.
+- The timeframe is inclusive of 1995 and 2009.
+- Matching for Dr Hexter’s Healer used a case-insensitive pattern (ILIKE 'Dr Hexter%Healer') to account for punctuation/spacing in the stored name.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

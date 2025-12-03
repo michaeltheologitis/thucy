@@ -1,0 +1,69 @@
+
+<userQuery>
+<query>
+marc roskin direct season 1
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of approach
+- Explored the available data sources and found a single table containing TV episode data for the series Leverage.
+- Interpreted the user’s fragment “marc roskin direct season 1” as a check of whether Marc Roskin directed the episode numbered 1 in the represented season (the table appears to hold one season’s worth of Leverage episodes; its “season” column corresponds to the episode’s number within that season, not the series’ season number).
+- Verified director credits from the database and compared them to the claim.
+
+Data sources discovered
+- Database: TabFact (postgres_tabfact19)
+- Table: public.list_of_leverage_episodes
+  - Columns: series (bigint), season (bigint), title (text), "directed by" (text), "written by" (text), "original air date" (text), "us viewers (in millions)" (double precision)
+
+Schema verification
+SQL executed:
+SELECT DISTINCT season, series FROM list_of_leverage_episodes ORDER BY season ASC, series ASC;
+Result (excerpt):
+- season values range 1..17 while series values range 45..61. This pattern matches Leverage Season 4 (No. overall 45–61; No. in season 1–17). Thus, “season” in this table is the episode number within that season, not the TV season index of the show.
+
+Evidence 1: Who directed episode number 1 in the represented season?
+SQL executed:
+SELECT DISTINCT "directed by" FROM list_of_leverage_episodes WHERE season = 1 ORDER BY "directed by";
+Result:
+- dean devlin
+Interpretation: Episode 1 of the represented season (Leverage Season 4 premiere, “The Long Way Down Job”) was directed by Dean Devlin, not Marc Roskin.
+
+Evidence 2: Which episodes in this season were directed by Marc Roskin?
+SQL executed (count):
+SELECT count(*) FROM public.list_of_leverage_episodes WHERE "directed by" ILIKE '%Roskin%';
+Result: 4
+
+SQL executed (list):
+SELECT season, title, "directed by", "original air date" FROM public.list_of_leverage_episodes WHERE "directed by" ILIKE '%Roskin%' ORDER BY season, "original air date";
+Result:
+- season 3 — title: the 15 minutes job — directed by: marc roskin — original air date: july 10 , 2011
+- season 11 — title: the experimental job — directed by: marc roskin — original air date: november 27 , 2011
+- season 13 — title: the girls' night out job — directed by: marc roskin — original air date: december 11 , 2011
+- season 16 — title: the gold job — directed by: marc roskin — original air date: january 1 , 2012
+Interpretation: Marc Roskin directed episodes numbered 3, 11, 13, and 16 within this season; not episode 1.
+
+Evidence 3: Context that confirms the season in this table is Leverage Season 4 (2011–2012)
+SQL executed:
+SELECT series, season, title, "directed by", "written by", "original air date" FROM list_of_leverage_episodes ORDER BY to_date(initcap("original air date"), 'FMMonth FMDD , YYYY') NULLS LAST LIMIT 20;
+Result (excerpt, chronological):
+1) series 45, season 1, title: the long way down job — directed by: dean devlin — original air date: june 26 , 2011
+3) series 47, season 3, title: the 15 minutes job — directed by: marc roskin — original air date: july 10 , 2011
+10) series 55, season 11, title: the experimental job — directed by: marc roskin — original air date: november 27 , 2011
+12) series 57, season 13, title: the girls' night out job — directed by: marc roskin — original air date: december 11 , 2011
+15) series 60, season 16, title: the gold job — directed by: marc roskin — original air date: january 1 , 2012
+This matches Leverage Season 4’s run and confirms the interpretation of columns.
+
+Conclusion based on the data
+- Within the available Leverage episodes dataset (covering the Season 4 run), Marc Roskin did not direct the episode numbered 1 within that season; that episode was directed by Dean Devlin. Marc Roskin did direct episodes numbered 3, 11, 13, and 16 in this season.
+
+Assumptions and scope notes
+- The only available dataset pertains to Leverage episodes that correspond to the 2011–2012 run (Season 4). The column named “season” in this table is the episode number within that season, not the show’s season index. If the claim intended “Season 1 of the series,” that information is not present in the connected database, so I cannot verify directors for Leverage Season 1 using these data.
+- I assumed the user’s fragment meant “Marc Roskin directed episode 1 (of the season represented here).” Under that interpretation, the claim is contradicted by the data above.
+
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

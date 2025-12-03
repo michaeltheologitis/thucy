@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+the home team st kilda score 12.15 (87) at moorabbin oval
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim assessed: "the home team st kilda score 12.15 (87) at moorabbin oval"
+
+Data sources discovered
+- Database: TabFact
+- Schema: public
+- Table: t_1981_vfl_season (match-level records with columns: "home team", "home team score", "away team", "away team score", venue, crowd, date)
+
+Verification steps and evidence
+1) Identify stored casing for team names
+SQL:
+SELECT DISTINCT "home team" FROM t_1981_vfl_season LIMIT 50;
+Result:
+[{"home team":"hawthorn"},{"home team":"collingwood"},{"home team":"st kilda"},{"home team":"geelong"},{"home team":"south melbourne"},{"home team":"richmond"}]
+
+2) Confirm venue entries for St Kilda home games
+SQL:
+SELECT DISTINCT venue FROM t_1981_vfl_season WHERE "home team" = 'st kilda';
+Result:
+[{"venue":"moorabbin oval"}]
+
+3) Check whether St Kilda has a home score recorded as 12.15 (87)
+SQL:
+SELECT DISTINCT "home team score" FROM t_1981_vfl_season WHERE "home team" = 'st kilda' LIMIT 50;
+Result:
+[{"home team score":"12.15 (87)"}]
+
+4) Retrieve the exact matching match record(s)
+SQL:
+SELECT date, "home team", "home team score", "away team", "away team score", venue
+FROM t_1981_vfl_season
+WHERE "home team" = 'st kilda'
+  AND venue = 'moorabbin oval'
+  AND "home team score" = '12.15 (87)';
+Result:
+[{"date":"29 august 1981","home team":"st kilda","home team score":"12.15 (87)","away team":"footscray","away team score":"5.8 (38)","venue":"moorabbin oval"}]
+
+Conclusion
+- Supported by the 1981 VFL season data: St Kilda, as the home team at Moorabbin Oval, scored 12.15 (87) on 29 August 1981 (vs Footscray). This directly matches the claim.
+
+Assumptions
+- The claim is evaluated against the accessible dataset (1981 VFL season). Team and venue names are stored in lowercase in this table, which was accounted for in the queries.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

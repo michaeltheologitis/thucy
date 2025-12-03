@@ -1,0 +1,70 @@
+
+<userQuery>
+<query>
+patty sheehan , judy rankin and kathy whitworth be all captain that win the solheim cup 1 time
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Patty Sheehan, Judy Rankin and Kathy Whitworth be all captain that win the Solheim Cup 1 time.”
+
+What I checked
+- Whether Patty Sheehan, Judy Rankin, and Kathy Whitworth appear in the dataset as USA captains.
+- For each, how many Solheim Cup captaincies they had and how many of those resulted in a United States win.
+
+Evidence from the database
+1) Distinct USA captains in the dataset
+- Result includes: Judy Rankin, Kathy Whitworth, Patty Sheehan (among others)
+- Executed SQL:
+  SELECT DISTINCT "usa captain" FROM public.solheim_cup WHERE "usa captain" IS NOT NULL;
+
+2) Event-level records for the three named captains
+- Rows found:
+  - 1990 | Lake Nona Golf & Country Club, Florida, USA | Winning Team: United States | Score: 11½ - 4½ | USA Captain: Kathy Whitworth
+  - 1992 | Dalmahoy Country Club, Scotland | Winning Team: Europe | Score: 11½ - 6½ | USA Captain: Kathy Whitworth
+  - 1996 | St Pierre Golf & Country Club, Wales | Winning Team: United States | Score: 17 - 11 | USA Captain: Judy Rankin
+  - 1998 | Muirfield Village, Ohio, USA | Winning Team: United States | Score: 16 - 12 | USA Captain: Judy Rankin
+  - 2002 | Interlachen Country Club, Minnesota, USA | Winning Team: United States | Score: 15½ - 12½ | USA Captain: Patty Sheehan
+  - 2003 | Barsebäck Golf & Country Club, Sweden | Winning Team: Europe | Score: 17½ - 10½ | USA Captain: Patty Sheehan
+- Executed SQL:
+  SELECT year, venue, "winning team", score, "usa captain"
+  FROM public.solheim_cup
+  WHERE "usa captain" ILIKE '%Sheehan%'
+     OR "usa captain" ILIKE '%Rankin%'
+     OR "usa captain" ILIKE '%Whitworth%'
+  ORDER BY year;
+
+3) Aggregated counts of events and wins by captain (for these three)
+- Results:
+  - Judy Rankin | Winning Team: United States | Events Count: 2
+  - Kathy Whitworth | Winning Team: United States | Events Count: 1
+  - Kathy Whitworth | Winning Team: Europe | Events Count: 1
+  - Patty Sheehan | Winning Team: United States | Events Count: 1
+  - Patty Sheehan | Winning Team: Europe | Events Count: 1
+- Executed SQL:
+  SELECT "usa captain", "winning team", COUNT(*) AS events_count
+  FROM public.solheim_cup
+  WHERE "usa captain" ILIKE '%Rankin%'
+     OR "usa captain" ILIKE '%Whitworth%'
+     OR "usa captain" ILIKE '%Sheehan%'
+  GROUP BY "usa captain", "winning team"
+  ORDER BY "usa captain", "winning team";
+
+Findings
+- Patty Sheehan: 2 captaincies (2002, 2003), with 1 United States win (2002) in the dataset.
+- Judy Rankin: 2 captaincies (1996, 1998), both United States wins (2 wins total).
+- Kathy Whitworth: 2 captaincies (1990, 1992), with 1 United States win (1990) and 1 loss (1992).
+
+Conclusion
+- The claim that all three “won the Solheim Cup 1 time” as captains is not supported by the data. Judy Rankin has 2 wins as captain, while Patty Sheehan and Kathy Whitworth each have 1 win.
+
+Assumptions
+- Interpreted “win the Solheim Cup 1 time” to mean: as USA captain, the number of Solheim Cup events where the “winning team” is “United States” equals 1.
+- Interpreted “all” as applying to each named person individually.
+- Used “United States” in the "winning team" column as the indicator of a USA captain’s win.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

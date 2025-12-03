@@ -1,0 +1,67 @@
+
+<userQuery>
+<query>
+brook lopez lead the team in point for 5 straight game
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim assessed: “Brook Lopez lead the team in points for 5 straight games.”
+
+Data source discovered
+- Database: TabFact (postgres_tabfact9)
+- Table: public.t_2010_11_new_jersey_nets_season (2010–11 New Jersey Nets season). Relevant columns include: game, date, team, score, high points, high rebounds, high assists, location attendance, record.
+
+Formatting check for the “high points” field
+- The “high points” field contains player name and points in parentheses, e.g., “brook lopez (31)”. This supports direct text matching to identify the team’s single-game scoring leader.
+
+Evidence and SQL
+1) Available range of games in this dataset
+- SQL executed:
+  SELECT MIN(game) AS min_game, MAX(game) AS max_game FROM public.t_2010_11_new_jersey_nets_season;
+- Result: {"min_game":75, "max_game":81}
+- Interpretation: The available rows cover games 75 through 81 of the season.
+
+2) Game-by-game leaders and whether Brook Lopez led
+- SQL executed:
+  SELECT game, date, "high points", (lower("high points") LIKE '%brook lopez%') AS brook_leads
+  FROM public.t_2010_11_new_jersey_nets_season
+  ORDER BY game;
+- Results:
+  {"game":75, "date":"april 1",  "high points":"brandan wright (15)", "brook_leads":false}
+  {"game":76, "date":"april 3",  "high points":"deron williams (18)",   "brook_leads":false}
+  {"game":77, "date":"april 5",  "high points":"brook lopez (30)",     "brook_leads":true}
+  {"game":78, "date":"april 6",  "high points":"brook lopez (39)",     "brook_leads":true}
+  {"game":79, "date":"april 8",  "high points":"brook lopez (27)",     "brook_leads":true}
+  {"game":80, "date":"april 10", "high points":"brook lopez (35)",     "brook_leads":true}
+  {"game":81, "date":"april 11", "high points":"brook lopez (31)",     "brook_leads":true}
+- Interpretation: Brook Lopez is recorded as the Nets’ high scorer in five consecutive games (games 77–81).
+
+3) Consecutive-run calculation (longest Brook Lopez streak in this dataset)
+- SQL executed:
+  SELECT COUNT(*) AS len, MIN(game) AS start_game, MAX(game) AS end_game, string_agg(CAST(game AS text),', ' ORDER BY game) AS games
+  FROM (
+    SELECT game, ROW_NUMBER() OVER (ORDER BY game) AS rn
+    FROM public.t_2010_11_new_jersey_nets_season
+    WHERE lower("high points") LIKE '%brook lopez%'
+  ) t
+  GROUP BY (game - rn)
+  ORDER BY start_game;
+- Result:
+  {"len":5, "start_game":77, "end_game":81, "games":"77, 78, 79, 80, 81"}
+- Interpretation: The data confirms a 5-game consecutive streak where Brook Lopez led the team in points.
+
+Conclusion
+- The available authoritative dataset confirms that Brook Lopez led his team (New Jersey Nets) in points for 5 straight games (games 77–81 of the 2010–11 season). This supports the claim.
+
+Assumptions
+- “Team” interpreted as the New Jersey Nets (2010–11), which is the only Brook Lopez–relevant team available in the connected data.
+- “Led the team in points” interpreted as the player listed in the “high points” column for each game.
+- “5 straight games” interpreted as five consecutive game numbers within the season schedule.
+- The table contains games 75–81; the claim is verified within this available range, which is sufficient to establish a 5-game streak occurred.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

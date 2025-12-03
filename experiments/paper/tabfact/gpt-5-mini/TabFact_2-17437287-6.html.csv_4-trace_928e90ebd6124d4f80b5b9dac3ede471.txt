@@ -1,0 +1,62 @@
+
+<userQuery>
+<query>
+the score for the game where birmingham city be the away team on 10 march 1984 be 1 - 3
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Data sources discovered:
+- PostgreSQL database: TabFact (public schema)
+- Relevant table: public.t_1983_84_fa_cup — 1983–84 FA Cup ties
+  - Columns: "tie no" (text), "home team" (text), "score" (text), "away team" (text), "date" (text)
+
+Goal: Verify the claim: "the score for the game where Birmingham City were the away team on 10 March 1984 was 1 - 3".
+
+Evidence collected
+1) What matches are recorded on 10 March 1984?
+SQL executed:
+SELECT "tie no", "home team", "score", "away team", "date" 
+FROM public.t_1983_84_fa_cup
+WHERE date ILIKE '%10 March 1984%';
+
+Results:
+- tie no: 1, home team: notts county, score: 1 - 2, away team: everton, date: 10 march 1984
+- tie no: 3, home team: plymouth argyle, score: 0 - 0, away team: derby county, date: 10 march 1984
+- tie no: 4, home team: birmingham city, score: 1 - 3, away team: watford, date: 10 march 1984
+
+Interpretation: On 10 March 1984, Birmingham City played at home vs Watford, and the score was 1 - 3.
+
+2) All matches in this table involving Birmingham (home or away)
+SQL executed:
+SELECT "tie no", "home team", "score", "away team", "date" 
+FROM public.t_1983_84_fa_cup
+WHERE "home team" ILIKE '%birmingham%' OR "away team" ILIKE '%birmingham%';
+
+Results:
+- tie no: 4, home team: birmingham city, score: 1 - 3, away team: watford, date: 10 march 1984
+
+Interpretation: The only Birmingham City appearance in this dataset for the 1983–84 FA Cup is as the home team on 10 March 1984, losing 1 - 3 to Watford.
+
+3) Explicit check for Birmingham City as the away team on 10 March 1984
+SQL executed:
+SELECT * FROM public.t_1983_84_fa_cup WHERE "date" LIKE '10 March 1984%' AND "away team" ILIKE 'Birmingham City';
+
+Result: 0 rows
+
+Broader variant:
+SELECT * FROM public.t_1983_84_fa_cup WHERE "date" LIKE '10 March 1984%' AND "away team" ILIKE '%Birmingham%';
+
+Result: 0 rows
+
+Conclusion
+- The data shows no match on 10 March 1984 with Birmingham City as the away team. Instead, Birmingham City played at home on that date and lost 1 - 3 to Watford in the FA Cup. Therefore, the statement that Birmingham City were the away team is incorrect, although the 1 - 3 scoreline for a Birmingham City match on that date is correct.
+
+Assumptions and scope
+- The verification is based solely on the available TabFact public.t_1983_84_fa_cup table (1983–84 FA Cup). If the claim pertained to a different competition (e.g., league), that is outside the scope of the accessible data. Dates are stored as text; case-insensitive matching (ILIKE) and exact string LIKE patterns for '10 March 1984' were used. 'Birmingham' matching was done case-insensitively and includes 'Birmingham City'.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

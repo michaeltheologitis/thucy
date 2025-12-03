@@ -1,0 +1,54 @@
+
+<userQuery>
+<query>
+datia 's constituency number be higher than gohad 's by 9
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “Datia’s constituency number is higher than Gohad’s by 9.”
+
+Data source discovery and schema
+- Available table: bhind_lok_sabha_constituency
+- Columns: 
+  - "constituency number" (text)
+  - "name" (text)
+  - "reserved for ( sc / st / none)" (text)
+  - "district" (text)
+  - "number of electorates (2009)" (bigint)
+
+Evidence
+1) Listing constituency records (to verify presence and numbers for Datia and Gohad)
+Executed SQL:
+SELECT name, "constituency number", district, "reserved for ( sc / st / none)" AS reservation_status FROM bhind_lok_sabha_constituency;
+Result excerpt (relevant rows):
+- gohad | 13 | bhind | sc
+- datia | 22 | datia | none
+
+2) Direct computation of the difference (Datia − Gohad)
+Executed SQL:
+SELECT 
+    CAST("constituency number" AS INTEGER) AS constituency_number, 
+    (SELECT CAST("constituency number" AS INTEGER) FROM bhind_lok_sabha_constituency WHERE LOWER(name) = 'gohad') AS gohad_num,
+    (CAST("constituency number" AS INTEGER) - (SELECT CAST("constituency number" AS INTEGER) FROM bhind_lok_sabha_constituency WHERE LOWER(name) = 'gohad')) AS difference 
+FROM 
+    bhind_lok_sabha_constituency 
+WHERE 
+    LOWER(name) = 'datia';
+Result:
+- Datia constituency_number: 22
+- Gohad gohad_num: 13
+- Difference: 9
+
+Conclusion
+- Datia’s constituency number (22) is higher than Gohad’s (13) by 9. The claim is supported by the data.
+
+Assumptions
+- “Constituency number” refers to the field "constituency number" in the bhind_lok_sabha_constituency table.
+- “Datia” and “Gohad” correspond to the rows with name values 'datia' and 'gohad' (case-insensitive match).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,60 @@
+
+<userQuery>
+<query>
+the game between footscray and fitzroy be play at windy hill
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “The game between Footscray and Fitzroy was played at Windy Hill.”
+
+Data sources discovered:
+- TabFact (postgres_tabfact23) → public schema. Only relevant table found: public.t_1962_vfl_season (VFL match data with home/away teams, scores, venue, crowd, date).
+
+Evidence gathered
+1) Table size/context
+SQL:
+SELECT COUNT(*) FROM public.t_1962_vfl_season;
+Result:
+[{"count":6}]
+
+2) Inspect contents (to see available teams/venues/dates)
+SQL:
+SELECT * FROM public.t_1962_vfl_season;
+Result:
+[
+  {"home team":"melbourne","home team score":"11.18 (84)","away team":"st kilda","away team score":"11.6 (72)","venue":"mcg","crowd":48952,"date":"23 june 1962"},
+  {"home team":"essendon","home team score":"15.17 (107)","away team":"geelong","away team score":"10.7 (67)","venue":"windy hill","crowd":35000,"date":"23 june 1962"},
+  {"home team":"collingwood","home team score":"10.14 (74)","away team":"fitzroy","away team score":"9.11 (65)","venue":"victoria park","crowd":26488,"date":"23 june 1962"},
+  {"home team":"carlton","home team score":"12.9 (81)","away team":"footscray","away team score":"9.10 (64)","venue":"princes park","crowd":32400,"date":"23 june 1962"},
+  {"home team":"south melbourne","home team score":"10.13 (73)","away team":"richmond","away team score":"11.13 (79)","venue":"lake oval","crowd":17000,"date":"23 june 1962"},
+  {"home team":"north melbourne","home team score":"10.8 (68)","away team":"hawthorn","away team score":"10.7 (67)","venue":"arden street oval","crowd":8470,"date":"23 june 1962"}
+]
+
+3) Direct check: any Footscray vs Fitzroy game in this dataset
+SQL:
+SELECT COUNT(*) FROM public.t_1962_vfl_season WHERE ("home team" = 'footscray' AND "away team" = 'fitzroy') OR ("home team" = 'fitzroy' AND "away team" = 'footscray');
+Result:
+[{"count":0}]
+
+4) Which game(s) were at Windy Hill?
+SQL:
+SELECT "home team", "away team", venue, date FROM public.t_1962_vfl_season WHERE venue ILIKE '%Windy Hill%' ORDER BY date ASC;
+Result:
+[{"home team":"essendon","away team":"geelong","venue":"windy hill","date":"23 june 1962"}]
+
+Findings
+- In the available VFL data (public.t_1962_vfl_season), there is no match where Footscray played Fitzroy at all, and the only game at Windy Hill is Essendon vs Geelong on 23 June 1962.
+- On that same date, Fitzroy played Collingwood at Victoria Park and Footscray played Carlton at Princes Park, not each other and not at Windy Hill.
+
+Conclusion
+- The claim is not supported by the data and is contradicted for the events covered by the accessible dataset.
+
+Assumptions
+- Due to the accessible data containing only the public.t_1962_vfl_season table (six matches from 23 June 1962), I interpreted the claim within the scope of this dataset. Team names are matched in lowercase as stored (e.g., 'footscray', 'fitzroy').
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

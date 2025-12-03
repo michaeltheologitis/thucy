@@ -1,0 +1,78 @@
+
+<userQuery>
+<query>
+lleyton hewitt never face the same opponent in more than 1 master series final
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “Lleyton Hewitt never faced the same opponent in more than one Masters Series final.”
+
+Data source exploration
+- Available database: TabFact
+- Table: public.lleyton_hewitt(outcome text, year bigint, championship text, surface text, opponent text, score text)
+- This table contains Lleyton Hewitt’s Masters Series finals with opponent, year, tournament (championship), outcome, score, and surface.
+
+Evidence 1: Enumerate all finals and opponents
+SQL executed:
+SELECT * FROM public.lleyton_hewitt;
+
+Result:
+- 2000 | stuttgart        | wayne ferreira  | runner - up | 6 - 7 (6 - 8), 6 - 3, 7 - 6 (7 - 5), 6 - 7 (2 - 7), 2 - 6 | hard (i)
+- 2002 | indian wells     | tim henman      | winner      | 6 - 1, 6 - 2 | hard
+- 2002 | cincinnati       | carlos moyá     | runner - up | 5 - 7, 6 - 7 (5 - 7) | hard
+- 2002 | paris            | marat safin     | runner - up | 6 - 7 (4 - 7), 0 - 6, 4 - 6 | carpet (i)
+- 2003 | indian wells (2) | gustavo kuerten | winner      | 6 - 1, 6 - 1 | hard
+- 2004 | cincinnati (2)   | andre agassi    | runner - up | 3 - 6, 6 - 3, 2 - 6 | hard
+- 2005 | indian wells     | roger federer   | runner - up | 2 - 6, 4 - 6, 4 - 6 | hard
+
+Observation: The seven opponents listed are all distinct: Wayne Ferreira, Tim Henman, Carlos Moyá, Marat Safin, Gustavo Kuerten, Andre Agassi, Roger Federer.
+
+Evidence 2: Check for any opponent appearing in more than one final
+SQL executed:
+SELECT opponent, COUNT(*) AS finals_count 
+FROM public.lleyton_hewitt 
+GROUP BY opponent 
+HAVING COUNT(*) > 1;
+
+Result: No rows returned (indicates no opponent faced Hewitt in more than one Masters Series final).
+
+Evidence 3: Show counts of opponents and finals to confirm one-to-one mapping
+SQL executed:
+SELECT opponent, COUNT(*) AS finals_count
+FROM public.lleyton_hewitt
+GROUP BY opponent
+ORDER BY opponent ASC;
+
+Result:
+- Andre Agassi: 1
+- Carlos Moyá: 1
+- Gustavo Kuerten: 1
+- Marat Safin: 1
+- Roger Federer: 1
+- Tim Henman: 1
+- Wayne Ferreira: 1
+
+SQL executed:
+SELECT COUNT(*) AS total_rows FROM public.lleyton_hewitt;
+
+Result:
+- total_rows: 7
+
+SQL executed:
+SELECT COUNT(DISTINCT opponent) AS distinct_opponents FROM public.lleyton_hewitt;
+
+Result:
+- distinct_opponents: 7
+
+Conclusion
+- The data shows Hewitt reached 7 Masters Series finals against 7 different opponents. There are no repeated opponents across these finals. Therefore, the claim is supported by the data.
+
+Assumptions
+- The public.lleyton_hewitt table enumerates Lleyton Hewitt’s ATP Masters Series (Masters 1000/former Super 9) finals. The championship names (Stuttgart [Masters], Indian Wells, Cincinnati, Paris) correspond to Masters Series events during the listed years.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

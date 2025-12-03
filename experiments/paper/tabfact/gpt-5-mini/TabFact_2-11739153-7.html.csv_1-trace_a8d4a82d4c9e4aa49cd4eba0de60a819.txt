@@ -1,0 +1,44 @@
+
+<userQuery>
+<query>
+during the 2007 - 08 minnesota wild season , the score on february 10 and february 24 be 2 - 1
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: During the 2007–08 Minnesota Wild season, the scores on February 10 and February 24 were 2–1.
+
+Data source discovery
+- Available database: TabFact (postgres_tabfact34)
+- Relevant table: public.t_2007_08_minnesota_wild_season
+- Relevant columns: date (text), visitor (text), score (text), home (text), decision (text), attendance (bigint), record (text)
+
+Evidence from data
+Exploratory SQL executed:
+SELECT date, visitor, score, home FROM public.t_2007_08_minnesota_wild_season WHERE date ILIKE '%Feb%' ORDER BY date;
+
+Returned rows included (excerpt):
+- {date: "february 10", visitor: "minnesota", score: "2 - 1", home: "st louis"}
+- {date: "february 24", visitor: "calgary", score: "2 - 1", home: "minnesota"}
+
+Final SQL executed (ordered by day of month):
+SELECT date, visitor, score, home FROM public.t_2007_08_minnesota_wild_season WHERE date ILIKE '%feb%' ORDER BY CAST(substring(date FROM '\\d+') AS integer);
+
+Relevant results:
+- february 10 — minnesota — 2 - 1 — st louis
+- february 24 — calgary — 2 - 1 — minnesota
+
+Interpretation
+- February 10: Minnesota (visitor) at St. Louis — score recorded as 2 - 1.
+- February 24: Calgary (visitor) at Minnesota — score recorded as 2 - 1.
+Both dates have a final score of 2–1, matching the claim.
+
+Assumptions
+- The table public.t_2007_08_minnesota_wild_season represents the 2007–08 season; dates like "february 10" refer to February 2008.
+- The score format is visitor goals – home goals (consistent with the visitor/home columns).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

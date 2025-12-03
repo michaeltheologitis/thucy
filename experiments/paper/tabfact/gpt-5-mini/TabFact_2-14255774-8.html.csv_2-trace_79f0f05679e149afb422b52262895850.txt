@@ -1,0 +1,70 @@
+
+<userQuery>
+<query>
+2 game have a score of more than 10 point
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “2 game have a score of more than 10 point.”
+
+Data source discovery
+- Available source: TabFact (PostgreSQL), schema public. Relevant table: public.t_2008_arizona_diamondbacks_season (columns: date text, opponent text, score text, loss text, attendance bigint, record text).
+
+How “score” is stored (sample inspection)
+Executed SQL:
+SELECT date, opponent, score, loss, attendance, record
+FROM public.t_2008_arizona_diamondbacks_season
+LIMIT 15;
+Observation: score is stored as a string like “X - Y” (optionally “X - Y (N)” for extra innings). This allows extracting the two run totals per game.
+
+Main verification
+Interpretation used for the claim: number of games in which any team scored more than 10 runs (i.e., max of the two run values > 10).
+
+1) Count of games where any team scored more than 10
+Executed SQL:
+SELECT COUNT(*) AS any_team_gt_10
+FROM public.t_2008_arizona_diamondbacks_season
+WHERE GREATEST(
+  regexp_replace(split_part(score, ' - ', 1), '^\s*(\d+).*', '\\1')::int,
+  regexp_replace(split_part(score, ' - ', 2), '^\s*(\d+).*', '\\1')::int
+) > 10;
+Result: any_team_gt_10 = 2
+
+2) Games where any team scored more than 10 (for transparency)
+Executed SQL:
+SELECT date, opponent, score,
+  regexp_replace(split_part(score, ' - ', 1), '^\s*(\d+).*', '\\1')::int AS runs_team1,
+  regexp_replace(split_part(score, ' - ', 2), '^\s*(\d+).*', '\\1')::int AS runs_team2
+FROM public.t_2008_arizona_diamondbacks_season
+WHERE GREATEST(
+  regexp_replace(split_part(score, ' - ', 1), '^\s*(\d+).*', '\\1')::int,
+  regexp_replace(split_part(score, ' - ', 2), '^\s*(\d+).*', '\\1')::int
+) > 10
+ORDER BY date;
+Returned rows:
+- september 21 | rockies   | 13 - 4 | 13 | 4
+- september 25 | cardinals | 12 - 3 | 12 | 3
+
+Additional context (alternative reading)
+If the claim intended “combined score > 10 runs,” the result is different.
+Executed SQL:
+SELECT COUNT(*) AS combined_gt_10
+FROM public.t_2008_arizona_diamondbacks_season
+WHERE (
+  regexp_replace(split_part(score, ' - ', 1), '^\s*(\d+).*', '\\1')::int +
+  regexp_replace(split_part(score, ' - ', 2), '^\s*(\d+).*', '\\1')::int
+) > 10;
+Result: combined_gt_10 = 5
+
+Conclusion
+- Under the natural interpretation that “a score of more than 10” means at least one team scored more than 10 runs in the game, the data confirms there are exactly 2 such games.
+
+Assumptions
+- “Score” refers to the per-team run totals in the score column. “More than 10 point” is interpreted as any team’s runs > 10 in a game, not the combined total. Parsing of scores strips any extra-innings notation and reads only the leading integers on each side of the hyphen.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

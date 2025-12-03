@@ -1,0 +1,77 @@
+
+<userQuery>
+<query>
+2010 - 11 - 17 be the release date of version 1.0 with a category of utilities , a developer of dino game , and a title of msn money
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “2010 - 11 - 17 be the release date of version 1.0 with a category of utilities, a developer of dino game, and a title of msn money.”
+
+Conclusion summary:
+- Title: msn money — Supported
+- Version: 1.0 — Supported
+- Category: utilities — Supported
+- Release date: 2010 - 11 - 17 — Not supported (data shows 2010 - 07 - 29)
+- Developer: dino game — Not supported (data shows microsoft)
+Overall: The claim mixes correct and incorrect details.
+
+Data sources explored:
+- Database: TabFact (postgres_tabfact26)
+- Schema: public
+- Table: list_of_zune_applications (columns: title, developer, category, "release date", version)
+
+Evidence and executed SQL:
+1) Locate the “MSN Money” entry and verify its fields
+SQL:
+SELECT title, developer, category, "release date", version
+FROM public.list_of_zune_applications
+WHERE lower(title) = 'msn money';
+Result:
+- title: msn money
+- developer: microsoft
+- category: utilities
+- release date: 2010 - 07 - 29
+- version: 1.0
+Interpretation: Title, category, and version match the claim; release date and developer do not.
+
+2) Check whether any app has developer = “dino game”
+SQL (count check):
+SELECT count(*) AS match_count
+FROM public.list_of_zune_applications
+WHERE developer ILIKE 'dino game';
+Result: match_count = 0
+
+SQL (attempt to list rows):
+SELECT title, developer, category, "release date", version
+FROM public.list_of_zune_applications
+WHERE developer ILIKE 'dino game';
+Result: No rows returned
+Interpretation: No apps in this table are by a developer named “dino game.”
+
+3) Check for any app with the release date “2010 - 11 - 17”
+SQL:
+SELECT title, developer, category, "release date", version
+FROM public.list_of_zune_applications
+WHERE "release date" = '2010 - 11 - 17';
+Results:
+- title: chord finder | developer: microsoft | category: utilities | release date: 2010 - 11 - 17 | version: 1.0
+- title: windows live messenger | developer: microsoft | category: social networking | release date: 2010 - 11 - 17 | version: 1.4
+Interpretation: The date 2010 - 11 - 17 appears for other apps, but not for “msn money.”
+
+Final assessment of each sub-claim:
+- Title = “msn money”: Verified
+- Version = 1.0: Verified
+- Category = “utilities”: Verified
+- Release date = “2010 - 11 - 17”: Inaccurate (actual is “2010 - 07 - 29”)
+- Developer = “dino game”: Inaccurate (actual is “microsoft”)
+
+Assumptions made:
+- Case-insensitive matching for title and developer (using lower(title) and ILIKE) to account for capitalization variations.
+- Exact string match for the text-formatted release date as stored in the table.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

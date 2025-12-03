@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+3 of the total game feature have an attendance in the 3000s
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “3 of the total game feature have an attendance in the 3000s” is taken to mean “Three games in the dataset have attendance between 3000 and 3999 inclusive.”
+
+Data sources discovered:
+- Database: TabFact (PostgreSQL), Schema: public
+- Table: public.t_2008_09_bradford_city_a_f_c_season (columns: game, date, opponent, venue, result, attendance)
+
+Evidence and executed SQL:
+1) Count games with attendance in the 3000s
+SQL:
+SELECT COUNT(*) AS count FROM public.t_2008_09_bradford_city_a_f_c_season WHERE attendance BETWEEN 3000 AND 3999;
+Result: count = 3
+
+2) List those games
+SQL:
+SELECT game, date, opponent, venue, result, attendance
+FROM public.t_2008_09_bradford_city_a_f_c_season
+WHERE attendance BETWEEN 3000 AND 3999
+ORDER BY game ASC;
+Results:
+- game: 4, date: 30 august 2008, opponent: aldershot town, venue: away, result: 2 - 3, attendance: 3805
+- game: 10, date: 11 october 2008, opponent: accrington stanley, venue: away, result: 3 - 2, attendance: 3012
+- game: 12, date: 21 october 2008, opponent: darlington, venue: away, result: 1 - 2, attendance: 3034
+
+3) Total games for context
+SQL:
+SELECT count(*) AS total_games FROM public.t_2008_09_bradford_city_a_f_c_season;
+Result: total_games = 43
+
+Assessment:
+- The dataset shows exactly 3 games with attendance in the 3000–3999 range. This matches the claim.
+
+Assumptions:
+- “game feature” refers to the games listed in public.t_2008_09_bradford_city_a_f_c_season.
+- “in the 3000s” interpreted as 3000–3999 inclusive using BETWEEN 3000 AND 3999.
+- NULL attendances (if any) are excluded from the count by the WHERE clause.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

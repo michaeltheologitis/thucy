@@ -1,0 +1,54 @@
+
+<userQuery>
+<query>
+the highest scoring game of the season be against the angel on september 8 final score be 12 - 10
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “the highest scoring game of the season be against the angel on september 8 final score be 12 - 10.”
+
+Summary conclusion: Verified by the available dataset (1997 Toronto Blue Jays table containing September games). The September 8 game vs the Angels ended 12 - 10, and its combined 22 runs are the highest total in the table.
+
+Evidence from data (with exact executed SQL):
+
+1) Confirm the September 8 game vs Angels and its score
+SQL executed:
+SELECT date, opponent, score, attendance FROM public.t_1997_toronto_blue_jays_season LIMIT 10;
+Result excerpt shows:
+- date: "september 8", opponent: "angels", score: "12 - 10" (also shows surrounding September dates and opponents)
+
+2) Compute the maximum combined runs in any game
+SQL executed:
+SELECT MAX((regexp_replace(split_part(score, ' - ', 1), '^\s*([0-9]+).*', '\\1')::int + regexp_replace(split_part(score, ' - ', 2), '^\s*([0-9]+).*', '\\1')::int)) AS max_total
+FROM public.t_1997_toronto_blue_jays_season;
+Result:
+- max_total = 22
+
+3) List all games that match that maximum combined total
+SQL executed:
+SELECT date, opponent, score,
+ (regexp_replace(split_part(score, ' - ', 1), '^\s*([0-9]+).*', '\\1')::int + regexp_replace(split_part(score, ' - ', 2), '^\s*([0-9]+).*', '\\1')::int) AS combined_runs
+FROM public.t_1997_toronto_blue_jays_season
+WHERE (regexp_replace(split_part(score, ' - ', 1), '^\s*([0-9]+).*', '\\1')::int + regexp_replace(split_part(score, ' - ', 2), '^\s*([0-9]+).*', '\\1')::int) = 22;
+Result:
+- date: "september 8", opponent: "angels", score: "12 - 10", combined_runs: 22 (only row returned)
+
+Additional context on dataset scope
+SQL executed:
+SELECT DISTINCT date FROM public.t_1997_toronto_blue_jays_season ORDER BY date LIMIT 50;
+Result shows only September dates (e.g., "september 1" … "september 28"), indicating this table contains September games.
+
+Assessment
+- The September 8 game vs Angels ended 12 - 10.
+- Its combined runs (22) are the highest in the dataset, and no other game ties this total.
+
+Assumptions
+- “Highest scoring game” is interpreted as the game with the highest combined runs (both teams).
+- “Season” is taken to refer to the scope of the provided table, which contains the team’s September games for 1997 (the only data available here).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

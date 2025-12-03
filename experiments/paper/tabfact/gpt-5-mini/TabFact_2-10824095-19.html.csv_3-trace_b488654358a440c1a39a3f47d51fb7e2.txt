@@ -1,0 +1,51 @@
+
+<userQuery>
+<query>
+21.16 (142) home team score have a away team of fitzroy
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The match with a home team score of 21.16 (142) had an away team of Fitzroy.
+
+Data source discovery:
+- Available DB: TabFact (postgres_tabfact8), schema: public.
+- Relevant table: public.t_1982_vfl_season with columns: "home team", "home team score", "away team", "away team score", "venue", "crowd", "date".
+
+Evidence and executed SQL:
+1) Find all matches where the home team score is exactly 21.16 (142):
+SQL:
+SELECT "home team", "home team score", "away team", "away team score", "venue", "date" 
+FROM public.t_1982_vfl_season
+WHERE "home team score" = '21.16 (142)';
+Result:
+- fitzroy — 21.16 (142) — st kilda — 11.12 (78) — junction oval — 7 august 1982
+
+2) Check if any row has home team score 21.16 (142) AND away team Fitzroy (case-insensitive, trimmed):
+SQL:
+SELECT COUNT(*) AS match_count
+FROM public.t_1982_vfl_season
+WHERE TRIM("home team score") = '21.16 (142)'
+  AND LOWER(TRIM("away team")) = 'fitzroy';
+Result:
+- match_count = 0
+
+3) Count how many rows have home team score 21.16 (142) (sanity check):
+SQL:
+SELECT COUNT(*) AS count_exact_score
+FROM public.t_1982_vfl_season
+WHERE TRIM("home team score") = '21.16 (142)';
+Result:
+- count_exact_score = 1
+
+Conclusion:
+- The only instance of a home team score 21.16 (142) shows Fitzroy as the HOME team, with St Kilda as the AWAY team. There is no match where the home team score is 21.16 (142) and the away team is Fitzroy.
+
+Assumptions:
+- Interpreted the claim as asserting that the away team for the match with home score 21.16 (142) is Fitzroy, and limited the search to the 1982 VFL season table available. Matching on team name was done case-insensitively and with trimmed whitespace; score string matched exactly after trimming.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

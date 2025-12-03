@@ -1,0 +1,52 @@
+
+<userQuery>
+<query>
+manchester unite have draw all mathces to the blackburn rover 2 out of 2 time since 13 august 2005
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Manchester United have drawn all matches against Blackburn Rovers (2 out of 2) since 13 August 2005.”
+
+Data sources checked
+- Database: postgres_tabfact2 (TabFact, public schema)
+- Table used: t_2005_06_manchester_united_f_c_season (contains match data for Manchester United’s 2005–06 season)
+
+What the data shows
+- In the 2005–06 season (which begins after 13 August 2005), Manchester United played Blackburn Rovers twice in league play. Both matches were losses for Manchester United, not draws.
+  - 24 September 2005 (H): 1 - 2
+  - 1 February 2006 (A): 3 - 4
+- Aggregate: 2 matches vs Blackburn Rovers; 0 draws.
+
+Executed SQL and results (evidence)
+1) List all rows vs Blackburn Rovers
+SQL:
+SELECT date, opponents, "h / a", "result f - a", attendance, "league position"
+FROM public.t_2005_06_manchester_united_f_c_season
+WHERE opponents ILIKE '%Blackburn%';
+
+Result rows:
+- {"date": "24 september 2005", "opponents": "blackburn rovers", "h / a": "h", "result f - a": "1 - 2", "attendance": 67765, "league position": "6th"}
+- {"date": "1 february 2006", "opponents": "blackburn rovers", "h / a": "a", "result f - a": "3 - 4", "attendance": 25484, "league position": "2nd"}
+
+2) Count total matches and draws vs Blackburn Rovers
+SQL:
+SELECT COUNT(*) AS total_matches,
+       SUM(CASE WHEN CAST(TRIM(SPLIT_PART("result f - a", '-', 1)) AS INTEGER) = CAST(TRIM(SPLIT_PART("result f - a", '-', 2)) AS INTEGER) THEN 1 ELSE 0 END) AS draws
+FROM public.t_2005_06_manchester_united_f_c_season
+WHERE opponents ILIKE '%Blackburn%';
+
+Result:
+- {"total_matches": 2, "draws": 0}
+
+Conclusion
+- The data contradicts the claim. Since 13 August 2005 (i.e., during the 2005–06 season captured in this table), Manchester United played Blackburn Rovers twice and did not draw either match.
+
+Assumptions
+- “Since 13 August 2005” is interpreted as within the 2005–06 season (the available table for that season). Both listed fixtures occurred after that date. The table appears to cover league fixtures; no additional cup matches vs Blackburn are present in this table.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

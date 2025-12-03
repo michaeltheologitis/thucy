@@ -1,0 +1,45 @@
+
+<userQuery>
+<query>
+tiger wood score be less than 205
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Scope and data discovery
+- Data sources: Discovered one accessible PostgreSQL data source: postgres_tabfact8 (TabFact), schema public, containing a single table.
+- Schema details: Table public.t_2002_u_s_open_golf with columns: place (text), player (text), country (text), score (text), to par (text).
+
+Verification steps and evidence
+1) Locate Tiger Woods’ entry and read the recorded score text.
+SQL executed:
+SELECT player, score FROM public.t_2002_u_s_open_golf WHERE player ILIKE 'Tiger Woods';
+Result:
+- player = "tiger woods"
+- score = "67 + 68 + 70 = 205"
+
+2) Parse the total from the score field and test whether it is less than 205.
+SQL executed:
+SELECT player, score, trim(split_part(score, '=' , 2)) AS after_eq, regexp_replace(trim(split_part(score, '=' , 2)), '[^0-9-]', '', 'g') AS score_digits, (regexp_replace(trim(split_part(score, '=' , 2)), '[^0-9-]', '', 'g'))::int AS score_int, ((regexp_replace(trim(split_part(score, '=' , 2)), '[^0-9-]', '', 'g'))::int < 205) AS less_than_205 FROM public.t_2002_u_s_open_golf WHERE player ILIKE 'Tiger Woods';
+Result:
+- after_eq = "205"
+- score_int = 205
+- less_than_205 = false
+
+Findings
+- The table records Tiger Woods’ total in the score field as 205.
+- The comparison “score < 205” evaluates to false because 205 is equal to, not less than, 205.
+
+Conclusion
+- The claim that Tiger Woods’ score is less than 205 is not supported by the data; it is contradicted by the recorded value of 205.
+
+Assumptions
+- “tiger wood” refers to the player entry spelled “tiger woods”.
+- The numeric score to compare is the total after the equals sign in the score text (e.g., "67 + 68 + 70 = 205").
+- The relevant context is the available table t_2002_u_s_open_golf, treated as authoritative for this verification.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,66 @@
+
+<userQuery>
+<query>
+the number of student enrol at st andrew university be 600
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the number of student enrol at st andrew university be 600.”
+
+Step 1: Discover available data sources and tables
+- Evidence query (tables):
+  SQL:
+  SELECT table_schema, table_name FROM information_schema.tables WHERE table_type='BASE TABLE';
+  SELECT schemaname, tablename FROM pg_catalog.pg_tables;
+- Result (relevant portion): A table named public.north_state_conference is available.
+
+Step 2: Inspect schema of the relevant table
+- Evidence query (columns):
+  SQL:
+  SELECT column_name, data_type FROM information_schema.columns WHERE table_schema='public' AND table_name='north_state_conference' ORDER BY ordinal_position;
+- Result (relevant columns):
+  - institution (text)
+  - enrollment (bigint)
+  - location (text)
+  - founded (bigint)
+  - type (text)
+  - nickname (text)
+  - joined (text)
+  - left (text)
+  - current conference (text)
+
+Step 3: Retrieve enrollment for St Andrews University
+- Evidence query (match institution name):
+  SQL:
+  SELECT institution, enrollment 
+  FROM public.north_state_conference 
+  WHERE institution ILIKE '%St Andrew%' OR institution ILIKE '%St Andrews%';
+- Result: St Andrews University — enrollment = 600
+
+Step 4: Retrieve the full record for context
+- Evidence query (full row):
+  SQL:
+  SELECT * FROM public.north_state_conference WHERE institution ILIKE '%St Andrews%';
+- Result:
+  - Institution: St Andrews University
+  - Location: Laurinburg, North Carolina
+  - Founded: 1958
+  - Type: Private
+  - Enrollment: 600
+  - Nickname: Knights
+  - Joined: 1988
+  - Left: 2012
+  - Current Conference: aac (naia)
+
+Conclusion based on data
+- The table public.north_state_conference contains a row for “St Andrews University” with enrollment 600. This supports the claim that the number of students enrolled at St Andrews University is 600.
+
+Assumptions
+- “st andrew university” in the claim is interpreted as “St Andrews University” (Laurinburg, North Carolina), which appears in the dataset. This is distinct from the University of St Andrews in Scotland, which is not represented in the available data sources.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

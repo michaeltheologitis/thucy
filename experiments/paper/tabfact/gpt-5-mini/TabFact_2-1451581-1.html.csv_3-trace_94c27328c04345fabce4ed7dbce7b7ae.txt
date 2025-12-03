@@ -1,0 +1,41 @@
+
+<userQuery>
+<query>
+rank 16 have a code (iata / icao) of ord / kord
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Data source discovery
+- Accessible database: TabFact (public schema)
+- Relevant table: public.world_s_busiest_airports_by_cargo_traffic
+  - Columns: rank (bigint), airport (text), code (iata / icao) (text), total cargo (metric tonnes) (bigint), % change (text)
+
+Evidence 1: What is at rank 16?
+- Executed SQL:
+  SELECT rank, airport, "code (iata / icao)" AS code
+  FROM public.world_s_busiest_airports_by_cargo_traffic
+  WHERE rank = 16;
+- Result: rank = 16, airport = london heathrow airport, code = lhr / egll
+- Interpretation: At rank 16, the code is LHR / EGLL, not ORD / KORD.
+
+Evidence 2: Where does ORD / KORD appear?
+- Executed SQL (case-insensitive exact match on the full code field):
+  SELECT rank, airport, "code (iata / icao)"
+  FROM public.world_s_busiest_airports_by_cargo_traffic
+  WHERE lower("code (iata / icao)") = 'ord / kord';
+- Result: rank = 17, airport = o'hare international airport, code = ord / kord
+- Interpretation: ORD / KORD corresponds to rank 17 in this dataset, not rank 16.
+
+Conclusion
+- The claim that rank 16 has code (iata / icao) of ord / kord is contradicted by the data. Rank 16 is LHR / EGLL; ORD / KORD is rank 17.
+
+Assumptions
+- The claim refers to the TabFact table world_s_busiest_airports_by_cargo_traffic and its column "code (iata / icao)" containing the IATA/ICAO pair separated by " / ".
+- Code comparisons are case-insensitive.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

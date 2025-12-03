@@ -1,0 +1,89 @@
+
+<userQuery>
+<query>
+galina voskoboeva play 20% of her game on a clay top tennis court and 1% on hard
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary conclusion
+The claim that “Galina Voskoboeva plays 20% of her games on clay and 1% on hard” is not supported by the available data. In the accessible dataset of her matches, clay accounts for 40% of matches, while hard surfaces account for either 20% (strictly “hard”) or 60% (combining “hard” and “hard (i)”/indoor hard). Both figures contradict the stated 20% clay and 1% hard.
+
+What data source was checked
+- Database: TabFact (postgres_tabfact16)
+- Schema: public
+- Table: public.galina_voskoboeva (columns: outcome, date, tournament, surface, opponent, score)
+
+Executed SQL and evidence
+1) Counting total matches
+SQL:
+SELECT COUNT(*) AS total_matches FROM public.galina_voskoboeva;
+Result:
+- total_matches = 5
+
+2) Distribution by raw surface values
+SQL:
+SELECT COALESCE(NULLIF(TRIM(surface), ''), '(blank)') AS surface,
+       COUNT(*) AS match_count,
+       ROUND(100.0*COUNT(*)/(SELECT COUNT(*) FROM public.galina_voskoboeva), 2) AS percent_of_total
+FROM public.galina_voskoboeva
+GROUP BY COALESCE(NULLIF(TRIM(surface), ''), '(blank)')
+ORDER BY match_count DESC;
+Results (surface, match_count, percent_of_total):
+- hard (i): 2 matches, 40.00%
+- clay: 2 matches, 40.00%
+- hard: 1 match, 20.00%
+Interpretation:
+- Clay = 40% (not 20%)
+- Hard (strictly the value “hard”) = 20% (not 1%)
+
+3) Distribution by normalized surface (mapping “hard (i)” to “hard”)
+SQL:
+WITH t AS (
+  SELECT *, CASE
+      WHEN surface IS NULL OR trim(surface) = '' THEN '(blank)'
+      ELSE lower(trim(surface))
+    END AS surf_trim
+  FROM public.galina_voskoboeva
+), normalized AS (
+  SELECT CASE
+      WHEN surf_trim = 'hard (i)' THEN 'hard'
+      WHEN surf_trim = 'hard' THEN 'hard'
+      WHEN surf_trim = 'clay' THEN 'clay'
+      ELSE surf_trim
+    END AS surface_normalized
+  FROM t
+), totals AS (
+  SELECT COUNT(*)::integer AS total_matches FROM normalized
+)
+SELECT
+  surface_normalized,
+  COUNT(*) AS match_count,
+  ROUND( (COUNT(*)::numeric / (SELECT total_matches FROM totals)) * 100.0, 2) AS percent_of_total
+FROM normalized
+GROUP BY surface_normalized
+ORDER BY match_count DESC, surface_normalized;
+Results (surface_normalized, match_count, percent_of_total):
+- hard: 3 matches, 60.00%
+- clay: 2 matches, 40.00%
+Interpretation:
+- When counting indoor hard (“hard (i)”) as hard, hard surfaces represent 60% of matches—not 1%.
+
+Assessment vs. the claim
+- Claimed clay share: 20%
+  Evidence: 40% (contradicted)
+- Claimed hard share: 1%
+  Evidence: 20% if using only the raw “hard” label; 60% if combining “hard” and “hard (i)” (both contradict 1%).
+
+Conclusion: The claim is inaccurate given the data in the public.galina_voskoboeva table.
+
+Assumptions
+- “Game” refers to matches; each row in public.galina_voskoboeva represents one match.
+- Surfaces are taken from the surface column as labeled; “hard (i)” is treated as indoor hard and a subtype of hard in the normalization step.
+- The analysis is limited to the accessible dataset, which is treated as authoritative per instructions.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

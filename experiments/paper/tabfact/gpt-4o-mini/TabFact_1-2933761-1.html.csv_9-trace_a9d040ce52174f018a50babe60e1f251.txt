@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+multiple people be prison escapist and each leave the cube alive
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary conclusion: The claim that multiple people are prison escapists and each leaves the cube alive is not supported by the data. The data shows only one character with the occupation "prison escapist," and that character dies. The only character recorded as alive after exiting the cube is not a prison escapist.
+
+Evidence from the database
+- Full table listing to establish characters, occupations, and outcomes
+  SQL executed:
+  SELECT * FROM public.cube_film_series;
+  Result highlights:
+  • kazan — occupation: autistic savant; status: alive after exiting the cube
+  • rennes — occupation: prison escapist; status: dead
+  • david worth — status: dead
+  • quentin — status: dead
+  • joan leaven — status: dead
+  • dr helen holloway — status: dead
+
+- How many characters are prison escapists, and what are their outcomes?
+  SQL executed:
+  SELECT name, status FROM public.cube_film_series WHERE occupation = 'prison escapist';
+  Result:
+  • rennes — status: dead
+  Finding: There is one character with occupation "prison escapist," and he did not leave the cube alive.
+
+- Which characters are recorded as leaving the cube alive?
+  SQL executed:
+  SELECT name, occupation, gender, "played by" FROM cube_film_series WHERE status = 'alive after exiting the cube';
+  Result:
+  • kazan — occupation: autistic savant (not a prison escapist)
+
+- Is there any prison escapist who is alive (status contains the word "alive")?
+  SQL executed:
+  SELECT COUNT(*) AS character_count, ARRAY_AGG(name) AS names, ARRAY_AGG(status) AS statuses FROM public.cube_film_series WHERE occupation = 'prison escapist' AND status LIKE '%alive%';
+  Result:
+  • character_count = 0
+  Finding: No prison escapist is recorded as alive in the status column.
+
+Assessment against the claim
+- “Multiple people be prison escapist”: The dataset shows only one prison escapist (rennes), not multiple.
+- “Each leave the cube alive”: The only person who left the cube alive is kazan, whose occupation is autistic savant, not prison escapist. The prison escapist (rennes) is recorded as dead.
+
+Therefore, the claim is contradicted by the data.
+
+Assumptions
+- Interpreted the claim as: There are multiple characters whose occupation is “prison escapist,” and all of them leave the cube alive. “Leave the cube alive” was aligned to status = “alive after exiting the cube” or statuses containing the word “alive.”
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

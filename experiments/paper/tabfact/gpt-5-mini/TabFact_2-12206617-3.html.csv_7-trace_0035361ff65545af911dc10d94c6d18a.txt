@@ -1,0 +1,69 @@
+
+<userQuery>
+<query>
+the toronto blue jays lose 2 of the last 3 game they play in may 1991
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim checked: "the toronto blue jays lose 2 of the last 3 game they play in may 1991"
+
+Conclusion: The data shows the Blue Jays lost 1 of their last 3 May 1991 games (results: W, L, W), not 2. Therefore, the claim is contradicted by the data.
+
+Data source discovery
+- Available database: TabFact (public schema)
+- Relevant table: public.t_1991_toronto_blue_jays_season
+- Table columns: date (text), opponent (text), score (text), loss (text), attendance (bigint), record (text)
+
+Evidence and executed SQL
+1) List all May 1991 games to identify the last three and inspect records
+SQL executed:
+SELECT date, opponent, score, loss, record
+FROM public.t_1991_toronto_blue_jays_season
+WHERE date ILIKE 'May %'
+ORDER BY CAST(regexp_replace(date, '[^0-9]', '', 'g') AS integer);
+
+Key rows near month end (from the result set):
+- may 29 — opponent: athletics — score: 8 - 3 — loss: slusarski (1 - 2) — record: 26 - 20
+- may 30 — opponent: athletics — score: 8 - 6 — loss: ward (0 - 2) — record: 26 - 21
+- may 31 — opponent: angels — score: 5 - 1 — loss: langston (6 - 2) — record: 27 - 21
+
+2) Compute W/L for the final three May games by comparing cumulative wins between consecutive games
+SQL executed:
+WITH may AS (
+  SELECT date, (regexp_replace(lower(date),'^[a-z]+\s+([0-9]{1,2}).*$','\1'))::int AS day, opponent, score, record,
+         (trim(split_part(record,'-',1)))::int AS wins
+  FROM public.t_1991_toronto_blue_jays_season
+  WHERE lower(date) LIKE 'may %'
+), computed AS (
+  SELECT date, opponent, score, record, day,
+         CASE WHEN lag(wins) OVER (ORDER BY day) IS NULL THEN NULL
+              WHEN wins > lag(wins) OVER (ORDER BY day) THEN 'W' ELSE 'L' END AS result
+  FROM may
+)
+SELECT date, opponent, score, record, result
+FROM computed
+WHERE day >= (SELECT max(day) FROM may) - 2
+ORDER BY day;
+
+Result (last three games in May 1991):
+- may 29 | opponent: athletics | score: 8 - 3 | record: 26 - 20 | result: W
+- may 30 | opponent: athletics | score: 8 - 6 | record: 26 - 21 | result: L
+- may 31 | opponent: angels    | score: 5 - 1 | record: 27 - 21 | result: W
+
+Interpretation
+- The team’s cumulative record went from 25-20 (May 28) to 26-20 (May 29) → Win on May 29.
+- 26-20 to 26-21 (May 30) → Loss on May 30.
+- 26-21 to 27-21 (May 31) → Win on May 31.
+- Therefore, they lost 1 of their last 3 May games, not 2.
+
+Assumptions
+- “Last 3 games they play in May 1991” refers to the final three dates in May with games listed (May 29, May 30, May 31).
+- Game result is derived by comparing the cumulative record’s win component to the previous game within May; an increase in wins indicates a win, an increase in losses indicates a loss.
+- The “loss” column in the table denotes the losing pitcher of the game, not whether the Blue Jays lost.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

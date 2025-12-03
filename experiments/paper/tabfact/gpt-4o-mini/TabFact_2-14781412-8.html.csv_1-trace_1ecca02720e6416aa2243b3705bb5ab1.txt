@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+equestrian at the asian game have be locate in a different city every year that it occur
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Equestrian at the Asian Games has been located in a different city every edition (year) it occurred.”
+
+Data discovery
+- Available source: PostgreSQL database with table public.equestrian_at_the_asian_games (columns: year bigint, location text, gold text, silver text, bronze text). No related tables present.
+
+Evidence and executed SQL
+1) Distinct years vs. distinct locations
+- SQL: SELECT COUNT(DISTINCT year) AS distinct_years, COUNT(DISTINCT location) AS distinct_locations FROM public.equestrian_at_the_asian_games;
+- Result: distinct_years = 7, distinct_locations = 7
+- Interpretation: The number of distinct locations equals the number of distinct years, suggesting no location repeats across different years in the dataset.
+
+2) Check for any location repeating across multiple years
+- SQL: SELECT location, ARRAY_AGG(DISTINCT year) AS years FROM public.equestrian_at_the_asian_games GROUP BY location HAVING COUNT(DISTINCT year) > 1;
+- Result: No rows returned
+- Interpretation: No city appears in more than one year.
+
+3) Full list of year–location pairs (ordered)
+- SQL: SELECT year, location FROM public.equestrian_at_the_asian_games ORDER BY year ASC;
+- Result:
+  - 1982: New Delhi
+  - 1986: Seoul
+  - 1994: Hiroshima
+  - 1998: Bangkok
+  - 2002: Busan
+  - 2006: Doha
+  - 2010: Guangzhou
+- Interpretation: Within the data (1982–2010), each edition’s equestrian events are associated with a different city.
+
+4) Row count and year uniqueness sanity checks
+- SQL: SELECT COUNT(*) FROM public.equestrian_at_the_asian_games;
+- Result: 7
+- SQL: SELECT year, location FROM public.equestrian_at_the_asian_games GROUP BY year, location HAVING COUNT(year) > 1;
+- Result: No rows returned
+- SQL: SELECT MIN(year) AS min_year, MAX(year) AS max_year FROM public.equestrian_at_the_asian_games;
+- Result: min_year = 1982, max_year = 2010
+- Interpretation: The table covers 7 editions from 1982 to 2010 with no duplicate years or locations.
+
+Conclusion
+- The available data (1982–2010) shows that equestrian at the Asian Games took place in a different city in each edition listed; no city repeats across these years.
+- However, the dataset does not include editions after 2010. Therefore, we can verify the claim for the years present in the data, but cannot confirm it for editions beyond 2010 from this source alone.
+
+Assumptions
+- “Every year that it occur” is interpreted as every edition represented in the public.equestrian_at_the_asian_games table.
+- The ‘location’ field represents the host city for equestrian at that edition.
+- No additional datasets containing later editions (post-2010) are available in the connected sources.
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

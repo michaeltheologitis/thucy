@@ -1,0 +1,75 @@
+
+<userQuery>
+<query>
+6 game have an attendance of over 7000 during the 1993 new york jet season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "6 game have an attendance of over 7000 during the 1993 new york jet season"
+
+Summary conclusion: The data show that all 16 games in the 1993 New York Jets season had attendance greater than 7,000. Therefore, the claim is not supported.
+
+Data source discovery
+- Available database: TabFact (public schema)
+- Relevant table: public.t_1993_new_york_jets_season (columns: week, date, opponent, result, game site, attendance)
+
+Evidence and executed SQL
+1) How many games had attendance > 7000?
+- Executed SQL:
+  SELECT count(*) AS games_over_7000 FROM public.t_1993_new_york_jets_season WHERE (regexp_replace(attendance::text, '[^0-9]', '', 'g'))::int > 7000;
+- Result: {"games_over_7000":16}
+
+2) List the games with attendance > 7000 (week, date, opponent, game site, attendance)
+- Executed SQL:
+  SELECT week, date, opponent, "game site", attendance FROM public.t_1993_new_york_jets_season WHERE (regexp_replace(attendance::text, '[^0-9]', '', 'g'))::int > 7000 ORDER BY week;
+- Rows returned:
+  - week: 1,  date: 1993 - 09 - 05, opponent: denver broncos,                      game site: the meadowlands,                       attendance: 68130
+  - week: 2,  date: 1993 - 09 - 12, opponent: miami dolphins,                    game site: joe robbie stadium,                    attendance: 70314
+  - week: 4,  date: 1993 - 09 - 26, opponent: new england patriots,            game site: the meadowlands,                       attendance: 64836
+  - week: 5,  date: 1993 - 10 - 03, opponent: philadelphia eagles,             game site: the meadowlands,                       attendance: 72593
+  - week: 6,  date: 1993 - 10 - 10, opponent: los angeles raiders,            game site: los angeles memorial coliseum,         attendance: 41627
+  - week: 8,  date: 1993 - 10 - 24, opponent: buffalo bills,                   game site: the meadowlands,                       attendance: 71541
+  - week: 9,  date: 1993 - 10 - 31, opponent: new york giants,                 game site: giants stadium,                        attendance: 71659
+  - week:10,  date: 1993 - 11 - 07, opponent: miami dolphins,                  game site: the meadowlands,                       attendance: 71306
+  - week:11,  date: 1993 - 11 - 14, opponent: indianapolis colts,              game site: rca dome,                              attendance: 47351
+  - week:12,  date: 1993 - 11 - 21, opponent: cincinnati bengals,             game site: the meadowlands,                       attendance: 64264
+  - week:13,  date: 1993 - 11 - 28, opponent: new england patriots,           game site: foxboro stadium,                       attendance: 42810
+  - week:14,  date: 1993 - 12 - 05, opponent: indianapolis colts,              game site: the meadowlands,                       attendance: 45799
+  - week:15,  date: 1993 - 12 - 11, opponent: washington redskins,            game site: robert f kennedy memorial stadium,     attendance: 47970
+  - week:16,  date: 1993 - 12 - 18, opponent: dallas cowboys,                  game site: the meadowlands,                       attendance: 73233
+  - week:17,  date: 1993 - 12 - 26, opponent: buffalo bills,                   game site: rich stadium,                          attendance: 70817
+  - week:18,  date: 1994 - 01 - 02, opponent: houston oilers,                  game site: houston astrodome,                     attendance: 61040
+
+3) Total number of games in the season table
+- Executed SQL:
+  SELECT count(*) AS total_games FROM public.t_1993_new_york_jets_season;
+- Result: {"total_games":16}
+
+Additional context (in case the intended threshold was 70,000)
+- Verified column types:
+  SQL:
+  SELECT column_name, data_type FROM information_schema.columns WHERE table_name='t_1993_new_york_jets_season' AND table_schema='public';
+  Result:
+  [{"column_name":"week","data_type":"bigint"},{"column_name":"date","data_type":"text"},{"column_name":"opponent","data_type":"text"},{"column_name":"result","data_type":"text"},{"column_name":"game site","data_type":"text"},{"column_name":"attendance","data_type":"bigint"}]
+- Count of games with attendance > 70000:
+  SQL:
+  SELECT COUNT(*) AS count FROM public.t_1993_new_york_jets_season WHERE attendance > 70000;
+  Result: [{"count":7}]
+- Weeks with attendance > 70000:
+  SQL:
+  SELECT week, attendance FROM public.t_1993_new_york_jets_season WHERE attendance > 70000 ORDER BY week;
+  Result: [{"attendance":70314,"week":2},{"attendance":72593,"week":5},{"attendance":71541,"week":8},{"attendance":71659,"week":9},{"attendance":71306,"week":10},{"attendance":73233,"week":16},{"attendance":70817,"week":17}]
+
+Conclusion
+- The claim is contradicted by the data: there were 16 games with attendance over 7,000, not 6.
+
+Assumptions
+- The table public.t_1993_new_york_jets_season fully enumerates the 1993 New York Jets regular-season schedule and recorded attendances. No additional postseason games are present in this table.
+- The threshold stated in the claim is 7,000; the additional 70,000 analysis is provided only as context.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

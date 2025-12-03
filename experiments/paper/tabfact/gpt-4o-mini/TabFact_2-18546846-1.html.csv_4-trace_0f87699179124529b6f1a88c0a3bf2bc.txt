@@ -1,0 +1,45 @@
+
+<userQuery>
+<query>
+the 49ers play the los angeles don 2 time in the 1947 season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "the 49ers play the los angeles don 2 time in the 1947 season"
+
+Data sources explored
+- Discovered data source: PostgreSQL database with table public.t_1947_san_francisco_49ers_season
+- Table schema (from inspection): columns = week (bigint), date (text), opponent (text), result (text), score (text), record (text)
+
+Verification steps and evidence
+1) Count appearances of Los Angeles Dons (including common naming variants)
+SQL:
+SELECT COUNT(*) AS opponent_count, opponent 
+FROM public.t_1947_san_francisco_49ers_season 
+WHERE opponent ILIKE '%Los Angeles Dons%' OR opponent ILIKE '%L.A. Dons%' OR opponent ILIKE '%LA Dons%' 
+GROUP BY opponent;
+Result:
+- opponent = Los Angeles Dons, opponent_count = 2
+
+2) Retrieve the detailed games vs Los Angeles Dons
+SQL:
+SELECT week, date, opponent, result, score, record 
+FROM t_1947_san_francisco_49ers_season 
+WHERE opponent ILIKE '%Los Angeles Dons%' 
+ORDER BY week;
+Returned rows:
+- Week 2 | Date: September 7, 1947 | Opponent: Los Angeles Dons | Result: W | Score: 17 - 14 | Record: 2 - 0
+- Week 9 | Date: November 2, 1947 | Opponent: Los Angeles Dons | Result: W | Score: 26 - 16 | Record: 6 - 2 - 1
+
+Conclusion
+- The data shows the San Francisco 49ers played the Los Angeles Dons exactly two times in the 1947 season. The claim is supported.
+
+Assumptions
+- "los angeles don" refers to the AAFC team Los Angeles Dons, and "49ers" refers to the San Francisco 49ers’ 1947 AAFC season.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

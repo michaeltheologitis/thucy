@@ -1,0 +1,51 @@
+
+<userQuery>
+<query>
+in the illinois 6th district , republican henry hyde , incumbent since 1974 , beat democrat mario reymond reda
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "In the Illinois 6th district, Republican Henry Hyde, incumbent since 1974, beat Democrat Mario Reymond Reda."
+
+Data sources explored:
+- Database: postgres_tabfact23
+- Schema: public
+- Relevant table: united_states_house_of_representatives_elections_1980 (columns: district, incumbent, party, first elected, result, candidates)
+
+Evidence from executed SQL:
+1) Locate the Illinois 6th district entry (case-insensitive search):
+SQL:
+SELECT district FROM united_states_house_of_representatives_elections_1980 WHERE district ILIKE '%Illinois%' AND district ILIKE '%6%';
+Result:
+[{"district":"illinois 6"}]
+
+2) Inspect column names to handle the space in "first elected":
+SQL:
+SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'united_states_house_of_representatives_elections_1980' ORDER BY ordinal_position;
+Result:
+[{"column_name":"district","data_type":"text"},{"column_name":"incumbent","data_type":"text"},{"column_name":"party","data_type":"text"},{"column_name":"first elected","data_type":"bigint"},{"column_name":"result","data_type":"text"},{"column_name":"candidates","data_type":"text"}]
+
+3) Retrieve the full record for Illinois 6th district:
+SQL:
+SELECT district, incumbent, party, "first elected", result, candidates FROM united_states_house_of_representatives_elections_1980 WHERE district = 'illinois 6';
+Result:
+[{"district":"illinois 6","incumbent":"henry hyde","party":"republican","first elected":1974,"result":"re - elected","candidates":"henry hyde (r) 67.0% mario reymond reda (d) 33.0%"}]
+
+Assessment:
+- District: Illinois 6 — matches claim.
+- Incumbent: Henry Hyde — matches claim.
+- Party: Republican — matches claim.
+- First elected: 1974 — supports "incumbent since 1974."
+- Result and opponents: The candidates field explicitly shows Henry Hyde defeating Mario Reymond Reda (D), with Hyde receiving 67.0% and Reda 33.0% — matches claim.
+
+Conclusion: The data directly supports that in the Illinois 6th congressional district (1980 election), Republican incumbent Henry Hyde, first elected in 1974, defeated Democrat Mario Reymond Reda.
+
+Assumptions:
+- The claim did not specify a year. I interpreted it as referring to the 1980 U.S. House election, as per the available table united_states_house_of_representatives_elections_1980. The evidence is specific to that year.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,85 @@
+
+<userQuery>
+<query>
+besides mickaël delage , there be only 1 other winner in the mountain classifcation
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim: "besides mickaël delage, there be only 1 other winner in the mountain classifcation"
+- Finding: The data shows two other riders, not one, appearing as mountains classification leaders besides Mickaël Delage.
+
+Data source exploration
+- Discovered data source: PostgreSQL (TabFact catalog), public schema.
+- Relevant table identified: t_2010_vuelta_a_espa_a with columns: stage, winner, general classification, points classification, mountains classification, combination classification, team classification.
+
+Evidence and executed SQL
+1) List all distinct values in mountains classification
+SQL:
+SELECT DISTINCT "mountains classification" FROM t_2010_vuelta_a_espa_a;
+Result:
+- not awarded
+- mickaël delage
+- serafín martínez
+- david moncoutié
+
+2) Count all distinct values in mountains classification
+SQL:
+SELECT COUNT(DISTINCT "mountains classification") AS distinct_count FROM t_2010_vuelta_a_espa_a;
+Result:
+- distinct_count: 4
+
+3) List distinct rider names (exclude non-rider value "not awarded")
+SQL:
+SELECT DISTINCT "mountains classification" AS name
+FROM t_2010_vuelta_a_espa_a
+WHERE lower("mountains classification") <> 'not awarded';
+Result:
+- mickaël delage
+- serafín martínez
+- david moncoutié
+
+4) Count distinct rider names excluding Mickaël Delage (case- and accent-insensitive), and excluding non-rider value
+SQL:
+SELECT COUNT(DISTINCT "mountains classification") AS count_excl_mickael
+FROM (
+  SELECT "mountains classification",
+    regexp_replace(
+      regexp_replace(
+        regexp_replace(
+          regexp_replace(
+            regexp_replace(
+              regexp_replace(
+                regexp_replace(
+                  regexp_replace(
+                    lower("mountains classification"),
+                  '[àáâäãå]', 'a', 'g'),
+                '[èéêë]', 'e', 'g'),
+              '[ìíîï]', 'i', 'g'),
+            '[òóôöõ]', 'o', 'g'),
+          '[ùúûü]', 'u', 'g'),
+        '[ç]', 'c', 'g'),
+      '[ñ]', 'n', 'g'),
+    '[ýÿ]', 'y', 'g') AS normalized_name
+  FROM t_2010_vuelta_a_espa_a
+) s
+WHERE normalized_name <> 'mickael delage'
+  AND normalized_name <> 'not awarded';
+Result:
+- count_excl_mickael: 2
+
+Conclusion
+- Distinct rider names in the mountains classification column: 3 (mickaël delage; serafín martínez; david moncoutié).
+- Excluding Mickaël Delage, there are 2 other riders, not 1. The claim is contradicted by the data.
+
+Assumptions
+- Interpreted "winner in the mountain classification" as any rider appearing as the mountains classification leader across stages in table t_2010_vuelta_a_espa_a.
+- Treated the literal value "not awarded" as a non-rider entry and excluded it from rider counts.
+- Applied case- and accent-insensitive normalization when comparing the name "Mickaël Delage".
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

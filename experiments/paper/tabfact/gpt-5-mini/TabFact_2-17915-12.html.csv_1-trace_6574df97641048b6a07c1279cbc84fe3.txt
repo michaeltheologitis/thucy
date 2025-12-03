@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+19 of lleyton hewitt master series final have 1 side or the other finishing with 6 point
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: Among Lleyton Hewitt’s Masters Series finals, 19 sets ended with one side (either player) finishing the set with exactly 6 games.
+
+Data discovery and schema
+- Available data source: TabFact (PostgreSQL)
+- Relevant table discovered: public.lleyton_hewitt with columns (outcome, year, championship, surface, opponent, score). This table lists Lleyton Hewitt’s results in Masters Series finals (events such as Stuttgart, Indian Wells, Cincinnati, Paris) with the final match score strings.
+
+Evidence
+1) Retrieve all finals and their scores
+- SQL executed:
+  SELECT outcome, year, championship, surface, opponent, score FROM lleyton_hewitt LIMIT 50;
+- Rows returned (7 finals):
+  1) 2000 Stuttgart (hard (i)) vs Wayne Ferreira, runner-up, score: 6 - 7 (6 - 8) , 6 - 3 , 7 - 6 (7 - 5) , 6 - 7 (2 - 7) , 2 - 6
+  2) 2002 Indian Wells (hard) vs Tim Henman, winner, score: 6 - 1 , 6 - 2
+  3) 2002 Cincinnati (hard) vs Carlos Moyá, runner-up, score: 5 - 7 , 6 - 7 (5 - 7)
+  4) 2002 Paris (carpet (i)) vs Marat Safin, runner-up, score: 6 - 7 (4 - 7) , 0 - 6 , 4 - 6
+  5) 2003 Indian Wells (hard) vs Gustavo Kuerten, winner, score: 6 - 1 , 6 - 1
+  6) 2004 Cincinnati (hard) vs Andre Agassi, runner-up, score: 3 - 6 , 6 - 3 , 2 - 6
+  7) 2005 Indian Wells (hard) vs Roger Federer, runner-up, score: 2 - 6 , 4 - 6 , 4 - 6
+
+2) Count total sets and sets where either player finished with exactly 6 games
+- Total sets across all finals: 20
+  SQL executed:
+  SELECT count(*) AS total_sets
+  FROM lleyton_hewitt,
+       regexp_matches(score, '([0-9]+\s*-\s*[0-9]+(?:\s*\(\s*[0-9]+\s*-\s*[0-9]+\s*\))?)','g') AS m(set_score);
+  Result: total_sets = 20
+
+- Sets with either side exactly 6 games: 19
+  SQL executed:
+  SELECT count(*) AS sets_with_a_6
+  FROM lleyton_hewitt
+  CROSS JOIN LATERAL regexp_matches(score, '([0-9]+\s*-\s*[0-9]+(?:\s*\(\s*[0-9]+\s*-\s*[0-9]+\s*\))?)','g') AS ms
+  CROSS JOIN LATERAL regexp_matches(regexp_replace(ms[1],'[[:space:]]+','', 'g'), '^([0-9]+)-([0-9]+)', '') AS gr
+  WHERE gr[1] = '6' OR gr[2] = '6';
+  Result: sets_with_a_6 = 19
+
+3) Identify the exception(s) where no side finished with 6
+- SQL executed:
+  SELECT year, championship, surface, opponent, ms[1] AS set_score_raw, gr[1] AS left_score, gr[2] AS right_score
+  FROM lleyton_hewitt
+  CROSS JOIN LATERAL regexp_matches(score, '([0-9]+\s*-\s*[0-9]+(?:\s*\(\s*[0-9]+\s*-\s*[0-9]+\s*\))?)','g') AS ms
+  CROSS JOIN LATERAL regexp_matches(regexp_replace(ms[1],'[[:space:]]+','', 'g'), '^([0-9]+)-([0-9]+)', '') AS gr
+  WHERE gr[1] <> '6' AND gr[2] <> '6';
+- Result: One set: 2002 Cincinnati vs Carlos Moyá, set “5 - 7”.
+
+Conclusion
+- Across Lleyton Hewitt’s Masters Series finals captured in the data (7 finals; 20 sets total), 19 sets have one side finishing on exactly 6 games. The sole exception is a 5–7 set in the 2002 Cincinnati final against Carlos Moyá. This directly supports the claim as interpreted.
+
+Assumptions
+- “Master series final” refers to the finals listed in the lleyton_hewitt table (Stuttgart, Indian Wells, Cincinnati, Paris), which are ATP Masters Series events.
+- “Finishing with 6 point” is interpreted as a set in which either player’s games total equals 6 in the outer set score (e.g., 6–3, 3–6, 7–6, 6–7). Tiebreak details in parentheses were ignored for this criterion.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

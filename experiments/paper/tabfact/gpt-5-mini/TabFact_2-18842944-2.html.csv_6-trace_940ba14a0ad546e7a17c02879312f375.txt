@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+the largest attendance of 44505 be at the game that take place on september 13 , 1976
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "the largest attendance of 44505 be at the game that take place on september 13 , 1976"
+
+Data source discovery:
+- Connected database: TabFact Postgres (postgres_tabfact34)
+- Relevant table discovered: public.t_1976_buffalo_bills_season
+
+Schema context:
+- Columns: week (bigint), date (text), opponent (text), result (text), attendance (bigint)
+
+Evidence:
+1) Inspect all games (to understand dates and attendance values)
+SQL executed:
+SELECT week, date, opponent, result, attendance FROM public.t_1976_buffalo_bills_season ORDER BY week;
+Key rows observed:
+- week 1 — date: "september 13 , 1976" — opponent: "miami dolphins" — result: "l 30 - 21" — attendance: 77683
+- week 3 — date: "september 26 , 1976" — opponent: "tampa bay buccaneers" — result: "w 14 - 9" — attendance: 44505
+(among other rows)
+
+2) What is the maximum attendance in the table?
+SQL executed:
+SELECT MAX(attendance) AS max_attendance FROM public.t_1976_buffalo_bills_season;
+Result:
+- max_attendance = 77683
+
+3) Which game(s) had attendance 44505?
+SQL executed:
+SELECT * FROM public.t_1976_buffalo_bills_season WHERE attendance = 44505;
+Result:
+- week: 3 — date: "september 26 , 1976" — opponent: "tampa bay buccaneers" — result: "w 14 - 9" — attendance: 44505
+
+4) What was the attendance on september 13 , 1976?
+SQL executed:
+SELECT week, date, opponent, result, attendance
+FROM public.t_1976_buffalo_bills_season
+WHERE translate(lower(date), ' ,', '') = translate(lower('september 13 , 1976'), ' ,', '');
+Result:
+- week: 1 — date: "september 13 , 1976" — opponent: "miami dolphins" — result: "l 30 - 21" — attendance: 77683
+
+Assessment:
+- The largest attendance in this dataset is 77,683, not 44,505.
+- The game with 44,505 attendance occurred on September 26, 1976, not on September 13, 1976.
+- The game on September 13, 1976 had attendance 77,683.
+
+Conclusion: The claim is contradicted by the data.
+
+Assumptions made:
+- The claim refers to the 1976 Buffalo Bills season games contained in public.t_1976_buffalo_bills_season.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,69 @@
+
+<userQuery>
+<query>
+bell uh - 1 iroquois be the version of b - 58 aircraft model originate in the united state which have 2 in service
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of the claim
+User claim (interpreted): “Bell UH-1 Iroquois is a version of a B-58 aircraft model originating in the United States which has 2 in service.”
+
+Data sources explored
+- Discovered data sources: A single PostgreSQL table: public.uruguayan_air_force
+- Schema (from tool):
+  - aircraft (text): model/name of the aircraft
+  - origin (text): country of origin
+  - type (text): aircraft type (e.g., fighter, bomber, transport)
+  - versions (text): versions/variants of the model
+  - in service (text): info on whether/quantity in service (text field; values may be numeric)
+
+Evidence gathered
+1) Presence and details for Bell UH-1 Iroquois
+- Executed SQL:
+  SELECT aircraft, origin, type, versions, "in service"
+  FROM uruguayan_air_force
+  WHERE aircraft ILIKE '%UH-1%'
+     OR aircraft ILIKE '%Iroquois%'
+     OR versions ILIKE '%UH-1%'
+     OR versions ILIKE '%Iroquois%';
+- Result:
+  - aircraft: bell uh - 1 iroquois
+  - origin: united states
+  - type: transport / utility
+  - versions: uh - 1h
+  - in service: 13
+- What this shows:
+  - Bell UH-1 Iroquois is listed with origin “united states” and has “in service” = 13 (not 2) in this dataset. Its listed version is “uh - 1h”; no link to any “B-58”.
+
+2) Any entries related to B-58
+- Executed SQL:
+  SELECT aircraft, origin, type, versions, "in service"
+  FROM uruguayan_air_force
+  WHERE aircraft LIKE '%B-58%'
+     OR origin LIKE '%B-58%'
+     OR type LIKE '%B-58%'
+     OR versions LIKE '%B-58%'
+     OR "in service" LIKE '%B-58%';
+- Result: No rows returned.
+- What this shows:
+  - There is no evidence in the uruguayan_air_force table of any aircraft entry related to “B-58”.
+
+Assessment of each part of the claim
+- “Bell UH-1 Iroquois … originate[s] in the United States” — Supported by evidence (origin = “united states”).
+- “… which have 2 in service” — Contradicted by evidence (in service = 13 for Bell UH-1 Iroquois in this dataset).
+- “Bell UH-1 Iroquois [is] the version of B-58 aircraft model” — Contradicted/unsupported. The UH-1 entry shows version “uh - 1h” and there are no B-58-related entries in the dataset to suggest any relationship.
+
+Conclusion
+Based strictly on the available, authoritative uruguayan_air_force dataset, the claim is inaccurate overall: while the origin (United States) is correct for the Bell UH-1 Iroquois, there is no support for any relationship to a B-58 aircraft model, and the “2 in service” figure is contradicted by the data (13 in service).
+
+Assumptions made
+- The claim is evaluated against the available uruguayan_air_force dataset, treated as authoritative per instructions.
+- “In service” is interpreted as the count of aircraft in service as stored in the text field.
+- The phrase “be the version of B-58 aircraft model” is interpreted as asserting a variant/lineage relationship between Bell UH-1 Iroquois and a B-58 model; no such relationship is reflected in the dataset.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,66 @@
+
+<userQuery>
+<query>
+only 10 cleveland brown 's quarterback have win more than 30 game
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of claim
+- Claim: “only 10 Cleveland Browns quarterbacks have won more than 30 games.”
+- Interpretation: Count of distinct Cleveland Browns starting quarterbacks whose wins (as a starter) exceed 30, based on the authoritative dataset available.
+
+Data sources explored
+- Discovered a PostgreSQL database with schema public containing a single relevant table: list_of_cleveland_browns_starting_quarterbacks.
+
+Schema details (for grounding)
+- Table: public.list_of_cleveland_browns_starting_quarterbacks
+  - quarterback (text): Name of the quarterback
+  - uniform no (s) (text): Uniform number(s)
+  - games started (bigint)
+  - wins (bigint)
+  - losses (bigint)
+  - ties (bigint)
+  - winning pct (double precision)
+
+Evidence and executed SQL
+1) Count of QBs with more than 30 wins
+- Result: 6
+- SQL executed:
+SELECT COUNT(*) AS quarterback_count
+FROM list_of_cleveland_browns_starting_quarterbacks
+WHERE wins > 30;
+
+2) List of QBs with more than 30 wins, ordered by wins
+- Result (name — wins):
+  - Brian Sipe — 57
+  - Otto Graham — 57
+  - Bernie Kosar — 53
+  - Frank Ryan — 52
+  - Bill Nelsen — 34
+  - Milt Plum — 33
+- SQL executed:
+SELECT quarterback, wins 
+FROM public.list_of_cleveland_browns_starting_quarterbacks 
+WHERE wins > 30 
+ORDER BY wins DESC;
+
+3) Sensitivity check (30 or more wins)
+- Result: 6
+- SQL executed:
+SELECT COUNT(*) AS quarterback_count
+FROM list_of_cleveland_browns_starting_quarterbacks
+WHERE wins >= 30;
+
+Conclusion
+- The data shows 6 quarterbacks with more than 30 wins as starters for the Cleveland Browns, not 10. Even when including quarterbacks with exactly 30 wins (>= 30), the count remains 6.
+
+Assumptions
+- “Wins” refers to wins as a starting quarterback for the Cleveland Browns, as represented by the wins column in the list_of_cleveland_browns_starting_quarterbacks table.
+- The dataset is treated as authoritative and complete for the scope of this verification.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,75 @@
+
+<userQuery>
+<query>
+the world cup have 4 game throughout june 1998 , all of which be in france
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Data sources explored:
+- Discovered one accessible PostgreSQL database: TabFact (public schema) with a single relevant table: public.t_1998_in_paraguayan_football(date text, venue text, score text, comp text, report text).
+
+Schema reconnaissance and table scan:
+1) Confirm table size
+SQL:
+SELECT COUNT(*) AS row_count FROM public.t_1998_in_paraguayan_football;
+Result:
+row_count = 14
+
+2) Identify competition labels
+SQL:
+SELECT DISTINCT comp FROM public.t_1998_in_paraguayan_football ORDER BY comp;
+Result:
+comp values: f, kirin cup, world cup
+
+3) Full table dump (to see dates, venues, and World Cup rows)
+SQL:
+SELECT * FROM public.t_1998_in_paraguayan_football;
+Key relevant rows (World Cup entries):
+- comp: world cup | date: 1998 - 06 - 12 | score: 0 - 0 | venue: stade de la mosson montpellier , france
+- comp: world cup | date: 1998 - 06 - 19 | score: 0 - 0 | venue: stade geoffroy - guichard saint - étienne , france
+- comp: world cup | date: 1998 - 06 - 24 | score: 1 - 3 | venue: stade de toulouse toulouse , france
+- comp: world cup | date: 1998 - 06 - 28 | score: 0 - 0 ( 1 - 0 aet ) | venue: stade félix bollaert lens , france
+
+Targeted verification queries:
+4) Count World Cup matches in June 1998
+SQL:
+SELECT COUNT(*) AS worldcup_june_count
+FROM public.t_1998_in_paraguayan_football
+WHERE comp ILIKE 'world cup' AND date LIKE '1998 - 06 - %';
+Result:
+worldcup_june_count = 4
+
+5) Of those, count how many have venue containing 'france'
+SQL:
+SELECT COUNT(*) AS venue_france_count
+FROM public.t_1998_in_paraguayan_football
+WHERE comp ILIKE 'world cup' AND date LIKE '1998 - 06 - %' AND venue ILIKE '%france%';
+Result:
+venue_france_count = 4
+
+6) List those World Cup rows (for transparency)
+SQL:
+SELECT date, venue, score
+FROM public.t_1998_in_paraguayan_football
+WHERE comp ILIKE 'world cup' AND date LIKE '1998 - 06 - %' AND venue ILIKE '%france%'
+ORDER BY date;
+Results:
+- 1998 - 06 - 12 | stade de la mosson montpellier , france | 0 - 0
+- 1998 - 06 - 19 | stade geoffroy - guichard saint - étienne , france | 0 - 0
+- 1998 - 06 - 24 | stade de toulouse toulouse , france | 1 - 3
+- 1998 - 06 - 28 | stade félix bollaert lens , france | 0 - 0 ( 1 - 0 aet )
+
+Conclusion based on evidence:
+- The table documents exactly 4 World Cup matches occurring in June 1998, and each listed venue is in France. Therefore, within the scope of this dataset (1998 Paraguayan football matches), the claim is supported by the data.
+
+Assumptions made:
+- Interpreted "the world cup have 4 game throughout june 1998 , all of which be in france" as referring to the World Cup matches represented in this table (i.e., Paraguay’s 1998 World Cup fixtures), not the entire tournament schedule.
+- Used date LIKE '1998 - 06 - %' to identify June 1998 given the text-based date format.
+- Used venue ILIKE '%france%' to determine that venues are in France.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

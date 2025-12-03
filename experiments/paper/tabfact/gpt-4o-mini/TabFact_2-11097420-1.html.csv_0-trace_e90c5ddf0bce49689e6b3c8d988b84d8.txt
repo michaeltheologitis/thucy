@@ -1,0 +1,85 @@
+
+<userQuery>
+<query>
+only 3 of the project have be complete so far
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim assessed: "only 3 of the project have be complete so far"
+
+Data source discovery
+- Available database: public (PostgreSQL)
+- Table: list_of_superfund_sites_in_mississippi
+
+Schema snapshot (relevant columns)
+- name (text)
+- construction completed (text)
+
+Evidence and executed SQL
+1) Total number of records (context) and initial populated check
+- SQL:
+  SELECT COUNT(*) AS total_superfund_sites FROM public.list_of_superfund_sites_in_mississippi;
+- Result: 9
+
+- SQL:
+  SELECT COUNT(*) AS count_construction_completed FROM public.list_of_superfund_sites_in_mississippi WHERE "construction completed" IS NOT NULL AND TRIM("construction completed") <> '';
+- Result: 9
+Note: The above treats '-' as populated text. We therefore refine to count actual completion dates.
+
+2) List sites and their "construction completed" values
+- SQL:
+  SELECT name, "construction completed" 
+  FROM public.list_of_superfund_sites_in_mississippi 
+  ORDER BY name;
+- Result (abridged):
+  american creosote works , inc | -
+  chemfax , inc | -
+  davis timber company | -
+  flowood site | 09 / 17 / 1993
+  newsom brothers / old reichhold chemicals , inc | 08 / 08 / 1997
+  picayune wood treating | -
+  potter co | -
+  sonford products | -
+  walcotte chemical co warehouses | 12 / 30 / 1982
+
+3) Count rows with actual completion dates (exclude '-') and list them
+- SQL (count):
+  SELECT COUNT(*) AS count_completed_dates
+  FROM public.list_of_superfund_sites_in_mississippi
+  WHERE "construction completed" <> '-' AND "construction completed" ~ '\d';
+- Result: 3
+
+- SQL (list):
+  SELECT name, "construction completed"
+  FROM public.list_of_superfund_sites_in_mississippi
+  WHERE "construction completed" <> '-' AND "construction completed" ~ '\d';
+- Result:
+  Flowood Site | 09 / 17 / 1993
+  Newsom Brothers / Old Reichhold Chemicals, Inc | 08 / 08 / 1997
+  Walcotte Chemical Co Warehouses | 12 / 30 / 1982
+
+4) Frequency of distinct values in "construction completed"
+- SQL:
+  SELECT "construction completed", COUNT(*) AS frequency
+  FROM public.list_of_superfund_sites_in_mississippi
+  GROUP BY "construction completed";
+- Result:
+  '-' | 6
+  '08 / 08 / 1997' | 1
+  '12 / 30 / 1982' | 1
+  '09 / 17 / 1993' | 1
+
+Conclusion
+- Interpreting “project completed” as sites with an actual date in the "construction completed" field, there are exactly 3 completed projects in the dataset. This supports the claim.
+
+Assumptions
+- “Project” refers to Superfund site remediation projects listed in the table list_of_superfund_sites_in_mississippi.
+- “Complete” means the "construction completed" field contains a real completion date; '-' indicates not completed.
+- “So far” refers to the current state of the provided dataset.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

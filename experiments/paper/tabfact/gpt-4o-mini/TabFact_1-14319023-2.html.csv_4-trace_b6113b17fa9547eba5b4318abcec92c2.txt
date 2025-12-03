@@ -1,0 +1,88 @@
+
+<userQuery>
+<query>
+when the girl single be lindaweni fanetri , the mixed double be wifqi windarto debby susanto after the year 2007
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Finding: The girls’ singles winner Lindaweni Fanetri and the mixed doubles pair Wifqi Windarto & Debby Susanto occurred together in 2007 at the Indonesian National Badminton Championships. There are no records of this occurring after 2007.
+
+Key Evidence (with executed SQL)
+1) Full record for 2007 confirms both winners
+Executed SQL:
+SELECT * FROM public.indonesian_national_badminton_championships WHERE year = 2007;
+
+Result row:
+- Year: 2007
+- Boys Singles: Nandang Arif
+- Girls Singles: Lindaweni Fanetri
+- Boys Doubles: Budi Hartono & Yohanes Rendy Sugiarto
+- Girls Doubles: Anneke Feinya Agustin & Wenny Setiawati
+- Mixed Doubles: Wifqi Windarto & Debby Susanto
+
+2) No year strictly after 2007 matches both conditions
+Executed SQL:
+SELECT year, "girls singles", "mixed doubles" 
+FROM public.indonesian_national_badminton_championships 
+WHERE year > 2007 
+AND LOWER("girls singles") = 'lindaweni fanetri' 
+AND LOWER("mixed doubles") LIKE '%wifqi windarto%' 
+AND LOWER("mixed doubles") LIKE '%debby susanto%'
+ORDER BY year;
+
+Result: No records found.
+
+3) Individually, no occurrences after 2007 for either condition
+- Girls’ singles = Lindaweni Fanetri, year > 2007
+Executed SQL:
+SELECT year, "girls singles" 
+FROM public.indonesian_national_badminton_championships 
+WHERE year > 2007 AND LOWER("girls singles") = 'lindaweni fanetri' 
+ORDER BY year;
+Result: No records found.
+
+- Mixed doubles contains both names, year > 2007
+Executed SQL:
+SELECT year, "mixed doubles" 
+FROM public.indonesian_national_badminton_championships 
+WHERE year > 2007 
+AND LOWER("mixed doubles") LIKE '%wifqi windarto%'
+AND LOWER("mixed doubles") LIKE '%debby susanto%'
+ORDER BY year;
+Result: No records found.
+
+Clarification of the timeframe (>= 2007 vs. > 2007)
+For completeness, checking year >= 2007 shows the match occurs in 2007, but not after:
+- Girls’ singles in 2007+:
+Executed SQL:
+SELECT year, "girls singles" 
+FROM public.indonesian_national_badminton_championships 
+WHERE year >= 2007 AND LOWER("girls singles") = 'lindaweni fanetri' 
+ORDER BY year;
+Result: 2007 — Lindaweni Fanetri
+
+- Mixed doubles in 2007+:
+Executed SQL:
+SELECT year, "mixed doubles" 
+FROM public.indonesian_national_badminton_championships 
+WHERE year >= 2007 
+AND LOWER("mixed doubles") LIKE '%wifqi windarto%'
+AND LOWER("mixed doubles") LIKE '%debby susanto%'
+ORDER BY year;
+Result: 2007 — Wifqi Windarto & Debby Susanto
+
+Conclusion
+- The combination “girls’ singles winner = Lindaweni Fanetri” and “mixed doubles winners = Wifqi Windarto & Debby Susanto” occurred in 2007.
+- There are no records of this occurring after 2007. Thus, if the claim asserts it happened after 2007, the data contradicts that.
+
+Assumptions
+- “girl single” is interpreted as the Girls’ Singles category in the Indonesian National Badminton Championships (junior event), and “mixed double” as the Mixed Doubles category in the same competition.
+- “after the year 2007” is interpreted as year > 2007 (not including 2007).
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

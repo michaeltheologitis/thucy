@@ -1,0 +1,68 @@
+
+<userQuery>
+<query>
+the ebraer emb 120 basilia from switzerland be a transport / utility type aircraft
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of data environment explored
+- Available data source: a PostgreSQL database (schema: public) with a single table: uruguayan_air_force, containing columns: aircraft (text), origin (text), type (text), versions (text), in service (text). This dataset is treated as authoritative for verification.
+
+Claim analyzed
+- Interpreted claim: “The Embraer EMB 120 Brasilia is from Switzerland and is a transport/utility type aircraft.”
+
+Evidence gathered
+1) Presence of Embraer EMB 120 Brasilia entry and its origin/type
+- Executed SQL:
+  SELECT aircraft, origin, type FROM uruguayan_air_force WHERE aircraft ILIKE '%Embraer EMB 120%' OR aircraft ILIKE '%Brasilia%';
+- Result (as returned):
+  aircraft: embraer emb 120 brasilia; origin: brazil; type: transport
+
+- Executed SQL (full row confirmation):
+  SELECT * FROM public.uruguayan_air_force WHERE aircraft ILIKE '%EMB 120%' OR aircraft ILIKE '%Brasilia%';
+- Result (as returned):
+  aircraft: embraer emb 120 brasilia; origin: Brazil; type: Transport; versions: emb 120; in service: 1
+
+Interpretation:
+- The dataset lists the EMB 120 Brasilia as originating from Brazil and classifies it as Type: Transport.
+
+2) Whether EMB 120 is classified as “utility” in this dataset
+- Executed SQL:
+  SELECT aircraft, type FROM public.uruguayan_air_force WHERE (aircraft ILIKE '%EMB 120%' OR aircraft ILIKE '%Brasilia%') AND type ILIKE '%utility%';
+- Result: No rows returned.
+
+Interpretation:
+- In this dataset, the EMB 120 is not labeled with “utility” in its type.
+
+3) Context: How the dataset uses “utility” for other aircraft
+- Executed SQL (count of entries whose type includes ‘utility’):
+  SELECT COUNT(*) AS aircraft_count FROM uruguayan_air_force WHERE type ILIKE '%utility%';
+- Result: 6
+
+- Executed SQL (examples):
+  SELECT aircraft, type FROM uruguayan_air_force WHERE type ILIKE '%utility%' LIMIT 5;
+- Results (examples as returned):
+  - Lockheed C - 130 Hercules — Type: Transport / Utility
+  - Embraer EMB 110 Bandeirante — Type: Transport / Utility
+  - Beechcraft Twin Bonanza — Type: Transport / Utility
+  - Cessna 206 Stationair — Type: Utility / Liaison
+  - Bell 212 Twin Huey — Type: Transport / Utility
+
+Interpretation:
+- The table does use a “Transport / Utility” classification for some aircraft, but the Embraer EMB 120 Brasilia entry is specifically labeled “Transport” only.
+
+Conclusions
+- “From Switzerland”: Contradicted by the data. The origin recorded is Brazil.
+- “Transport/utility type aircraft”: Partly contradicted. The dataset classifies the EMB 120 as “Transport” (not “Transport / Utility”).
+- Therefore, the claim as stated is not supported by the evidence.
+
+Assumptions made
+- “From Switzerland” was interpreted as country of origin (manufacturer/origin nation), not an operator’s nationality. The dataset provides an origin field which we used for this determination.
+- Verification is grounded solely in the available uruguayan_air_force dataset, treated as authoritative within scope.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

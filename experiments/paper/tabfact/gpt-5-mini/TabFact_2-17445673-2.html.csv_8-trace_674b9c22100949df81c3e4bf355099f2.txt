@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+the match with the shortest time be win against borislav jeliazkov
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “The match with the shortest time was a win against Borislav Jeliazkov.” I verify this using the available fight record data for Tim Lajcik.
+
+Data source explored
+- Database: TabFact (postgres_tabfact7)
+- Schema: public
+- Table: public.tim_lajcik (columns: res, record, opponent, method, event, round, time)
+
+Evidence 1: All fights sorted by converted time (ascending)
+Executed SQL:
+SELECT res AS result, opponent, method, event, round, time AS raw_time,
+CASE WHEN time ~ '^\d{1,2}:[0-5][0-9]$' THEN
+  ((regexp_match(time, '^(\d{1,2}):([0-5][0-9])$'))[1])::int * 60
+  + ((regexp_match(time, '^(\d{1,2}):([0-5][0-9])$'))[2])::int
+ELSE NULL END AS time_seconds
+FROM public.tim_lajcik
+ORDER BY time_seconds ASC NULLS LAST, raw_time;
+Key rows (shortest first):
+- 0:18 — result: win, opponent: joe campanella (time_seconds: 18)
+- 1:20 — result: win, opponent: paul devich (time_seconds: 80)
+- 1:34 — result: loss, opponent: marcelo tigre (time_seconds: 94)
+- 1:55 — result: loss, opponent: kimo leopoldo (time_seconds: 115)
+- 2:23 — result: loss, opponent: borislav jeliazkov (time_seconds: 143)
+… (longer times follow)
+
+Evidence 2: Shortest win only
+Executed SQL:
+SELECT res, opponent, method, event, round, time AS raw_time,
+       (split_part(time, ':', 1)::int*60 + split_part(time, ':', 2)::int) AS total_seconds
+FROM public.tim_lajcik
+WHERE res = 'win' AND time ~ '^[0-9]+:[0-9]{2}$'
+ORDER BY total_seconds ASC;
+Result (shortest win):
+- res: win | opponent: joe campanella | raw_time: 0:18 | total_seconds: 18
+
+Evidence 3: Fights vs. Borislav Jeliazkov
+Executed SQL:
+SELECT res, opponent, method, event, round, time FROM public.tim_lajcik WHERE opponent ILIKE 'borislav jeliazkov';
+Result:
+- res: loss | opponent: borislav jeliazkov | method: submission (rear naked choke) | event: rings : king of kings 1999 block b | round: 1 | time: 2:23
+
+Findings
+- The shortest recorded fight time is 0:18 (a win vs. Joe Campanella), not against Borislav Jeliazkov.
+- The fight vs. Borislav Jeliazkov was a loss at 2:23, which is not the shortest time.
+
+Conclusion
+- The claim that the shortest-time match was a win against Borislav Jeliazkov is contradicted by the data.
+
+Assumptions
+- “Match” refers to the fights listed in public.tim_lajcik.
+- “Shortest time” is interpreted using the time column parsed as M:SS.
+- “Be win against” is interpreted as “was a win against.”
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

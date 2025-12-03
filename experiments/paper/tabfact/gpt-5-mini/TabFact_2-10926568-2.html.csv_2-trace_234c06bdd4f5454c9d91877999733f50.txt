@@ -1,0 +1,64 @@
+
+<userQuery>
+<query>
+the title of the episode that air in january 28 , 2008 be vietnam host by don wildman
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The user implies that the episode airing on January 28, 2008 was titled “Vietnam” and was hosted by Don Wildman, and asks for the title.
+
+Findings from the data source (public.cities_of_the_underworld):
+
+1) Verify available tables
+SQL executed:
+SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';
+Result:
+[{"table_name":"cities_of_the_underworld"}]
+
+2) Scan 2008 episodes to identify relevant entries
+SQL executed:
+SELECT "production no", "episode no", "original airdate", "episode title", "host"
+FROM public.cities_of_the_underworld
+WHERE lower("original airdate") LIKE '%2008%'
+ORDER BY "original airdate" NULLS LAST
+LIMIT 100;
+Key rows returned (subset shown):
+- {"episode no":201, "episode title":"underground apocalypse", "host":"don wildman", "original airdate":"january 28 , 2008", "production no":15}
+- {"episode no":202, "episode title":"vietnam", "host":"don wildman", "original airdate":"february 4 , 2008", "production no":16}
+
+3) Targeted check for January 28, 2008, hosted by Don Wildman
+SQL executed:
+SELECT *
+FROM public.cities_of_the_underworld
+WHERE lower("original airdate") LIKE '%january 28 , 2008%'
+  AND lower("host") LIKE '%don wildman%';
+Result:
+[{"episode no":201, "episode title":"underground apocalypse", "host":"don wildman", "original airdate":"january 28 , 2008", "production no":15}]
+
+4) Targeted check for the episode titled “Vietnam”
+SQL executed:
+SELECT "production no", "episode no", "original airdate", "episode title", "host"
+FROM public.cities_of_the_underworld
+WHERE "episode title" ILIKE '%vietnam%';
+Result:
+- production no: 16
+  episode no: 202
+  episode title: vietnam
+  original airdate: february 4 , 2008
+  host: don wildman
+
+Conclusion:
+- The episode that aired on January 28, 2008 was titled “Underground Apocalypse” and was hosted by Don Wildman.
+- The episode titled “Vietnam” aired later, on February 4, 2008, also hosted by Don Wildman.
+
+Answer to the user’s question: The January 28, 2008 episode title is “Underground Apocalypse.”
+
+Assumptions:
+- Matching on dates and host was done case-insensitively because the original airdate is stored as text with specific spacing and punctuation (e.g., "january 28 , 2008").
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

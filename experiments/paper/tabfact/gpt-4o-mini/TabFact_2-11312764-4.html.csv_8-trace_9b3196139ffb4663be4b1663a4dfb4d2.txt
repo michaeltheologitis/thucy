@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+natalia strelkova come in last place with 112.28 point
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of data sources explored:
+- Available database: TabFact
+- Table: public.t_1979_world_figure_skating_championships
+  - Columns: rank (bigint), name (text), nation (text), "sp + fs" (bigint), points (double precision), places (bigint)
+
+Evidence gathered:
+1) Locate records for Natalia Strelkova
+- SQL: SELECT * FROM public.t_1979_world_figure_skating_championships WHERE name = 'Natalia Strelkova';
+- Result: No rows
+- SQL: SELECT * FROM public.t_1979_world_figure_skating_championships WHERE name ILIKE '%Strelkova%';
+- Result: name = natalia strelkova; nation = soviet union; places = 134; points = 164.94; rank = 13; "sp + fs" = 16
+- SQL: SELECT name, rank, points, places FROM public.t_1979_world_figure_skating_championships WHERE lower(name) = 'natalia strelkova';
+- Result: Name: Natalia Strelkova; Rank: 13; Points: 164.94; Places: 134
+
+2) Determine last place (maximum rank) and who holds it
+- SQL: SELECT COUNT(*) AS total_rows FROM public.t_1979_world_figure_skating_championships;
+- Result: 31
+- SQL: SELECT MAX(rank) AS max_rank FROM public.t_1979_world_figure_skating_championships;
+- Result: 31
+- SQL: SELECT name, points FROM public.t_1979_world_figure_skating_championships WHERE rank = (SELECT MAX(rank) FROM public.t_1979_world_figure_skating_championships);
+- Result: Name: Gloria Mas; Points: 112.28
+
+3) Verify the 112.28 points figure
+- SQL: SELECT name, rank FROM public.t_1979_world_figure_skating_championships WHERE points = 112.28;
+- Result: Name: Gloria Mas; Rank: 31
+- SQL: SELECT MIN(points) AS min_points FROM public.t_1979_world_figure_skating_championships;
+- Result: 112.28
+- SQL: SELECT name, rank, points FROM public.t_1979_world_figure_skating_championships WHERE points = 112.28;
+- Result: Name: Gloria Mas; Rank: 31; Points: 112.28
+
+Assessment of the claim components:
+- "natalia strelkova come in last place": Not supported. Data shows Natalia Strelkova ranked 13th (not last). Last place (rank 31 of 31) is Gloria Mas.
+- "with 112.28 point": Not supported for Natalia Strelkova. She has 164.94 points. The 112.28 points belong to Gloria Mas, who is last.
+
+Conclusion: The claim is contradicted by the data. Natalia Strelkova did not come in last place and did not have 112.28 points.
+
+Assumptions made:
+- "Last place" is interpreted as the highest numerical rank in the table (max rank = 31), which is standard in ranking.
+- The claim pertains to the dataset represented by public.t_1979_world_figure_skating_championships (1979 World Figure Skating Championships).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

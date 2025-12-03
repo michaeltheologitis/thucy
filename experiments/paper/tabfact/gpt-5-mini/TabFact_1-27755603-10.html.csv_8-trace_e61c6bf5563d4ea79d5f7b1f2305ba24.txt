@@ -1,0 +1,82 @@
+
+<userQuery>
+<query>
+the detroit piston have their lowest game attendance during this period of the 2010 - 2011 season on march 20 against atlanta at the phillips arena
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the detroit piston have their lowest game attendance during this period of the 2010 - 2011 season on march 20 against atlanta at the phillips arena.”
+
+Data sources discovered:
+- Database: TabFact (postgres_tabfact20), schema: public
+- Relevant table: public.t_2010_11_detroit_pistons_season (columns: game, date, team, score, high points, high rebounds, high assists, location attendance, record)
+
+Key evidence from the data
+1) What happened on March 20?
+- SQL executed:
+  SELECT team, "location attendance" FROM public.t_2010_11_detroit_pistons_season WHERE date = 'march 20';
+- Result:
+  {"team":"atlanta","location attendance":"philips arena 17580"}
+- Interpretation: On March 20, the opponent was Atlanta, and the venue/attendance string is “philips arena 17580,” i.e., attendance 17,580 at Philips Arena.
+
+2) Lowest attendance in March (the relevant period implied by the dates around March in the table)
+- SQL executed:
+  SELECT date, team AS opponent,
+         regexp_replace("location attendance", ' [0-9]+$', '') AS venue,
+         substring("location attendance" from '[0-9]+$')::integer AS attendance
+  FROM public.t_2010_11_detroit_pistons_season
+  WHERE date ILIKE '%march%'
+  ORDER BY attendance ASC
+  LIMIT 1;
+- Result:
+  {"date":"march 1","opponent":"milwaukee","venue":"bradley center","attendance":11364}
+- Cross-check (full ordered list for March):
+  SQL executed:
+  SELECT game, date, "location attendance",
+         regexp_replace("location attendance", '[^0-9]', '', 'g')::int AS attendance
+  FROM public.t_2010_11_detroit_pistons_season
+  WHERE (date ILIKE '%Mar%' OR date ILIKE '%March%')
+    AND regexp_replace("location attendance", '[^0-9]', '', 'g') <> ''
+  ORDER BY attendance ASC;
+- Results (excerpt in ascending order):
+  1) march 1 — bradley center 11364 — attendance 11364
+  2) march 2 — the palace of auburn hills 13122 — attendance 13122
+  3) march 16 — the palace of auburn hills 15166 — attendance 15166
+  4) march 6 — the palace of auburn hills 17506 — attendance 17506
+  5) march 20 — philips arena 17580 — attendance 17580
+  ... (higher attendances follow)
+- Conclusion for March: The lowest March attendance was 11,364 on March 1 vs Milwaukee at the Bradley Center, not March 20 vs Atlanta at Philips Arena (17,580).
+
+3) Lowest attendance across the entire 2010–11 season (for completeness)
+- SQL executed (find minimum attendance value):
+  SELECT MIN((regexp_replace("location attendance", '[^0-9]', '', 'g'))::int) AS min_attendance
+  FROM public.t_2010_11_detroit_pistons_season;
+- Result:
+  {"min_attendance":11364}
+- SQL executed (retrieve the row(s) with that minimum):
+  SELECT *
+  FROM public.t_2010_11_detroit_pistons_season
+  WHERE (regexp_replace("location attendance", '[^0-9]', '', 'g'))::int = (
+    SELECT MIN((regexp_replace("location attendance", '[^0-9]', '', 'g'))::int)
+    FROM public.t_2010_11_detroit_pistons_season
+  );
+- Result:
+  {"date":"march 1","game":62,"team":"milwaukee","score":"l 90 - 92 (ot)","high points":"rodney stuckey (25)","high rebounds":"greg monroe , charlie villanueva (9)","high assists":"rodney stuckey (5)","location attendance":"bradley center 11364","record":"22 - 40"}
+- Conclusion for the season: The season’s lowest recorded attendance was 11,364 on March 1 vs Milwaukee at the Bradley Center.
+
+Overall assessment based on the data
+- The March 20 game vs Atlanta at Philips Arena had attendance 17,580 — this is not the lowest in March nor the season. The lowest in March (and the entire 2010–11 season) is March 1 vs Milwaukee at the Bradley Center with 11,364.
+- Therefore, the claim that March 20 vs Atlanta at Philips Arena was the lowest attendance “during this period of the 2010–2011 season” is contradicted by the data.
+
+Assumptions made (stated explicitly):
+- “This period” refers to the March portion of the 2010–11 schedule as stored in the table (dates recorded as text like “march 1”).
+- Column “team” indicates the opponent.
+- Column “location attendance” stores venue name followed by the attendance number; attendance is the trailing integer extracted via regex.
+- Spelling of the venue in the dataset is “philips arena” (without a double “l”).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

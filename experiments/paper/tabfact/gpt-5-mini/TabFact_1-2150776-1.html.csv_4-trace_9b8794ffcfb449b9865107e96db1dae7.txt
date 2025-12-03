@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+on june 16 , jeff gordon be the driver in a ford for hendrick motorsports
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "on june 16, jeff gordon be the driver in a ford for hendrick motorsports"
+
+Summary of findings
+- The TabFact database contains a Pocono 400 race table with year-by-year details including date, driver, team, and manufacturer.
+- On June 16 (1996), Jeff Gordon is listed as the driver for Hendrick Motorsports, but the manufacturer is Chevrolet, not Ford.
+- There are no entries in this table where Hendrick Motorsports is paired with Ford.
+
+Evidence from data (with exact executed SQL)
+1) Check for Jeff Gordon on dates including "June 16"
+SQL:
+SELECT year, date, driver, team, manufacturer
+FROM public.pocono_400
+WHERE date ILIKE '%June 16%' AND driver ILIKE 'Jeff Gordon';
+
+Result:
+- year: 1996; date: june 16; driver: jeff gordon; team: hendrick motorsports; manufacturer: chevrolet
+
+2) List all entries for Jeff Gordon to review team/manufacturer associations
+SQL:
+SELECT year, date, team, manufacturer
+FROM public.pocono_400
+WHERE driver ILIKE 'Jeff Gordon'
+ORDER BY year;
+
+Results:
+- 1996 | june 16 | hendrick motorsports | chevrolet
+- 1997 | june 8  | hendrick motorsports | chevrolet
+- 2007 | june 10 | hendrick motorsports | chevrolet
+- 2011 | june 12 | hendrick motorsports | chevrolet
+
+3) Test if Hendrick Motorsports ever appears with Ford in this table
+SQL:
+SELECT COUNT(*) AS cnt FROM public.pocono_400 WHERE team = 'Hendrick Motorsports' AND manufacturer = 'Ford';
+
+Result:
+- cnt = 0
+
+Conclusion
+- The specific assertion that Jeff Gordon drove "a Ford for Hendrick Motorsports" on June 16 is contradicted by the available data. On June 16 (1996) he is recorded as driving a Chevrolet for Hendrick Motorsports.
+
+Assumptions
+- The available data source is the TabFact database table public.pocono_400, treated as authoritative for Pocono 400 race records, including dates that fall around mid-June. I interpret the claim’s "on june 16" as referring to the race date listed in this table (1996), since it explicitly lists "june 16" alongside Jeff Gordon for Hendrick Motorsports. No broader cross-series data beyond this table was available in the current data environment.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

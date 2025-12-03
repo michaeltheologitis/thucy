@@ -1,0 +1,44 @@
+
+<userQuery>
+<query>
+gary unmarried come on friday at 8:00 pm
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim evaluated: “Gary Unmarried comes on Friday at 8:00 pm.”
+
+Data source explored
+- Database: TabFact
+- Schema: public
+- Table: gary_unmarried
+- Columns: episode (text), air date (text), timeslot (text), 18 - 49 (text), viewers (double precision)
+
+Evidence collected
+1) Distinct timeslots and counts
+- Result: Only “wednesday 8:30 pm” appears, 20 rows.
+- Executed SQL:
+  SELECT DISTINCT timeslot, COUNT(*) AS row_count FROM gary_unmarried GROUP BY timeslot;
+
+2) Direct check for any Friday timeslot (including “friday 8:00 pm”)
+- Result: No entries found.
+- Executed SQL:
+  SELECT * FROM public.gary_unmarried WHERE timeslot ILIKE '%friday%' OR timeslot = 'friday 8:00 pm';
+
+3) Day-of-week validation from air dates
+- Result: All 20 episodes map to “Wednesday”.
+- Executed SQL:
+  SELECT trim(to_char(to_date("air date", 'FMMonth DD, YYYY'), 'Day')) AS dow, COUNT(*) FROM public.gary_unmarried GROUP BY 1 ORDER BY 2 DESC;
+
+Conclusion
+- The available data shows Gary Unmarried aired on Wednesday at 8:30 pm, with no evidence of a Friday 8:00 pm timeslot. The claim is contradicted by the data.
+
+Assumptions
+- “Comes on” is interpreted as the show’s original broadcast timeslot.
+- The public.gary_unmarried table is treated as authoritative for the show’s airing schedule represented in the dataset (episodes listed span 2008–2009).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

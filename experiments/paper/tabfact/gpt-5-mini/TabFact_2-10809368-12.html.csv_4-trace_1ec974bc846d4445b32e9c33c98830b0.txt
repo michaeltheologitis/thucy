@@ -1,0 +1,67 @@
+
+<userQuery>
+<query>
+punt road oval be the venue where richmond play as the away team
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+Claim: “Punt Road Oval be the venue where Richmond play as the away team.” Within the available 1946 VFL season dataset, there is no evidence that Richmond played as the away team at Punt Road Oval. The only Punt Road Oval match present shows Richmond as the home team.
+
+Data sources discovered
+- postgres_tabfact34 (public schema)
+
+Schema examined
+- Table: public.t_1946_vfl_season
+  - Columns: "home team" (text), "home team score" (text), "away team" (text), "away team score" (text), "venue" (text), "crowd" (bigint), "date" (text)
+
+Evidence and executed SQL
+1) Does Richmond appear as the away team at Punt Road Oval?
+- SQL:
+  SELECT COUNT(*) AS match_count FROM public.t_1946_vfl_season WHERE "away team" = 'Richmond' AND "venue" = 'Punt Road Oval';
+- Result: match_count = 0
+
+2) Case-insensitive search for Richmond as away team at any venue containing “punt”
+- SQL:
+  SELECT count(*) AS match_count FROM public.t_1946_vfl_season WHERE lower("away team") = 'richmond' AND lower(venue) LIKE '%punt%';
+- Result: match_count = 0
+
+3) List all matches at venues containing “punt” (to see who was home/away there)
+- SQL:
+  SELECT date, "home team", "away team", venue FROM public.t_1946_vfl_season WHERE venue ILIKE '%punt%';
+- Result:
+  - 13 july 1946 | home team: richmond | away team: fitzroy | venue: punt road oval
+
+4) Exact (case-insensitive) matches for venue = ‘Punt Road Oval’
+- Count SQL:
+  SELECT COUNT(*) AS match_count FROM public.t_1946_vfl_season WHERE lower(trim(venue)) = 'punt road oval';
+- Result: match_count = 1
+- List SQL:
+  SELECT date, "home team", "away team" FROM public.t_1946_vfl_season WHERE lower(trim(venue)) = 'punt road oval' ORDER BY date;
+- Result:
+  - 13 july 1946 | home team: richmond | away team: fitzroy
+
+5) Does Richmond appear as an away team at all in this table?
+- Distinct away-team values (lowercased)
+  - SQL:
+    SELECT DISTINCT lower("away team") AS away_team_lower FROM public.t_1946_vfl_season ORDER BY away_team_lower;
+  - Result: fitzroy; footscray; hawthorn; melbourne; north melbourne; south melbourne (richmond not present)
+- Substring check for ‘richmond’ in away team
+  - SQL:
+    SELECT COUNT(*) AS match_count FROM public.t_1946_vfl_season WHERE "away team" ILIKE '%richmond%';
+  - Result: match_count = 0
+
+Conclusion
+- In the 1946 VFL season data available, Richmond never appears as the away team at Punt Road Oval. The only record for Punt Road Oval shows Richmond as the home team. Therefore, the claim is not supported by the data.
+
+Assumptions
+- “Richmond” refers to Richmond Football Club in the VFL context, as represented in this dataset.
+- The verification is constrained to the available dataset (public.t_1946_vfl_season), which appears to cover at least part of the 1946 season.
+- Venue name normalization was handled case-insensitively and with trimming where noted.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

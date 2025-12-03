@@ -1,0 +1,75 @@
+
+<userQuery>
+<query>
+the maximum number of 2006 subscriber for glo mobile be 11000 at morocco
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the maximum number of 2006 subscriber for glo mobile be 11000 at morocco.”
+
+Summary conclusion: The data show that Glo Mobile’s maximum 2006 subscriber count is 11,000 (in thousands), but the country is Nigeria, not Morocco. No record exists for Morocco in the dataset. Therefore, the claim’s numeric part is supported, but the location is incorrect.
+
+Data source discovery
+- One accessible PostgreSQL database: postgres_tabfact19
+- Public schema tables: mobile_telephony_in_africa
+  - Columns:
+    - provider (text)
+    - country (text)
+    - subscribers (2005) (thousands) (bigint)
+    - subscribers (2006) (thousands) (bigint)
+    - growth % (double precision)
+
+Evidence and executed SQL
+1) Locate all providers mentioning “glo” and show 2006 subscribers
+SQL:
+SELECT provider, country, "subscribers (2006) (thousands)"
+FROM mobile_telephony_in_africa
+WHERE provider ILIKE '%glo%';
+Result:
+- provider: glo mobile | country: nigeria | subscribers (2006) (thousands): 11000
+
+2) Compute the maximum 2006 subscribers among those ‘glo’ rows
+SQL:
+SELECT MAX("subscribers (2006) (thousands)") AS max_subscribers_2006
+FROM mobile_telephony_in_africa
+WHERE provider ILIKE '%glo%';
+Result:
+- max_subscribers_2006: 11000
+Interpretation: The column is in thousands, so 11000 = 11,000,000 subscribers.
+
+3) Check if any record exists for Glo Mobile in Morocco
+SQL:
+SELECT COUNT(*) AS match_count
+FROM mobile_telephony_in_africa
+WHERE lower(provider) = 'glo mobile' AND lower(country) = 'morocco';
+Result:
+- match_count = 0 (no such rows)
+
+4) Verify if the dataset has any Morocco rows at all
+SQL:
+SELECT column_name FROM information_schema.columns WHERE table_name = 'mobile_telephony_in_africa';
+Result (column list confirms exact identifiers):
+- subscribers (2005) (thousands), subscribers (2006) (thousands), growth %, provider, country
+
+SQL:
+SELECT count(*) AS cnt FROM mobile_telephony_in_africa WHERE country = 'Morocco';
+Result:
+- cnt = 0 (no Morocco records in this table)
+
+Assessment
+- True: The maximum 2006 subscriber count for Glo Mobile recorded in this dataset is 11,000 (thousands), i.e., 11 million.
+- False: The location is not Morocco; the record is for Nigeria. The dataset contains no Morocco entries at all.
+
+Final determination: The numeric part of the claim is supported, but the stated location (Morocco) is contradicted by the data.
+
+Assumptions
+- Interpreted the claim as: “In 2006, the maximum number of subscribers for Glo Mobile was 11,000 (thousands) and this occurred in Morocco.”
+- Provider matching was case-insensitive (both exact and substring): 'glo mobile', 'glo'.
+- Subscriber units are as labeled in the column: thousands.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

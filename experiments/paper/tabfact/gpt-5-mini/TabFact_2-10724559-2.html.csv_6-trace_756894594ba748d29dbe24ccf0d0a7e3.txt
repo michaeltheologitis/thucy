@@ -1,0 +1,43 @@
+
+<userQuery>
+<query>
+mirko vučinić didn't score any goal in a debut year later than 2008
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim: "mirko vučinić didn't score any goal in a debut year later than 2008"
+- Finding: In the available data, Mirko Vučinić has debut year 2000 and total goals 95. This contradicts both the "debut year later than 2008" and the "didn't score any goal" parts of the claim.
+
+Data source exploration
+- Discovered one relational data source: TabFact (postgres_tabfact15), public schema.
+- Relevant table: public.football_records_in_italy with columns: rank, all - time rank, name, debut year, current club, goals, apps.
+
+Evidence
+- Retrieved the row for Mirko Vučinić and inspected debut year and goals.
+
+Executed SQL (exact):
+SELECT name, "debut year", goals, apps
+FROM public.football_records_in_italy
+WHERE translate(lower(name), 'čć', 'cc') = translate(lower('Mirko Vučinić'), 'čć', 'cc');
+
+Result:
+- name: mirko vučinić
+- debut year: 2000
+- goals: 95
+- apps: 298
+
+Assessment
+- The claim asserts conditions that would imply for Mirko Vučinić: (a) debut year > 2008, and (b) goals = 0. The data shows debut year = 2000 (not later than 2008) and goals = 95 (>0). Therefore, the claim is contradicted by the data.
+
+Assumptions
+- Interpreted "didn't score any goal" as goals = 0 using the "goals" column in the table.
+- Interpreted "debut year later than 2008" as the "debut year" column being > 2008.
+- Used simple diacritic normalization (č/ć -> c) to match the name entry.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

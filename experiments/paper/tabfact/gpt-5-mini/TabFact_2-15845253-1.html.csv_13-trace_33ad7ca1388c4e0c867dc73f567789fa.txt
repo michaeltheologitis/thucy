@@ -1,0 +1,103 @@
+
+<userQuery>
+<query>
+13 viral family have an helical virion shape
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “13 viral family have an helical virion shape.”
+
+Data source discovery
+- Accessible database: TabFact (PostgreSQL)
+- Schema: public
+- Relevant table: public.viral_disease with columns:
+  - family (text)
+  - baltimore group (text)
+  - envelopment (text)
+  - virion shape (text)
+  - replication site (text)
+
+Evidence and executed SQL
+1) Distinct values and counts for virion shape
+SQL:
+SELECT "virion shape", COUNT(*) AS count FROM public.viral_disease GROUP BY "virion shape" ORDER BY count DESC, "virion shape";
+Result:
+- icosahedral: 13
+- helical: 6
+- complex: 2
+- helical , bullet shaped: 1
+- spherical: 1
+
+Total rows in table
+SQL:
+SELECT COUNT(*) AS total_rows FROM public.viral_disease;
+Result:
+- total_rows: 23
+
+2) Distinct families overall
+SQL:
+SELECT COUNT(DISTINCT family) AS distinct_family_count FROM public.viral_disease;
+Result:
+- distinct_family_count = 23
+
+3) Families and their virion shape(s)
+SQL:
+SELECT family, STRING_AGG(DISTINCT COALESCE("virion shape", ''), ', ' ORDER BY COALESCE("virion shape", '')) AS virion_shapes
+FROM public.viral_disease
+GROUP BY family
+ORDER BY family;
+Result (family -> virion_shapes):
+- adenoviridae -> icosahedral
+- arenaviridae -> helical
+- astroviridae -> icosahedral
+- bunyaviridae -> helical
+- caliciviridae -> icosahedral
+- coronaviridae -> helical
+- filoviridae -> helical
+- flaviviridae -> icosahedral
+- hepadnaviridae -> icosahedral
+- hepeviridae -> icosahedral
+- herpesviridae -> complex
+- orthomyxoviridae -> helical
+- papillomaviridae -> icosahedral
+- paramyxoviridae -> helical
+- parvoviridae -> icosahedral
+- picornaviridae -> icosahedral
+- polyomaviridae -> icosahedral
+- poxviridae -> complex
+- reoviridae -> icosahedral
+- retroviridae -> icosahedral
+- rhabdoviridae -> helical , bullet shaped
+- togaviridae -> icosahedral
+- unassigned -> spherical
+
+4) Count families with helical virion shape (exact vs. contains)
+- Exact match (virion shape = 'helical')
+  SQL:
+  SELECT COUNT(DISTINCT family) AS count_exact_helical FROM public.viral_disease WHERE "virion shape" = 'helical';
+  Result: count_exact_helical = 6
+  SQL (to list families):
+  SELECT DISTINCT family FROM public.viral_disease WHERE "virion shape" = 'helical' ORDER BY family;
+  Result: arenaviridae, bunyaviridae, coronaviridae, filoviridae, orthomyxoviridae, paramyxoviridae
+
+- Case-insensitive substring match (virion shape contains 'helical')
+  SQL:
+  SELECT COUNT(DISTINCT family) AS count_like_helical FROM public.viral_disease WHERE lower("virion shape") LIKE '%helical%';
+  Result: count_like_helical = 7
+  SQL (to list families):
+  SELECT DISTINCT family FROM public.viral_disease WHERE lower("virion shape") LIKE '%helical%' ORDER BY family;
+  Result: arenaviridae, bunyaviridae, coronaviridae, filoviridae, orthomyxoviridae, paramyxoviridae, rhabdoviridae
+
+Conclusion
+- The dataset lists 23 distinct viral families. Only 6 families have virion shape exactly labeled “helical,” and 7 families contain “helical” in their virion shape description (including “helical , bullet shaped” for rhabdoviridae). Both counts are well below 13. Therefore, the claim that 13 viral families have a helical virion shape is not supported by the data.
+
+Assumptions
+- “Viral family” corresponds to the family column in public.viral_disease.
+- “Helical virion shape” is interpreted primarily via the virion shape column. I reported both exact matches to “helical” and a broader count including any description containing “helical.”
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

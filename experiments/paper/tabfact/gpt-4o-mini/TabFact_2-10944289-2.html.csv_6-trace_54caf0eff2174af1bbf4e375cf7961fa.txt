@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+the final score on september 17 at soldier field be 10 - 27
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the final score on September 17 at Soldier Field be 10 - 27.”
+
+Data sources discovered
+- PostgreSQL database: TabFact
+- Schema: public
+- Table: nbc_sunday_night_football_results_2006_present
+  - Columns (text): date, visiting team, final score, host team, stadium
+
+Evidence 1: All Sunday Night Football games at Soldier Field (2006–present)
+SQL executed:
+SELECT date, "visiting team", "host team", "final score", stadium 
+FROM public.nbc_sunday_night_football_results_2006_present 
+WHERE stadium ILIKE '%Soldier Field%';
+
+Result rows:
+- Date: October 1; Visiting Team: Seattle Seahawks; Host Team: Chicago Bears; Final Score: 6 - 37; Stadium: Soldier Field
+- Date: December 31; Visiting Team: Green Bay Packers; Host Team: Chicago Bears; Final Score: 26 - 7; Stadium: Soldier Field
+
+Observation: Neither of these Soldier Field SNF games has a final score of 10 - 27, and neither is on September 17.
+
+Evidence 2: Sunday Night Football game(s) on September 17
+SQL executed:
+SELECT date, "visiting team", "host team", "final score", "stadium" 
+FROM public.nbc_sunday_night_football_results_2006_present 
+WHERE date ILIKE '%September 17%';
+
+Result row:
+- Date: September 17; Visiting Team: Washington Redskins; Host Team: Dallas Cowboys; Final Score: 10 - 27; Stadium: Texas Stadium
+
+Observation: The SNF game on September 17 with a 10 - 27 score took place at Texas Stadium, not Soldier Field.
+
+Evidence 3: Direct check for any September 17 SNF at Soldier Field
+SQL executed:
+SELECT COUNT(*) AS row_count 
+FROM public.nbc_sunday_night_football_results_2006_present 
+WHERE date LIKE '%September 17%' AND stadium = 'Soldier Field';
+
+Result:
+- row_count: 0
+
+Conclusion
+- Within the authoritative Sunday Night Football (2006–present) dataset, there is no game at Soldier Field on September 17 with a final score of 10 - 27. The only September 17 SNF game with a 10 - 27 score occurred at Texas Stadium (Washington at Dallas). Therefore, the claim is contradicted by the data.
+
+Assumptions and scope
+- The verification is performed against the available, authoritative dataset of NBC Sunday Night Football results from 2006 to present. Dates in this table are recorded without years, but align with known SNF schedules (e.g., Sep 17, 2006: Washington at Dallas, 10 - 27). If the claim refers to a non-SNF event (e.g., another league or sport at Soldier Field), that would be outside the scope of the accessible data; conclusions here are strictly within SNF data.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,50 @@
+
+<userQuery>
+<query>
+olga govortsova advance to the third round in the french open 2 year in a row
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of steps
+- Discovered available data sources and identified a PostgreSQL database (TabFact) with a relevant table: public.olga_govortsova.
+- Queried the table to retrieve Olga Govortsova’s Grand Slam results by year, focusing on the French Open.
+- Verified whether she reached the third round in consecutive years.
+
+Key evidence from the data
+- The French Open results for Olga Govortsova (2007–2011) are: 2007 = a, 2008 = 3r, 2009 = 3r, 2010 = 2r, 2011 = 2r.
+- This shows she reached the third round in consecutive years 2008 and 2009.
+
+Executed SQL (exact queries)
+1) Full table to inspect all tournament results:
+SELECT * FROM public.olga_govortsova;
+
+Relevant row returned for the French Open:
+- tournament: french open; 2007: a; 2008: 3r; 2009: 3r; 2010: 2r; 2011: 2r
+
+2) Explicit extraction of years with third-round (3r) results at the French Open:
+SELECT year, result FROM (
+  SELECT '2007' as year, "2007" as result, tournament FROM public.olga_govortsova
+  UNION ALL SELECT '2008', "2008", tournament FROM public.olga_govortsova
+  UNION ALL SELECT '2009', "2009", tournament FROM public.olga_govortsova
+  UNION ALL SELECT '2010', "2010", tournament FROM public.olga_govortsova
+  UNION ALL SELECT '2011', "2011", tournament FROM public.olga_govortsova
+) t WHERE tournament ILIKE 'french open' AND result='3r';
+
+Result:
+- 2008, 3r
+- 2009, 3r
+
+Conclusion
+- The data confirms Olga Govortsova advanced to the third round of the French Open in two consecutive years, 2008 and 2009. The claim is supported by the evidence.
+
+Assumptions
+- Interpreted '3r' as "third round" and 'a' as absent/not applicable.
+- The available dataset spans 2007–2011; the claim was evaluated within this scope.
+- "Advance to the third round" is treated as equivalent to "reach the third round."
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

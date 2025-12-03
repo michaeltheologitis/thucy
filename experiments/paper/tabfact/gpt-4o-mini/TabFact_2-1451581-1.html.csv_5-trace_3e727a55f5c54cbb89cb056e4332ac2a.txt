@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+cologne bonn airport saw a 0.1% increase in cargo
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Cologne Bonn Airport saw a 0.1% increase in cargo.”
+
+Data source exploration:
+- Available database contains a table focused on airport cargo traffic: world_s_busiest_airports_by_cargo_traffic.
+- Relevant columns include: rank, total cargo (metric tonnes), airport, code (iata / icao), % change.
+
+Evidence collected:
+1) Targeted lookup for Cologne Bonn Airport by full name
+- Result: One matching row with % change = 0.5%
+- Executed SQL:
+SELECT rank, "total cargo (metric tonnes)", airport, "code (iata / icao)", "% change" 
+FROM world_s_busiest_airports_by_cargo_traffic 
+WHERE airport ILIKE '%Cologne Bonn Airport%'
+- Returned row:
+  - Rank: 28
+  - Total Cargo (Metric Tonnes): 730,054
+  - Airport: Cologne Bonn Airport
+  - Code (IATA / ICAO): CGN / EDDK
+  - % Change: 0.5%
+
+2) Broad lookup by name fragments and code to ensure no alternate entries
+- Result: Same single row; no entries showing 0.1%
+- Executed SQL:
+SELECT rank, "total cargo (metric tonnes)", airport, "code (iata / icao)", "% change" 
+FROM world_s_busiest_airports_by_cargo_traffic 
+WHERE airport ILIKE '%Cologne%' OR airport ILIKE '%Bonn%' OR "code (iata / icao)" = 'CGN';
+- Returned row:
+  - Rank: 28
+  - Total Cargo (Metric Tonnes): 730,054
+  - Airport: Cologne Bonn Airport
+  - Code (IATA / ICAO): CGN / EDDK
+  - % Change: 0.5%
+
+Conclusion:
+- The data shows a 0.5% increase for Cologne Bonn Airport, not 0.1%. While the direction (an increase) is correct, the stated magnitude is not supported by the evidence.
+
+Assumptions:
+- The “% change” field represents the reported year-over-year change for the period covered by this dataset.
+- “Cologne Bonn Airport” is uniquely identified by name and code (CGN / EDDK) in this table, and there are no separate duplicate rows for different periods within this dataset.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

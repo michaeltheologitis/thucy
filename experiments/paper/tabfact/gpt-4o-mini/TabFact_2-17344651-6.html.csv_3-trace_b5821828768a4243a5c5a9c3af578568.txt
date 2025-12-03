@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+the boston celtic achieve their highest score against the detroit piston in the 1984 - 85 season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the boston celtic achieve their highest score against the detroit piston in the 1984 - 85 season.”
+
+Data source explored
+- Database: public schema
+- Table: public.t_1984_85_boston_celtics_season
+- Columns: game (bigint), date (text), opponent (text), score (text), location (text), record (text)
+- Interpretation: The score column is in the format “Boston points - Opponent points,” based on sample rows (e.g., a loss with left value lower than right still increments the record appropriately).
+
+Verification steps and evidence
+1) Determine the Celtics’ highest single-game point total in 1984-85
+- Executed SQL:
+  SELECT MAX(CAST(SPLIT_PART(score, ' - ', 1) AS INTEGER)) AS max_points FROM public.t_1984_85_boston_celtics_season;
+- Result: 131
+
+2) Identify which opponent(s) and dates correspond to that maximum
+- Executed SQL:
+  SELECT date, opponent FROM public.t_1984_85_boston_celtics_season WHERE CAST(SPLIT_PART(score, ' - ', 1) AS INTEGER) = 131;
+- Result: January 29 against Detroit Pistons
+
+3) Cross-check overall max and Detroit-specific max using case-insensitive opponent matching
+- Executed SQL:
+  SELECT MAX(CAST(split_part(score, '-', 1) AS INTEGER)) AS max_points FROM public.t_1984_85_boston_celtics_season;
+- Result: 131
+
+- Executed SQL:
+  SELECT MAX(CAST(split_part(score, '-', 1) AS INTEGER)) AS max_points_vs_detroit FROM public.t_1984_85_boston_celtics_season WHERE LOWER(opponent) = 'detroit pistons';
+- Result: 131
+
+- Executed SQL:
+  SELECT date, CAST(split_part(score, '-', 1) AS INTEGER) AS boston_points FROM public.t_1984_85_boston_celtics_season WHERE LOWER(opponent) = 'detroit pistons';
+- Result: January 29, 1985 — 131 points
+
+4) Precisely list the 131-point game for confirmation (date, opponent, location)
+- Executed SQL:
+  SELECT date, opponent, score, location FROM public.t_1984_85_boston_celtics_season WHERE score LIKE '131%';
+- Result: Date: Tuesday, January 29; Opponent: Detroit Pistons; Score: 131 - 130; Location: Hartford Civic Center
+
+Conclusion
+- The data shows the Boston Celtics’ highest single-game score in the 1984-85 season was 131 points, achieved in a game against the Detroit Pistons on January 29, 1985 (at Hartford Civic Center). Therefore, the claim is supported by the evidence.
+
+Assumptions
+- The left-hand value of the score field represents the Boston Celtics’ points (consistent with sample rows and win/loss context).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

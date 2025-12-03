@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+mark brook and kenny perry tie for have the lowest to par
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The statement appears to assert that (Mark Brooks) and Kenny Perry tied for the lowest score relative to par (best to-par) in the referenced event. Based on the available data source (1996 PGA Championship table), this means they shared the lowest 72-hole to-par score at the end of regulation.
+
+What the data shows:
+- The 1996 PGA Championship leaderboard in public.t_1996_pga_championship contains player finishing positions, scores, and “to par”.
+- After normalizing the “to par” text values to integers, the most-under-par (lowest) value is −11, achieved by two players: Mark Brooks and Kenny Perry.
+
+Key evidence and executed SQL:
+1) Full ordering by normalized to-par (most negative first)
+SQL:
+SELECT place, player, score, "to par", 
+       CASE 
+           WHEN REPLACE("to par", ' ', '') = 'E' THEN '0' 
+           ELSE REPLACE(LTRIM(REPLACE("to par", ' ', '')), '+', '') 
+       END::integer AS normalized_to_par_int 
+FROM public.t_1996_pga_championship 
+ORDER BY normalized_to_par_int ASC, place;
+Result excerpt (top rows):
+- place=1, player=mark brooks, score=68 + 70 + 69 + 70 = 277, to par=- 11, normalized_to_par_int=-11
+- place=2, player=kenny perry, score=66 + 72 + 71 + 68 = 277, to par=- 11, normalized_to_par_int=-11
+- place=t3, player=steve elkington, score=... , to par=- 10, normalized_to_par_int=-10
+- place=t3, player=tommy tolles, score=... , to par=- 10, normalized_to_par_int=-10
+
+2) Directly list players with the lowest to-par (−11)
+SQL:
+SELECT place, player, score, "to par" FROM public.t_1996_pga_championship WHERE (CASE WHEN REPLACE("to par", ' ', '') = 'E' THEN '0' ELSE REPLACE(REPLACE("to par", ' ', ''), '+', '') END)::integer = -11;
+Result:
+- Place: 1, Player: Mark Brooks, Score: 68 + 70 + 69 + 70 = 277, To Par: -11
+- Place: 2, Player: Kenny Perry, Score: 66 + 72 + 71 + 68 = 277, To Par: -11
+
+Conclusion:
+- The data confirms that Mark Brooks and Kenny Perry tied for the lowest to-par (−11) at the end of regulation in the 1996 PGA Championship. The claim’s substance is correct. Note: the name should be “Mark Brooks,” not “mark brook.”
+
+Assumptions made:
+- The claim refers to the 1996 PGA Championship (the only available data source) and to “lowest to par” as the lowest 72-hole score relative to par, excluding any playoff holes.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

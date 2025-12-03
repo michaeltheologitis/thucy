@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+the size of the crowd when essendon be the away team be 25158
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "the size of the crowd when Essendon be the away team be 25158"
+
+Data source explored:
+- Database schema: public
+- Table: public.t_1954_vfl_season
+- Columns: "home team" (text), "home team score" (text), "away team" (text), "away team score" (text), "venue" (text), "crowd" (bigint), "date" (text)
+
+Method and evidence:
+1) Identify how Essendon appears in the data (case/label) and how many away matches exist for Essendon.
+- SQL executed:
+  SELECT DISTINCT "away team" FROM public.t_1954_vfl_season WHERE "away team" ILIKE '%Essendon%';
+- Result: essendon
+
+- SQL executed:
+  SELECT COUNT(*) FROM public.t_1954_vfl_season WHERE "away team" ILIKE '%Essendon%';
+- Result: 1 row where Essendon is the away team
+
+2) Retrieve distinct crowd sizes for Essendon as the away team and check for 25,158.
+- SQL executed:
+  SELECT DISTINCT "crowd" FROM public.t_1954_vfl_season WHERE "away team" ILIKE '%Essendon%' ORDER BY "crowd" ASC;
+- Result: 28158
+
+- SQL executed:
+  SELECT COUNT(*) FROM public.t_1954_vfl_season WHERE "away team" ILIKE '%Essendon%' AND "crowd" = 25158;
+- Result: 0
+
+3) Retrieve the full match details for Essendon as the away team to confirm context.
+- SQL executed:
+  SELECT "date", "home team", "home team score", "away team", "away team score", "venue", "crowd" 
+  FROM public.t_1954_vfl_season 
+  WHERE LOWER("away team") LIKE '%essendon%';
+- Result: Date: 31 July 1954; Home Team: Geelong; Home Team Score: 16.14 (110); Away Team: Essendon; Away Team Score: 11.10 (76); Venue: Kardinia Park; Crowd: 28,158
+
+Conclusion:
+- The only match in the dataset where Essendon is the away team has a recorded crowd of 28,158, not 25,158. Therefore, the claim is not supported by the data.
+
+Assumptions:
+- Interpreted the claim within the available dataset (1954 VFL season table) and treated “Essendon” case-insensitively to account for label formatting in the data.
+
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

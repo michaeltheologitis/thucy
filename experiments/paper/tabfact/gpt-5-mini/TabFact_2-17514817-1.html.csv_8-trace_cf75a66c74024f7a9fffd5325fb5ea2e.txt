@@ -1,0 +1,93 @@
+
+<userQuery>
+<query>
+west berkshire brewery 's maggs magnificent mild 2 time receive a bronze award at the siba national beer competition between 1995 and 2005
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “West Berkshire Brewery’s Magg’s Magnificent Mild received a Bronze award two times at the SIBA National Beer Competition between 1995 and 2005.”
+
+Summary conclusion: The data show no Bronze awards at the SIBA National Beer Competition for Maggs Magnificent Mild between 1995 and 2005. The beer did earn a Bronze medal in 2005 at the SIBA South East Region Beer Competition (regional, not national). Therefore, the claim is not supported by the data.
+
+Data sources discovered:
+- One accessible data source: postgres_tabfact2 (TabFact) database; public schema; table: west_berkshire_brewery.
+
+Schema details (relevant table):
+- public.west_berkshire_brewery columns: year (bigint), "beer name" (text), prize (text), category (text), competition (text). No primary/foreign keys.
+
+Evidence and executed SQL:
+1) Direct check for Bronze awards at SIBA National Beer Competition for Magg’s Magnificent Mild between 1995 and 2005
+- SQL executed:
+SELECT year, "beer name", prize, category, competition
+FROM public.west_berkshire_brewery
+WHERE "beer name" ILIKE 'Magg''s Magnificent Mild'
+  AND competition ILIKE 'SIBA National Beer Competition'
+  AND lower(prize) = 'bronze'
+  AND year BETWEEN 1995 AND 2005
+ORDER BY year;
+- Result: No rows returned (empty set).
+- SQL executed (count):
+SELECT COUNT(*) AS bronze_count
+FROM public.west_berkshire_brewery
+WHERE "beer name" ILIKE 'Magg''s Magnificent Mild'
+  AND competition ILIKE 'SIBA National Beer Competition'
+  AND lower(prize) = 'bronze'
+  AND year BETWEEN 1995 AND 2005;
+- Result: bronze_count = 0
+
+2) Broader retrieval of all awards for Maggs Magnificent Mild to inspect actual competition/prize history and catch spelling variations
+- SQL executed:
+SELECT year, "beer name", prize, category, competition
+FROM public.west_berkshire_brewery
+WHERE lower("beer name") LIKE '%magg%'
+  AND lower("beer name") LIKE '%magnif%'
+  AND lower("beer name") LIKE '%mild%'
+ORDER BY year;
+- Returned rows (year | beer name | prize | category | competition):
+  - 2002 | maggs magnificent mild | gold medal | mild and porter | siba south east region beer competition
+  - 2003 | maggs magnificent mild | gold medal | mild and porter | siba national beer competition
+  - 2004 | maggs magnificent mild | overall winner | beer of the festival | bracknell blues and real ale festival
+  - 2005 | maggs magnificent mild | gold medal | mild | camra reading branch beer festival
+  - 2005 | maggs magnificent mild | third place | overall | camra reading branch beer festival
+  - 2005 | maggs magnificent mild | gold medal | mild | siba south east region beer competition
+  - 2005 | maggs magnificent mild | bronze medal | overall | siba south east region beer competition
+  - 2006 | maggs magnificent mild | silver medal | mild | siba national beer competition
+  - 2006 | maggs magnificent mild | silver medal | mild | camra reading branch beer festival
+  - 2008 | maggs magnificent mild | silver medal | in category | camra reading branch beer festival
+- Observation: The only Bronze in this set is 2005 at “siba south east region beer competition,” not the SIBA National Beer Competition.
+
+3) Independent check: any Bronze awards at SIBA National Beer Competition between 1995 and 2005 (any beer from this brewery)
+- SQL executed:
+SELECT year, "beer name", prize, category, competition
+FROM public.west_berkshire_brewery
+WHERE competition ILIKE '%SIBA National Beer%'
+  AND prize ILIKE '%bronze%'
+  AND year BETWEEN 1995 AND 2005
+ORDER BY year;
+- Result: No rows returned.
+- Supporting context (Bronze awards in 1995–2005 regardless of competition):
+SQL executed:
+SELECT year, "beer name", prize, category, competition
+FROM public.west_berkshire_brewery
+WHERE prize ILIKE '%bronze%'
+  AND year BETWEEN 1995 AND 2005
+ORDER BY year
+LIMIT 100;
+- Result:
+  - 2005 | maggs magnificent mild | bronze medal | overall | siba south east region beer competition
+
+Conclusion based on evidence:
+- There are zero instances of Maggs Magnificent Mild receiving a Bronze award at the SIBA National Beer Competition between 1995 and 2005. The beer did receive a Bronze at a regional SIBA competition in 2005 and non-Bronze awards at the SIBA National in 2003 (Gold) and 2006 (Silver). The claim that it received two Bronze awards at the SIBA National in the specified period is contradicted by the data.
+
+Assumptions made:
+- The table public.west_berkshire_brewery comprehensively represents West Berkshire Brewery’s awards history for the period in question.
+- Competition matching used case-insensitive substring on “SIBA National Beer Competition.” If alternative naming not containing that substring were used, it could be missed; however, returned rows explicitly include “siba national beer competition,” indicating consistent naming in this dataset.
+- Beer name normalization: the dataset stores the beer as “maggs magnificent mild” (no apostrophe). Searches accounted for this by using flexible, case-insensitive matching.
+
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

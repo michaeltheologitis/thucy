@@ -1,0 +1,64 @@
+
+<userQuery>
+<query>
+the release date for the model with sspec number sla4h (m0) be q2 2008 with part number (s) lf80537 ge0301 m
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the release date for the model with sspec number sla4h (m0) be q2 2008 with part number (s) lf80537 ge0301 m”
+
+Data source explored
+- Database: TabFact (postgres_tabfact6)
+- Schema: public
+- Table: list_of_intel_pentium_dual_core_microprocessors
+  Columns include: "model number", "sspec number", "release date", "part number (s)", among others.
+
+Step 1 — Check for an exact SSPEC match of SLA4H (without stepping)
+- Purpose: Ensure whether the table stores the SSPEC exactly as “SLA4H” or with additional text.
+- SQL executed:
+SELECT COUNT(*) AS match_count
+FROM public.list_of_intel_pentium_dual_core_microprocessors
+WHERE lower("sspec number") = 'sla4h';
+- Result: match_count = 0 (no exact “SLA4H” entries)
+
+Step 2 — Search for any SSPEC entries containing ‘SLA4H’
+- Purpose: Find entries where the SSPEC includes stepping text like “(m0)”.
+- SQL executed:
+SELECT "model number", "sspec number", "release date", "part number (s)"
+FROM public.list_of_intel_pentium_dual_core_microprocessors
+WHERE lower("sspec number") LIKE '%sla4h%';
+- Result:
+  - model number: pentium dual - core t2390
+  - sspec number: sla4h (m0)
+  - release date: q2 2008
+  - part number (s): lf80537 ge0361 m
+
+Step 3 — Verify exact equality to ‘sla4h (m0)’
+- Purpose: Confirm the precise row and all fields for the SSPEC including stepping.
+- SQL executed:
+SELECT * FROM public.list_of_intel_pentium_dual_core_microprocessors WHERE lower("sspec number") = lower('sla4h (m0)');
+- Result (selected fields shown):
+  - model number: pentium dual - core t2390
+  - sspec number: sla4h (m0)
+  - release date: q2 2008
+  - part number (s): lf80537 ge0361 m
+
+Findings
+- The SSPEC number “SLA4H (M0)” exists and corresponds to Pentium Dual-Core T2390.
+- Release date is “Q2 2008” — this matches the claim.
+- Part number(s) listed are “LF80537 GE0361 M” — this differs from the claimed “LF80537 GE0301 M”.
+
+Conclusion
+- The release date portion of the claim is supported by the data.
+- The part number provided in the claim does not match the database entry.
+
+Assumptions
+- Matching was done case-insensitively for SSPEC values and part numbers.
+- The table includes stepping text within the “sspec number” field; there is no separate “stepping” column to cross-verify M0 apart from the literal string in “sspec number”.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,50 @@
+
+<userQuery>
+<query>
+the score be 2 - 2 when the away team be brighton and heave albion
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim interpreted: The match score was 2 - 2 in a game where the away team was Brighton & Hove Albion.
+- Scope: Verified against the available TabFact (postgres_tabfact11) database, public schema, table t_1990_91_fa_cup (1990–91 FA Cup results).
+
+Data source discovery
+- Database: TabFact (postgres_tabfact11)
+- Schema: public
+- Relevant table: t_1990_91_fa_cup with columns [tie no, home team, score, away team, date].
+
+Evidence
+1) Locate all matches where the away team mentions “Brighton”
+Executed SQL:
+SELECT "tie no", "home team", score, "away team", date
+FROM public.t_1990_91_fa_cup
+WHERE "away team" ILIKE '%brighton%';
+
+Result:
+- tie no: 1 | home team: liverpool | score: 2 - 2 | away team: brighton & hove albion | date: 26 / 01 / 1991
+
+2) Check distinct scores for rows where away team equals “brighton & hove albion” (case-insensitive)
+Executed SQL:
+SELECT score, count(*) AS cnt
+FROM public."t_1990_91_fa_cup"
+WHERE lower("away team") = 'brighton & hove albion'
+GROUP BY score
+ORDER BY cnt DESC, score;
+
+Result:
+- 2 - 2: 1 occurrence
+
+Conclusion
+- The data shows a match where the away team is Brighton & Hove Albion and the recorded score is 2 - 2. No other scores are associated with Brighton & Hove Albion as the away team in this dataset. The claim is supported by the evidence.
+
+Assumptions
+- “brighton and heave albion” was interpreted as “Brighton & Hove Albion.”
+- Verification is limited to the available dataset (1990–91 FA Cup table).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

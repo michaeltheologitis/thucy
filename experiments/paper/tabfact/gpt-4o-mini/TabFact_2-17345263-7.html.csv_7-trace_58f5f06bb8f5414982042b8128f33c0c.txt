@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+34028 be the total attendance on september 11
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “34028 be the total attendance on September 11.”
+
+Summary of findings
+- In the available dataset (East Carolina Pirates football, 1990–1999), there are no games recorded on September 11 in any year. Therefore, the total attendance on September 11 is 0 (no matching records).
+- The figure 34,028 does appear in the dataset, but it corresponds to a game on September 12 (opponent: Chattanooga), not September 11.
+
+Evidence and executed SQL
+1) Check for any games on September 11 (matching full and abbreviated month names)
+Executed SQL:
+SELECT date, opponent, site, attendance
+FROM east_carolina_pirates_football_1990_99
+WHERE (date ILIKE '%September%' OR date ILIKE '%Sept%' OR date ILIKE '%Sep%')
+  AND date ILIKE '%11%';
+Result: No records found.
+
+2) Sum attendance for any September 11 matches (same filter)
+Executed SQL:
+SELECT SUM(CAST(REPLACE(attendance, ',', '') AS INTEGER)) AS total_attendance
+FROM east_carolina_pirates_football_1990_99
+WHERE (date ILIKE '%September%' OR date ILIKE '%Sept%' OR date ILIKE '%Sep%')
+  AND date ILIKE '%11%';
+Result: total_attendance = NULL (indicates no matching rows; effectively 0).
+
+3) Check for numeric date formats for September 11 (e.g., 9/11, 9-11)
+Executed SQL:
+SELECT date, opponent, site, attendance
+FROM east_carolina_pirates_football_1990_99
+WHERE date ILIKE '%9/11%' OR date ILIKE '%09/11%' OR date ILIKE '%9-11%' OR date ILIKE '%09-11%';
+Result: No records found.
+
+4) Locate the 34,028 attendance to understand the source of the number
+Executed SQL:
+SELECT date, opponent, site, attendance
+FROM east_carolina_pirates_football_1990_99
+WHERE (date ILIKE '%September 12%' OR date ILIKE '%Sept 12%' OR date ILIKE '%Sep 12%');
+Result:
+- Date: September 12
+- Opponent: Chattanooga
+- Site: Dowdy - Ficklen Stadium, Greenville, NC
+- Attendance: 34,028
+
+Conclusion
+- The dataset shows no games on September 11; thus the total attendance on that date is 0. The number 34,028 pertains to a September 12 game, not September 11. Therefore, the claim is not supported by the data.
+
+Assumptions
+- “Total attendance on September 11” is interpreted as the sum of attendance for all East Carolina Pirates football games dated September 11 (any year) within the available dataset (1990–1999).
+- Searched for various date representations (full/abbreviated month names and numeric formats). The dataset is treated as authoritative within its scope.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

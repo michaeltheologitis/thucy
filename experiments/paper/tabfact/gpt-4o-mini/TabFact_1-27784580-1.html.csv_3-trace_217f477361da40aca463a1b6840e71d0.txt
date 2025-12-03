@@ -1,0 +1,81 @@
+
+<userQuery>
+<query>
+fukusyū no puropōzu have 2.2% higher rating than the title with the most recent broadcast date
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “fukusyū no puropōzu have 2.2% higher rating than the title with the most recent broadcast date.”
+
+Data sources discovered
+- Database: TabFact
+- Table: tsuki_no_koibito
+  - Columns: Unnamed: 0 (text), episode title (text), romanized title (text), translation of title (text), broadcast date (text), ratings (text)
+
+Evidence and executed SQL
+1) Rating for “fukusyū no puropōzu”
+SQL:
+SELECT ratings, "broadcast date" FROM tsuki_no_koibito WHERE "romanized title" = 'fukusyū no puropōzu';
+Result: ratings = 15.6%, broadcast date = May 24, 2010
+
+2) Title with the most recent broadcast date (by parsing year, month, day from the text field)
+SQL:
+SELECT "romanized title", "broadcast date", "ratings"
+FROM tsuki_no_koibito
+ORDER BY 
+    CAST(regexp_replace(split_part("broadcast date", ',', 2), '\\D', '', 'g') AS INT) DESC,
+    CASE lower(split_part("broadcast date", ' ', 1))
+        WHEN 'january' THEN 1 
+        WHEN 'february' THEN 2 
+        WHEN 'march' THEN 3 
+        WHEN 'april' THEN 4 
+        WHEN 'may' THEN 5 
+        WHEN 'june' THEN 6 
+        WHEN 'july' THEN 7 
+        WHEN 'august' THEN 8 
+        WHEN 'september' THEN 9 
+        WHEN 'october' THEN 10 
+        WHEN 'november' THEN 11 
+        WHEN 'december' THEN 12 
+    END DESC,
+    CAST(regexp_replace(split_part(split_part("broadcast date", ',', 1), ' ', 2), '\\D', '', 'g') AS INT) DESC
+LIMIT 1;
+Result: romanized title = saishūshōjomakuwakare, broadcast date = June 14, 2010, ratings = 13.4%
+
+3) Direct computation of rating difference (absolute and relative)
+SQL:
+WITH f AS (
+  SELECT CAST(replace(ratings, '%', '') AS numeric) AS rating
+  FROM tsuki_no_koibito
+  WHERE "romanized title" = 'fukusyū no puropōzu'
+), m AS (
+  SELECT CAST(replace(ratings, '%', '') AS numeric) AS rating
+  FROM tsuki_no_koibito
+  ORDER BY 
+    CAST(regexp_replace(split_part("broadcast date", ',', 2), '\\D', '', 'g') AS INT) DESC,
+    CASE lower(split_part("broadcast date", ' ', 1))
+        WHEN 'january' THEN 1 WHEN 'february' THEN 2 WHEN 'march' THEN 3 WHEN 'april' THEN 4 WHEN 'may' THEN 5 WHEN 'june' THEN 6 WHEN 'july' THEN 7 WHEN 'august' THEN 8 WHEN 'september' THEN 9 WHEN 'october' THEN 10 WHEN 'november' THEN 11 WHEN 'december' THEN 12 END DESC,
+    CAST(regexp_replace(split_part(split_part("broadcast date", ',', 1), ' ', 2), '\\D', '', 'g') AS INT) DESC
+  LIMIT 1
+)
+SELECT f.rating AS fuku_rating, m.rating AS most_recent_rating,
+       ROUND(f.rating - m.rating, 1) AS point_diff,
+       ROUND(((f.rating - m.rating) / m.rating) * 100, 2) AS pct_diff
+FROM f, m;
+Result: fuku_rating = 15.6, most_recent_rating = 13.4, point_diff = 2.2, pct_diff = 16.42%
+
+Conclusion
+- “fukusyū no puropōzu” (15.6%) is higher than the most recent broadcast “saishūshōjomakuwakare” (13.4%) by 2.2 percentage points.
+- If “2.2% higher” is interpreted as percentage points (common in TV ratings), the claim is supported exactly by the data. If interpreted as a relative percent difference, the correct value would be 16.42% higher, not 2.2%.
+
+Assumptions
+- Interpreted “X% higher rating” as an absolute difference in rating points (percentage points), which is standard in ratings contexts where the rating itself is a percent.
+- “Most recent broadcast date” refers to the maximum chronological date in the broadcast date field across all rows in the table.
+
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

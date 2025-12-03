@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+olympic game hold at venice , italy in 1984 have note 2:10:57
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Olympic Games held at Venice, Italy in 1984 have note 2:10:57.” We verify this against the available authoritative dataset (public.orlando_pizzolato), which records competitions, venues, positions, and notes for Orlando Pizzolato.
+
+Key evidence from data
+1) Are there any 1984 entries labeled Olympic Games?
+- Executed SQL:
+  SELECT * FROM public.orlando_pizzolato WHERE year = 1984 AND competition ILIKE '%Olympic%';
+- Result: No rows found.
+
+2) What entries exist for 1984?
+- Executed SQL:
+  SELECT * FROM orlando_pizzolato WHERE year = 1984;
+- Result (1 row): year: 1984; competition: new york city marathon; venue: new york , united states; position: 1st; notes: 2:14:53.
+
+3) Are there any entries for Venice, Italy?
+- Executed SQL:
+  SELECT * FROM public.orlando_pizzolato WHERE lower(venue) LIKE '%venice%';
+- Result (1 row): year: 1988; competition: venice marathon; venue: venice , italy; position: 1st; notes: 2:15:24.
+
+4) Are there any entries with note 2:10:57?
+- Executed SQL:
+  SELECT year, competition, venue, position, notes
+  FROM orlando_pizzolato
+  WHERE notes = '2:10:57' OR notes LIKE '%2:10:57%';
+- Result (1 row): year: 1986; competition: european championships; venue: stuttgart , west germany; position: 2nd; notes: 2:10:57.
+
+5) Any Olympic Games entries at Venice?
+- Executed SQL:
+  SELECT * FROM public.orlando_pizzolato
+  WHERE competition ILIKE 'olympic games'
+    AND venue ILIKE '%venice%';
+- Result: No rows found.
+
+Assessment of claim components
+- “Olympic Games … in 1984”: No 1984 Olympic Games entry in this dataset; the only 1984 entry is the New York City Marathon (notes 2:14:53).
+- “… held at Venice, Italy”: Venice appears only in 1988 for the Venice Marathon (notes 2:15:24), not for the Olympic Games.
+- “… note 2:10:57”: The note 2:10:57 exists, but it corresponds to the 1986 European Championships in Stuttgart, not an Olympic event, not in 1984, and not in Venice.
+
+Conclusion: The claim is contradicted by the data: there is no 1984 Olympic Games entry, no Olympic Games held at Venice, and the 2:10:57 note corresponds to a different event, year, and venue.
+
+Assumptions made
+- The claim refers to an event record as represented in the public.orlando_pizzolato table, interpreting “note 2:10:57” as the notes field value, and “Olympic Games held at Venice, Italy in 1984” as the competition and venue/year fields.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

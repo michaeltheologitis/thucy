@@ -1,0 +1,115 @@
+
+<userQuery>
+<query>
+2 of the project be propose and list during 1993 , but be never complete
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Two of the projects were proposed and listed during 1993, but were never completed.” I verify this against the available data.
+
+Data discovery
+- Source discovered: PostgreSQL database TabFact (postgres_tabfact1), schema public.
+- Only table available: public.list_of_superfund_sites_in_mississippi (Superfund sites in Mississippi).
+
+Schema (from the database)
+- Columns (all text): cerclis id, name, county, proposed, listed, construction completed, partially deleted, deleted.
+
+Key evidence and executed SQL
+1) Understand the meaning/population of “construction completed”
+- SQL:
+SELECT "construction completed", COUNT(*) AS count
+FROM public.list_of_superfund_sites_in_mississippi
+WHERE "construction completed" IS NOT NULL
+  AND trim("construction completed") <> ''
+GROUP BY "construction completed"
+ORDER BY count DESC, "construction completed";
+- Result highlights: "-": 6; "08 / 08 / 1997": 1; "09 / 17 / 1993": 1; "12 / 30 / 1982": 1.
+- SQL:
+SELECT COUNT(*) AS null_or_empty_count
+FROM public.list_of_superfund_sites_in_mississippi
+WHERE "construction completed" IS NULL OR trim("construction completed") = '' ;
+- Result: 0.
+Interpretation: “-” is used to indicate no construction completion date (i.e., not completed) for 6 sites.
+
+2) Identify 1993 entries for proposed and listed
+- SQL:
+SELECT proposed, COUNT(*) AS cnt
+FROM public.list_of_superfund_sites_in_mississippi
+GROUP BY proposed
+ORDER BY cnt DESC NULLS LAST;
+- Proposed values include two in 1993: 05 / 10 / 1993 and 06 / 23 / 1993 (each once).
+- SQL:
+SELECT listed, COUNT(*) AS cnt
+FROM public.list_of_superfund_sites_in_mississippi
+GROUP BY listed
+ORDER BY cnt DESC NULLS LAST;
+- Listed values: two rows are "-" and none show 1993.
+- SQL:
+SELECT DISTINCT proposed FROM public.list_of_superfund_sites_in_mississippi WHERE proposed LIKE '%1993%';
+- Result: 05 / 10 / 1993; 06 / 23 / 1993.
+- SQL:
+SELECT COUNT(*) AS cnt_proposed_1993 FROM public.list_of_superfund_sites_in_mississippi WHERE proposed LIKE '%1993%';
+- Result: 2.
+- SQL:
+SELECT DISTINCT listed FROM public.list_of_superfund_sites_in_mississippi WHERE listed LIKE '%1993%';
+- Result: none.
+- SQL:
+SELECT COUNT(*) AS cnt_listed_1993 FROM public.list_of_superfund_sites_in_mississippi WHERE listed LIKE '%1993%';
+- Result: 0.
+
+3) The specific rows proposed in 1993 and their listed/completion status
+- SQL:
+SELECT "cerclis id", name, county, proposed, listed
+FROM public.list_of_superfund_sites_in_mississippi
+WHERE proposed LIKE '%1993%';
+- Results (2 rows):
+  - msd008154486, chemfax , inc, harrison, proposed: 06 / 23 / 1993, listed: -
+  - msd056029648, potter co, copiah, proposed: 05 / 10 / 1993, listed: -
+- SQL:
+SELECT name, proposed, listed, "construction completed" 
+FROM public.list_of_superfund_sites_in_mississippi
+WHERE proposed LIKE '%1993%';
+- Results:
+  - chemfax , inc — proposed: 06 / 23 / 1993; listed: -; construction completed: -
+  - potter co — proposed: 05 / 10 / 1993; listed: -; construction completed: -
+
+4) Direct test of “proposed in 1993 AND listed in 1993”
+- SQL:
+SELECT COUNT(*) AS count FROM public.list_of_superfund_sites_in_mississippi WHERE "proposed" LIKE '%1993%' AND "listed" LIKE '%1993%';
+- Result: 0.
+- SQL:
+SELECT "cerclis id", "name", "county", "proposed", "listed", "construction completed", "partially deleted", "deleted" FROM public.list_of_superfund_sites_in_mississippi WHERE "proposed" LIKE '%1993%' AND "listed" LIKE '%1993%';
+- Result: no rows.
+
+5) Count of projects proposed in 1993 and never completed
+- SQL:
+SELECT count(*) AS count_rows
+FROM public.list_of_superfund_sites_in_mississippi
+WHERE proposed LIKE '%1993%'
+  AND "construction completed" = '-';
+- Result: 2.
+- SQL:
+SELECT "name", "listed", proposed, "construction completed"
+FROM public.list_of_superfund_sites_in_mississippi
+WHERE proposed LIKE '%1993%'
+  AND "construction completed" = '-';
+- Results confirm both have listed = '-' (not listed) and construction completed = '-'.
+
+Findings
+- True: There are exactly 2 projects proposed in 1993 that were never completed (construction completed = “-”).
+- False: None of the projects were listed in 1993; in fact, the two 1993-proposed sites were not listed at all (listed = “-”).
+
+Conclusion
+- The claim that “2 of the project [were] proposed and listed during 1993, but [were] never complete” is not supported as stated. The correct statement is: Two projects were proposed in 1993 and were never completed, but they were not listed in 1993 (nor listed at all in this dataset).
+
+Assumptions made
+- “Project” refers to rows in public.list_of_superfund_sites_in_mississippi (Superfund sites in Mississippi).
+- “-” in date fields denotes “no date” (e.g., not listed / not completed).
+- “During 1993” interpreted as the text field containing the substring “1993”.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

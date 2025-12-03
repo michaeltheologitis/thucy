@@ -1,0 +1,62 @@
+
+<userQuery>
+<query>
+less than half the 1984 - 1985 season game be play in the boston garden
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Less than half the 1984–1985 season games were played in the Boston Garden.”
+
+Step 1 — Discover available data
+- Finding: A single relevant table exists in the public schema that appears to cover the Boston Celtics’ 1984–85 season.
+- SQL (list public tables):
+  SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';
+- Result: t_1984_85_boston_celtics_season
+
+Step 2 — Inspect table structure
+- SQL (list columns for candidate tables):
+  SELECT table_name, column_name, data_type FROM information_schema.columns WHERE table_name ILIKE '%celtics%' OR table_name ILIKE '%boston%' OR table_name ILIKE '%nba%' OR table_name ILIKE '%season%' OR table_name LIKE '%1984%' OR table_name LIKE '%1985%';
+- Result (columns for public.t_1984_85_boston_celtics_season):
+  - game (bigint)
+  - date (text)
+  - opponent (text)
+  - score (text)
+  - location (text)
+  - record (text)
+
+Step 3 — Count total games and games at Boston Garden
+- SQL (total games):
+  SELECT COUNT(*) AS total_games FROM public.t_1984_85_boston_celtics_season;
+- Result: 14
+
+- SQL (games at Boston Garden):
+  SELECT COUNT(*) AS garden_games FROM public.t_1984_85_boston_celtics_season WHERE LOWER(location) LIKE '%boston garden%';
+- Result: 8
+
+- SQL (distinct locations and counts for context):
+  SELECT location, COUNT(*) AS location_count FROM public.t_1984_85_boston_celtics_season GROUP BY location;
+- Result:
+  - boston garden: 8
+  - the omni: 1
+  - hartford civic center: 1
+  - brendan byrne arena: 1
+  - market square arena: 1
+  - madison square garden: 1
+  - the spectrum: 1
+
+- Calculation (share of games at Boston Garden): 8 / 14 ≈ 57.14%
+
+Conclusion
+- The available season table shows that approximately 57.14% of the listed 1984–85 games were played at Boston Garden. This is more than half, not less. Therefore, the claim is contradicted by the data.
+
+Assumptions
+- “Season games” refers to the games listed in public.t_1984_85_boston_celtics_season.
+- The “location” field accurately reflects the game venue; case-insensitive matching reliably identifies “Boston Garden.”
+- No other season tables for 1984–85 exist in the accessible data beyond the identified one, which is treated as authoritative per instructions.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

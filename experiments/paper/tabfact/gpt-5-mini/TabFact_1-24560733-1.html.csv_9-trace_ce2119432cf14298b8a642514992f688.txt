@@ -1,0 +1,45 @@
+
+<userQuery>
+<query>
+the most the wildcat outscore an opponent be by 26 point
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “The most the Wildcats outscored an opponent was by 26 points.” Interpreted within the available data as referring to the 1947 Kentucky Wildcats football team (the only accessible ‘Wildcats’ dataset).
+
+Data source discovery:
+- Available database: TabFact
+- Schema: public
+- Relevant table: public.t_1947_kentucky_wildcats_football_team (columns: game, date, opponent, result, "wildcats points", opponents, record)
+
+Evidence:
+1) Find the maximum point differential (Wildcats points − Opponents points)
+SQL:
+SELECT MAX("wildcats points" - opponents) AS max_diff FROM public.t_1947_kentucky_wildcats_football_team;
+Result:
+[{"max_diff": 36}]
+
+2) List the game(s) where this maximum occurred
+SQL:
+SELECT date, opponent, "wildcats points", opponents, ("wildcats points" - opponents) AS diff
+FROM public.t_1947_kentucky_wildcats_football_team
+WHERE ("wildcats points" - opponents) = (
+  SELECT MAX("wildcats points" - opponents) FROM public.t_1947_kentucky_wildcats_football_team
+)
+ORDER BY date;
+Result:
+[{"date": "nov 15", "opponent": "evansville", "wildcats points": 36, "opponents": 0, "diff": 36}]
+
+Conclusion:
+- The largest victory margin in this dataset is 36 points (36–0 vs Evansville on Nov 15), not 26 points. The claim is contradicted by the data.
+
+Assumptions:
+- “Wildcats” refers to the 1947 Kentucky Wildcats football team because this is the only relevant ‘Wildcats’ dataset available via the connected data source.
+- Dates and team naming are used as stored in the table.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

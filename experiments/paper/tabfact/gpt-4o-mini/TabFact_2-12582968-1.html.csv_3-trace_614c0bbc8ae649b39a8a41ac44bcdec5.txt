@@ -1,0 +1,51 @@
+
+<userQuery>
+<query>
+4 of the competition out of 10 be world wide championship
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of finding:
+- The claim is interpreted as: "4 out of 10 competitions are world(-wide) championships."
+- Using the available TabFact database (public schema, table: luk_melich), there are exactly 10 competition entries, and 4 of them include the word "World" in the competition name (3 World Championships + 1 World Junior Championships).
+
+Data source and schema context:
+- Database: TabFact
+- Schema: public
+- Table: luk_melich(year bigint, competition text, venue text, position text, notes text)
+
+Evidence and executed SQL:
+1) Total number of competitions (rows)
+- Result: 10
+- SQL:
+  SELECT COUNT(*) AS total_rows FROM public.luk_melich;
+
+2) Count of competitions that are world(-level) championships (competition contains the word "World")
+- Result: 4
+- SQL:
+  SELECT COUNT(*) AS total_count
+  FROM luk_melich
+  WHERE competition ILIKE '%World%';
+
+3) Breakdown of which competitions contained "World"
+- Result:
+  - world championships: 3
+  - world junior championships: 1
+- SQL:
+  SELECT competition, COUNT(*) AS count
+  FROM luk_melich
+  WHERE competition ILIKE '%World%'
+  GROUP BY competition;
+
+Conclusion:
+- The data shows 10 total competition entries, of which 4 contain "World" in the competition title. This supports the claim that 4 out of 10 are world(-wide) championships.
+
+Assumptions made:
+- "world wide championship" is interpreted as competitions whose names contain the word "World", including both senior and junior world championships. Other global events like the Olympic Games are not counted as "world championships" unless the competition name explicitly includes "World".
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

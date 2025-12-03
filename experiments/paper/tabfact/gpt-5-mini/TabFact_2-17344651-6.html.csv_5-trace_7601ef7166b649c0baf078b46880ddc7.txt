@@ -1,0 +1,100 @@
+
+<userQuery>
+<query>
+the boston celtic lose more game than they win in the 1984 - 1985 season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the boston celtic lose more game than they win in the 1984 - 1985 season.”
+
+Summary of approach
+- Discovered available data sources and examined the database schema.
+- Identified a table containing game-by-game data for a portion of the Boston Celtics’ 1984–85 season (games 33–46).
+- Used this table to compute the team’s record as of the last game present and to tally wins/losses across the rows available.
+
+What data is available?
+- One table in the public schema holds a slice of the 1984–85 season for the Boston Celtics (games 33 through 46). It includes a running “record” after each game and per-game scores.
+
+Evidence and executed SQL
+1) List of tables and relevant structure
+- Tool result: public.t_1984_85_boston_celtics_season with columns: game (bigint), date (text), opponent (text), score (text), location (text), record (text).
+
+2) Sample rows to understand formats
+SQL:
+SELECT game, date, opponent, score, location, record
+FROM public.t_1984_85_boston_celtics_season
+LIMIT 10;
+Result (excerpt):
+1) 33 | wed jan 2  | new jersey nets     | 110 - 95 | brendan byrne arena | 27 - 6
+2) 34 | fri jan 4  | new york knicks     | 105 - 94 | boston garden       | 28 - 6
+...
+10) 42 | wed jan 23 | seattle supersonics | 97 - 107 | boston garden       | 34 - 8
+Observations: “score” is “points_for - points_against”; “record” is “wins - losses” after that game.
+
+3) How many rows are in this table, and which game numbers does it cover?
+SQL:
+SELECT COUNT(*) AS total_rows FROM public.t_1984_85_boston_celtics_season;
+SELECT MIN(game) AS min_game FROM public.t_1984_85_boston_celtics_season;
+SELECT MAX(game) AS max_game FROM public.t_1984_85_boston_celtics_season;
+Results:
+- total_rows: 14
+- min_game: 33
+- max_game: 46
+Interpretation: This table covers only a midseason slice (games 33–46), not the entire season.
+
+4) The latest (highest-numbered) game’s record in this table
+SQL:
+SELECT * FROM public.t_1984_85_boston_celtics_season ORDER BY game DESC LIMIT 1;
+Result:
+{"date":"wed jan 30","game":46,"location":"the spectrum","opponent":"philadelphia 76ers","record":"37 - 9","score":"104 - 122"}
+
+5) Parse the record at the latest game to numeric wins/losses
+SQL:
+SELECT game, record,
+       regexp_replace(record, '\\s*-\\s*', '-') AS record_normalized,
+       split_part(regexp_replace(record, '\\s*-\\s*', '-'), '-', 1)::int AS wins,
+       split_part(regexp_replace(record, '\\s*-\\s*', '-'), '-', 2)::int AS losses
+FROM public.t_1984_85_boston_celtics_season
+ORDER BY game DESC
+LIMIT 1;
+Result:
+{"game":46, "record":"37 - 9", "record_normalized":"37 - 9", "wins":37, "losses":9}
+Interpretation: As of game 46 (Jan 30), the Celtics were 37–9 (far more wins than losses).
+
+6) Cross-check: wins and losses across the rows present (by parsing scores)
+SQL:
+WITH parsed AS (
+  SELECT *,
+    (regexp_matches(score, '(\d+)\\s*-\\s*(\d+)'))[1]::int AS cscore,
+    (regexp_matches(score, '(\d+)\\s*-\\s*(\d+)'))[2]::int AS oscore
+  FROM public.t_1984_85_boston_celtics_season
+  WHERE score ~ '\\d+\\s*-\\s*\\d+'
+)
+SELECT count(*) AS total_games,
+  sum(CASE WHEN cscore>oscore THEN 1 ELSE 0 END) AS wins,
+  sum(CASE WHEN cscore<oscore THEN 1 ELSE 0 END) AS losses
+FROM parsed;
+Results:
+- total_games: 14
+- wins: 11
+- losses: 3
+Interpretation: Across the 14 rows present in the table, the team won many more games than it lost.
+
+Conclusion
+- The available data (covering games 33–46 of the 1984–85 season) shows the Boston Celtics at 37–9 as of Jan 30 and 11–3 across the parsed rows—clearly more wins than losses in this span.
+- The table does not contain the entire 1984–85 season, so we cannot compute the full-season record from this dataset alone. However, within the portion we can observe, the evidence contradicts the claim that they “lose more game than they win.” There is no support in the available data for the claim.
+
+Verdict rationale
+- Given the limited coverage (only a midseason slice), the claim about the entire season cannot be fully adjudicated from this dataset. Nevertheless, the portion of the season we can observe directly contradicts the claim.
+
+Assumptions
+- The claim refers to the Boston Celtics’ regular season record.
+- We relied solely on the available table (games 33–46) in the TabFact public schema, which is authoritative within its scope but does not cover the full season.
+- Where necessary, text fields were parsed using standard PostgreSQL string functions to derive numeric values.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

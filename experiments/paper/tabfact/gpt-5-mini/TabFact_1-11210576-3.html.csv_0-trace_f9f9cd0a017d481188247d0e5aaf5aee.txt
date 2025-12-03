@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+christian de la fuente 's duration be 02x03 - 03x05
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “christian de la fuente’s duration be 02x03 - 03x05.”
+
+Data source explored:
+- Database: postgres_tabfact21 (schema: public)
+- Table: public.list_of_csi_miami_characters (columns include: character, actor, first episode, final episode, duration, final episode count)
+
+Evidence gathered:
+1) Locate any entries for actors with last name “de la Fuente”
+Executed SQL:
+SELECT character, actor, "first episode", "final episode", duration
+FROM public.list_of_csi_miami_characters
+WHERE actor ILIKE '%Fuente%' OR actor ILIKE '%de la Fuente%';
+Result:
+- character: sam belmontes; actor: christian de la fuente; first episode: hard time; final episode: legal; duration: 02x03 - 03x05
+
+2) Confirm the exact “christian de la fuente” entry
+Executed SQL:
+SELECT "character", actor, duration
+FROM public.list_of_csi_miami_characters
+WHERE actor ILIKE '%christian%fuente%'
+   OR actor ILIKE '%cristi%n%fuente%';
+Result:
+- character: sam belmontes; actor: christian de la fuente; duration: 02x03 - 03x05
+
+3) Retrieve full row for final confirmation
+Executed SQL:
+SELECT * FROM public.list_of_csi_miami_characters WHERE actor ILIKE 'christian de la fuente';
+Result (one row):
+- actor: christian de la fuente
+- character: sam belmontes
+- position: trace technician
+- first episode: hard time
+- final episode: legal
+- duration: 02x03 - 03x05
+- final episode count: 7
+
+Conclusion:
+- The database entry for actor “christian de la fuente” shows duration = “02x03 - 03x05.” This directly matches the claim.
+
+Assumptions:
+- “Duration” refers to the episode range (season x episode) for the actor’s appearances in the CSI: Miami dataset represented by public.list_of_csi_miami_characters.
+- The claim pertains to CSI: Miami, as that is the available authoritative data source containing this actor’s entry.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

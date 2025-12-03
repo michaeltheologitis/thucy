@@ -1,0 +1,89 @@
+
+<userQuery>
+<query>
+the most point score by the dolphin in a game be 38
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “The most points scored by the Miami Dolphins in a single game is 38.” I verified this against the available data in the TabFact database, which contains a table for the 1983 Miami Dolphins season.
+
+Data source explored
+- Database: TabFact (public schema)
+- Relevant table: public.t_1983_miami_dolphins_season (week, date, opponent, result, attendance)
+
+Step 1 — Inspect the table and the result format
+Executed SQL:
+SELECT * FROM public.t_1983_miami_dolphins_season ORDER BY week ASC LIMIT 15;
+
+Key observed rows (showing the result format “w 34 - 24”, “l 27 - 14”, etc.):
+1) week: 1, date: "september 4 , 1983", opponent: "buffalo bills", result: "w 12 - 0", attendance: 78715
+2) week: 2, date: "september 11 , 1983", opponent: "new england patriots", result: "w 34 - 24", attendance: 59343
+3) week: 3, date: "september 19 , 1983", opponent: "los angeles raiders", result: "l 27 - 14", attendance: 57796
+...
+15) week: 15, date: "december 10 , 1983", opponent: "atlanta falcons", result: "w 31 - 24", attendance: 56725
+
+Observation: The result field uses a leading “w”/“l” followed by two numbers separated by “ - ”. For wins, the Dolphins’ score is the left number; for losses, it is the right number.
+
+Step 2 — Compute Dolphins points per game and order by points
+Executed SQL:
+SELECT week, date, opponent, result,
+CASE
+ WHEN lower(result) LIKE 'w%' THEN CAST(regexp_replace(split_part(result,'-',1), '[^0-9]', '', 'g') AS integer)
+ WHEN lower(result) LIKE 'l%' THEN CAST(regexp_replace(split_part(result,'-',2), '[^0-9]', '', 'g') AS integer)
+ ELSE NULL END AS dolphins_points
+FROM public.t_1983_miami_dolphins_season
+ORDER BY dolphins_points DESC;
+
+Result excerpt (top values):
+- week 13 | november 28 , 1983 | cincinnati bengals | w 38 - 14 | dolphins_points = 38
+- week 12 | november 20 , 1983 | baltimore colts    | w 37 - 0  | dolphins_points = 37
+- week 6  | october 9 , 1983    | buffalo bills      | l 38 - 35 | dolphins_points = 35
+- week 2  | september 11 , 1983 | new england patriots | w 34 - 24 | dolphins_points = 34
+- week 16 | december 16 , 1983  | new york jets      | w 34 - 14 | dolphins_points = 34
+(… remaining games follow at lower point totals)
+
+Step 3 — Compute the maximum Dolphins points in a single game and identify the game(s)
+Executed SQL (max value):
+SELECT MAX(
+  CASE
+    WHEN lower(result) LIKE 'w%' THEN (split_part(regexp_replace(result,'[^0-9\-]','','g'), '-', 1))::int
+    ELSE (split_part(regexp_replace(result,'[^0-9\-]','','g'), '-', 2))::int
+  END
+) AS max_dolphins_points
+FROM public.t_1983_miami_dolphins_season;
+
+Returned value:
+- max_dolphins_points = 38
+
+Executed SQL (locate games at this maximum):
+SELECT week, date, opponent, result,
+  CASE
+    WHEN lower(result) LIKE 'w%' THEN (split_part(regexp_replace(result,'[^0-9\-]','','g'), '-', 1))::int
+    ELSE (split_part(regexp_replace(result,'[^0-9\-]','','g'), '-', 2))::int
+  END AS dolphins_points
+FROM public.t_1983_miami_dolphins_season
+WHERE (CASE
+    WHEN lower(result) LIKE 'w%' THEN (split_part(regexp_replace(result,'[^0-9\-]','','g'), '-', 1))::int
+    ELSE (split_part(regexp_replace(result,'[^0-9\-]','','g'), '-', 2))::int
+  END) = 38
+ORDER BY week;
+
+Returned row:
+- week: 13, date: november 28 , 1983, opponent: cincinnati bengals, result: w 38 - 14, dolphins_points: 38
+
+Conclusion
+- Based on the available data for the 1983 Miami Dolphins season, the maximum points scored by the Dolphins in a single game that season is 38 (Week 13 vs. Cincinnati Bengals, 38–14).
+
+Verdict and scope
+- Within the scope of the available data (1983 season), the claim is supported.
+
+Assumptions
+- The claim was interpreted within the scope of the available dataset (1983 Miami Dolphins season), as no broader franchise-wide data was accessible.
+- Parsing logic: for entries beginning with ‘w’, Dolphins points are the left score; for entries beginning with ‘l’, Dolphins points are the right score. This is consistent with standard team-season table conventions and aligned with the data format observed.
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

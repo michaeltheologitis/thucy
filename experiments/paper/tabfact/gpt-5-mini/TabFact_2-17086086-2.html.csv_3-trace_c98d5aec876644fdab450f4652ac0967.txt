@@ -1,0 +1,46 @@
+
+<userQuery>
+<query>
+9 july 1990 be the date the opponent in the final be katerina maleeva
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: On 9 July 1990, the opponent in the final was Katerina Maleeva.
+
+Data source discovery
+- Database: postgres_tabfact19
+- Schema: public
+- Table: isabel_cueto
+  - Columns: date (text), tournament (text), surface (text), opponent in the final (text), score (text)
+
+Evidence
+1) Check the entry for date = 9 July 1990
+- Executed SQL:
+  SELECT tournament, surface, "opponent in the final", score
+  FROM public.isabel_cueto
+  WHERE lower(date) = lower('9 July 1990');
+- Result: tournament = "palermo , italy"; surface = "clay"; opponent in the final = "barbara paulus"; score = "6 - 2 , 6 - 3"
+- Interpretation: On 9 July 1990, the opponent in the final recorded in this dataset was Barbara Paulus, not Katerina Maleeva.
+
+2) Check whether Katerina Maleeva appears as an opponent in any final in this dataset
+- Executed SQL (to see exact stored names):
+  SELECT DISTINCT "opponent in the final" FROM public.isabel_cueto ORDER BY 1 LIMIT 200;
+- Distinct opponents include: barbara paulus, katerina maleeva, laura golarsa, sandra cecchini
+
+- Executed SQL (filter for Katerina Maleeva):
+  SELECT date, tournament, surface, score FROM public.isabel_cueto WHERE "opponent in the final" = 'katerina maleeva';
+- Result: date = "31 july 1989"; tournament = "sofia , bulgaria"; surface = "clay"; score = "6 - 2 , 7 - 6 (3)"
+- Interpretation: Katerina Maleeva is listed as an opponent in the final on 31 July 1989, not on 9 July 1990.
+
+Conclusion
+- The dataset shows that on 9 July 1990, the opponent in the final was Barbara Paulus. Katerina Maleeva appears as an opponent in a final on 31 July 1989. Therefore, the claim is contradicted by the data.
+
+Assumptions
+- The claim refers to the information recorded in the available isabel_cueto table and uses the date formatting as stored (text).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

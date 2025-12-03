@@ -1,0 +1,44 @@
+
+<userQuery>
+<query>
+the candidate be john j phillips (r) 57.6% n e west (d) 42.4%
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "the candidate be john j phillips (r) 57.6% n e west (d) 42.4%"
+
+Data sources explored:
+- PostgreSQL instance TabFact (postgres_tabfact7), table: public.united_states_house_of_representatives_elections_1942
+- Table columns: district, incumbent, party, first elected, result, candidates (all text)
+
+Findings:
+- The 1942 U.S. House election dataset contains an entry where the candidates field exactly matches the claim’s text, associated with California’s 22nd district. This records John J. Phillips (R) at 57.6% and N. E. West (D) at 42.4%.
+
+Executed SQL and results (evidence):
+SQL:
+SELECT district, candidates, result
+FROM united_states_house_of_representatives_elections_1942
+WHERE candidates ILIKE '%John J. Phillips%'
+   OR candidates ILIKE '%John J Phillips%'
+   OR candidates ILIKE '%N. E. West%'
+   OR candidates ILIKE '%N.E. West%'
+   OR candidates ILIKE '%N E West%';
+
+Result:
+- district: california 22
+  candidates: john j phillips (r) 57.6% n e west (d) 42.4%
+  result: new seat republican gain
+
+Conclusion:
+- The claim is fully supported by the 1942 House elections data for California’s 22nd district.
+
+Assumptions:
+- The claim refers to the 1942 U.S. House of Representatives race recorded in the available dataset.
+- Case and punctuation normalization are acceptable (the dataset stores names in lowercase without periods in one instance).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

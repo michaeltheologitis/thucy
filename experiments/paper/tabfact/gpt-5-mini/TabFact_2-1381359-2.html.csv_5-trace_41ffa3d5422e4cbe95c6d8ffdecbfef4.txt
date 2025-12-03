@@ -1,0 +1,52 @@
+
+<userQuery>
+<query>
+2010 - 11 detail season have a runner - up of tokai , and a title of 47th
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “2010 - 11 detail season have a runner - up of tokai, and a title of 47th.”
+
+Data source discovery:
+- Connected source: TabFact Postgres database (postgres_tabfact17)
+- Relevant table: public.all_japan_university_rugby_championship
+  - Columns: title (text), season (text), winner (text), score (text), "runner - up" (text), venue (text), attendance (text)
+
+Evidence and executed SQL:
+1) Locate the 2010–11 season entry and check title and runner-up
+SQL:
+SELECT season, title, "runner - up" FROM public.all_japan_university_rugby_championship WHERE season LIKE '%2010%';
+Result:
+- season: 2010 - 11 details
+- title: 47th
+- runner - up: waseda
+
+2) Confirm exact match on the season string
+SQL:
+SELECT title, "runner - up" FROM public.all_japan_university_rugby_championship WHERE season = '2010 - 11 details';
+Result:
+- title: 47th
+- runner - up: waseda
+
+3) Check whether any season lists Tokai as runner-up (context for potential confusion)
+SQL:
+SELECT season, title, winner, "runner - up", score FROM public.all_japan_university_rugby_championship WHERE "runner - up" ILIKE '%tokai%';
+Result:
+- season: 2009 - 10 details; title: 46th; winner: teikyo; runner - up: tokai; score: 14 - 13
+
+Assessment:
+- Title for 2010 - 11: 47th — Supported by the data.
+- Runner-up for 2010 - 11: Tokai — Contradicted by the data (runner-up is Waseda). Tokai was runner-up in 2009 - 10 (46th), not in 2010 - 11.
+
+Conclusion: The claim mixes one correct detail (title = 47th) with an incorrect one (runner-up = Tokai). Overall, it is not fully accurate.
+
+Assumptions:
+- Interpreted “2010 - 11 detail season” as the row with season value “2010 - 11 details” in the table.
+- Used case-insensitive match for searching runner-up values containing “Tokai.”
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

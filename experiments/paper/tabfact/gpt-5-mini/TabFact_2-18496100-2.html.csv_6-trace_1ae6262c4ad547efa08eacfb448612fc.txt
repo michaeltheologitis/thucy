@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+mehgaon tie with datia to have the highest number of electorate in 2009
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The statement says that “Mehgaon tie with Datia to have the highest number of electorate in 2009.” I verify this against the available electoral dataset.
+
+Data source explored:
+- Database: TabFact (public schema)
+- Relevant table: bhind_lok_sabha_constituency
+  - Key columns: name, district, number of electorates (2009), etc.
+
+Evidence collected:
+1) Full constituency list with 2009 electorate counts (excluding the aggregate total row), sorted high→low
+- SQL executed:
+  SELECT "constituency number", "name", "number of electorates (2009)" FROM bhind_lok_sabha_constituency WHERE "constituency number" != 'total :' AND "name" != 'total :' ORDER BY "number of electorates (2009)" DESC;
+- Returned (top to bottom):
+  - mehgaon — 210649
+  - lahar — 205839
+  - bhind — 197183
+  - ater — 177334
+  - gohad — 166893
+  - datia — 143593
+  - bhander — 139600
+  - sewda — 130161
+
+2) Maximum electorate count and which constituency(ies) have it
+- SQL executed to get max (excluding aggregate/total rows):
+  SELECT MAX("number of electorates (2009)") AS max_electorates
+  FROM public.bhind_lok_sabha_constituency
+  WHERE "constituency number" ~ '^[0-9]+' AND "number of electorates (2009)" IS NOT NULL;
+- Result: 210649
+- SQL executed to list constituency(ies) at that maximum:
+  SELECT "constituency number", "name", "reserved for ( sc / st / none)", "district", "number of electorates (2009)"
+  FROM public.bhind_lok_sabha_constituency
+  WHERE "constituency number" ~ '^[0-9]+'
+    AND "number of electorates (2009)" = 210649;
+- Result: constituency number 12; name: mehgaon; district: bhind; reserved: none; electorate (2009): 210649.
+
+3) Direct comparison of Mehgaon and Datia electorate counts (2009)
+- SQL executed:
+  SELECT "name", "number of electorates (2009)" FROM public.bhind_lok_sabha_constituency WHERE lower("name") IN ('mehgaon','datia');
+- Results:
+  - mehgaon: 210649
+  - datia: 143593
+
+Conclusion:
+- Mehgaon has the highest electorate count in 2009 with 210,649.
+- Datia has 143,593, which is significantly lower and not tied with Mehgaon. There is no tie for the highest; Mehgaon stands alone at the top.
+
+Answer: The claim is not supported by the data.
+
+Assumptions made:
+- “Highest number of electorate in 2009” refers to the column “number of electorates (2009)” in the bhind_lok_sabha_constituency table.
+- Aggregate/total rows (where fields equal 'total :') are excluded from constituency comparisons.
+- Name matching is case-insensitive (e.g., 'mehgaon' vs 'Mehgaon').
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

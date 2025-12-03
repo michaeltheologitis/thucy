@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+the city of license for w282ae be albany , georgia and the city of license for w290ag be gadsden , alabama
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify
+- “The city of license for W282AE is Albany, Georgia, and the city of license for W290AG is Gadsden, Alabama.”
+
+Data source discovery and schema
+- Discovered data source: TabFact PostgreSQL database (public schema).
+- Relevant table: public.wyfk
+  - Columns: "call sign" (text), "frequency mhz" (text), "city of license" (text), "erp w" (bigint), "class" (text), "fcc info" (text)
+
+Evidence collected
+1) Inspect table contents to see available call signs and cities of license
+- Executed SQL:
+  SELECT "call sign", "city of license" FROM public.wyfk;
+- Returned rows (excerpt relevant to this claim):
+  - w282ae | macon , georgia
+  - w290ag | griffin , georgia
+
+2) Directly fetch the two specified call signs (case-insensitive match)
+- Executed SQL:
+  SELECT "call sign", "city of license" FROM public.wyfk WHERE lower("call sign") IN ('w282ae','w290ag');
+- Results:
+  - call sign: w282ae, city of license: macon , georgia
+  - call sign: w290ag, city of license: griffin , georgia
+
+3) Context check: which records have Albany or Gadsden as city of license
+- Executed SQL:
+  SELECT "call sign", "city of license" FROM public.wyfk WHERE lower("city of license") LIKE '%albany%' OR lower("city of license") LIKE '%gadsden%';
+- Results:
+  - w230av — gadsden , alabama
+  - w273ae — albany , georgia
+
+Findings
+- W282AE is listed with city of license “macon , georgia,” not Albany, Georgia.
+- W290AG is listed with city of license “griffin , georgia,” not Gadsden, Alabama.
+- Albany, Georgia and Gadsden, Alabama do appear in the dataset, but for different call signs (w273ae and w230av, respectively).
+
+Conclusion
+- The claim is contradicted by the data in the authoritative source available.
+
+Assumptions
+- Call signs in the database are stored lowercase; queries used lower(...) to match provided uppercase inputs.
+- City names and punctuation are reported exactly as stored (e.g., spacing before commas).
+
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

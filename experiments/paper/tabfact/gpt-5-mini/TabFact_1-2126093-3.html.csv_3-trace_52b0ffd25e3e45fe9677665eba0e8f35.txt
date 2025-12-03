@@ -1,0 +1,63 @@
+
+<userQuery>
+<query>
+the win score of the vernal ladies tornament be set in sept 2006 at 203
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “The winning score of the Vernal Ladies tournament was set in September 2006 at 203.”
+
+Data source discovery and scope:
+- Available database: TabFact (public schema)
+- Relevant table: public.ai_miyazato (columns include: date, tournament, winning score, to par, margin of victory, runner(s)-up)
+
+What I checked:
+1) Whether there is a “Vernal Ladies” tournament entry, and what its winning score and date are.
+2) Whether any “Vernal Ladies” entry exists in 2006, specifically September 2006.
+
+Evidence and executed SQL:
+- Query A: Find any rows for tournaments containing “Vernal”
+  SQL:
+  SELECT * FROM public.ai_miyazato WHERE tournament ILIKE '%Vernal%';
+  Result:
+  - no: 7
+  - date: 15 may 2005
+  - tournament: vernal ladies
+  - winning score: 69 + 64 + 70 = 203
+  - to par: - 13
+  - margin of victory: 8 strokes
+  - runner (s) - up: akiko fukushima
+
+- Query B: Count rows exactly matching “Vernal Ladies”
+  SQL:
+  SELECT count(*) FROM public.ai_miyazato WHERE tournament ILIKE '%Vernal Ladies%';
+  Result: 1
+
+- Query C: Check for any “Vernal Ladies” entry in 2006
+  SQL:
+  SELECT * FROM public.ai_miyazato WHERE tournament ILIKE '%Vernal Ladies%' AND date ILIKE '%2006%';
+  Result: no rows returned
+
+- Query D: Check specifically for September 2006
+  SQL:
+  SELECT * FROM public.ai_miyazato WHERE tournament ILIKE '%Vernal Ladies%' AND (date ILIKE '%September%2006%' OR date ILIKE '%Sept%2006%' OR date ILIKE '%sep%2006%');
+  Result: no rows returned
+
+Findings:
+- The database shows a “Vernal Ladies” tournament with a winning score of 203, but the date is 15 May 2005, not September 2006.
+- There are no entries indicating a “Vernal Ladies” event in 2006 or in September 2006.
+
+Conclusion:
+- The “203” winning score for the Vernal Ladies tournament is supported by the data.
+- The timing (“September 2006”) is contradicted by the data, which shows the event dated 15 May 2005.
+
+Assumptions:
+- The claim refers to the “Vernal Ladies” tournament as listed in the ai_miyazato table of the TabFact database, treated as authoritative for this verification.
+- Dates are stored as free-form text in this dataset; I used case-insensitive substring matches (ILIKE) to identify year/month references.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,60 @@
+
+<userQuery>
+<query>
+there be only 1 game play on may 20
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "there be only 1 game play on may 20"
+
+Data discovery:
+- Available source: TabFact (public schema)
+- Relevant table: public.t_2005_texas_rangers_season
+
+Schema check (summary):
+- Columns: date (text), winning team (text), score (text), winning pitcher (text), losing pitcher (text), attendance (bigint), location (text)
+- Date is stored as text in the format "month day" (no year)
+
+Evidence collection:
+1) Understand date formatting
+Executed SQL:
+SELECT DISTINCT date FROM public.t_2005_texas_rangers_season LIMIT 20;
+Result (sample): may 21; may 22; june 25; may 20; june 24
+
+Executed SQL:
+SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE date ~ '^[A-Za-z]+ [0-9]{1,2}$') AS match_simple_format FROM public.t_2005_texas_rangers_season;
+Result: total = 5; match_simple_format = 5
+
+2) Count games on May 20
+Executed SQL:
+SELECT COUNT(*) AS games_on_may_20
+FROM public.t_2005_texas_rangers_season
+WHERE date ILIKE '%May 20%';
+Result: games_on_may_20 = 1
+
+3) Retrieve details for May 20
+Executed SQL:
+SELECT date, "winning team", score, "winning pitcher", "losing pitcher", attendance, location
+FROM public.t_2005_texas_rangers_season
+WHERE date ILIKE '%May 20%';
+Result row:
+- date: "may 20"
+- winning team: "texas"
+- score: "7 - 3"
+- winning pitcher: "kenny rogers"
+- losing pitcher: "brandon backe"
+- attendance: 38109
+- location: "arlington"
+
+Conclusion:
+- The dataset shows exactly 1 game recorded on "may 20" in the 2005 Texas Rangers season table. This supports the claim as interpreted within this data source.
+
+Assumptions:
+- The claim refers to the games recorded in public.t_2005_texas_rangers_season (2005 Texas Rangers season). The "date" entries are month-day strings without a year; by table context, they correspond to 2005 dates.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

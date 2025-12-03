@@ -1,0 +1,47 @@
+
+<userQuery>
+<query>
+2 viral family have a complex virion shape
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “2 viral family have a complex virion shape.”
+
+Data source discovery:
+- Available database: TabFact (postgres_tabfact15), schema: public
+- Relevant table identified: public.viral_disease
+  - Columns: family (text), baltimore group (text), envelopment (text), virion shape (text), replication site (text)
+
+Evidence gathered:
+1) Distinct families where virion shape contains “complex” (case-insensitive)
+- Result:
+  - herpesviridae — complex
+  - poxviridae — complex
+- Executed SQL:
+  SELECT DISTINCT family, "virion shape"
+  FROM public.viral_disease
+  WHERE "virion shape" IS NOT NULL
+    AND LOWER("virion shape") LIKE '%complex%'
+  ORDER BY family;
+
+2) Count of distinct families with virion shape described as complex
+- Result: 2
+- Executed SQL:
+  SELECT COUNT(DISTINCT family) AS num_families
+  FROM public.viral_disease
+  WHERE "virion shape" IS NOT NULL
+    AND LOWER("virion shape") LIKE '%complex%';
+
+Conclusion:
+- The data show exactly two virus families recorded with a “complex” virion shape: Herpesviridae and Poxviridae. This supports the claim that 2 viral families have a complex virion shape.
+
+Assumptions:
+- “Complex virion shape” was operationalized as any virion shape value containing the substring “complex” (case-insensitive) in the virion shape field of public.viral_disease.
+- Families with NULL names (if any) would not be counted; none affected the result.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

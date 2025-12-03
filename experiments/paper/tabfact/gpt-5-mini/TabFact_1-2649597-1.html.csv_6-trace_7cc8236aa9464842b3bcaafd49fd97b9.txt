@@ -1,0 +1,70 @@
+
+<userQuery>
+<query>
+shane hall have an average finish of 33.39 between 1995 - 2008
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “shane hall have an average finish of 33.39 between 1995 - 2008.”
+
+Data sources discovered
+- Connected PostgreSQL database: postgres_tabfact18 (TabFact), schema: public.
+- Relevant table: public.shane_hall
+  - Columns: year (bigint), races (bigint), wins (bigint), poles (bigint), "top 5" (bigint), "top 10" (bigint), dnf (bigint), finish (double precision), start (double precision), winnings (bigint), "season rank" (text), "team (s)" (text).
+
+Evidence and computations
+1) Retrieve Shane Hall’s yearly finish values from 1995–2008
+- Executed SQL:
+  SELECT year, finish, (SELECT AVG(finish) FROM public.shane_hall WHERE year BETWEEN 1995 AND 2008) AS overall_avg
+  FROM public.shane_hall
+  WHERE year BETWEEN 1995 AND 2008
+  ORDER BY year;
+- Result (year | finish):
+  1995 | 24.0
+  1996 | 26.4
+  1997 | 27.1
+  1998 | 24.9
+  1999 | 25.8
+  2000 | 35.0
+  2001 | 27.9
+  2002 | 27.0
+  2003 | 35.8
+  2004 | 31.4
+  2005 | 40.9
+  2006 | 38.9
+  2008 | 43.0
+  Computed overall simple average (repeated on each row): 31.39230769230769
+
+2) Confirm counts of years and total races in the same range
+- Executed SQL:
+  SELECT COUNT(*) AS years_count, SUM(races) AS total_races
+  FROM public.shane_hall
+  WHERE year BETWEEN 1995 AND 2008;
+- Result: years_count = 13, total_races = 190
+
+3) Simple (unweighted) average finish across 1995–2008
+- Executed SQL:
+  SELECT AVG(finish) AS simple_avg
+  FROM public.shane_hall
+  WHERE year BETWEEN 1995 AND 2008;
+- Result: simple_avg = 31.39230769230769
+
+4) Races-weighted average finish across 1995–2008
+- Executed SQL:
+  SELECT SUM(finish * races)::double precision / NULLIF(SUM(races),0) AS weighted_avg
+  FROM public.shane_hall
+  WHERE year BETWEEN 1995 AND 2008;
+- Result: weighted_avg = 28.278947368421058
+
+Conclusion
+- The database shows Shane Hall’s simple average finish across 1995–2008 (inclusive, for years present) is approximately 31.39, and the races-weighted average is approximately 28.28. Both differ materially from the claimed 33.39. Therefore, the claim is not supported by the data.
+
+Assumptions/notes
+- “Between 1995–2008” is treated as inclusive and based on the rows present. The table does not include an entry for 2007; per SQL AVG semantics, only present years are included. If the claim refers to another series/scope or a different weighting method not reflected in this table, that could explain the discrepancy, but the accessible authoritative data do not support 33.39.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

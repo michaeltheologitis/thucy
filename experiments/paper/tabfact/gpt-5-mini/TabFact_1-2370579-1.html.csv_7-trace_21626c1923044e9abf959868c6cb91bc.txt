@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+on jul / aug 1966 , there 's somebody close behind you be film
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “on jul / aug 1966 , there 's somebody close behind you be film.” Interpreted as: the episode titled “there 's somebody close behind you” was filmed in Jul/Aug 1966.
+
+Data sources consulted
+- postgres_tabfact19 database (public schema). Relevant table: public.the_baron with columns: episode, prod, title, "directed by", "written by", originalairdate, filmed.
+
+Method
+- Identify the episode by title and retrieve its filming date.
+- Independently list all episodes whose filmed field indicates Jul/Aug 1966 to see what was filmed then.
+
+Evidence
+1) Locate episode(s) with “behind” in the title
+- Result: Episode 14, prod 111, title: there 's somebody close behind you; original air date: 28 december 1966; filmed: dec 1965.
+- Executed SQL:
+  SELECT episode, prod, title, originalairdate, filmed
+  FROM public.the_baron
+  WHERE title ILIKE '%behind%';
+
+2) Retrieve the full record for “there 's somebody close behind you”
+- Result confirms: filmed = dec 1965; directed by: roy baker; written by: terry nation and dennis spooner.
+- Executed SQL:
+  SELECT episode, prod, title, "directed by", "written by", originalairdate, filmed
+  FROM public.the_baron
+  WHERE lower(regexp_replace(title, '[^a-z0-9]+', '', 'g')) =
+        lower(regexp_replace('there ''s somebody close behind you', '[^a-z0-9]+', '', 'g'));
+
+3) List episodes filmed in Jul/Aug 1966
+- Results:
+  - Episode 15, prod 125, title: storm warning (part one), filmed: jul / aug 1966
+  - Episode 16, prod 126, title: the island (part two), filmed: jul / aug 1966
+  - Episode 22, prod 124, title: night of the hunter, filmed: jul 1966
+- Executed SQL:
+  SELECT episode, prod, title, filmed
+  FROM public.the_baron
+  WHERE filmed ILIKE '%jul 1966%' OR filmed ILIKE '%aug 1966%'
+  ORDER BY episode;
+
+Analysis
+- The episode titled “there 's somebody close behind you” (Episode 14) was filmed in Dec 1965, not in Jul/Aug 1966.
+- Jul/Aug 1966 filming pertains to other episodes (notably “storm warning (part one)” and “the island (part two)”), not to “there 's somebody close behind you.”
+
+Conclusion
+- The claim that “there 's somebody close behind you” was filmed in Jul/Aug 1966 is contradicted by the data. It was filmed in Dec 1965.
+
+Assumptions made
+- “be film” is interpreted as “was filmed.”
+- The claim refers to the TV series The Baron and the episode titled “there 's somebody close behind you,” matching the title stored in public.the_baron.title.
+- Filming month/year is taken from the public.the_baron.filmed field, which is treated as authoritative.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

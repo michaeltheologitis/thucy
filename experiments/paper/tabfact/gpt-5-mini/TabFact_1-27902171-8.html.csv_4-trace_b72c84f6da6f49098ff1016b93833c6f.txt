@@ -1,0 +1,46 @@
+
+<userQuery>
+<query>
+the date for score of w 112 - 91 be after march 19
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim interpreted: The game with the score string "W 112 - 91" occurred after March 19.
+- Finding: The only game in the available dataset with score "w 112 - 91" occurred on March 19 (not after).
+
+Data sources and schema inspected
+- Database: TabFact (PostgreSQL), schema public
+- Table: t_1991_92_seattle_supersonics_season (columns: game bigint, date text, team text, score text, high points text, high rebounds text, high assists text, location attendance text, record text)
+
+Evidence
+1) Sample rows to understand formats
+Executed SQL:
+SELECT game, date, team, score, "high points", "high rebounds", "high assists", "location attendance", record
+FROM public.t_1991_92_seattle_supersonics_season
+ORDER BY game
+LIMIT 10;
+Result excerpt shows:
+- game 67 | date: march 19 | team: houston rockets | score: w 112 - 91
+
+2) Exact match for the score "w 112 - 91" (case-insensitive)
+Executed SQL:
+SELECT game, date, team AS opponent_team, score
+FROM public.t_1991_92_seattle_supersonics_season
+WHERE lower(score) = 'w 112 - 91';
+Result:
+- game: 67, date: march 19, opponent team: houston rockets, score: w 112 - 91
+
+Conclusion
+- The dataset contains one instance of the score string "w 112 - 91", and its date is March 19. Therefore, it is not after March 19. The claim is contradicted by the data.
+
+Assumptions
+- The claim refers to the available dataset (1991–92 Seattle SuperSonics season table) and the score string formatting found therein.
+- "After March 19" is interpreted strictly as a date later than March 19 (not including March 19 itself).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

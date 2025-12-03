@@ -1,0 +1,72 @@
+
+<userQuery>
+<query>
+hanover in plymouth county intersects route 123
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The town of Hanover (in Plymouth County, MA) intersects Route 123 (i.e., Route 123 passes through or has an intersection within Hanover).
+
+Data sources discovered
+- One accessible PostgreSQL source (TabFact, schema public) with a single relevant table: public.massachusetts_route_139, which lists Route 139 segments and their intersecting roads by location and county.
+
+Evidence gathered
+1) Search for any Route 139 entries in Plymouth County that note an intersection with Route 123 and might indicate where that intersection occurs.
+Executed SQL:
+SELECT county, location, "street names", milepost, "roads intersected", notes
+FROM public.massachusetts_route_139
+WHERE (location ILIKE '%Hanover%' OR county ILIKE '%Plymouth%')
+  AND "roads intersected" ~* E'\\m(?:MA\\s*|Route\\s*)?123\\M';
+Results (2 rows, both in Plymouth County):
+- county: plymouth; location: rockland; street names: north avenue plain street market street; milepost: 12.2; roads intersected: route 123; notes: western terminus of route 123 / 139 concurrency
+- county: plymouth; location: rockland; street names: north avenue plain street market street; milepost: 12.8; roads intersected: route 123; notes: eastern terminus of route 123 / 139 concurrency
+Interpretation: In Plymouth County, Route 139 intersects Route 123 in Rockland, not Hanover.
+
+2) Check explicitly if any Route 139 entries in Hanover mention an intersection with Route 123.
+Executed SQL:
+SELECT county, location, "street names", milepost, "roads intersected", notes
+FROM public.massachusetts_route_139
+WHERE location ILIKE '%Hanover%'
+  AND "roads intersected" ~* E'\\m(?:MA\\s*|Route\\s*)?123\\M';
+Result: no rows returned.
+Interpretation: Within the Route 139 dataset, there is no record of a Route 123 intersection in Hanover.
+
+3) List what is recorded for Route 139 in Hanover to understand local intersections there.
+Executed SQL:
+SELECT county, location, "street names", milepost, "roads intersected", notes
+FROM public.massachusetts_route_139
+WHERE location ILIKE '%Hanover%'
+ORDER BY (CASE WHEN milepost ~ '^[0-9]+(\.[0-9]+)?$' THEN milepost::numeric ELSE NULL END) ASC, milepost ASC;
+Result (1 row):
+- county: plymouth; location: hanover; street names: hanover street rockland street columbia road; milepost: 17.9; roads intersected: route 53; notes: northern terminus of route 53 / 139 concurrency
+Interpretation: The Hanover entry for Route 139 shows an intersection with Route 53, not Route 123.
+
+4) For completeness, check whether Route 139 lists any Route 123 intersections in nearby Norwell (adjacent to Hanover).
+Executed SQL (count check):
+SELECT COUNT(*) AS match_count
+FROM public.massachusetts_route_139
+WHERE location ILIKE '%Norwell%'
+  AND "roads intersected" ILIKE '%Route 123%';
+Result: match_count = 0
+Executed SQL (retrieval attempt; no rows matched):
+SELECT county, location, milepost, "roads intersected", notes
+FROM public.massachusetts_route_139
+WHERE location ILIKE '%Norwell%'
+  AND "roads intersected" ILIKE '%Route 123%';
+Interpretation: The Route 123/139 intersection is not recorded in Norwell either; it is recorded in Rockland.
+
+Conclusion
+- The only available authoritative dataset logs Route 123 intersecting Route 139 in Rockland (Plymouth County) and does not show any Route 123 intersection in Hanover. While this does not categorically prove that Route 123 never enters Hanover, we found no supporting evidence that Hanover intersects Route 123 and some counterevidence pointing to the intersection being located in Rockland instead.
+
+Therefore, based on the accessible data, the claim that “Hanover in Plymouth County intersects Route 123” is not supported.
+
+Assumptions and limitations
+- Interpreted “intersects Route 123” as the municipality of Hanover being traversed by, or containing an intersection with, Route 123.
+- Only a Route 139-centric dataset was available; it is treated as authoritative for where Route 139 meets other numbered routes. Lack of a dedicated Route 123 table limits direct confirmation of Route 123’s municipal path, so conclusions are drawn from the presence/absence of Route 123 intersections within the Route 139 records in the relevant towns.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

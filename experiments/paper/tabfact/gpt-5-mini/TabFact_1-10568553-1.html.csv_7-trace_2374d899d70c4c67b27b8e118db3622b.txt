@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+milepost 12.8 be at weymouth
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “milepost 12.8 be at weymouth.”
+
+Summary conclusion: According to the authoritative massachusetts_route_139 table in the TabFact PostgreSQL database, milepost 12.8 is located in Rockland (Plymouth County), not Weymouth.
+
+Evidence from executed SQL queries:
+1) Direct lookup of milepost 12.8
+SQL (executed exactly):
+SELECT county, location, "street names", milepost, "roads intersected", notes
+FROM public.massachusetts_route_139
+WHERE trim(milepost) = '12.8'
+   OR (trim(milepost) ~ '^[0-9]+(\.[0-9]+)?$' AND trim(milepost)::numeric = 12.8);
+Result:
+- county: plymouth; location: rockland; street names: north avenue plain street market street; milepost: 12.8; roads intersected: route 123; notes: eastern terminus of route 123 / 139 concurrency
+
+2) Check for any entries that mention Weymouth and their milepost values
+SQL (executed exactly):
+SELECT location, milepost
+FROM public.massachusetts_route_139
+WHERE lower(location) LIKE '%weymouth%'
+ORDER BY (milepost ~ '^\s*-?\d+(\.\d+)?\s*$') DESC,
+         CASE WHEN milepost ~ '^\s*-?\d+(\.\d+)?\s*$' THEN CAST(milepost AS numeric) END,
+         milepost;
+Result:
+- location: weymouth; milepost: (no major junctions)
+
+3) Context around milepost 12.x to 13.5
+SQL (executed exactly):
+SELECT milepost, location, county, "street names", "roads intersected"
+FROM massachusetts_route_139
+WHERE trim(milepost) ~ '^[0-9]+(\.[0-9]+)?$'
+  AND CAST(trim(milepost) AS numeric) BETWEEN 12.0 AND 13.5
+ORDER BY CAST(trim(milepost) AS numeric) ASC;
+Results:
+- 12.2 — rockland (plymouth)
+- 12.8 — rockland (plymouth)
+
+4) Broad substring search for any milepost text containing “12.8”
+SQL (executed exactly):
+SELECT milepost, location, notes
+FROM public.massachusetts_route_139
+WHERE milepost ILIKE '%12.8%';
+Result:
+- milepost: 12.8; location: rockland; notes: eastern terminus of route 123 / 139 concurrency
+
+Assessment:
+- All evidence shows milepost 12.8 on MA Route 139 lies in Rockland, not Weymouth.
+
+Assumptions (due to ambiguity):
+- I interpreted the claim as referring to Massachusetts Route 139, because the only available authoritative dataset with mileposts in the connected data source is public.massachusetts_route_139.
+- I treated the milepost column as numeric when it matched a simple numeric pattern; otherwise as text.
+- If the claim referred to a different route or mode (e.g., rail), that context is not present in the available data source and the conclusion would not apply.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

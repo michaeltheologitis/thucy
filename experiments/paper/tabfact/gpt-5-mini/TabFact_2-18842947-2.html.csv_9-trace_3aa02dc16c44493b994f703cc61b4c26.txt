@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+the packer score the highest amount of point (6) in a game versus the lion
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim being evaluated: “the packer score the highest amount of point (6) in a game versus the lion.”
+
+Data source inspected
+- Database: postgres_tabfact23 (schema: public)
+- Table: public.t_1976_detroit_lions_season (columns: week, date, opponent, result, attendance)
+
+Step 1 — Inspect the 1976 Detroit Lions season data to understand opponents and result format
+Executed SQL:
+SELECT week, date, opponent, result, attendance FROM public.t_1976_detroit_lions_season ORDER BY week;
+Key relevant rows returned:
+- Week 4 | opponent: green bay packers | result: l 24 - 14
+- Week 8 | opponent: green bay packers | result: w 27 - 6
+Interpretation: The “result” field begins with W/L and then two scores separated by a hyphen.
+
+Step 2 — Retrieve and parse the two Packers games to extract Lions vs opponent points
+Executed SQL 1 (filter Packers games):
+SELECT week, date, opponent, result FROM t_1976_detroit_lions_season WHERE opponent ILIKE '%Green Bay%';
+
+Executed SQL 2 (parse numeric scores and assign to Lions vs opponent using the W/L marker):
+WITH g AS (
+  SELECT week, date, opponent, result,
+    (regexp_matches(result, '(\d+)\s*-\s*(\d+)'))[1]::int AS num1,
+    (regexp_matches(result, '(\d+)\s*-\s*(\d+)'))[2]::int AS num2
+  FROM t_1976_detroit_lions_season
+  WHERE opponent ILIKE '%green bay%'
+)
+SELECT week, date, opponent, result, num1, num2,
+  CASE WHEN lower(trim(result)) LIKE 'w %' THEN GREATEST(num1,num2) ELSE LEAST(num1,num2) END AS lions_points,
+  CASE WHEN lower(trim(result)) LIKE 'w %' THEN LEAST(num1,num2) ELSE GREATEST(num1,num2) END AS opponent_points
+FROM g
+ORDER BY week;
+
+Parsed results and findings:
+- Week 4 (Oct 3, 1976): result = “l 24 - 14” → Lions 14, Packers 24
+- Week 8 (Oct 31, 1976): result = “w 27 - 6” → Lions 27, Packers 6
+Thus, against the Lions in 1976, the Packers’ points in the two games were 24 and 6. Their higher total was 24, not 6.
+
+Conclusion
+- False: “the highest amount of point (6) … versus the lion.” The highest points the Packers scored against the Lions in the 1976 season was 24.
+- True (supporting detail only): The Packers did score 6 points in one of the games (Week 8), but that was not their highest against the Lions that season.
+
+Assumptions
+- “packer” refers to the Green Bay Packers; “lion” refers to the Detroit Lions.
+- “highest amount of point” is interpreted as the maximum points the Packers scored in a single game vs the Lions within the available 1976 season dataset.
+- Score attribution uses the W/L marker: on “w”, the Lions have the larger number; on “l”, the Lions have the smaller number.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

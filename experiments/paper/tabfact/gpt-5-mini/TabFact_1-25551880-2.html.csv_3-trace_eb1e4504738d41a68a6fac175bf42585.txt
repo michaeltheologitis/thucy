@@ -1,0 +1,82 @@
+
+<userQuery>
+<query>
+mickaël delage be the only person to appear in the mountain classification just 1 time
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “mickaël delage be the only person to appear in the mountain classification just 1 time.”
+
+Data sources discovered
+- Single relational source: TabFact -> public.t_2010_vuelta_a_espa_a (interpreted as the 2010 Vuelta a España stages and classification holders).
+
+Schema (relevant parts)
+- Columns: stage (bigint), winner (text), general classification (text), points classification (text), mountains classification (text), combination classification (text), team classification (text).
+
+Evidence gathered from SQL queries
+1) Count total rows (stages)
+- SQL:
+  SELECT COUNT(*) AS row_count FROM public.t_2010_vuelta_a_espa_a;
+- Result: 21 rows
+- Interpretation: 21 stages are represented, so there are 21 “mountains classification” entries total.
+
+2) List each value in mountains classification and how many times it appears
+- SQL:
+  SELECT "mountains classification" AS rider, COUNT(*) AS appearances
+  FROM public.t_2010_vuelta_a_espa_a
+  WHERE "mountains classification" IS NOT NULL AND "mountains classification" <> ''
+  GROUP BY "mountains classification"
+  ORDER BY appearances DESC, rider ASC;
+- Result:
+  - david moncoutié — 13
+  - serafín martínez — 6
+  - mickaël delage — 1
+  - not awarded — 1
+- Interpretation: Two values appear exactly once: “mickaël delage” and the placeholder “not awarded”.
+
+3) Directly identify which values appear exactly once
+- SQL:
+  SELECT "mountains classification", COUNT(*) AS cnt
+  FROM public.t_2010_vuelta_a_espa_a
+  GROUP BY "mountains classification"
+  ORDER BY cnt ASC, "mountains classification" ASC;
+- Result rows:
+  - {"mountains classification":"mickaël delage", "cnt":1}
+  - {"mountains classification":"not awarded", "cnt":1}
+  - {"mountains classification":"serafín martínez", "cnt":6}
+  - {"mountains classification":"david moncoutié", "cnt":13}
+
+4) Count how many single-occurrence values are rider names (excluding literal 'not awarded') and list them
+- SQL (count):
+  SELECT COUNT(*) AS single_named_count
+  FROM (
+    SELECT "mountains classification"
+    FROM public.t_2010_vuelta_a_espa_a
+    GROUP BY "mountains classification"
+    HAVING COUNT(*) = 1 AND "mountains classification" <> 'not awarded'
+  ) AS t;
+- Result: 1
+- SQL (list):
+  SELECT "mountains classification" AS name
+  FROM public.t_2010_vuelta_a_espa_a
+  GROUP BY "mountains classification"
+  HAVING COUNT(*) = 1 AND "mountains classification" <> 'not awarded'
+  ORDER BY name;
+- Result:
+  - mickaël delage
+
+Conclusion
+- Within the available dataset (2010 Vuelta a España stages), the only person who appears exactly once in the mountains classification column is mickaël delage. The other single-occurrence value is the non-person placeholder “not awarded.” Therefore, the claim is supported by the data.
+
+Assumptions
+- Scope: Limited to the 2010 Vuelta a España table available in the data environment.
+- “Person” excludes the literal placeholder “not awarded.”
+- Values were treated exactly as stored (no case or accent normalization); NULLs/empty strings were excluded where noted.
+
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

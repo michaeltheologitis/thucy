@@ -1,0 +1,70 @@
+
+<userQuery>
+<query>
+only 4 of the athlete have a mark greater than 29 foot
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “only 4 of the athlete have a mark greater than 29 foot.”
+
+Data discovery and schema context
+- Data source: TabFact (PostgreSQL), public schema.
+- Relevant table: public.long_jump with columns: mark (text), wind (double precision), athlete (text), nationality (text), venue (text), date (text).
+- Marks are recorded as text with a metric value followed by the imperial conversion in parentheses, e.g., “8.95 m (29ft4¼in)”.
+
+Interpretation used for verification
+- “greater than 29 foot” interpreted as strictly greater than 29.0 feet.
+- Converted threshold to meters: 29 ft × 0.3048 = 8.8392 meters.
+- Counted distinct athletes with a mark > 8.8392 m.
+
+Evidence from the database
+1) Total number of rows (context)
+SQL:
+SELECT count(*) AS total_rows FROM public.long_jump;
+Result:
+- total_rows = 10
+
+2) All rows ordered by parsed metric value (to see which exceed the threshold)
+SQL:
+SELECT athlete, mark, (substring(mark FROM '([0-9]+(?:\.[0-9]+)?)'))::double precision AS meters
+FROM public.long_jump
+ORDER BY meters DESC NULLS LAST, athlete, mark;
+Results (meters parsed from the numeric text before “ m”):
+1) mike powell — 8.95 m (29ft4¼in) — meters: 8.95
+2) bob beamon — 8.90 m (29ft2¼in) a — meters: 8.90
+3) carl lewis — 8.87 m (29ft1in) — meters: 8.87
+4) robert emmiyan — 8.86 m (29ft0¾in) a — meters: 8.86
+5) dwight phillips — 8.74 m (28ft8in) — meters: 8.74
+6) erick walder — 8.74 m (28ft8in) a — meters: 8.74
+7) larry myricks — 8.74 m (28ft8in) — meters: 8.74
+8) irving saladino — 8.73 m (28ft7½in) — meters: 8.73
+9) iván pedroso — 8.71 m (28ft6¾in) — meters: 8.71
+10) loúis tsátoumas — 8.66 m (28ft4¾in) — meters: 8.66
+Observation: The top four marks are all strictly greater than 8.8392 m (29 ft); the rest are below.
+
+3) Count of distinct athletes with marks strictly greater than 29 ft (8.8392 m)
+SQL:
+SELECT COUNT(DISTINCT athlete) AS distinct_athletes_above_threshold FROM (
+  SELECT athlete,
+    NULLIF(trim(replace(split_part(mark, ' m', 1), ',', '.')), '')::double precision AS parsed_m
+  FROM public.long_jump
+  WHERE mark LIKE '% m%'
+) t
+WHERE parsed_m > 8.8392;
+Result:
+- distinct_athletes_above_threshold = 4
+
+Conclusion
+- The database shows exactly 4 distinct athletes with marks strictly greater than 29 feet. This supports the claim.
+
+Assumptions
+- “Greater than 29 foot” interpreted as strictly > 29.0 ft (not ≥ 29.0 ft).
+- Used the metric value before the literal “ m” for numeric comparisons; this aligns with the mark text format in the table.
+- Counted distinct athletes (not number of performances), which matches the phrasing “4 of the athlete(s)”.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

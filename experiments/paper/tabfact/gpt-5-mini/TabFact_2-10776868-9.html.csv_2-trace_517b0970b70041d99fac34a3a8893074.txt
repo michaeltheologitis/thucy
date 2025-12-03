@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+the match between south melbourne and richmond draw a bigger crowd than the game between hawthorn and north melbourne
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "the match between south melbourne and richmond draw a bigger crowd than the game between hawthorn and north melbourne"
+
+Data source discovery
+- Available database: TabFact (postgres_tabfact19)
+- Relevant table: public.t_1962_vfl_season with columns: "home team" (text), "home team score" (text), "away team" (text), "away team score" (text), "venue" (text), "crowd" (bigint), "date" (text)
+
+Step 1: Confirm exact team name strings
+SQL executed:
+SELECT DISTINCT team FROM (SELECT "home team" AS team FROM public.t_1962_vfl_season UNION SELECT "away team" AS team FROM public.t_1962_vfl_season) t ORDER BY team;
+Result (relevant teams):
+- "south melbourne"
+- "richmond"
+- "hawthorn"
+- "north melbourne"
+
+Step 2: Retrieve the 1962 matches for the two pairings and their crowds
+SQL executed:
+SELECT date, "home team", "away team", venue, crowd
+FROM public.t_1962_vfl_season
+WHERE ("home team" = 'south melbourne' AND "away team" = 'richmond')
+   OR ("home team" = 'richmond' AND "away team" = 'south melbourne')
+   OR ("home team" = 'hawthorn' AND "away team" = 'north melbourne')
+   OR ("home team" = 'north melbourne' AND "away team" = 'hawthorn')
+ORDER BY date;
+Returned rows:
+- 23 june 1962 — south melbourne vs richmond — lake oval — crowd: 17000
+- 23 june 1962 — north melbourne vs hawthorn — arden street oval — crowd: 8470
+
+Step 3: Verify whether there are additional fixtures between the same pairings in 1962
+SQL executed:
+SELECT COUNT(*) AS match_count
+FROM public.t_1962_vfl_season
+WHERE ("home team" = 'south melbourne' AND "away team" = 'richmond')
+   OR ("home team" = 'richmond' AND "away team" = 'south melbourne');
+Result: match_count = 1
+
+SQL executed:
+SELECT COUNT(*) AS match_count
+FROM public.t_1962_vfl_season
+WHERE ("home team" = 'hawthorn' AND "away team" = 'north melbourne')
+   OR ("home team" = 'north melbourne' AND "away team" = 'hawthorn');
+Result: match_count = 1
+
+Conclusion based on data
+- South Melbourne vs Richmond (23 June 1962): 17,000 attendees
+- North Melbourne vs Hawthorn (23 June 1962): 8,470 attendees
+- Therefore, within the available 1962 VFL season data, the South Melbourne–Richmond match drew a larger crowd than the Hawthorn–North Melbourne game.
+
+Assumptions
+- Scope is limited to the accessible dataset (1962 VFL season table). I interpret the claim in the context of this dataset.
+- Team names are matched exactly as stored (lowercase).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

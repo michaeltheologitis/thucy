@@ -1,0 +1,78 @@
+
+<userQuery>
+<query>
+only 1 of the viral disease have not be assign to a family
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of approach
+- Discovered available data sources and identified a PostgreSQL database (postgres_tabfact22) with a public.viral_disease table.
+- Confirmed the table has a text column named family that captures the virus family assignment.
+- Queried the data to count total records, detect NULL/empty family values, and look for textual markers indicating an unassigned family (e.g., the literal 'unassigned').
+
+Data source and schema
+- Database: postgres_tabfact22 (public schema)
+- Table: public.viral_disease
+- Relevant column: family (text, nullable)
+
+Evidence and executed SQL
+1) Total records in viral_disease
+SQL:
+SELECT COUNT(*) AS total FROM public.viral_disease;
+Result:
+- total = 23
+
+2) Records where family is NULL or empty (whitespace-trimmed)
+SQL:
+SELECT COUNT(*) AS unassigned_count FROM public.viral_disease WHERE family IS NULL OR trim(family) = '';
+Result:
+- unassigned_count = 0
+
+3) Distribution of family values (to inspect possible unassigned markers)
+SQL:
+SELECT CASE WHEN family IS NULL THEN '<NULL>' WHEN trim(family) = '' THEN '<EMPTY_OR_WHITESPACE>' ELSE family END AS family_label, COUNT(*) AS cnt FROM public.viral_disease GROUP BY family_label ORDER BY cnt DESC;
+Result (family_label => count):
+- filoviridae => 1
+- bunyaviridae => 1
+- poxviridae => 1
+- flaviviridae => 1
+- arenaviridae => 1
+- papillomaviridae => 1
+- rhabdoviridae => 1
+- herpesviridae => 1
+- retroviridae => 1
+- caliciviridae => 1
+- picornaviridae => 1
+- astroviridae => 1
+- paramyxoviridae => 1
+- coronaviridae => 1
+- togaviridae => 1
+- hepadnaviridae => 1
+- orthomyxoviridae => 1
+- hepeviridae => 1
+- polyomaviridae => 1
+- adenoviridae => 1
+- reoviridae => 1
+- unassigned => 1
+- parvoviridae => 1
+
+4) Explicit check for common unassigned textual markers
+SQL:
+SELECT family, COUNT(*) AS cnt FROM public.viral_disease WHERE family IS NOT NULL AND lower(trim(family)) IN ('unknown','unassigned','none','n/a','na','not assigned','not applicable','-','?') GROUP BY family ORDER BY cnt DESC;
+Result:
+- 'unassigned' => 1
+
+Conclusion
+- There are 23 viral_disease records in total.
+- None have family as NULL or empty.
+- Exactly one record uses the literal string 'unassigned' in the family column. Interpreting 'unassigned' as “not assigned to a family,” the claim that only 1 viral disease has not been assigned to a family is supported by the data.
+
+Assumptions
+- I interpret the textual value 'unassigned' in the family column as indicating no family assignment. I also checked other common markers (unknown, none, etc.) and found none besides 'unassigned'.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

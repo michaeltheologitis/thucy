@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+mobilis be from algeria with 7476 subscriber in 2006
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "mobilis be from algeria with 7476 subscriber in 2006"
+
+Data source discovery
+- Database: TabFact
+- Schema: public
+- Table: mobile_telephony_in_africa
+  - Columns: provider (text), country (text), "subscribers (2005) (thousands)" (bigint), "subscribers (2006) (thousands)" (bigint), "growth %" (double precision)
+
+Evidence
+1) List of distinct countries present
+SQL:
+SELECT DISTINCT country FROM mobile_telephony_in_africa;
+Result excerpt includes: Algeria
+
+2) Retrieve the Mobilis entry for Algeria (case-insensitive match)
+SQL:
+SELECT provider, country, "subscribers (2005) (thousands)", "subscribers (2006) (thousands)"
+FROM mobile_telephony_in_africa
+WHERE LOWER(provider) LIKE '%mobilis%'
+AND LOWER(country) LIKE '%algeria%';
+Result:
+- provider: mobilis
+- country: Algeria
+- subscribers (2005) (thousands): 4908
+- subscribers (2006) (thousands): 7476
+
+3) Cross-check via a full listing (sorted) that includes the Algeria/Mobilis row
+SQL:
+SELECT provider, country, "subscribers (2005) (thousands)", "subscribers (2006) (thousands)", "growth %"
+FROM mobile_telephony_in_africa
+ORDER BY country, provider;
+Result excerpt for Algeria:
+- Algeria | Mobilis | 4908 | 7476 | 52
+- Algeria | Djezzy  | 7109 | 10531 | 48
+
+Assessment
+- The table explicitly labels 2006 subscriber counts in thousands. For Mobilis in Algeria, the 2006 value is 7476 (thousands) = 7,476,000 subscribers.
+- The claim’s core facts are correct: Mobilis is in Algeria, and the numeric figure 7476 matches the 2006 value in the dataset. However, the unit in the claim is stated as “subscriber,” whereas the data is in thousands of subscribers.
+
+Conclusion
+- The claim is supported by the data in terms of operator, country, and numeric value, but the unit is imprecise. The accurate statement per the dataset would be: “Mobilis (Algeria) had 7,476 thousand subscribers in 2006.”
+
+Assumptions made
+- Interpreted “mobilis be from algeria” as “Mobilis is a provider in Algeria.”
+- Interpreted the number “7476” in the claim as referring to the dataset’s 2006 subscriber metric, which is measured in thousands.
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

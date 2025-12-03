@@ -1,0 +1,57 @@
+
+<userQuery>
+<query>
+verizon center 20173 for the location and attendance when the record be 49 - 36%
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The user appears to assert that when the (team’s) record was 49 - 36, the location and attendance were “Verizon Center 20173.” I verified this against the available authoritative dataset.
+
+Data sources inspected
+- Database: TabFact
+- Table: public.t_2008_09_miami_heat_season (columns: game, date, team, score, high points, high rebounds, high assists, location attendance, record)
+
+Verification steps and evidence
+1) Identify games at Verizon Center and extract location, attendance, and record
+- Executed SQL:
+  SELECT date, team, score, "location attendance", record 
+  FROM public.t_2008_09_miami_heat_season 
+  WHERE LOWER("location attendance") LIKE '%verizon center%'
+  ORDER BY date;
+- Result: One matching game
+  - Date: April 4
+  - Team: Washington
+  - Score: W 118 - 104 (OT)
+  - Location Attendance: Verizon Center 20173
+  - Record: 41 - 36
+- Interpretation: “Verizon Center 20173” is a valid location-attendance pair in this dataset, but the associated record at that time was 41 - 36, not 49 - 36.
+
+2) Check if any game shows a record of 49 - 36
+- Executed SQL:
+  SELECT date, team, score, "location attendance", record 
+  FROM public.t_2008_09_miami_heat_season 
+  WHERE record = '49 - 36' OR record LIKE '%49 - 36%';
+- Result: 0 rows
+- Interpretation: There is no instance in this dataset where the record is 49 - 36.
+
+3) Context check (sample of rows to understand formatting and confirm the Verizon Center entry appears as shown)
+- Executed SQL:
+  SELECT date, team, score, "location attendance", record
+  FROM public.t_2008_09_miami_heat_season
+  LIMIT 10;
+- Sample included the same Verizon Center row, confirming the format and values: “verizon center 20173” with record “41 - 36.”
+
+Conclusion
+- The location and attendance “Verizon Center 20173” are supported by the data for an April 4 game versus Washington, but the corresponding record at that point was 41 - 36. The dataset contains no occurrence of a 49 - 36 record. Therefore, the claim tying “Verizon Center 20173” to a 49 - 36 record is not supported.
+
+Assumptions made
+- Interpreted “49 - 36%” as a record value formatted like the table’s record column (wins – losses), ignoring the stray percent sign.
+- Interpreted the claim within the scope of the only available dataset (2008–09 Miami Heat season), treating it as the authoritative source for this verification.
+- Treated “Verizon Center” matching case-insensitively within the “location attendance” text field.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

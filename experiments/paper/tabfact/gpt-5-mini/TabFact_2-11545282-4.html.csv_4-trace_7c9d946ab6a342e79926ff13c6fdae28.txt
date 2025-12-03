@@ -1,0 +1,62 @@
+
+<userQuery>
+<query>
+the jazz have at least 3 guard that be on the team 1979 - 80
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The Utah Jazz had at least three guards on their 1979–80 team.
+
+Data sources explored
+- Discovered one PostgreSQL database (postgres_tabfact22) with one relevant table: public.utah_jazz_all_time_roster, containing player, position, and years for jazz (free-text) among other fields.
+
+Method
+- Filtered the all-time roster for players whose “years for jazz” text indicates presence in 1979–80 and whose position includes the substring “guard”.
+
+Evidence
+1) List players matching season and position criteria
+SQL executed:
+SELECT player, position, "years for jazz" FROM public.utah_jazz_all_time_roster
+WHERE position ILIKE '%guard%'
+AND (
+  "years for jazz" ILIKE '%1979-80%' OR
+  "years for jazz" ILIKE '%1979–80%' OR
+  "years for jazz" ILIKE '%1979%' OR
+  "years for jazz" ILIKE '%79-80%' OR
+  "years for jazz" ILIKE '%79–80%'
+);
+
+Result rows:
+- adrian dantley — guard - forward — 1979 - 86
+- brad davis — guard — 1979 - 80
+- paul dawkins — guard — 1979 - 80
+- greg deane — guard — 1979 - 80
+
+2) Count such players
+SQL executed:
+SELECT COUNT(*) FROM public.utah_jazz_all_time_roster
+WHERE position ILIKE '%guard%'
+AND (
+  "years for jazz" ILIKE '%1979-80%' OR
+  "years for jazz" ILIKE '%1979–80%' OR
+  "years for jazz" ILIKE '%1979%' OR
+  "years for jazz" ILIKE '%79-80%' OR
+  "years for jazz" ILIKE '%79–80%'
+);
+
+Result:
+- count: 4
+
+Conclusion
+- The roster data shows at least three guards for the 1979–80 Jazz (Brad Davis, Paul Dawkins, Greg Deane). Even without counting Adrian Dantley (listed as guard-forward), the threshold of three guards is met. Therefore, the claim is supported by the data.
+
+Assumptions
+- Treated any “years for jazz” entry that includes 1979 (e.g., “1979 - 86”) as including the 1979–80 season.
+- Considered any position containing the substring “guard” (including combo positions like “guard - forward”) as a guard for counting purposes.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

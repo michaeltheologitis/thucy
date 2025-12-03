@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+the home team score 17.5 (107) on sunday , january 30
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim: “the home team score 17.5 (107) on sunday , january 30.”
+- Finding: In the 2000 Ansett Australia Cup table, there is a match on “sunday , 30 january” where the home team (adelaide) scored 17.5 (107). This supports the claim.
+
+Data source discovery
+- Available database: TabFact (postgres_tabfact9), public schema.
+- Relevant table: t_2000_ansett_australia_cup with columns: "home team", "home team score", "away team", "away team score", "ground", "crowd", "date" (scores and date stored as text).
+
+Executed SQL and evidence
+1) Identify exact date string formatting in the table
+SQL:
+SELECT DISTINCT "date" FROM public.t_2000_ansett_australia_cup ORDER BY "date";
+Result (excerpt):
+- monday , 14 february
+- saturday , 5 february
+- sunday , 13 february
+- sunday , 30 january
+- sunday , 6 february
+Interpretation: The table stores the target date as “sunday , 30 january”.
+
+2) Retrieve all matches on that date
+SQL:
+SELECT "home team", "home team score", "away team", "away team score", "ground", "crowd", "date"
+FROM public.t_2000_ansett_australia_cup
+WHERE "date" = 'sunday , 30 january';
+Results:
+1) home team: adelaide | home team score: 17.5 (107) | away team: melbourne | away team score: 19.11 (125) | ground: football park | crowd: 12239 | date: sunday , 30 january
+2) home team: geelong | home team score: 10.14 (74) | away team: st kilda | away team score: 11.12 (78) | ground: waverley park | crowd: 7394 | date: sunday , 30 january
+
+Assessment
+- The data shows that on “sunday , 30 january,” at least one home team (adelaide) scored 17.5 (107). This directly supports the claim.
+
+Assumptions
+- Scope: The verification is grounded in the 2000 Ansett Australia Cup dataset (table t_2000_ansett_australia_cup). The date strings do not include a year, but the table pertains to 2000; January 30, 2000 was a Sunday.
+- Interpretation: The claim is interpreted existentially (i.e., that there exists a home team on that date with that score), not that every home team on that date had that score.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

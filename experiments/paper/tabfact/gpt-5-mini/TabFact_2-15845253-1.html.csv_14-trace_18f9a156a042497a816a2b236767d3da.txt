@@ -1,0 +1,86 @@
+
+<userQuery>
+<query>
+7 viral family have a icosahedral virion shape
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “7 viral family have a icosahedral virion shape.”
+
+Data source discovery
+- Available database: TabFact (public schema)
+- Relevant table identified via schema inspection: viral_disease with columns [family, baltimore group, envelopment, virion shape, replication site]
+
+Step 1: Inspect distinct values of virion shape
+Executed SQL:
+SELECT "virion shape", COUNT(*) AS count
+FROM viral_disease
+GROUP BY "virion shape"
+ORDER BY "virion shape";
+
+Result (distinct values and row counts):
+- complex: 2
+- helical: 6
+- helical , bullet shaped: 1
+- icosahedral: 13
+- spherical: 1
+
+Step 2: List distinct virus families with virion shape = 'icosahedral'
+Executed SQL:
+SELECT DISTINCT "family" FROM viral_disease WHERE "virion shape" = 'icosahedral' ORDER BY "family";
+
+Resulting families (13 total):
+- adenoviridae
+- astroviridae
+- caliciviridae
+- flaviviridae
+- hepadnaviridae
+- hepeviridae
+- papillomaviridae
+- parvoviridae
+- picornaviridae
+- polyomaviridae
+- reoviridae
+- retroviridae
+- togaviridae
+
+Step 3: Count distinct families with virion shape = 'icosahedral'
+Executed SQL:
+SELECT COUNT(DISTINCT "family") AS distinct_family_count FROM viral_disease WHERE "virion shape" = 'icosahedral';
+
+Result:
+- distinct_family_count = 13
+
+Step 4 (robustness check): Case-insensitive substring match for 'icosahed'
+Executed SQL (count):
+SELECT COUNT(*) AS matching_row_count
+FROM viral_disease
+WHERE "virion shape" ILIKE '%icosahed%';
+
+Result:
+- matching_row_count = 13
+
+Executed SQL (distinct values of 'virion shape' among matches):
+SELECT DISTINCT "virion shape" AS virion_shape
+FROM viral_disease
+WHERE "virion shape" ILIKE '%icosahed%'
+ORDER BY "virion shape";
+
+Result:
+- virion_shape = icosahedral
+
+Conclusion
+- The TabFact viral_disease table shows 13 distinct virus families with an icosahedral virion shape, not 7. Therefore, the claim is contradicted by the data available in this environment.
+
+Assumptions
+- “viral family” refers to the values in the family column of the viral_disease table.
+- “icosahedral virion shape” corresponds directly to the value 'icosahedral' in the virion shape column.
+- Counts are based on distinct family names in this table; the table appears to include one row per family in this subset, as the row count and distinct family count both equal 13 for icosahedral.
+- This verification is grounded strictly in the accessible TabFact database; if another source defines families or shapes differently, results could differ, but we treat the accessible data as authoritative per instructions.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

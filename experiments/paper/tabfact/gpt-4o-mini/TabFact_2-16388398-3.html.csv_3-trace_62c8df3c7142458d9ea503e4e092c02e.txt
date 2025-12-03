@@ -1,0 +1,69 @@
+
+<userQuery>
+<query>
+the away team score 17.5 before a crowd of 12239 on sunday , 30 january
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Data source discovered: a PostgreSQL database with a single table public.t_2000_ansett_australia_cup containing AFL Ansett Australia Cup 2000 match data.
+- Task: Verify the claim "the away team score 17.5 before a crowd of 12239 on sunday, 30 january" against the available data.
+
+Schema (from data source)
+- Columns:
+  - home team (text)
+  - home team score (text)
+  - away team (text)
+  - away team score (text)
+  - ground (text)
+  - crowd (bigint)
+  - date (text)
+
+Evidence and Executed SQL
+1) Locate match(es) with the stated crowd size (12,239)
+- SQL executed:
+  SELECT "home team", "away team", "away team score", crowd, date, ground
+  FROM public.t_2000_ansett_australia_cup
+  WHERE crowd = 12239;
+- Result:
+  - Home Team: Adelaide
+  - Away Team: Melbourne
+  - Away Team Score: 19.11 (125)
+  - Crowd: 12,239
+  - Date: Sunday, 30 January
+  - Ground: Football Park
+
+Interpretation: The only match with a crowd of 12,239 occurred on Sunday, 30 January, and the away team score recorded is 19.11 (125), not 17.5.
+
+2) Check if any match has away team score exactly "17.5"
+- SQL executed:
+  SELECT "home team", "away team", "away team score", crowd, date, ground 
+  FROM public.t_2000_ansett_australia_cup 
+  WHERE "away team score" = '17.5';
+- Result: No rows returned.
+
+3) (Sanity check) Check if any match has home team score exactly "17.5"
+- SQL executed:
+  SELECT "home team", "home team score", "away team", "away team score", "date", "crowd", "ground" 
+  FROM public.t_2000_ansett_australia_cup 
+  WHERE "home team score" = '17.5';
+- Result: No rows returned.
+
+Findings
+- The database contains one match with a crowd of 12,239 on Sunday, 30 January, at Football Park (Adelaide vs Melbourne).
+- In that match, the away team score is 19.11 (125), not 17.5.
+- There are no records where any away team score equals the exact string "17.5" in this dataset.
+
+Conclusion
+- The parts of the claim about the date (Sunday, 30 January) and the crowd (12,239) match the data.
+- The statement that the away team scored 17.5 does not match the data; the away team scored 19.11 (125) in the identified match, and no away score of 17.5 exists in the dataset.
+
+Assumptions
+- The claim refers to the AFL Ansett Australia Cup 2000 dataset (the only available data source) and to the unique match recorded with crowd 12,239 on Sunday, 30 January. The year is assumed to be 2000 based on this dataset’s scope.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

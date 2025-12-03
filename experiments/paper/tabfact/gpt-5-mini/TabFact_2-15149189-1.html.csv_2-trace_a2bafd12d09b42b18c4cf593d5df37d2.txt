@@ -1,0 +1,62 @@
+
+<userQuery>
+<query>
+prop steve borthwick be leicester 's best know player in that position
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The user is asserting that “prop Steve Borthwick” is Leicester’s best-known player in that position.
+
+Summary conclusion: The available data shows Steve Borthwick’s position as lock (not prop) and his club as Bath (not Leicester) in the 2008 Six Nations context. There is no support in the data for him being a Leicester prop, so the claim is inaccurate.
+
+Evidence from data
+1) Steve Borthwick’s position and club
+- Executed SQL:
+  SELECT player, position, "club / province" FROM public.t_2008_six_nations_championship_squads WHERE player ILIKE '%Steve Borthwick%';
+- Result:
+  player: steve borthwick | position: lock | club / province: bath
+- Interpretation: In the 2008 Six Nations squads table, Steve Borthwick is listed as a lock and his club is Bath. This directly contradicts the idea that he is a “prop.”
+
+2) Leicester-affiliated players in the same dataset
+- Executed SQL (to find players whose club/province contains “leicester”):
+  SELECT player, position, "club / province" FROM public.t_2008_six_nations_championship_squads WHERE "club / province" ILIKE '%leicester%';
+- Result:
+  - george chuter — hooker — leicester
+  - louis deacon — lock — leicester
+  - ben kay — lock — leicester
+  - tom croft — flanker — leicester
+  - lewis moody — flanker — leicester
+- Interpretation: This confirms which players in this dataset are associated with Leicester. Steve Borthwick does not appear among Leicester players.
+
+3) Who are props in this dataset?
+- Step 1 (distinct positions):
+  Executed SQL:
+  SELECT DISTINCT position FROM public.t_2008_six_nations_championship_squads ORDER BY position;
+  Result includes: prop
+- Step 2 (list all props):
+  Executed SQL:
+  SELECT player, position, "club / province" FROM public.t_2008_six_nations_championship_squads WHERE position = 'prop' ORDER BY player;
+- Result:
+  - andrew sheridan | prop | sale
+  - jason hobson | prop | bristol
+  - matt stevens | prop | bath
+  - phil vickery ( c ) | prop | wasps
+  - tim payne | prop | wasps
+- Interpretation: The 2008 Six Nations squad table lists several props, and Steve Borthwick is not one of them. He is listed as a lock.
+
+Assessment of each part of the claim
+- “Prop Steve Borthwick”: Inaccurate per the data; he is a lock, not a prop.
+- “Leicester’s best known player in that position”: The dataset associates Steve Borthwick with Bath (not Leicester) and provides no basis to evaluate “best known.” The foundational premise (that he’s a Leicester prop) is not supported.
+
+Final determination: The claim is contradicted by the data in the available source.
+
+Assumptions made
+- I interpret the user’s statement as: “Is Steve Borthwick (as a prop) Leicester’s best-known player in that position?”
+- I relied on the available PostgreSQL TabFact table t_2008_six_nations_championship_squads as an authoritative source for positions and club affiliations relevant to the 2008 Six Nations squads. No other rugby tables were available to cross-check beyond this context.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+the size of the crowd when essendon be the away team be 25158
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "the size of the crowd when Essendon be the away team be 25158"
+
+Data sources explored
+- Discovered a single PostgreSQL database: TabFact (schema: public)
+- Relevant table identified: public.t_1954_vfl_season with columns: "home team", "home team score", "away team", "away team score", "venue", "crowd" (bigint), "date"
+
+What the data shows
+- The table contains 6 matches (all dated 31 July 1954). Essendon appears once as the away team in this dataset, and that match’s recorded crowd is 28,158—not 25,158.
+- No match in this table has a crowd of exactly 25,158.
+
+Executed SQL and results
+1) Count total rows in the table
+SQL:
+SELECT COUNT(*) AS total_rows FROM public.t_1954_vfl_season;
+Result:
+ total_rows = 6
+
+2) Count rows where away team contains 'essendon' (case-insensitive)
+SQL:
+SELECT COUNT(*) AS away_essendon_count FROM public.t_1954_vfl_season WHERE lower("away team") LIKE '%essendon%';
+Result:
+ away_essendon_count = 1
+
+3) List the match(es) where Essendon is the away team
+SQL:
+SELECT "home team", "date", "venue", crowd FROM public.t_1954_vfl_season WHERE lower("away team") LIKE '%essendon%' ORDER BY "date";
+Result:
+ home team: geelong; date: 31 july 1954; venue: kardinia park; crowd: 28158
+
+4) Check if any match has crowd exactly 25,158
+SQL:
+SELECT COUNT(*) AS match_count FROM public.t_1954_vfl_season WHERE crowd = 25158;
+Result:
+ match_count = 0
+
+5) Sample rows (to show context of all matches in the table)
+SQL:
+SELECT "home team","away team",date,venue,crowd FROM public.t_1954_vfl_season LIMIT 10;
+Result (all 6 rows):
+- collingwood vs st kilda, date: 31 july 1954, venue: victoria park, crowd: 16500
+- carlton vs richmond, date: 31 july 1954, venue: princes park, crowd: 25863
+- melbourne vs hawthorn, date: 31 july 1954, venue: mcg, crowd: 26708
+- south melbourne vs footscray, date: 31 july 1954, venue: lake oval, crowd: 19500
+- north melbourne vs fitzroy, date: 31 july 1954, venue: arden street oval, crowd: 11000
+- geelong vs essendon, date: 31 july 1954, venue: kardinia park, crowd: 28158
+
+Conclusion
+- The claim is not supported by the available data. In this dataset, when Essendon is the away team, the recorded crowd is 28,158, and there are zero matches with a crowd of 25,158.
+
+Assumptions
+- Interpretation is limited to the available table public.t_1954_vfl_season (a 6-row subset dated 31 July 1954). Team names in the table are stored in lowercase (e.g., 'essendon'). The claim was interpreted as referring to this dataset and date scope.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

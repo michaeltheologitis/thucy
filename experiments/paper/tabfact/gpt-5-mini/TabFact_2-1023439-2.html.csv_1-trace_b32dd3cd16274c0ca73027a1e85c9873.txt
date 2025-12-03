@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+under the influence chart at 56 in the us in 1985 and 1986
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Under the Influence charted at 56 in the US in 1985 and 1986.”
+
+Data sources discovered:
+- postgres_tabfact20 (schema: public)
+  - Table: vanity_performer(year bigint, title text, "us" text, "us r&b" text, "us dance" text)
+
+Evidence collected:
+1) Locate rows for title 'Under the Influence'
+- Executed SQL:
+  SELECT year, title, "us", "us r&b", "us dance" FROM vanity_performer WHERE title ILIKE 'Under the Influence';
+- Result:
+  [{"title":"under the influence","us":"56","us dance":"6","us r&b":"9","year":1986}]
+- Finding: “Under the Influence” appears only in 1986 and shows US = 56 (with R&B = 9, Dance = 6).
+
+2) Check what exists for 1985
+- Executed SQL:
+  SELECT title, "us" FROM public.vanity_performer WHERE year = 1985;
+- Result:
+  - title: mechanical emotion, us: 107
+- Finding: The only 1985 entry is “mechanical emotion” with US = 107; no “Under the Influence” entry for 1985.
+
+3) Confirm all 1986 entries
+- Executed SQL:
+  SELECT * FROM vanity_performer WHERE year = 1986;
+- Results (columns: year, title, us, us r&b, us dance):
+  1) year: 1986, title: under the influence, us: 56, us r&b: 9, us dance: 6
+  2) year: 1986, title: animals, us: -, us r&b: -, us dance: -
+- Finding: Confirms “Under the Influence” charted at US = 56 in 1986; no other 1986 entries contradict this.
+
+Conclusion:
+- The data shows “Under the Influence” charted at 56 in the US in 1986.
+- There is no evidence it charted at 56 in 1985; in 1985 the only entry present is “Mechanical Emotion” (US = 107).
+
+Assumptions made:
+- “Under the Influence” refers to the entry in the vanity_performer table, and the "us" column reflects the main US singles chart (e.g., Billboard Hot 100). The table is treated as authoritative per instructions.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

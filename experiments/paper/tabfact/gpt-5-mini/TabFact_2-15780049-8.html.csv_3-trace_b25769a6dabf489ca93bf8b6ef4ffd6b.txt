@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+game number 72 on march 28 be against cleveland with a score of w 94 - 80 (ot)
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify:
+"game number 72 on march 28 be against cleveland with a score of w 94 - 80 (ot)"
+
+Data sources explored:
+- PostgreSQL TabFact database (public schema)
+- Identified relevant table: public.t_2001_02_toronto_raptors_season (per-game entries for the 2001–02 Toronto Raptors season)
+
+Evidence:
+1) Retrieve game 72 details
+Executed SQL:
+SELECT * FROM public.t_2001_02_toronto_raptors_season WHERE game = 72;
+Result:
+- game: 72
+- date: march 28
+- team: atlanta
+- score: w 85 - 83 (ot)
+- high points: antonio davis , morris peterson (15)
+- high rebounds: antonio davis (9)
+- high assists: chris childs (7)
+- location attendance: philips arena 12036
+- record: 34 - 38
+
+Finding: Game 72 was on March 28, but the opponent was Atlanta, and the score was W 85-83 (OT), not Cleveland and not 94-80.
+
+2) Check for any games against Cleveland
+Executed SQL:
+SELECT game, date, team, score
+FROM public.t_2001_02_toronto_raptors_season
+WHERE team ILIKE '%Cleveland%'
+ORDER BY game;
+Result:
+- Game 69 — date: march 22 — team: cleveland — score: w 94 - 80 (ot)
+
+Finding: The Raptors did beat Cleveland 94-80 (OT), but it was Game 69 on March 22, not Game 72 on March 28.
+
+3) Confirm the unique occurrence of the exact score text
+Executed SQL:
+SELECT game, date, team, score FROM public.t_2001_02_toronto_raptors_season WHERE score = 'w 94 - 80 (ot)';
+Result:
+- game: 69, date: march 22, team: cleveland, score: w 94 - 80 (ot)
+
+Conclusion:
+- Correct: Game 72 occurred on March 28 and went to OT.
+- Incorrect: The opponent was Atlanta (not Cleveland), and the score was W 85-83 (OT) (not W 94-80 (OT)). The W 94-80 (OT) win over Cleveland corresponds to Game 69 on March 22.
+
+Assumptions:
+- Because the available authoritative data source contains a single NBA season table (2001–02 Toronto Raptors), I interpret the claim as referring to the 2001–02 Toronto Raptors season.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

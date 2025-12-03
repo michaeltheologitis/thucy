@@ -1,0 +1,79 @@
+
+<userQuery>
+<query>
+both a male and female leave the cube alive
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim assessed: “both a male and female leave the cube alive.”
+
+Summary of findings
+- The database table public.cube_film_series lists character records from the Cube film series with their gender and status. It shows only one character with status “alive after exiting the cube,” and that character (Kazan) is male. All female characters in the table are recorded as “dead.”
+- Therefore, while a male leaves the cube alive, no female does in this dataset.
+
+Evidence and executed SQL
+1) Distinct statuses and counts
+SQL:
+SELECT status, count(*) AS count, min(name) AS example_name, min("played by") AS example_actor
+FROM public.cube_film_series
+GROUP BY status
+ORDER BY count DESC;
+Result:
+- status: "dead", count: 5, example_name: "david worth", example_actor: "david hewlett"
+- status: "alive after exiting the cube", count: 1, example_name: "kazan", example_actor: "andrew miller"
+
+2) Full list of names and statuses
+SQL:
+SELECT name, status, "played by"
+FROM public.cube_film_series
+ORDER BY status NULLS LAST, name;
+Result (abbrev.):
+- kazan — alive after exiting the cube — andrew miller
+- david worth — dead — david hewlett
+- dr helen holloway — dead — nicky guadagni
+- joan leaven — dead — nicole de boer
+- quentin — dead — maurice dean wint
+- rennes — dead — wayne robson
+
+3) Who exits alive, with genders
+SQL:
+SELECT name, gender FROM public.cube_film_series WHERE status = 'alive after exiting the cube' ORDER BY name;
+Result:
+- kazan — male
+
+SQL:
+SELECT gender, COUNT(*) AS count FROM public.cube_film_series WHERE status = 'alive after exiting the cube' GROUP BY gender ORDER BY count DESC, gender;
+Result:
+- male — 1
+
+4) Female characters and their statuses
+SQL:
+SELECT DISTINCT gender FROM public.cube_film_series;
+Result: female; male
+
+SQL:
+SELECT name, status, gender FROM public.cube_film_series WHERE LOWER(COALESCE(gender,'')) = 'female' ORDER BY name;
+Result:
+- dr helen holloway — dead — female
+- joan leaven — dead — female
+
+SQL:
+SELECT name, status FROM public.cube_film_series WHERE LOWER(COALESCE(gender,'')) = 'female' AND LOWER(COALESCE(status,'')) = 'alive after exiting the cube';
+Result: no rows
+
+Assessment of the claim
+- True part: A male leaves the cube alive (Kazan).
+- False part: No female is recorded as leaving the cube alive in the provided data.
+
+Conclusion: The claim is contradicted by the data.
+
+Assumptions
+- “Leave the cube alive” is interpreted as status = “alive after exiting the cube” as recorded in public.cube_film_series.
+- The table represents the canonical characters and fates relevant to the query (not broader franchise entries beyond those present).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

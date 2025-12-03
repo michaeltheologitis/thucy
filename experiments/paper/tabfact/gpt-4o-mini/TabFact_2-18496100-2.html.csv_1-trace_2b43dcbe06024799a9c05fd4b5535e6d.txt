@@ -1,0 +1,81 @@
+
+<userQuery>
+<query>
+mehgaon have the highest number of electorate in 2009
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “Mehgaon has the highest number of electorate in 2009.”
+
+Data source overview
+- Database: public schema
+- Table: bhind_lok_sabha_constituency
+- Relevant columns: name (text), number of electorates (2009) (bigint)
+
+Key checks and evidence
+1) Identify and handle any aggregate/total rows
+- Purpose: Determine if the table contains an aggregate “total” row that should be excluded from constituency-level comparisons.
+- Executed SQL:
+  SELECT * FROM bhind_lok_sabha_constituency WHERE "number of electorates (2009)" = (SELECT MAX("number of electorates (2009)") FROM bhind_lok_sabha_constituency) OR name LIKE '%total%';
+- Result:
+  name = total :; number of electorates (2009) = 1371252
+
+- Executed SQL (count of rows with the overall max):
+  SELECT COUNT(*) FROM bhind_lok_sabha_constituency WHERE "number of electorates (2009)" = (SELECT MAX("number of electorates (2009)") FROM bhind_lok_sabha_constituency);
+- Result: count = 1
+
+Interpretation: The table includes a non-constituency aggregate row named “total :”. For verifying the claim among constituencies, this row must be excluded.
+
+2) Find the constituency with the maximum electorate in 2009 (excluding totals)
+- Executed SQL:
+  SELECT name, "number of electorates (2009)" 
+  FROM bhind_lok_sabha_constituency 
+  WHERE name NOT ILIKE 'total%'
+  ORDER BY "number of electorates (2009)" DESC 
+  LIMIT 1;
+- Result: name = mehgaon; number of electorates (2009) = 210649
+
+- Executed SQL (check for ties at the maximum):
+  SELECT COUNT(*) 
+  FROM bhind_lok_sabha_constituency 
+  WHERE "number of electorates (2009)" = 
+    (SELECT MAX("number of electorates (2009)") 
+     FROM bhind_lok_sabha_constituency 
+     WHERE name NOT ILIKE 'total%');
+- Result: count = 1
+
+Interpretation: Mehgaon is the sole constituency with the maximum electorate in 2009 when excluding the aggregate total row.
+
+3) Context: Top 5 constituencies by electorate (2009), excluding totals
+- Executed SQL:
+  SELECT name, "number of electorates (2009)"
+  FROM bhind_lok_sabha_constituency
+  WHERE name NOT LIKE '%total%'
+  ORDER BY "number of electorates (2009)" DESC
+  LIMIT 5;
+- Results (descending):
+  1) Mehgaon — 210649
+  2) Lahar — 205839
+  3) Bhind — 197183
+  4) Ater — 177334
+  5) Gohad — 166893
+
+4) Direct lookup for Mehgaon
+- Executed SQL:
+  SELECT name, "number of electorates (2009)" FROM bhind_lok_sabha_constituency WHERE LOWER(name) = LOWER('Mehgaon');
+- Result: name = mehgaon; number of electorates (2009) = 210649
+
+Conclusion
+- The data shows that, among actual constituencies (excluding the aggregate “total :” row), Mehgaon has the highest number of electorates in 2009, with 210,649 electors, and there are no ties at this maximum.
+
+Assumptions
+- “Mehgaon” refers to the constituency named “Mehgaon” in the bhind_lok_sabha_constituency table.
+- “Highest number of electorate in 2009” is interpreted among constituency rows, excluding the aggregate “total :” row.
+- “Electorate” corresponds to the column “number of electorates (2009)”.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

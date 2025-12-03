@@ -1,0 +1,80 @@
+
+<userQuery>
+<query>
+the yugoslavian national team win both of its friendly match by a score of 2:1
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "the yugoslavian national team win both of its friendly match by a score of 2:1"
+
+Data source discovery:
+- Available table: public.yugoslavia_national_football_team_results (historical results for the Yugoslavia national football team)
+
+Schema (from the database):
+- date (text)
+- city (text)
+- opponent (text)
+- results (text)
+- type of game (text)
+
+Step 1: Identify available match types and their counts
+SQL:
+SELECT "type of game", TRIM("type of game") AS trimmed_value, COUNT(*) as count
+FROM public.yugoslavia_national_football_team_results
+GROUP BY "type of game", trimmed_value
+ORDER BY count DESC;
+Result (trimmed values):
+- 1982 wcq: 3
+- balkan cup: 2
+- friendly: 2
+
+Step 2: List all friendlies (date, city, opponent, results)
+SQL:
+SELECT date, city, opponent, results 
+FROM yugoslavia_national_football_team_results 
+WHERE LOWER(TRIM("type of game")) = 'friendly' 
+ORDER BY date ASC;
+Results:
+1) Date: March 22, City: Sarajevo, Opponent: Uruguay, Results: 2:1
+2) Date: April 26, City: Borovo, Opponent: Poland, Results: 2:1
+
+Step 3: Count friendlies overall and friendlies with result 2:1
+SQL (total friendlies):
+SELECT COUNT(*) AS total_friendly_matches 
+FROM yugoslavia_national_football_team_results 
+WHERE LOWER(TRIM("type of game")) = 'friendly';
+Result: 2
+
+SQL (friendlies with 2:1):
+SELECT COUNT(*) AS friendly_match_results_2_1 
+FROM yugoslavia_national_football_team_results 
+WHERE LOWER(TRIM("type of game")) = 'friendly' 
+AND TRIM(results) = '2:1';
+Result: 2
+
+Step 4: Confirm that a format of "X:Y" means Yugoslavia scored X and opponent scored Y (so 2:1 implies Yugoslavia win)
+SQL:
+SELECT date, opponent, results, "type of game" 
+FROM yugoslavia_national_football_team_results 
+WHERE CAST(SUBSTRING(results FROM '^[0-9]+') AS INTEGER) < CAST(SUBSTRING(results FROM '[0-9]+$') AS INTEGER);
+Sample results indicating losses (first number lower than second):
+- Date: August 27, Opponent: Romania, Results: 1:4, Type of Game: Balkan Cup
+- Date: November 15, Opponent: Italy, Results: 0:2, Type of Game: 1982 WCQ
+Interpretation: The first number corresponds to Yugoslavia’s goals, confirming that 2:1 indicates a Yugoslavia win.
+
+Conclusion:
+- The database records exactly two matches classified as friendlies.
+- Both friendlies have a result of 2:1.
+- Given the score formatting (first number is Yugoslavia’s goals), both are Yugoslavia wins.
+Therefore, the claim is supported by the data.
+
+Assumptions:
+- "Results" are formatted as Yugoslavia goals : opponent goals (validated by Step 4).
+- "Both of its friendly match" refers to the complete set of friendly matches recorded in this dataset (which totals two).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

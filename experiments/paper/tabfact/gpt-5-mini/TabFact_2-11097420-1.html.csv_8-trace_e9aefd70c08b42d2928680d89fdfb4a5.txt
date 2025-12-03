@@ -1,0 +1,83 @@
+
+<userQuery>
+<query>
+potter co in copiah be the first project propose , but the last to be list
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “potter co in copiah be the first project propose, but the last to be list.”
+
+Interpretation of the claim
+- Interpreted domain: Superfund (NPL) sites in Mississippi.
+- “potter co in copiah” refers to the Superfund site “Potter Co” located in Copiah County, MS.
+- “first project propose” interpreted as: among Mississippi Superfund sites, Potter Co had the earliest NPL proposed date.
+- “last to be list” interpreted as: among Mississippi Superfund sites, Potter Co had the latest final NPL listing date.
+
+Data sources explored
+- Discovered data source: PostgreSQL database “TabFact”, public schema.
+- Relevant table: public.list_of_superfund_sites_in_mississippi
+- Relevant columns: name (text), county (text), proposed (text), listed (text), plus other date-like fields.
+- Schema details confirmed via schema inspection.
+
+Evidence gathered
+1) Locate Potter Co in Copiah County and inspect dates
+SQL executed:
+SELECT name, county, proposed, listed FROM public.list_of_superfund_sites_in_mississippi WHERE name ILIKE '%potter%' AND county ILIKE '%copiah%';
+Result:
+- name: potter co; county: copiah; proposed: 05 / 10 / 1993; listed: -
+Key points:
+- Potter Co exists in Copiah County.
+- Proposed date recorded: 05/10/1993.
+- Listed date is “-” (no final NPL listing date recorded).
+
+2) Earliest proposed date among all MS sites
+SQL executed:
+SELECT MIN(to_date(proposed, 'MM / DD / YYYY')) AS earliest_proposed FROM public.list_of_superfund_sites_in_mississippi WHERE proposed ~ '^[0-9]{2} / [0-9]{2} / [0-9]{4}$';
+Result:
+- earliest_proposed = 1983-09-08
+
+SQL executed:
+SELECT "cerclis id", name, county, proposed FROM public.list_of_superfund_sites_in_mississippi WHERE proposed ~ '^[0-9]{2} / [0-9]{2} / [0-9]{4}$' AND to_date(proposed,'MM / DD / YYYY') = (SELECT MIN(to_date(proposed,'MM / DD / YYYY')) FROM public.list_of_superfund_sites_in_mississippi WHERE proposed ~ '^[0-9]{2} / [0-9]{2} / [0-9]{4}$');
+Result:
+- cerclis id: msd980710941; name: flowood site; county: rankin; proposed: 09 / 08 / 1983
+Key point:
+- The earliest proposed date in the dataset is 09/08/1983 for Flowood Site (Rankin County), not Potter Co (which is 05/10/1993). Thus, Potter Co was not the first proposed.
+
+3) Latest listed date among all MS sites
+SQL executed:
+SELECT MAX(to_date(listed, 'MM / DD / YYYY')) AS latest_listed FROM public.list_of_superfund_sites_in_mississippi WHERE listed ~ '^[0-9]{2} / [0-9]{2} / [0-9]{4}$';
+Result:
+- latest_listed = 2007-03-07
+
+SQL executed:
+SELECT "cerclis id", name, county, listed FROM public.list_of_superfund_sites_in_mississippi WHERE listed ~ '^[0-9]{2} / [0-9]{2} / [0-9]{4}$' AND to_date(listed,'MM / DD / YYYY') = (SELECT MAX(to_date(listed,'MM / DD / YYYY')) FROM public.list_of_superfund_sites_in_mississippi WHERE listed ~ '^[0-9]{2} / [0-9]{2} / [0-9]{4}$');
+Result:
+- cerclis id: msd086556388; name: sonford products; county: rankin; listed: 03 / 07 / 2007
+Key point:
+- The latest listed site is Sonford Products (Rankin County) on 03/07/2007. Potter Co has no listed date (“-”), so it cannot be the last listed.
+
+4) Check all sites in Copiah County
+SQL executed:
+SELECT "name", "county", "proposed", "listed" FROM public.list_of_superfund_sites_in_mississippi WHERE county ILIKE '%Copiah%';
+Result:
+- Potter Co — county: copiah — proposed: 05 / 10 / 1993 — listed: -
+Key point:
+- Potter Co appears to be the only Copiah County entry and lacks a listed date.
+
+Conclusion
+- The claim is not supported by the data.
+  - Potter Co (Copiah) was not the first proposed among Mississippi sites (earliest is 09/08/1983 for Flowood Site; Potter Co proposed on 05/10/1993).
+  - Potter Co is not the last listed; in fact, it has no listed date in the dataset, while the latest listed site is Sonford Products (03/07/2007).
+
+Assumptions made
+- “Project” refers to Superfund NPL sites.
+- “Proposed” is the NPL proposed date; “listed” is the NPL final listing date.
+- “Last to be list” means the most recent final listing date among Mississippi sites.
+- A dash “-” in date fields indicates no date (not proposed/listed/completed as applicable).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

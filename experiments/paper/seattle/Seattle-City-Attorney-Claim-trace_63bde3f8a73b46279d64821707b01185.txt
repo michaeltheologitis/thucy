@@ -1,0 +1,70 @@
+
+<userQuery>
+<query>
+I am pleased to acknowledge that 2024 saw a reduction in property crime and violent crime in Seattle.
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify
+“2024 saw a reduction in property crime and violent crime in Seattle.”
+
+How I interpreted the claim
+- Reduction is interpreted as a year-over-year decrease from 2023 to 2024 in Seattle-wide totals.
+- “Property crime” and “violent crime” are mapped to the offense_category values 'PROPERTY CRIME' and 'VIOLENT CRIME' in the Seattle crime dataset.
+
+Data sources explored
+- Database: Seattle (PostgreSQL)
+- Schema: public
+- Table: public.crime_data (key fields: offense_date, offense_category, nibrs_crime_against_category)
+
+Evidence
+1) Year- and category-level counts (PROPERTY CRIME and VIOLENT CRIME in 2023–2024)
+SQL executed:
+SELECT
+  EXTRACT(YEAR FROM offense_date)::int AS year,
+  offense_category,
+  COUNT(*) AS incident_count
+FROM public.crime_data
+WHERE offense_category IN ('PROPERTY CRIME','VIOLENT CRIME')
+  AND offense_date >= '2023-01-01'::date
+  AND offense_date < '2025-01-01'::date
+GROUP BY 1, 2
+ORDER BY 1, 2;
+Results:
+- 2023 — PROPERTY CRIME: 40,951; VIOLENT CRIME: 5,435
+- 2024 — PROPERTY CRIME: 41,220; VIOLENT CRIME: 5,477
+
+2) Subtotals by year (PROPERTY + VIOLENT combined)
+SQL executed:
+SELECT
+  EXTRACT(YEAR FROM offense_date)::int AS year,
+  COUNT(*) AS incident_count_subtotal
+FROM public.crime_data
+WHERE offense_category IN ('PROPERTY CRIME','VIOLENT CRIME')
+  AND offense_date >= '2023-01-01'::date
+  AND offense_date < '2025-01-01'::date
+GROUP BY 1
+ORDER BY 1;
+Results:
+- 2023 — subtotal: 46,386
+- 2024 — subtotal: 46,697
+
+Findings
+- Property crime increased from 40,951 (2023) to 41,220 (2024), a rise of 269 incidents (~0.7%).
+- Violent crime increased from 5,435 (2023) to 5,477 (2024), a rise of 42 incidents (~0.8%).
+- Combined, these categories increased by 311 incidents from 2023 to 2024.
+
+Conclusion
+The claim is contradicted by the data: both property crime and violent crime were slightly higher in 2024 than in 2023 in the Seattle dataset examined.
+
+Assumptions and notes
+- “Reduction” interpreted as a year-over-year decrease from 2023 to 2024.
+- Used offense_date for annual assignment and offense_category for mapping to “PROPERTY CRIME” and “VIOLENT CRIME.”
+- The dataset covers Seattle city incidents recorded in public.crime_data.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

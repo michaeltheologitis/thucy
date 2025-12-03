@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+25 - 26 january 2003 and 12 - 13 july 2003 be the only game play in 2003
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The only gameplay dates in 2003 are “25 - 26 january 2003” and “12 - 13 july 2003.” We verify this against the available TabFact database table public.tsuyoshi_fujita.
+
+Data source discovery
+- Available DB: TabFact (postgres_tabfact18)
+- Table: public.tsuyoshi_fujita
+- Columns: season (text), event type (text), location (text), format (text), date (text), rank (bigint)
+
+Evidence and executed SQL
+1) Check for any rows explicitly labeled season = '2003'
+SQL:
+SELECT "event type", location, format, date, rank
+FROM public.tsuyoshi_fujita
+WHERE season = '2003'
+ORDER BY date NULLS LAST, "event type";
+Result: No rows returned.
+
+2) Find all rows whose date contains '2003'
+SQL:
+SELECT season, "event type", location, format, date, rank FROM public.tsuyoshi_fujita WHERE date LIKE '%2003%';
+Results:
+- season: 2002 - 03 | event type: grand prix | location: hiroshima | format: extended | date: 25 - 26 january 2003 | rank: 7
+- season: 2002 - 03 | event type: grand prix | location: bangkok  | format: standard | date: 12 - 13 july 2003  | rank: 1
+
+3) Count and list distinct 2003 date values to confirm exclusivity
+SQL:
+SELECT COUNT(*) AS count_2003 FROM public.tsuyoshi_fujita WHERE date LIKE '%2003%';
+Result: count_2003 = 2
+
+SQL:
+SELECT DISTINCT date FROM public.tsuyoshi_fujita WHERE date LIKE '%2003%' ORDER BY date;
+Results:
+- 25 - 26 january 2003
+- 12 - 13 july 2003
+
+Assessment
+- The only rows in the table whose date falls in 2003 are exactly “25 - 26 january 2003” and “12 - 13 july 2003.” No other 2003 dates are present. Therefore, the claim is supported by the data.
+
+Assumptions
+- “Game play in 2003” is interpreted as entries in public.tsuyoshi_fujita whose date text contains the year “2003.” The season label is textual and may span years (e.g., “2002 - 03”).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

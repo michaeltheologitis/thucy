@@ -1,0 +1,79 @@
+
+<userQuery>
+<query>
+chris topping and dave sutton have the highest league apps
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim assessed: “chris topping and dave sutton have the highest league apps.”
+
+Data source discovery
+- Available database: TabFact (public schema)
+- Relevant table: public.t_1979_80_huddersfield_town_f_c_season (player-level appearance and goal statistics by competition for the 1979–80 Huddersfield Town F.C. season)
+
+Step 1: Confirm table content size
+SQL executed:
+SELECT COUNT(*) AS row_count FROM public.t_1979_80_huddersfield_town_f_c_season;
+Result:
+- row_count = 18
+
+Step 2: Determine who has the highest league appearances (parse leading digits from text column)
+SQL executed:
+SELECT name,
+       "league apps",
+       (regexp_match("league apps", '^\s*([0-9]+)'))[1] AS leading_digits,
+       CASE WHEN (regexp_match("league apps", '^\s*([0-9]+)'))[1] IS NOT NULL
+            THEN ((regexp_match("league apps", '^\s*([0-9]+)'))[1])::int
+            ELSE NULL
+       END AS league_apps_num
+FROM public.t_1979_80_huddersfield_town_f_c_season
+ORDER BY league_apps_num DESC NULLS LAST, name;
+Key returned rows (ordered by league_apps_num desc):
+- dave sutton — "league apps" = 46 — league_apps_num = 46
+- malcolm brown — "league apps" = 46 — league_apps_num = 46
+- peter hart — "league apps" = 46 — league_apps_num = 46
+- ian robins — "league apps" = 45 — league_apps_num = 45
+- mick laverick — "league apps" = 45 — league_apps_num = 45
+- ...
+- chris topping — "league apps" = 13 — league_apps_num = 13
+(Full ordered list available from the executed query.)
+
+Step 3: Directly verify Chris Topping and Dave Sutton’s league apps
+3a) Lookup rows (case-insensitive):
+SQL executed:
+SELECT name, "league apps"
+FROM public.t_1979_80_huddersfield_town_f_c_season
+WHERE name ILIKE '%Topping%' OR name ILIKE '%Sutton%';
+Result:
+[{"league apps":"46","name":"dave sutton"}, {"league apps":"13","name":"chris topping"}]
+
+3b) Extract and cast the numeric counts:
+SQL executed:
+SELECT name,
+       "league apps" AS league_apps_text,
+       substring("league apps" from '^\d+') AS league_apps_leading,
+       (substring("league apps" from '^\d+'))::int AS league_apps_count
+FROM public.t_1979_80_huddersfield_town_f_c_season
+WHERE lower(name) IN ('chris topping','dave sutton');
+Result:
+[{"league_apps_count":46,"league_apps_leading":"46","league_apps_text":"46","name":"dave sutton"}, {"league_apps_count":13,"league_apps_leading":"13","league_apps_text":"13","name":"chris topping"}]
+
+Findings
+- The highest league appearances in this table is 46, held jointly by Dave Sutton, Malcolm Brown, and Peter Hart.
+- Chris Topping has 13 league appearances, which is not the highest.
+- Therefore, only Dave Sutton is among the top appearance holders; Chris Topping is not.
+
+Conclusion
+- The claim that “chris topping and dave sutton have the highest league apps” is not supported by the data. Dave Sutton is tied for the highest, but Chris Topping is not.
+
+Assumptions and scope
+- “Highest league apps” was interpreted within the scope of the available dataset: the 1979–80 Huddersfield Town F.C. season table.
+- The “league apps” column is stored as text and can contain extra notation (e.g., “39 (1)”). The numeric appearance count was taken as the leading digits parsed from that text.
+- Name matching was performed case-insensitively, as names in the table appear in lowercase.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

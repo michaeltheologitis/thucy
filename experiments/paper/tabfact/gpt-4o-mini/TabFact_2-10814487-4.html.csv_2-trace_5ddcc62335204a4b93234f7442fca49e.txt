@@ -1,0 +1,67 @@
+
+<userQuery>
+<query>
+the score on 15 / 04 / 07 in super league xii be 52 to 22 with an attendance of 9000
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify:
+"the score on 15 / 04 / 07 in super league xii be 52 to 22 with an attendance of 9000"
+
+Data sources explored:
+- Available PostgreSQL database (public schema) containing table: t_2007_bradford_bulls_season
+- Table columns: date (text), home team (text), score (text), away team (text), goals (text), attendance (bigint), competition (text)
+
+Evidence collected (with executed SQL):
+1) Identify valid competition values to ensure correct filtering
+Executed SQL:
+SELECT competition, COUNT(*) AS row_count 
+FROM t_2007_bradford_bulls_season 
+GROUP BY competition;
+Result summary:
+- competition = "super league xii": 28 rows
+- competition = "rugby league challenge cup": 4 rows
+
+2) Retrieve the match on the exact date 15 / 04 / 07 in Super League XII
+Executed SQL:
+SELECT date, "home team", score, "away team", attendance, competition 
+FROM t_2007_bradford_bulls_season 
+WHERE date = '15 / 04 / 07' AND competition = 'super league xii';
+Returned row:
+- date: 15 / 04 / 07; home team: Bradford; score: 52 - 22; away team: Hull KR; attendance: 10,881; competition: super league xii
+
+3) Check if any match on that date in Super League XII had attendance 9000
+Executed SQL:
+SELECT date, "home team", score, "away team", attendance 
+FROM t_2007_bradford_bulls_season 
+WHERE date = '15 / 04 / 07' 
+  AND competition = 'super league xii' 
+  AND attendance = 9000;
+Result: No rows returned
+
+4) (Context) Find any Super League XII match with attendance exactly 9000
+Executed SQL:
+SELECT date, "home team", score, "away team", attendance 
+FROM t_2007_bradford_bulls_season 
+WHERE competition = 'super league xii' AND attendance = 9000;
+Returned row:
+- date: 21 / 9 / 07; home team: Bradford; score: 30 - 31; away team: Wigan Warriors; attendance: 9000
+
+Assessment:
+- Score on 15 / 04 / 07 in Super League XII: 52 - 22. This matches the claim.
+- Attendance on that date: 10,881. This contradicts the claimed attendance of 9,000.
+
+Conclusion:
+The score component of the claim is correct, but the attendance is not. The actual attendance recorded for that match was 10,881, not 9,000.
+
+Assumptions made:
+- Interpreted "15 / 04 / 07" as a date string stored exactly in the dataset (day/month/year) for the 2007 season.
+- Interpreted "super league xii" as the 2007 Super League season value stored in lowercase in the competition column.
+- Interpreted "52 to 22" as equivalent to the stored score format "52 - 22".
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,51 @@
+
+<userQuery>
+<query>
+the term end for vilson ahmeti be after the term end for ylli bufi
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the term end for vilson ahmeti be after the term end for ylli bufi.”
+
+Conclusion: Yes. The database shows Ylli Bufi’s term end was 10 December 1991 and Vilson Ahmeti’s term end was 13 April 1992; 1992-04-13 is after 1991-12-10.
+
+Evidence from the data (executed SQL and results):
+
+1) Locate relevant rows by partial name match (case-insensitive)
+SQL:
+SELECT name, "term end" FROM public.list_of_prime_ministers_of_albania WHERE name ILIKE '%Ahmeti%' OR name ILIKE '%Bufi%';
+Results:
+- ylli bufi | 10 December 1991
+- vilson ahmeti | 13 April 1992
+
+2) Retrieve both exact rows for comparison
+SQL:
+SELECT "name", "term end" FROM public.list_of_prime_ministers_of_albania WHERE "name" IN ('vilson ahmeti', 'ylli bufi');
+Results:
+- ylli bufi | 10 December 1991
+- vilson ahmeti | 13 April 1992
+
+3) Parse term end text to dates
+SQL:
+SELECT "name", to_date("term end", 'DD Month YYYY') AS parsed_date FROM public.list_of_prime_ministers_of_albania WHERE "name" IN ('vilson ahmeti', 'ylli bufi');
+Results:
+- ylli bufi | 1991-12-10
+- vilson ahmeti | 1992-04-13
+
+4) Direct boolean comparison of the two dates
+SQL:
+SELECT to_date('13 april 1992', 'DD Month YYYY') > to_date('10 december 1991', 'DD Month YYYY') AS is_ahmeti_after_bufi;
+Result:
+- is_ahmeti_after_bufi | true
+
+Answer: Vilson Ahmeti’s term end (13 April 1992) is after Ylli Bufi’s term end (10 December 1991).
+
+Assumptions:
+- “term end” refers to the end date of each person’s tenure as Prime Minister of Albania, using the table public.list_of_prime_ministers_of_albania.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

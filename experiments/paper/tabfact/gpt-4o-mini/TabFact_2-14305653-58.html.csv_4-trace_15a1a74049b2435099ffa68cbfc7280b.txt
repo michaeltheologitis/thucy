@@ -1,0 +1,58 @@
+
+<userQuery>
+<query>
+the yugoslavian national team score 7 goal and allow 3 against in the 3 1982 world cup qualify match
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify:
+"the yugoslavian national team score 7 goal and allow 3 against in the 3 1982 world cup qualify match"
+
+Data source discovery:
+- Available database: PostgreSQL with table public.yugoslavia_national_football_team_results (date text, city text, opponent text, results text, "type of game" text).
+
+Schema inspection result:
+- Columns: date, city, opponent, results, type of game.
+
+Evidence 1: Identify qualifier records for the 1982 World Cup
+Executed SQL:
+SELECT "type of game", COUNT(*) as count FROM public.yugoslavia_national_football_team_results GROUP BY "type of game" ORDER BY count DESC;
+Result (relevant):
+- 1982 wcq: 3 rows
+
+Evidence 2: List the three matches labeled as 1982 wcq
+Executed SQL:
+SELECT date, city, opponent, results 
+FROM public.yugoslavia_national_football_team_results 
+WHERE "type of game" = '1982 wcq';
+Returned rows:
+1) Date: September 10, City: Luxembourg, Opponent: Luxembourg, Results: 5:0
+2) Date: September 27, City: Ljubljana, Opponent: Denmark, Results: 2:1
+3) Date: November 15, City: Torino, Italy, Opponent: Italy, Results: 0:2
+
+Evidence 3: Aggregate goals for and against across those matches
+Executed SQL:
+SELECT SUM(CAST(SPLIT_PART(results, ':', 1) AS INTEGER)) AS total_goals_scored, 
+       SUM(CAST(SPLIT_PART(results, ':', 2) AS INTEGER)) AS total_goals_conceded, 
+       COUNT(*) AS number_of_matches 
+FROM public.yugoslavia_national_football_team_results 
+WHERE "type of game" = '1982 wcq';
+Result:
+- total_goals_scored: 7
+- total_goals_conceded: 3
+- number_of_matches: 3
+
+Assessment:
+- The database shows exactly three matches tagged as 1982 wcq, with cumulative results 7 scored and 3 conceded. This directly supports the claim.
+
+Assumptions:
+- The label "1982 wcq" denotes matches in qualification for the 1982 FIFA World Cup.
+- The results field is formatted as Yugoslavia goals : opponent goals.
+
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

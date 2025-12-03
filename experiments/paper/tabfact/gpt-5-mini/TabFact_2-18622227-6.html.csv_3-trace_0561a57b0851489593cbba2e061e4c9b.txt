@@ -1,0 +1,51 @@
+
+<userQuery>
+<query>
+each tournament have the same result in the year 1990 and 1999
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "each tournament have the same result in the year 1990 and 1999"
+
+Data source discovery and schema grounding:
+- Available database: TabFact (postgres_tabfact15)
+- Schema: public
+- Table: katrina_adams
+- Columns: tournament (text), and year-result columns including "1990" (text) and "1999" (text)
+
+Evidence gathered via executed SQL:
+1) Count total tournaments (rows)
+SQL:
+SELECT COUNT(*) AS total_tournaments FROM public.katrina_adams;
+Result: total_tournaments = 5
+
+2) Count tournaments where 1990 result differs from 1999 result (treating NULL=NULL as equal)
+SQL:
+SELECT COUNT(*) AS count_diff FROM public.katrina_adams WHERE "1990" IS DISTINCT FROM "1999";
+Result: count_diff = 4
+
+3) List tournaments where 1990 and 1999 results differ
+SQL:
+SELECT tournament, "1990" AS result_1990, "1999" AS result_1999
+FROM public.katrina_adams
+WHERE "1990" IS DISTINCT FROM "1999"
+ORDER BY tournament;
+Results:
+- australian open: result_1990 = 3r, result_1999 = 1r
+- french open: result_1990 = 3r, result_1999 = 1r
+- us open: result_1990 = 3r, result_1999 = 1r
+- wimbledon: result_1990 = 3r, result_1999 = 1r
+
+Conclusion:
+- Out of 5 tournaments, 4 have different results between 1990 and 1999. Therefore, it is not true that each tournament has the same result in those years.
+
+Assumptions made:
+- Each row in public.katrina_adams represents a tournament.
+- "Same result" means the value in column "1990" equals the value in column "1999"; NULLs are treated as equal using PostgreSQL’s IS DISTINCT FROM operator.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

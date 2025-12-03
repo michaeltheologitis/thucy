@@ -1,0 +1,50 @@
+
+<userQuery>
+<query>
+more player be draft from usc than from clemson
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “More players are drafted from USC than from Clemson.”
+
+Data sources explored
+- Discovered a PostgreSQL database: postgres_tabfact17 with a public schema containing table public.indianapolis_colts_draft_history.
+- Table schema (from schema inspection): round (bigint), pick (bigint), overall (bigint), name (text), position (text), college (text).
+
+Interpretation
+- Since the accessible dataset is a single-table history of Indianapolis Colts draft picks, I verify the claim within this dataset: comparing the number of Colts draftees from USC vs Clemson.
+
+Evidence
+1) Distinct colleges and counts
+Executed SQL:
+SELECT college, COUNT(*) AS drafted_count
+FROM public.indianapolis_colts_draft_history
+GROUP BY college
+ORDER BY drafted_count DESC, college ASC
+LIMIT 200;
+Results (excerpt):
+- usc — 2
+- clemson — 1
+
+2) Direct side-by-side counts (case-insensitive exact match)
+Executed SQL:
+SELECT SUM(CASE WHEN trim(lower(college)) = 'usc' THEN 1 ELSE 0 END) AS usc_count,
+       SUM(CASE WHEN trim(lower(college)) = 'clemson' THEN 1 ELSE 0 END) AS clemson_count
+FROM public.indianapolis_colts_draft_history;
+Results:
+- usc_count: 2
+- clemson_count: 1
+
+Conclusion
+- Within the Indianapolis Colts draft history data, more players were drafted from USC (2) than from Clemson (1). The claim holds true in this dataset.
+
+Assumptions
+- Scope: Verification is limited to the available dataset (Indianapolis Colts draft history) and not the entire NFL unless otherwise specified.
+- Matching logic: College names compared using case-insensitive exact matches to 'usc' and 'clemson'. Variants like 'University of Southern California' would not be counted unless stored as 'usc' in this table.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,62 @@
+
+<userQuery>
+<query>
+galina voskoboeva play a total of 3 game on a hard tennis court , and 1 on clay
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "Galina Voskoboeva played a total of 3 games on a hard tennis court, and 1 on clay."
+
+Data source discovery
+- Available database: PostgreSQL with schema public. Primary table identified: public.galina_voskoboeva.
+
+Table structure (verified via SQL)
+- SQL executed:
+  SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'galina_voskoboeva';
+- Result columns: outcome (text), date (text), tournament (text), surface (text), opponent (text), score (text)
+
+Surface values overview
+- SQL executed:
+  SELECT surface, COUNT(*) AS count FROM public.galina_voskoboeva GROUP BY surface;
+- Result:
+  - hard (i): 2
+  - hard: 1
+  - clay: 2
+
+Match listings by surface (evidence)
+- Clay matches
+  - SQL executed:
+    SELECT date, tournament, opponent, surface FROM galina_voskoboeva WHERE surface ILIKE 'clay';
+  - Results:
+    1) Date: 3 October 2003, Tournament: Latina, Opponent: Roberta Vinci, Surface: Clay
+    2) Date: 6 June 2006, Tournament: Cuneo, Italy, Opponent: Alice Canepa, Surface: Clay
+
+- Hard matches (including indoor hard)
+  - SQL executed:
+    SELECT date, tournament, opponent, surface FROM galina_voskoboeva WHERE surface = 'hard' OR surface = 'hard (i)';
+  - Results:
+    1) Date: 28 January 2003, Tournament: Tipton, Opponent: Matea Mezak, Surface: Hard (i)
+    2) Date: 29 June 2003, Tournament: Mont - de - Marsan, Opponent: Oleksandra Kravets, Surface: Hard (i)
+    3) Date: 8 November 2005, Tournament: Pittsburgh, Opponent: Lilia Osterloh, Surface: Hard
+
+Aggregate counts used to verify the claim
+- SQL executed:
+  SELECT COUNT(*) AS total_matches_hard FROM galina_voskoboeva WHERE surface IN ('hard', 'hard (i)');
+  Result: 3
+- SQL executed:
+  SELECT COUNT(*) AS total_matches_clay FROM galina_voskoboeva WHERE surface = 'clay';
+  Result: 2
+
+Conclusion
+- The data shows 3 matches on hard (including indoor hard) and 2 matches on clay. Therefore, the claim is correct for hard-court matches (3) but incorrect for clay (claim says 1; data shows 2).
+
+Assumptions
+- Interpreted "game" as "matches" recorded in the public.galina_voskoboeva table.
+- Counted both 'hard' and 'hard (i)' as hard-court matches (indoor hard included).
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,73 @@
+
+<userQuery>
+<query>
+in 2009 , when the girl double be anneke feinya agustin wenny setiawati , the mixed double be wifqi windarto debby susanto
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify:
+- "In 2009, the girls' doubles were Anneke Feinya Agustin / Wenny Setiawati, and the mixed doubles were Wifqi Windarto / Debby Susanto."
+
+Data source explored:
+- Database: TabFact (PostgreSQL) -> public.indonesian_national_badminton_championships
+  Columns: year, boys singles, girls singles, boys doubles, girls doubles, mixed doubles
+
+Evidence 1 — Actual 2009 winners (girls doubles and mixed doubles):
+- SQL executed:
+  SELECT "year", "girls doubles", "mixed doubles"
+  FROM public.indonesian_national_badminton_championships
+  WHERE "year" = 2009;
+- Result:
+  year: 2009; girls doubles: "ayu pratiwi anggi widia"; mixed doubles: "didit juang indrianto yayu rahayu"
+
+Evidence 2 — Full record for 2009 for context:
+- SQL executed:
+  SELECT * FROM public.indonesian_national_badminton_championships WHERE year = 2009;
+- Result:
+  year: 2009
+  boys singles: riyanto subagja
+  girls singles: ana rovita
+  boys doubles: jones ralfy jansen dandi prabudita
+  girls doubles: ayu pratiwi anggi widia
+  mixed doubles: didit juang indrianto yayu rahayu
+
+Evidence 3 — Do the claimed pairs appear in any year (girls doubles side)?
+- SQL executed:
+  SELECT year, "girls doubles" FROM public.indonesian_national_badminton_championships
+  WHERE "girls doubles" ILIKE '%Anneke Feinya Agustin%' OR "girls doubles" ILIKE '%Wenny Setiawati%'
+  ORDER BY year;
+- Result:
+  2007 — girls doubles: "anneke feinya agustin wenny setiawati"
+
+Evidence 4 — Do the claimed pairs appear in any year (mixed doubles side)?
+- SQL executed:
+  SELECT year, "mixed doubles" FROM public.indonesian_national_badminton_championships
+  WHERE "mixed doubles" ILIKE '%Wifqi Windarto%' OR "mixed doubles" ILIKE '%Debby Susanto%'
+  ORDER BY year;
+- Results:
+  2006 — mixed doubles: "danny bawa chrisnanta debby susanto"
+  2007 — mixed doubles: "wifqi windarto debby susanto"
+
+Evidence 5 — Direct confirmation for 2007 (both categories):
+- SQL executed:
+  SELECT year, "girls doubles", "mixed doubles" FROM public.indonesian_national_badminton_championships WHERE year = 2007;
+- Result:
+  2007 — girls doubles: "anneke feinya agustin wenny setiawati"; mixed doubles: "wifqi windarto debby susanto"
+
+Assessment:
+- For 2009, the database shows girls doubles winners as "ayu pratiwi anggi widia" and mixed doubles winners as "didit juang indrianto yayu rahayu" — not the pairs in the claim.
+- The claimed pairs actually correspond to 2007, not 2009, per the same authoritative table.
+
+Conclusion:
+- The claim is false for the year 2009. The named pairs won in 2007.
+
+Assumptions made:
+- Interpreted "girl double" as the "girls doubles" category and "mixed double" as "mixed doubles" within the Indonesian National Badminton Championships.
+- Names are presented as stored in the dataset (concatenated pair names without punctuation).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

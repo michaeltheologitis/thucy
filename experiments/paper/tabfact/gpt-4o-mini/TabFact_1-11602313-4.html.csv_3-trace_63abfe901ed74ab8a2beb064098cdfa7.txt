@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+the processor with a part number of lf80537 ge0251 mn have a fsb of 533 mt / s
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “the processor with a part number of lf80537 ge0251 mn have a fsb of 533 mt / s.”
+
+Summary of finding: Verified. The Intel CPUs database contains an entry with the exact part number string “LF80537 GE0251 MN” corresponding to a Pentium Dual-Core T2330 processor whose FSB is listed as 533 MT/s.
+
+Data source explored:
+- Database: Intel CPUs database
+- Schema: public
+- Table: list_of_intel_pentium_dual_core_microprocessors
+  - Relevant columns: model number, fsb, frequency, socket, part number (s)
+
+Evidence and executed SQL:
+1) Targeted match for the exact part number (case/space-insensitive)
+SQL:
+SELECT "model number", "fsb", "frequency", "socket", "part number (s)" 
+FROM public.list_of_intel_pentium_dual_core_microprocessors 
+WHERE LOWER(TRIM("part number (s)")) = LOWER(TRIM('LF80537 GE0251 MN'))
+
+Result:
+- Model Number: Pentium Dual - Core T2330
+- FSB: 533 MT/s
+- Frequency: 1.6 GHz
+- Socket: Socket P
+- Exact Part Number(s): LF80537 GE0251 MN
+
+2) Broad lookup by the GE0251 code (used during discovery)
+SQL:
+SELECT "model number", fsb, frequency, socket, "part number (s)"
+FROM public.list_of_intel_pentium_dual_core_microprocessors
+WHERE LOWER("part number (s)"::text) LIKE LOWER('%GE0251%')
+
+Result (matching row):
+- Model Number: Pentium Dual - Core T2330
+- FSB: 533 MT / S
+- Frequency: 1.6 GHz
+- Socket: Socket P
+- Part Number(s): LF80537 GE0251 MN
+
+Conclusion: The processor with part number “LF80537 GE0251 MN” has an FSB of 533 MT/s, as per the database record.
+
+Assumptions:
+- “mt / s” is interpreted as the standard “MT/s” unit (mega-transfers per second) for FSB speed.
+- The part number string provided by the user matches the database’s “part number (s)” field representation, including spacing and casing, which were normalized during the query.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

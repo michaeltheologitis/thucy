@@ -1,0 +1,75 @@
+
+<userQuery>
+<query>
+reason to be pretty be nominate for best play more than 1 time
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Reasons to Be Pretty was nominated for Best Play more than once.”
+
+Summary conclusion: The data shows exactly one Best Play nomination for Reasons to Be Pretty (at the 2009 Tony Awards). There are no additional Best Play nominations recorded. Therefore, the claim is not supported.
+
+Data sources explored
+- Discovered data source: TabFact (PostgreSQL), schema: public
+- Relevant table: public.reasons_to_be_pretty (columns: year, award ceremony, category, nominee, result)
+
+Evidence (SQL and results)
+1) Inspect distinct categories to confirm presence and exact casing of “Best Play”
+SQL executed:
+SELECT DISTINCT category FROM public.reasons_to_be_pretty ORDER BY category;
+Results (distinct category values):
+- best performance by a featured actress in a play
+- best performance by a leading actor in a play
+- best play
+- outstanding actor in a play
+- outstanding director of a play
+- outstanding play
+- theatre world award
+
+2) Inspect distinct results to understand nomination vs. win values
+SQL executed:
+SELECT DISTINCT result FROM public.reasons_to_be_pretty ORDER BY result;
+Results (distinct result values):
+- nominated
+- won
+
+3) List all Best Play entries for Reasons to Be Pretty
+SQL executed:
+SELECT year, "award ceremony", category, nominee, result
+FROM public.reasons_to_be_pretty
+WHERE lower(category) = lower('Best Play')
+ORDER BY year, "award ceremony";
+Results:
+- 2009 | tony award | best play | neil labute | nominated
+
+4) Count Best Play nominations (excluding wins) and list ceremonies/years
+SQL executed:
+SELECT year, "award ceremony", category, nominee, result
+FROM public.reasons_to_be_pretty
+WHERE lower(category) = 'best play'
+ORDER BY year;
+Results:
+- {year: 2009, award ceremony: tony award, category: best play, nominee: neil labute, result: nominated)
+
+SQL executed:
+SELECT COUNT(*) AS nomination_count
+FROM public.reasons_to_be_pretty
+WHERE lower(category) = 'best play'
+  AND lower(result) LIKE '%nom%';
+Results:
+- nomination_count: 1
+
+Conclusion based on evidence
+- The table records one Best Play nomination (2009, Tony Award). There are no additional Best Play nominations in the dataset. Thus, “nominated more than once” is contradicted by the data.
+
+Assumptions
+- The TabFact public.reasons_to_be_pretty table is complete for award nominations relevant to this verification.
+- Matching for the category “Best Play” and the result “nominated” is case-insensitive.
+- Any result containing “nom” (e.g., “nominated”) is treated as a nomination; wins are excluded.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

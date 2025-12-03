@@ -1,0 +1,60 @@
+
+<userQuery>
+<query>
+the highest scoring team for the game that happen on the 18th of june be carlton
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “The highest scoring team for the game that happened on the 18th of June is Carlton.”
+
+Data source discovery
+- Available source: TabFact (public schema) with table public.t_1938_vfl_season (1938 VFL season). Columns: "home team", "home team score", "away team", "away team score", "venue", "crowd", "date" (dates stored as text; scores stored as strings like “16.25 (121)”).
+
+Evidence
+1) List all matches recorded on 18 June (broad text match)
+SQL executed:
+SELECT "home team", "home team score", "away team", "away team score", "venue", "crowd", "date"
+FROM public.t_1938_vfl_season
+WHERE date ILIKE '%18%' AND date ILIKE '%June%';
+Results (rows):
+- geelong | 11.23 (89) | hawthorn | 6.13 (49) | corio oval | 7000 | 18 june 1938
+- fitzroy | 16.12 (108) | south melbourne | 8.8 (56) | brunswick street oval | 12000 | 18 june 1938
+- st kilda | 14.12 (96) | melbourne | 16.16 (112) | junction oval | 14000 | 18 june 1938
+- richmond | 15.14 (104) | essendon | 15.9 (99) | punt road oval | 20000 | 18 june 1938
+- footscray | 13.9 (87) | collingwood | 10.5 (65) | western oval | 18000 | 18 june 1938
+- north melbourne | 11.5 (71) | carlton | 16.25 (121) | arden street oval | 13000 | 18 june 1938
+
+2) Confirm the same set precisely by date
+SQL executed:
+SELECT * FROM public.t_1938_vfl_season WHERE lower(date) = '18 june 1938';
+Results: Same six rows as above.
+
+3) Compute the highest-scoring team on that date (parse numeric points from parentheses)
+SQL executed:
+SELECT team, points, opponent, venue, date FROM (
+  SELECT date, venue, "home team" as team, CAST(trim(both '()' FROM split_part("home team score",' ',2)) AS integer) as points, "away team" as opponent
+  FROM public.t_1938_vfl_season
+  WHERE lower(date) = '18 june 1938'
+  UNION ALL
+  SELECT date, venue, "away team" as team, CAST(trim(both '()' FROM split_part("away team score",' ',2)) AS integer) as points, "home team" as opponent
+  FROM public.t_1938_vfl_season
+  WHERE lower(date) = '18 june 1938'
+) t
+ORDER BY points DESC
+LIMIT 1;
+Result:
+- team: carlton, points: 121, opponent: north melbourne, venue: arden street oval, date: 18 june 1938
+
+Conclusion
+- Carlton scored 121 points on 18 June 1938, which is the highest single-team score among all matches played on that date in the dataset. The claim is supported by the data.
+
+Assumptions
+- The claim refers to the matches on 18 June 1938 found in the available 1938 VFL season dataset.
+- “Highest scoring team for the game that happened on the 18th of June” is interpreted as the highest single-team score across all matches played on that date within this dataset.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

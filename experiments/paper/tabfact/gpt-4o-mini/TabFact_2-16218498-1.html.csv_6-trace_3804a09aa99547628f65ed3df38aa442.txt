@@ -1,0 +1,68 @@
+
+<userQuery>
+<query>
+port autonome versus sport clube da praia have higher score than of lprc oiler versus mighty blackpool
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim interpreted: The match Port Autonome vs Sport Clube/ing da Praia had a higher score than LPRC Oilers vs Mighty Blackpool.
+- Data scope: 1992 African Cup of Champions Clubs (the only available dataset). Within this dataset, LPRC Oilers vs Mighty Blackpool is recorded; no tie between Port Autonome and Sporting Clube da Praia is recorded. Therefore, the comparison cannot be supported by the data.
+
+Evidence and executed SQL
+1) Identify and quantify the score for LPRC Oilers vs Mighty Blackpool
+Result: Tie found with total 5 goals across two legs (1 - 0 and 1 - 3; aggregate 2 - 3).
+Executed SQL:
+SELECT "team 1", "team 2", "1st leg", "2nd leg", agg,
+       (COALESCE(NULLIF(SPLIT_PART("1st leg", ' - ', 1), '')::INT, 0) + 
+        COALESCE(NULLIF(SPLIT_PART("1st leg", ' - ', 2), '')::INT, 0) + 
+        COALESCE(NULLIF(SPLIT_PART("2nd leg", ' - ', 1), '')::INT, 0) + 
+        COALESCE(NULLIF(SPLIT_PART("2nd leg", ' - ', 2), '')::INT, 0)) AS total_goals 
+FROM t_1992_african_cup_of_champions_clubs 
+WHERE ("team 1" ILIKE '%LPRC Oilers%' AND "team 2" ILIKE '%Mighty Blackpool%') 
+OR ("team 1" ILIKE '%Mighty Blackpool%' AND "team 2" ILIKE '%LPRC Oilers%');
+Returned row (paraphrased): team 1 = LPRC Oilers; team 2 = Mighty Blackpool; 1st leg = 1 - 0; 2nd leg = 1 - 3; agg = 2 - 3; total_goals = 5.
+
+2) Check whether a tie exists between Port Autonome and Sporting Clube da Praia in 1992 data
+Result: No such tie found (0 rows returned).
+Executed SQL:
+SELECT "team 1", "team 2", "1st leg", "2nd leg", agg
+FROM t_1992_african_cup_of_champions_clubs
+WHERE (("team 1" ILIKE '%Autonome%' AND "team 2" ILIKE '%Praia%')
+    OR ("team 2" ILIKE '%Autonome%' AND "team 1" ILIKE '%Praia%'));
+Returned: 0 rows.
+
+3) Confirm the team names present (context that both clubs appear in the dataset, even if they did not meet each other)
+3a) Teams containing “Praia”
+Executed SQL:
+SELECT DISTINCT "team 1" AS team_name FROM t_1992_african_cup_of_champions_clubs WHERE "team 1" ILIKE '%Praia%'
+UNION
+SELECT DISTINCT "team 2" AS team_name FROM t_1992_african_cup_of_champions_clubs WHERE "team 2" ILIKE '%Praia%';
+Returned: Sporting Clube da Praia
+
+3b) Teams containing “Port”
+Executed SQL:
+SELECT DISTINCT "team 1" AS team_name FROM t_1992_african_cup_of_champions_clubs WHERE "team 1" ILIKE '%Port%'
+UNION
+SELECT DISTINCT "team 2" AS team_name FROM t_1992_african_cup_of_champions_clubs WHERE "team 2" ILIKE '%Port%';
+Returned (selection relevant to claim): Port Autonome; Sporting Clube da Praia; Postel Sport
+
+Assessment
+- The dataset records LPRC Oilers vs Mighty Blackpool with a total of 5 goals.
+- The dataset does not record any tie between Port Autonome and Sporting Clube da Praia in 1992; therefore, we cannot compute or compare a score for that pairing within this data.
+- Consequently, the assertion that Port Autonome vs Sporting/“Sport” Clube da Praia had a higher score than LPRC Oilers vs Mighty Blackpool is unsupported by the available evidence.
+
+Conclusion
+- Based strictly on the available 1992 African Cup of Champions Clubs data, the claim cannot be verified and is considered inaccurate within this scope.
+
+Assumptions
+- “Higher score” was interpreted as a higher total number of goals scored in the tie (sum of both teams’ goals across both legs).
+- “Sport Clube da Praia” was matched to “Sporting Clube da Praia,” which is how the team appears in the dataset.
+- Scope is limited to the accessible dataset (1992 African Cup of Champions Clubs). If the claim pertains to another season, it falls outside the available data and cannot be verified here.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

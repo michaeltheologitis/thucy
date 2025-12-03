@@ -1,0 +1,67 @@
+
+<userQuery>
+<query>
+collingwood score more point than fitzroy in their 1962 vfl match
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "collingwood score more point than fitzroy in their 1962 vfl match"
+
+Data source consulted: PostgreSQL database TabFact (postgres_tabfact21), public schema, table: public.t_1962_vfl_season. Relevant columns: "home team", "home team score", "away team", "away team score", "venue", "crowd", "date". Scores are stored as text and can appear in VFL format like "goals.behinds (points)".
+
+Evidence queries and results:
+1) Retrieve Collingwood vs Fitzroy matches in 1962 (case-insensitive), parse points, and check who scored more
+Executed SQL:
+SELECT
+  "home team",
+  "home team score",
+  "away team",
+  "away team score",
+  "venue",
+  "crowd",
+  "date",
+  CASE WHEN "home team score" ~ '\(\d+\)' THEN regexp_replace("home team score", '.*\((\d+)\).*', '\\1')::int ELSE ("home team score")::int END AS home_points,
+  CASE WHEN "away team score" ~ '\(\d+\)' THEN regexp_replace("away team score", '.*\((\d+)\).*', '\\1')::int ELSE ("away team score")::int END AS away_points,
+  CASE WHEN lower("home team") = 'collingwood' THEN CASE WHEN "home team score" ~ '\(\d+\)' THEN regexp_replace("home team score", '.*\((\d+)\).*', '\\1')::int ELSE ("home team score")::int END
+       WHEN lower("away team") = 'collingwood' THEN CASE WHEN "away team score" ~ '\(\d+\)' THEN regexp_replace("away team score", '.*\((\d+)\).*', '\\1')::int ELSE ("away team score")::int END
+       ELSE NULL END AS collingwood_points,
+  CASE WHEN lower("home team") = 'fitzroy' THEN CASE WHEN "home team score" ~ '\(\d+\)' THEN regexp_replace("home team score", '.*\((\d+)\).*', '\\1')::int ELSE ("home team score")::int END
+       WHEN lower("away team") = 'fitzroy' THEN CASE WHEN "away team score" ~ '\(\d+\)' THEN regexp_replace("away team score", '.*\((\d+)\).*', '\\1')::int ELSE ("away team score")::int END
+       ELSE NULL END AS fitzroy_points,
+  CASE WHEN
+    (CASE WHEN lower("home team") = 'collingwood' THEN CASE WHEN "home team score" ~ '\(\d+\)' THEN regexp_replace("home team score", '.*\((\d+)\).*', '\\1')::int ELSE ("home team score")::int END
+          WHEN lower("away team") = 'collingwood' THEN CASE WHEN "away team score" ~ '\(\d+\)' THEN regexp_replace("away team score", '.*\((\d+)\).*', '\\1')::int ELSE ("away team score")::int END END)
+    >
+    (CASE WHEN lower("home team") = 'fitzroy' THEN CASE WHEN "home team score" ~ '\(\d+\)' THEN regexp_replace("home team score", '.*\((\d+)\).*', '\\1')::int ELSE ("home team score")::int END
+          WHEN lower("away team") = 'fitzroy' THEN CASE WHEN "away team score" ~ '\(\d+\)' THEN regexp_replace("away team score", '.*\((\d+)\).*', '\\1')::int ELSE ("away team score")::int END END)
+  THEN true ELSE false END AS collingwood_scored_more
+FROM public.t_1962_vfl_season
+WHERE (lower("home team") = 'collingwood' AND lower("away team") = 'fitzroy')
+   OR (lower("home team") = 'fitzroy' AND lower("away team") = 'collingwood');
+
+Result row:
+- home team: Collingwood; home team score: 10.14 (74); away team: Fitzroy; away team score: 9.11 (65); venue: victoria park; crowd: 26488; date: 23 june 1962; home_points: 74; away_points: 65; collingwood_points: 74; fitzroy_points: 65; collingwood_scored_more: true
+
+2) Count of Collingwood vs Fitzroy matches in this table
+Executed SQL:
+SELECT COUNT(*) AS match_count
+FROM public.t_1962_vfl_season
+WHERE (lower("home team") = 'collingwood' AND lower("away team") = 'fitzroy')
+   OR (lower("home team") = 'fitzroy' AND lower("away team") = 'collingwood');
+
+Result: match_count = 1
+
+Conclusion:
+- In the 1962 VFL data available, Collingwood and Fitzroy met once (23 June 1962 at Victoria Park). Collingwood scored 74 points and Fitzroy scored 65 points. Therefore, Collingwood scored more points than Fitzroy in their 1962 VFL match.
+
+Assumptions stated for transparency:
+- Team names were matched case-insensitively (the stored values are lowercase in this dataset).
+- Points were parsed from the parenthesized totals in the score strings (e.g., "10.14 (74)" -> 74). If no parentheses existed, the score would have been cast as an integer directly.
+- The table t_1962_vfl_season is treated as authoritative for 1962 VFL match results within its scope.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

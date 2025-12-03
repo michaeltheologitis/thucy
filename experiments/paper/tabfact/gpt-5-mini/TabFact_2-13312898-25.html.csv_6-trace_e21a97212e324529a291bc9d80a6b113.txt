@@ -1,0 +1,54 @@
+
+<userQuery>
+<query>
+run back calvin o'neal be draft with pick 24 of round 6
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “running back Calvin O’Neal was drafted with pick 24 of round 6.”
+
+Data source discovery:
+- Tool identified one available database: TabFact (postgres_tabfact13), public schema, containing table indianapolis_colts_draft_history (draft history for the Colts franchise).
+
+Schema examined:
+- Table: public.indianapolis_colts_draft_history
+  Columns: round (bigint), pick (bigint), overall (bigint), name (text), position (text), college (text)
+  Note: No year column.
+
+Evidence queries and results:
+1) Locate Calvin O’Neal’s draft entry (name-normalized to handle apostrophes):
+SQL:
+SELECT name, position, round, pick, overall
+FROM public.indianapolis_colts_draft_history
+WHERE regexp_replace(lower(name), '[^a-z0-9]', '', 'g') = 'calvinoneal';
+Result:
+- name: calvin o'neal
+- position: linebacker
+- round: 6
+- pick (within round): 24
+- overall: 163
+
+2) Check for any other similarly named entries (to confirm uniqueness):
+SQL:
+SELECT name, position, round, pick, overall
+FROM public.indianapolis_colts_draft_history
+WHERE regexp_replace(lower(name), '[^a-z0-9]', '', 'g') LIKE '%oneal%'
+ORDER BY name;
+Result: Only the same single Calvin O’Neal record returned.
+
+Assessment:
+- The pick details are supported: Calvin O’Neal was drafted in round 6 with pick 24 (overall 163) by the Colts franchise.
+- The position stated in the claim is incorrect: data shows he was a linebacker, not a running back.
+
+Conclusion: The drafting round/pick is correct; the position is not.
+
+Assumptions:
+- The claim pertains to the NFL Draft and the Colts franchise (Baltimore/Indianapolis) covered by this table.
+- Name normalization appropriately resolves apostrophe variations (O’Neal/O'Neal/Oneal).
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

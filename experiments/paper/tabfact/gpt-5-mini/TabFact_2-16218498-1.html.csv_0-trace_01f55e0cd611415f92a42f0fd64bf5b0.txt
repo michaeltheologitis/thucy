@@ -1,0 +1,52 @@
+
+<userQuery>
+<query>
+saint - louis fc game have the highest combined agg of any of the featured game
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Conclusion: Verified. In the available dataset of featured ties, the Saint - Louis FC vs Young Africans tie has the highest combined aggregate (total goals across the two legs).
+
+What I checked
+- Interpreted “combined agg” as the sum of both teams’ aggregate goals shown in the agg column, ignoring any penalty shootout values in parentheses.
+- Verified which tie(s) have the maximum combined total across all featured ties in the table.
+
+Evidence from data
+1) Inspection of all featured ties
+Executed SQL:
+SELECT "team 1", "agg", "team 2", "1st leg", "2nd leg" FROM public.t_1992_african_cup_of_champions_clubs;
+
+Key row relevant to the claim:
+- Row: team 1 = "saint - louis fc", team 2 = "young africans", agg = "2 - 7" (total 9)
+
+2) Explicit computation of combined aggregate totals and identification of the maximum
+Executed SQL:
+SELECT "team 1" AS team1, "team 2" AS team2, agg,
+ ((regexp_match(regexp_replace(agg,'\\(.*\\)',''),'([0-9]+)[^0-9]+([0-9]+)'))[1])::int
+ + ((regexp_match(regexp_replace(agg,'\\(.*\\)',''),'([0-9]+)[^0-9]+([0-9]+)'))[2])::int
+ AS computed_total,
+ (((regexp_match(regexp_replace(agg,'\\(.*\\)',''),'([0-9]+)[^0-9]+([0-9]+)'))[1])::int
+ + ((regexp_match(regexp_replace(agg,'\\(.*\\)',''),'([0-9]+)[^0-9]+([0-9]+)'))[2])::int) =
+ max(((regexp_match(regexp_replace(agg,'\\(.*\\)',''),'([0-9]+)[^0-9]+([0-9]+)'))[1])::int
+ + ((regexp_match(regexp_replace(agg,'\\(.*\\)',''),'([0-9]+)[^0-9]+([0-9]+)'))[2])::int) OVER ()
+ AS is_highest
+FROM public.t_1992_african_cup_of_champions_clubs
+ORDER BY computed_total DESC, team1, team2;
+
+Result highlights:
+- saint - louis fc vs young africans: agg = "2 - 7", computed_total = 9, is_highest = true
+- Next highest: cd elá nguema vs primeiro de agosto: agg = "2 - 6", computed_total = 8
+- No other tie reaches 9.
+
+Therefore, the Saint - Louis FC tie has the highest combined aggregate among all featured ties in the dataset.
+
+Assumptions
+- “Featured game(s)” refers to all ties listed in the available table public.t_1992_african_cup_of_champions_clubs.
+- “Combined agg” means the sum of the two numbers in the agg field, ignoring any penalty shootout values displayed in parentheses.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

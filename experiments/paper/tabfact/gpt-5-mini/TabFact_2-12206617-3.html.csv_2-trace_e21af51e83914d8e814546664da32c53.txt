@@ -1,0 +1,63 @@
+
+<userQuery>
+<query>
+the toronto blue jay win 2 of the last 3 game they play in may 1991
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify
+- “the toronto blue jay win 2 of the last 3 game they play in may 1991.” Interpreted as: Did the Toronto Blue Jays win 2 of their final 3 games played in May 1991?
+
+What I checked
+- Pulled all May 1991 games from the Toronto Blue Jays 1991 season table, then examined the last three May dates and whether each was a win or loss based on the change in the cumulative wins (“record”) after each game.
+
+Evidence from the database (with executed SQL)
+1) List all May 1991 games (date, opponent, score, loss, record) and order by the day of the month
+SQL executed:
+SELECT date, opponent, score, loss, record
+FROM public.t_1991_toronto_blue_jays_season
+WHERE date ILIKE 'may %'
+ORDER BY CAST(regexp_replace(date, '\\D', '', 'g') AS integer);
+
+Returned rows (end of list shown here for the last dates in May):
+- may 28 | athletics | 8 - 4 | acker (1 - 2)     | 25 - 20
+- may 29 | athletics | 8 - 3 | slusarski (1 - 2) | 26 - 20
+- may 30 | athletics | 8 - 6 | ward (0 - 2)      | 26 - 21
+- may 31 | angels    | 5 - 1 | langston (6 - 2)  | 27 - 21
+
+How wins/losses are represented (confirmation via SQL)
+2) Verified that the left number in “score” is the winner’s runs and used the change in the “record” (wins) to mark Blue Jays wins
+SQL executed:
+SELECT date, score,
+  (regexp_match(score, '^\\s*([0-9]+)'))[1]::int AS first_runs,
+  (regexp_match(score, '-\\s*([0-9]+)'))[1]::int AS second_runs,
+  CAST(split_part(record,' - ',1) AS integer) AS wins,
+  LAG(CAST(split_part(record,' - ',1) AS integer)) OVER (ORDER BY CAST(regexp_replace(date,'\\D','', 'g') AS integer)) AS prev_wins,
+  (CAST(split_part(record,' - ',1) AS integer) > LAG(CAST(split_part(record,' - ',1) AS integer)) OVER (ORDER BY CAST(regexp_replace(date,'\\D','', 'g') AS integer))) AS game_marked_as_win,
+  ((regexp_match(score, '^\\s*([0-9]+)'))[1]::int > (regexp_match(score, '-\\s*([0-9]+)'))[1]::int) AS first_greater_than_second
+FROM public.t_1991_toronto_blue_jays_season
+WHERE date ILIKE 'may %'
+ORDER BY CAST(regexp_replace(date,'\\D','', 'g') AS integer);
+
+Key interpretation supported by this query:
+- The left side of “score” is always the winner’s runs (first_greater_than_second = true).
+- A Blue Jays win is identified when the wins count in “record” increases versus the previous game (game_marked_as_win = true).
+
+Applying this to the last three May games
+- May 29: score 8–3, record moved 25–20 → 26–20 → Win for Toronto.
+- May 30: score 8–6, record moved 26–20 → 26–21 → Loss for Toronto.
+- May 31: score 5–1, record moved 26–21 → 27–21 → Win for Toronto.
+
+Conclusion
+- The Blue Jays won 2 of their last 3 games in May 1991 (W-L-W on May 29, 30, 31).
+
+Assumptions made
+- “Last 3 game they play in May 1991” means the final three calendar games in May (May 29, 30, 31, 1991).
+- The “record” field is the cumulative season record after each game and can be used to detect wins via an increase in wins count.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

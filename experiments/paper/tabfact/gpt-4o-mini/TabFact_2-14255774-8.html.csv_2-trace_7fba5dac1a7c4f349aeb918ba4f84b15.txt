@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+2 game have a score of more than 10 point
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “2 game have a score of more than 10 point.”
+
+Data source overview
+- Discovered database: TabFact (PostgreSQL), schema public, table t_2008_arizona_diamondbacks_season with columns: date (text), opponent (text), score (text), loss (text), attendance (bigint), record (text).
+
+Understanding the score format
+- Sample rows to inspect the score column:
+SQL:
+SELECT date, opponent, score, loss, attendance, record FROM public.t_2008_arizona_diamondbacks_season LIMIT 10;
+Observation: The score values look like “8 - 6”, which (based on consistency with the team record changes) corresponds to opponent_runs - Diamondbacks_runs.
+
+Checks performed
+1) How many games where the Diamondbacks scored more than 10 runs?
+Result: 0
+SQL:
+SELECT COUNT(*) AS games_above_10_runs
+FROM public.t_2008_arizona_diamondbacks_season
+WHERE CAST(SUBSTRING(score FROM '[- ](\d+)$') AS INTEGER) > 10;
+
+2) How many games where the opponent scored more than 10 runs? Also list them.
+Result: 2 games
+- September 21 vs Rockies, Score: 13 - 4
+- September 25 vs Cardinals, Score: 12 - 3
+SQL (list):
+SELECT date, opponent, score 
+FROM public.t_2008_arizona_diamondbacks_season 
+WHERE CAST(SUBSTRING(score FROM '^[0-9]+') AS INTEGER) > 10;
+SQL (count):
+SELECT COUNT(*) AS count 
+FROM public.t_2008_arizona_diamondbacks_season 
+WHERE CAST(SUBSTRING(score FROM '^[0-9]+') AS INTEGER) > 10;
+
+3) How many games where either team (opponent or Diamondbacks) scored more than 10 runs?
+Result: 2
+SQL (count):
+SELECT COUNT(*) AS team_score_count
+FROM public.t_2008_arizona_diamondbacks_season
+WHERE (CAST(SUBSTRING(score FROM '^[0-9]+') AS INTEGER) > 10 OR CAST(SUBSTRING(score FROM '(\d+)$') AS INTEGER) > 10);
+
+Conclusion
+- There are 2 games in which at least one team scored more than 10 runs (both instances are the opponent scoring >10). Thus, the claim that “2 game have a score of more than 10 point” is supported if interpreted as “in two games, a team’s score exceeded 10.”
+
+Assumptions
+- Interpreted “have a score of more than 10 point” as: in a game, at least one team’s run total exceeded 10.
+- If instead the claim meant “the Diamondbacks scored more than 10,” the count would be 0 (not 2), as shown above.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

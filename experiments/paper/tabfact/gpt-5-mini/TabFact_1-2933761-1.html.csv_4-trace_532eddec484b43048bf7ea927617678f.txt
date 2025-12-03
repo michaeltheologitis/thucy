@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+the only person list as a prison escapist have a status of dead
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the only person list as a prison escapist have a status of dead.”
+
+Data sources explored
+- Discovered database: TabFact (postgres_tabfact22), schema: public, with one table: public.cube_film_series.
+- Table schema (relevant columns): name (text), occupation (text), gender (text), "prison connection" (text), "played by" (text), status (text).
+
+Step 1: Check whether “prison escapist” appears and how many times
+A) Distinct values of occupation with counts
+SQL:
+SELECT occupation, COUNT(*) AS count
+FROM public.cube_film_series
+GROUP BY occupation
+ORDER BY count DESC NULLS LAST;
+Result excerpt:
+- prison escapist: 1
+
+B) Case-insensitive check for “prison escapist” within occupation
+SQL:
+SELECT COUNT(*) AS count FROM public.cube_film_series WHERE occupation ILIKE '%prison escapist%';
+Result: count = 1
+
+Step 2: Retrieve the row(s) labeled “prison escapist” and verify status
+SQL:
+SELECT name, occupation, "prison connection", status
+FROM public.cube_film_series
+WHERE occupation = 'prison escapist';
+Result:
+- name: rennes; occupation: prison escapist; prison connection: centre pãnitentiaire de rennes (france); status: dead
+
+Confirmation (names and statuses for rows matching case-insensitive search)
+SQL:
+SELECT name, status FROM public.cube_film_series WHERE occupation ILIKE '%prison escapist%' ORDER BY name;
+Result:
+- name: rennes, status: dead
+
+Conclusion
+- There is exactly one entry with occupation “prison escapist,” and that entry’s status is “dead.” The claim is supported by the data.
+
+Assumptions
+- Interpreted “person list as a prison escapist” as any record in public.cube_film_series whose occupation equals or contains “prison escapist.”
+- Case-insensitive checks were used to ensure no capitalization variants were missed.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

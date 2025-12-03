@@ -1,0 +1,85 @@
+
+<userQuery>
+<query>
+the yugoslavian national team suffer its worst outcome lose 2:1 in the balken cup against poland on march 22
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of the claim
+Claim: “the yugoslavian national team suffer its worst outcome lose 2:1 in the balken [Balkan] cup against poland on march 22.”
+
+Bottom line: The data contradicts the claim on all key points (opponent, competition, date, and outcome). There is no Yugoslavia vs Poland match in the Balkan Cup; the only Yugoslavia–Poland entry is a friendly on April 26 (2:1). The only March 22 entry is vs Uruguay (2:1, friendly). The dataset also shows a much heavier Balkan Cup defeat (1:4 vs Romania), contradicting the “worst outcome” assertion.
+
+Data sources explored
+- Database: TabFact (PostgreSQL), public schema
+- Relevant table: yugoslavia_national_football_team_results (columns: date [text], city [text], opponent [text], results [text], type of game [text])
+
+Verification steps and evidence
+1) Are there Yugoslavia matches vs Poland in this dataset?
+- SQL:
+  SELECT COUNT(*) FROM public.yugoslavia_national_football_team_results WHERE opponent = 'Poland';
+  Result: count = 0
+- SQL:
+  SELECT date, city, opponent, results, "type of game"
+  FROM public.yugoslavia_national_football_team_results
+  WHERE opponent ILIKE '%poland%'
+  ORDER BY date;
+  Result:
+  • date: april 26; city: borovo; opponent: poland; results: 2:1; type of game: friendly
+Interpretation: Exactly one Poland match exists in this table, and it is a friendly on April 26 with a 2:1 scoreline (Yugoslavia listed first), not a Balkan Cup match.
+
+2) Any Yugoslavia–Poland match labeled as Balkan Cup?
+- SQL:
+  SELECT COUNT(*) AS match_count
+  FROM public.yugoslavia_national_football_team_results
+  WHERE opponent ILIKE '%poland%' AND "type of game" ILIKE '%balkan%';
+  Result: match_count = 0
+Interpretation: No Yugoslavia vs Poland matches in the Balkan Cup.
+
+3) What happened on March 22?
+- SQL:
+  SELECT date, city, opponent, results, "type of game"
+  FROM public.yugoslavia_national_football_team_results
+  WHERE date ILIKE '%march 22%';
+  Result:
+  • date: march 22; city: sarajevo; opponent: uruguay; results: 2:1; type of game: friendly
+Interpretation: On March 22, the recorded match is vs Uruguay (not Poland) and is a friendly (not Balkan Cup). Score 2:1 with Yugoslavia listed first, indicating a win, not a loss.
+
+4) Did Yugoslavia ever lose 1:2 to Poland in this dataset?
+- SQL:
+  SELECT date, city, opponent, results, "type of game"
+  FROM public.yugoslavia_national_football_team_results
+  WHERE opponent ILIKE '%Poland%' AND results LIKE '%1:2%';
+  Result: no rows
+Interpretation: No evidence of a 1:2 loss to Poland.
+
+5) What Balkan Cup matches exist in this dataset (for context and “worst outcome”)?
+- SQL:
+  SELECT date, city, opponent, results, "type of game"
+  FROM public.yugoslavia_national_football_team_results
+  WHERE lower("type of game") LIKE '%balkan%'
+  ORDER BY date;
+  Results:
+  • date: august 27; city: bucharest , romania; opponent: romania; results: 1:4; type of game: balkan cup
+  • date: march 30; city: belgrade; opponent: romania; results: 2:0; type of game: balkan cup
+Interpretation: The Balkan Cup entries are against Romania, not Poland. A 1:4 loss exists, which would be a worse defeat than 1:2, further contradicting the “worst outcome” element of the claim.
+
+Conclusion
+- Opponent: Not Poland for Balkan Cup; March 22 match is vs Uruguay. False.
+- Competition: Not Balkan Cup for the Poland match; the only Balkan Cup opponents here are Romania. False.
+- Date: March 22 match is a friendly vs Uruguay, not Poland. False.
+- Outcome: No 1:2 loss to Poland; the only Poland match is a 2:1 friendly (Yugoslavia score first, indicating a win). False.
+- “Worst outcome”: Not supported; dataset shows a 1:4 Balkan Cup defeat vs Romania, which is a heavier loss than 1:2. False.
+Overall, the claim is contradicted by the data.
+
+Assumptions
+- “Balken cup” is interpreted as “Balkan Cup.”
+- The results field lists Yugoslavia’s score first (standard convention in team-specific results tables).
+- The date column is stored as text without years; matching used case-insensitive substring search (e.g., 'march 22').
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

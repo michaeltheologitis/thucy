@@ -1,0 +1,80 @@
+
+<userQuery>
+<query>
+west berkshire brewery 's maggs magnificent mild be its most decorate beer between 1995 and 2009
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “West Berkshire Brewery’s Maggs Magnificent Mild is its most decorated beer between 1995 and 2009.” I take “most decorated” to mean the beer with the highest number of prizes/awards recorded in that time window.
+
+Data sources discovered
+- Database: TabFact (PostgreSQL)
+- Schema: public
+- Table: west_berkshire_brewery
+
+Schema details (used to ground the analysis)
+- Columns: year (bigint), beer name (text), prize (text), category (text), competition (text)
+- No primary keys or foreign keys; all columns nullable.
+
+Evidence and executed SQL
+1) Count prizes per beer between 1995 and 2009 inclusive
+SQL:
+SELECT "beer name" AS beer, COUNT(*) AS prizes
+FROM west_berkshire_brewery
+WHERE year BETWEEN 1995 AND 2009
+GROUP BY "beer name"
+ORDER BY prizes DESC, beer;
+Result:
+- maggs magnificent mild — 10
+- dr hexter 's healer — 5
+- good old boy — 5
+- full circle — 2
+- mr chubb 's lunchtime bitter — 2
+- dr hexter 's wedding ale — 1
+- mash tun — 1
+- old father thames — 1
+- skiff — 1
+
+2) Determine the maximum prize count in that period
+SQL:
+SELECT MAX(prizes) AS max_prizes FROM (
+  SELECT COUNT(*) AS prizes
+  FROM west_berkshire_brewery
+  WHERE year BETWEEN 1995 AND 2009
+  GROUP BY "beer name"
+) t;
+Result:
+- max_prizes = 10
+
+3) Identify the beer(s) with that maximum count
+SQL:
+SELECT "beer name" AS beer, COUNT(*) AS prizes
+FROM west_berkshire_brewery
+WHERE year BETWEEN 1995 AND 2009
+GROUP BY "beer name"
+HAVING COUNT(*) = (
+  SELECT MAX(prizes) FROM (
+    SELECT COUNT(*) AS prizes
+    FROM west_berkshire_brewery
+    WHERE year BETWEEN 1995 AND 2009
+    GROUP BY "beer name"
+  ) t
+)
+ORDER BY beer;
+Result:
+- maggs magnificent mild — 10
+
+Conclusion
+- Between 1995 and 2009 inclusive, “maggs magnificent mild” has the highest number of recorded prizes (10), ahead of the next-closest beers at 5. This supports the claim that it is the brewery’s most decorated beer in that period.
+
+Assumptions
+- “Most decorated” is interpreted as the most prizes/awards (row count in the prizes table) within the specified years.
+- The period 1995–2009 is inclusive.
+- The lowercase “maggs magnificent mild” in the data corresponds to the claimed “Magg’s Magnificent Mild.”
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

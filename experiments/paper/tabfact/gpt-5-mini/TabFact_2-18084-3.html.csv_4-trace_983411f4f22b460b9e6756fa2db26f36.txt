@@ -1,0 +1,70 @@
+
+<userQuery>
+<query>
+the most recent long jump record be set by dwight phillips
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim evaluated: “the most recent long jump record be set by Dwight Phillips.”
+
+Data sources discovered:
+- Database: TabFact (postgres_tabfact6), schema: public
+- Relevant table: public.long_jump (columns: mark [text], wind [double precision], athlete [text], nationality [text], venue [text], date [text])
+
+Evidence collection and executed SQL:
+1) Inspect sample rows to understand data format
+- SQL:
+  SELECT mark, wind, athlete, nationality, venue, date FROM public.long_jump LIMIT 10;
+- Observation: Contains well-known top men’s long jumps (e.g., Mike Powell 8.95 m in 1991; Bob Beamon 8.90 m in 1968; Dwight Phillips 8.74 m in 2009). Dates are stored as text.
+
+2) Identify the world-record mark (maximum distance in meters) and its holder/date
+- SQL:
+  SELECT athlete, date, venue, wind, mark, split_part(mark, ' m', 1)::numeric AS mark_m
+  FROM public.long_jump
+  WHERE mark IS NOT NULL
+  ORDER BY mark_m DESC
+  LIMIT 3;
+- Result (top 3):
+  1) Mike Powell — 8.95 m, Tokyo, wind 0.3, date: august 30 , 1991
+  2) Bob Beamon — 8.90 m, Mexico City, wind 2, date: october 18 , 1968
+  3) Carl Lewis — 8.87 m, Tokyo, wind 0.2, date: august 30 , 1991
+- Interpretation: The maximum mark (the world record) in the table is 8.95 m by Mike Powell on August 30, 1991.
+
+3) Verify that no mark exceeds 8.95 m (i.e., no more recent improvement)
+- SQL:
+  SELECT count(*) AS cnt
+  FROM public.long_jump
+  WHERE split_part(mark, ' m', 1)::numeric > 8.95;
+- Result: cnt = 0
+- Interpretation: No jump beyond 8.95 m exists in the dataset; thus, the 8.95 m record from 1991 remains the latest world record-setting mark.
+
+4) Check Dwight Phillips’s best mark in the table
+- SQL (method A):
+  SELECT athlete, date, venue, wind, mark, split_part(mark, ' m', 1)::numeric AS meters
+  FROM public.long_jump
+  WHERE athlete = 'dwight phillips'
+    AND split_part(mark, ' m', 1) ~ '^[0-9]+(\.[0-9]+)?$'
+  ORDER BY meters DESC
+  LIMIT 3;
+- SQL (method B):
+  SELECT athlete, date, venue, wind, mark, substring(mark from '([0-9]+(\.[0-9]+)?)')::numeric AS meters
+  FROM public.long_jump
+  WHERE athlete = 'dwight phillips'
+  AND substring(mark from '([0-9]+(\.[0-9]+)?)') IS NOT NULL
+  ORDER BY meters DESC
+  LIMIT 3;
+- Result (both methods): Dwight Phillips — 8.74 m, Eugene, wind 1.2, date: june 7 , 2009
+- Interpretation: Dwight Phillips’s best listed performance (8.74 m, 2009) is well below the 8.95 m world record and therefore did not set a new world record.
+
+Conclusion:
+- The most recent men’s long jump world record in the dataset is 8.95 m by Mike Powell set on August 30, 1991. No subsequent performance in the table exceeds this mark. Dwight Phillips’s best entry is 8.74 m in 2009, which is not a world record. Therefore, the claim that the most recent long jump record was set by Dwight Phillips is contradicted by the data.
+
+Assumptions due to ambiguity:
+- Interpreted “long jump record” as the men’s world record (best-ever legal mark). The table appears to list top men’s marks. If the claim intended a different record type (e.g., national record, championship record, indoor, or women’s event), that would require a different dataset and verification scope.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

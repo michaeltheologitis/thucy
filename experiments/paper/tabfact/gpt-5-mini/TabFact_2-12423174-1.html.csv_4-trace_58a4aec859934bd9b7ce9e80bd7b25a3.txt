@@ -1,0 +1,66 @@
+
+<userQuery>
+<query>
+canon yaoundé score 5 more point than their opponent
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "canon yaoundé score 5 more point than their opponent"
+
+Data sources explored:
+- Connected relational source: TabFact (postgres_tabfact10), public schema
+- Relevant table discovered: public.t_1971_african_cup_of_champions_clubs(team 1 text, agg text, team 2 text, 1st leg text, 2nd leg text)
+
+What I checked:
+- Searched for any ties in which Canon Yaoundé participated and computed the aggregate goal difference from Canon’s perspective. I treated "points" as "goals" given the football context in this dataset and the presence of an aggregate score (agg).
+
+Evidence found:
+- One tie shows Canon Yaoundé defeated AS Solidarité 9–4 on aggregate, which is a +5 goal difference for Canon Yaoundé.
+  - team 1: canon yaoundé
+  - team 2: as solidarité
+  - 1st leg: 7 - 3
+  - 2nd leg: 2 - 1
+  - agg: 9 - 4
+  - Aggregate difference (Canon goals − opponent goals): +5
+
+Executed SQL (exact) and results:
+1) Identify rows mentioning Canon:
+Query:
+SELECT "team 1", "team 2", "1st leg", "2nd leg", agg
+FROM public.t_1971_african_cup_of_champions_clubs
+WHERE "team 1" ILIKE '%canon%'
+   OR "team 2" ILIKE '%canon%';
+Result:
+[{"1st leg":"7 - 3","2nd leg":"2 - 1","agg":"9 - 4","team 1":"canon yaoundé","team 2":"as solidarité"}]
+
+2) Compute the aggregate difference from Canon’s perspective and filter for a +5 margin:
+Query:
+WITH matches AS (
+ SELECT "team 1","team 2","1st leg","2nd leg",agg,
+  split_part(regexp_replace(agg,'[^0-9]+','-','g'),'-',1)::int as g1,
+  split_part(regexp_replace(agg,'[^0-9]+','-','g'),'-',2)::int as g2,
+  CASE WHEN "team 1" ILIKE '%canon%' THEN 'team_1' WHEN "team 2" ILIKE '%canon%' THEN 'team_2' END as canon_side
+ FROM public.t_1971_african_cup_of_champions_clubs
+ WHERE "team 1" ILIKE '%canon%' OR "team 2" ILIKE '%canon%'
+)
+SELECT "team 1","team 2","1st leg","2nd leg",agg, canon_side,
+ CASE WHEN canon_side='team_1' THEN g1 - g2 ELSE g2 - g1 END as agg_diff
+FROM matches
+WHERE (CASE WHEN canon_side='team_1' THEN g1 - g2 ELSE g2 - g1 END) = 5;
+Result:
+[{"1st leg":"7 - 3","2nd leg":"2 - 1","agg":"9 - 4","agg_diff":5,"canon_side":"team_1","team 1":"canon yaoundé","team 2":"as solidarité"}]
+
+Conclusion:
+- Supported by the data: there is a recorded tie where Canon Yaoundé scored 5 more goals than their opponent (9–4 aggregate), satisfying the claim as interpreted.
+
+Assumptions made:
+- "points" refers to goals in football match context.
+- "their opponent" refers to the opposing club in the identified tie (AS Solidarité).
+- Verification is limited to the available TabFact table for the 1971 African Cup of Champions Clubs; broader seasons or competitions were not queried because they are not present in the connected data source.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

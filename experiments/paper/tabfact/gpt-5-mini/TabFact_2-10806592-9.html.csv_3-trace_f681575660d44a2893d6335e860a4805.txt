@@ -1,0 +1,66 @@
+
+<userQuery>
+<query>
+no game on the 18th of june draw a crowd of more than 20000
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: "no game on the 18th of june draw a crowd of more than 20000"
+
+Data source inspected: TabFact (public schema)
+Relevant table: public.t_1938_vfl_season (columns: home team, home team score, away team, away team score, venue, crowd, date)
+
+Step 1 — Identify date values present
+- Purpose: Confirm how the date is stored and whether 18 June exists in the dataset.
+- Executed SQL:
+  SELECT date, COUNT(*) AS row_count FROM public.t_1938_vfl_season GROUP BY date ORDER BY date NULLS FIRST;
+- Result: One distinct date value: "18 june 1938" (6 rows)
+
+Step 2 — Confirm exact date string used for filtering
+- Purpose: Ensure correct text match for the date in subsequent queries.
+- Executed SQL:
+  SELECT DISTINCT date FROM public.t_1938_vfl_season WHERE date ILIKE '%18%' AND date ILIKE '%June%' AND date ILIKE '%1938%';
+- Result: [ {"date": "18 june 1938"} ]
+
+Step 3 — Summary statistics and threshold check for 18 June 1938
+- Purpose: Determine whether any game exceeded a crowd of 20,000.
+- Executed SQL (maximum crowd):
+  SELECT MAX(crowd) AS max_crowd FROM public.t_1938_vfl_season WHERE lower(trim(date)) = '18 june 1938';
+  Result: max_crowd = 20000
+
+- Executed SQL (minimum crowd):
+  SELECT MIN(crowd) AS min_crowd FROM public.t_1938_vfl_season WHERE lower(trim(date)) = '18 june 1938';
+  Result: min_crowd = 7000
+
+- Executed SQL (average crowd):
+  SELECT ROUND(AVG(crowd)::numeric,2) AS avg_crowd FROM public.t_1938_vfl_season WHERE lower(trim(date)) = '18 june 1938';
+  Result: avg_crowd = 14000.00
+
+- Executed SQL (count of games with crowd > 20000):
+  SELECT COUNT(*) AS games_over_20000 FROM public.t_1938_vfl_season WHERE lower(trim(date)) = '18 june 1938' AND crowd > 20000;
+  Result: games_over_20000 = 0
+
+Step 4 — List all games and crowds on 18 June 1938
+- Purpose: Provide detailed evidence of each game’s attendance.
+- Executed SQL:
+  SELECT "home team","away team","venue",crowd FROM public.t_1938_vfl_season WHERE date = '18 june 1938' ORDER BY crowd DESC;
+- Results (ordered by crowd desc):
+  1) richmond vs essendon — punt road oval — Crowd: 20000
+  2) footscray vs collingwood — western oval — Crowd: 18000
+  3) st kilda vs melbourne — junction oval — Crowd: 14000
+  4) north melbourne vs carlton — arden street oval — Crowd: 13000
+  5) fitzroy vs south melbourne — brunswick street oval — Crowd: 12000
+  6) geelong vs hawthorn — corio oval — Crowd: 7000
+
+Conclusion based on data:
+- The maximum recorded crowd on 18 June 1938 is exactly 20,000, and the count of games with crowd strictly greater than 20,000 is zero. Therefore, within this dataset, no game on 18 June drew a crowd of more than 20,000.
+
+Assumptions and scope:
+- The claim is interpreted in the context of the available dataset (public.t_1938_vfl_season), which contains only games dated "18 june 1938". The phrase "more than 20000" is taken to mean strictly greater than 20,000 (not including 20,000).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

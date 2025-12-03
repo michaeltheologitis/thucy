@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+canon yaoundé score zero point against their opponent
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+What I checked
+- Explored available data sources. Only one was found: a PostgreSQL database (TabFact) with a single relevant table in the public schema: t_1971_african_cup_of_champions_clubs, containing team names and first/second-leg scores for the 1971 African Cup of Champions Clubs.
+
+Evidence from the data
+1) Locate any rows for Canon Yaoundé
+- SQL executed:
+SELECT "team 1", "team 2", agg, "1st leg", "2nd leg"
+FROM public.t_1971_african_cup_of_champions_clubs
+WHERE "team 1" ILIKE '%canon%' OR "team 1" ILIKE '%yaound%' OR "team 2" ILIKE '%canon%' OR "team 2" ILIKE '%yaound%';
+- Result:
+  team 1: canon yaoundé
+  team 2: as solidarité
+  agg: 9 - 4
+  1st leg: 7 - 3
+  2nd leg: 2 - 1
+
+2) Confirm whether any leg shows a zero for that tie
+- SQL executed:
+SELECT count(*) AS cnt FROM public.t_1971_african_cup_of_champions_clubs WHERE "team 1" = 'Canon Yaoundé' OR "team 2" = 'Canon Yaoundé';
+- Result: [{"cnt":0}] (exact-case spelling not present)
+
+- SQL executed:
+SELECT count(*) AS cnt_variant FROM public.t_1971_african_cup_of_champions_clubs WHERE "team 1" ILIKE '%Canon%Yaound%' OR "team 2" ILIKE '%Canon%Yaound%';
+- Result: [{"cnt_variant":1}] (one row found for Canon Yaoundé, case-insensitive)
+
+- SQL executed:
+SELECT "team 1", "agg", "team 2", "1st leg", "2nd leg",
+       ("1st leg" LIKE '%0%') AS first_has_0,
+       ("2nd leg" LIKE '%0%') AS second_has_0,
+       (("1st leg" LIKE '%0%') OR ("2nd leg" LIKE '%0%')) AS either_has_0
+FROM public.t_1971_african_cup_of_champions_clubs
+WHERE "team 1" ILIKE '%Canon%Yaound%' OR "team 2" ILIKE '%Canon%Yaound%';
+- Result:
+  team 1: canon yaoundé | agg: 9 - 4 | team 2: as solidarité | 1st leg: 7 - 3 | 2nd leg: 2 - 1 | first_has_0: false | second_has_0: false | either_has_0: false
+
+Conclusion
+- In the only Canon Yaoundé match present in the available dataset (1971 African Cup of Champions Clubs), neither leg shows a zero. Canon Yaoundé scored 7 and 2 in the two legs, respectively.
+- Therefore, within the scope of the accessible data, the claim that “Canon Yaoundé scored zero point against their opponent” is not supported.
+
+Assumptions and scope notes
+- Interpreted “score zero point” as “scored 0 goals in a match leg.”
+- Verification is limited to the available dataset (1971 African Cup of Champions Clubs in the TabFact database). If the claim concerns a different season or competition not present in this data source, it falls outside the evidence I can query here.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

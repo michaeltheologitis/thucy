@@ -1,0 +1,58 @@
+
+<userQuery>
+<query>
+the term start for ylli bufi be after the term start for vilson ahmeti
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "the term start for ylli bufi be after the term start for vilson ahmeti"
+
+Conclusion: The claim is false. According to the authoritative data, Ylli Bufi’s term started on 5 June 1991, and Vilson Ahmeti’s term started on 10 December 1991. Therefore, Ylli Bufi’s term start is before (not after) Vilson Ahmeti’s term start.
+
+Data source discovery
+- Tool: discover_data_sources
+- Result: One accessible PostgreSQL data source via TabFact connector; public schema includes table public.list_of_prime_ministers_of_albania.
+
+Schema details
+- Tool: schema_query
+- Database: TabFact (postgres_tabfact25), Schema: public
+- Table: public.list_of_prime_ministers_of_albania
+  - Columns: "name" (text), "born - died" (text), "term start" (text), "term end" (text), "political party" (text)
+
+Evidence and executed SQL
+1) Retrieve names and term starts (broad listing that includes the two relevant rows)
+- Executed SQL:
+  SELECT name, "term start" FROM public.list_of_prime_ministers_of_albania ORDER BY name LIMIT 200;
+- Returned rows (relevant):
+  [{"name":"vilson ahmeti","term start":"10 december 1991"}, {"name":"ylli bufi","term start":"5 june 1991"}]
+
+2) Case-insensitive fetch explicitly targeting the two individuals
+- Executed SQL:
+  SELECT name, "term start" FROM public.list_of_prime_ministers_of_albania WHERE name ILIKE '%Ylli%' OR name ILIKE '%Ahmeti%';
+- Result:
+  [{"name":"ylli bufi","term start":"5 june 1991"},{"name":"vilson ahmeti","term start":"10 december 1991"}]
+
+3) Parse the text dates and compare which is later
+- Executed SQL:
+  SELECT name, "term start", to_date("term start", 'FMDD FMMonth YYYY')::date AS parsed_date FROM public.list_of_prime_ministers_of_albania WHERE name ILIKE '%ylli%' OR name ILIKE '%vilson%';
+- Result:
+  [{"name":"ylli bufi","term start":"5 june 1991","parsed_date":"1991-06-05T00:00:00Z"},{"name":"vilson ahmeti","term start":"10 december 1991","parsed_date":"1991-12-10T00:00:00Z"}]
+
+4) Identify the later of the two parsed dates
+- Executed SQL:
+  SELECT name, parsed_date FROM (SELECT name, to_date("term start", 'FMDD FMMonth YYYY')::date AS parsed_date FROM public.list_of_prime_ministers_of_albania WHERE name ILIKE '%ylli%' OR name ILIKE '%vilson%') t ORDER BY parsed_date DESC LIMIT 1;
+- Result:
+  [{"name":"vilson ahmeti","parsed_date":"1991-12-10T00:00:00Z"}]
+
+These results show definitively that Vilson Ahmeti’s term start (1991-12-10) is later than Ylli Bufi’s (1991-06-05), contradicting the claim.
+
+Assumptions made
+- The claim refers to the start dates of terms as Prime Minister of Albania as recorded in the table public.list_of_prime_ministers_of_albania.
+- Date parsing uses the format "D Month YYYY" with English month names, which matches the stored text values.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

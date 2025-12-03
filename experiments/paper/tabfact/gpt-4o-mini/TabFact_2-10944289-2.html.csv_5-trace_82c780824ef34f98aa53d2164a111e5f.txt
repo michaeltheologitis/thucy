@@ -1,0 +1,60 @@
+
+<userQuery>
+<query>
+the dallas cowboy and the seattle seahawks play at the qwest field on december 31 , and the cowboy lead in a final score of 20 - 9
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the dallas cowboy and the seattle seahawks play at the qwest field on december 31 , and the cowboy lead in a final score of 20 - 9”
+
+What the data shows
+1) Did the Cowboys and Seahawks play at Qwest Field (NBC primetime dataset)?
+- Yes, but on January 6, not December 31, and the final score was 21-20 (Seahawks), not 20-9.
+
+Executed SQL and results:
+- Game(s) between Cowboys and Seahawks (any date):
+  SQL:
+  SELECT date, "visiting team", "host team", stadium, "final score" 
+  FROM public.nbc_sunday_night_football_results_2006_present 
+  WHERE ("visiting team" ILIKE '%Cowboys%' AND "host team" ILIKE '%Seahawks%') 
+     OR ("visiting team" ILIKE '%Seahawks%' AND "host team" ILIKE '%Cowboys%') ;
+  Result:
+  - Date: January 6; Visiting Team: Dallas Cowboys; Host Team: Seattle Seahawks; Stadium: Qwest Field; Final Score: 20 - 21
+
+- Any games on December 31 in this dataset:
+  SQL:
+  SELECT date, "visiting team", "host team", stadium, "final score" 
+  FROM public.nbc_sunday_night_football_results_2006_present 
+  WHERE date ILIKE '%December 31%';
+  Result:
+  - Date: December 31; Visiting Team: Green Bay Packers; Host Team: Chicago Bears; Stadium: Soldier Field; Final Score: 26 - 7
+
+- Any games at Qwest Field in this dataset:
+  SQL:
+  SELECT date, "visiting team", "host team", stadium, "final score" FROM public.nbc_sunday_night_football_results_2006_present WHERE stadium ILIKE '%Qwest%';
+  Result:
+  - Date: January 6; Visiting Team: Dallas Cowboys; Host Team: Seattle Seahawks; Stadium: Qwest Field; Final Score: 20 - 21
+
+- Any game with a final score of 20-9:
+  SQL:
+  SELECT date, "visiting team", "final score", "host team", stadium 
+  FROM public.nbc_sunday_night_football_results_2006_present 
+  WHERE "final score" ILIKE '%20 - 9%' OR "final score" ILIKE '%20-9%';
+  Result: No rows returned
+
+Assessment of each part of the claim
+- “play at the qwest field”: Supported in this dataset, but on January 6 (Cowboys at Seahawks, Qwest Field), not December 31.
+- “on december 31”: Not supported. The only December 31 entry is Packers at Bears at Soldier Field.
+- “final score of 20 - 9” with the Cowboys leading: Not supported. No 20-9 game exists in the dataset; the Cowboys-Seahawks Qwest Field game finished 21-20 in favor of Seattle.
+
+Conclusion: The available data contradicts the date and score asserted in the claim. While a Cowboys–Seahawks game at Qwest Field did occur, it was on January 6 and ended 21–20 for the Seahawks, not 20–9 for the Cowboys on December 31.
+
+Assumptions
+- The verification is based on the accessible, authoritative dataset: public.nbc_sunday_night_football_results_2006_present, which includes NBC Sunday Night Football (and NBC primetime playoff) games from 2006 onward. Within this scope, there is no record matching the claim’s date and score.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+the toronto blue jay play in 8 game with an attendance lower than 5000 in may of the 1991 season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the toronto blue jay play in 8 game with an attendance lower than 5000 in may of the 1991 season.”
+
+Data sources discovered:
+- PostgreSQL database: TabFact (public schema)
+- Relevant table: public.t_1991_toronto_blue_jays_season
+  - Columns: date (text), opponent (text), score (text), loss (text), attendance (bigint), record (text)
+  - Each row represents a 1991 Toronto Blue Jays game with game date and attendance.
+
+Evidence and executed SQL:
+1) Count May games with attendance < 5000 (case-insensitive month match)
+SQL:
+SELECT COUNT(*) FROM public.t_1991_toronto_blue_jays_season WHERE date ILIKE 'may%' AND attendance < 5000;
+Result: 0
+
+2) Total number of May games and the minimum May attendance
+SQL:
+SELECT COUNT(*) AS may_game_count, MIN(attendance) AS min_may_attendance FROM public.t_1991_toronto_blue_jays_season WHERE date ILIKE 'may%';
+Result: may_game_count = 27, min_may_attendance = 20809
+
+3) Season-wide check for any game with attendance < 5000 (sanity check)
+SQL:
+SELECT COUNT(*) FROM public.t_1991_toronto_blue_jays_season WHERE attendance < 5000;
+Result: 0
+
+Findings:
+- There are zero Toronto Blue Jays games in May 1991 with attendance below 5,000.
+- The lowest recorded attendance for any May 1991 game is 20,809, far above 5,000.
+- No 1991 Blue Jays games in this dataset have attendance below 5,000 in any month.
+
+Conclusion:
+- The claim that the Blue Jays played in 8 games with attendance lower than 5,000 in May 1991 is contradicted by the data.
+
+Assumptions noted:
+- The table comprehensively lists all 1991 Toronto Blue Jays games (home and away) and includes game attendance for each.
+- The date column begins with the month name (e.g., “May 1”), so date ILIKE 'may%' correctly identifies May games for the 1991 season (as indicated by the table name).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

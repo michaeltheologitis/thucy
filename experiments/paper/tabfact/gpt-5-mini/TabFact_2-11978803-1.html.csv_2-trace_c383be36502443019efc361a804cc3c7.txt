@@ -1,0 +1,50 @@
+
+<userQuery>
+<query>
+on august 15 , 2012 the game have a score of 3 - 0 and result in a win
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Data sources explored
+- Discovered source: TabFact PostgreSQL instance (public schema)
+- Relevant table (from schema inspection): public.branimir_suba_i with columns: date (text), venue (text), score (text), result (text), competition (text)
+
+Verification approach
+- Search the table for matches in 2012, then specifically confirm the entry for August 15, 2012, checking score and result fields.
+
+Evidence
+1) Query to list 2012 entries
+Executed SQL:
+SELECT date, venue, score, result, competition FROM public.branimir_suba_i WHERE date LIKE '%2012%' ORDER BY date;
+Result (rows returned: 1):
+- date: august 15 , 2012
+  venue: baku , azerbaijan
+  score: 3 - 0
+  result: win
+  competition: friendly
+
+2) Targeted query for the specific date
+Executed SQL:
+SELECT date, venue, score, result, competition FROM public.branimir_suba_i
+WHERE (lower(date) LIKE '%august%15%' OR lower(date) LIKE '%15%august%')
+  AND lower(date) LIKE '%2012%';
+Result (one row):
+- date: august 15 , 2012
+- venue: baku , azerbaijan
+- score: 3 - 0
+- result: win
+- competition: friendly
+
+Assessment
+- The data shows a match on august 15 , 2012 with score 3 - 0 and result win. This fully supports the claim.
+
+Assumptions
+- “Game” refers to the match records contained in public.branimir_suba_i.
+- Matching is case-insensitive and tolerant of spacing/punctuation as stored (e.g., “august 15 , 2012”).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

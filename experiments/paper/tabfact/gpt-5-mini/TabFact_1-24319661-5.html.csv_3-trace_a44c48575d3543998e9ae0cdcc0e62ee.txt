@@ -1,0 +1,45 @@
+
+<userQuery>
+<query>
+episode 11 have 2.77 million us viewer
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: "episode 11 have 2.77 million US viewer"
+
+Data source discovery:
+- Available source: PostgreSQL database "TabFact" with table public.list_of_white_collar_episodes (episodes of the TV show White Collar). This table includes a column "no in season" (episode number within season) and "us viewers (million)" (U.S. viewership in millions).
+
+Schema inspection (summary):
+- Columns: "no in series" (bigint), "no in season" (bigint), "title" (text), "directed by" (text), "written by" (text), "us viewers (million)" (double precision), "original air date" (text), "production code" (text). No separate season-number column is present.
+
+Evidence and executed SQL:
+1) Check the episode with episode-in-season number 11
+SQL:
+SELECT "no in season", title, "us viewers (million)" FROM public.list_of_white_collar_episodes WHERE "no in season" = 11;
+Result:
+- no in season: 11 | title: family business | us viewers (million): 2.77
+
+2) Independently find any episode(s) with ~2.77M U.S. viewers
+SQL:
+SELECT "no in series", "no in season", title, "us viewers (million)" FROM public.list_of_white_collar_episodes WHERE ABS("us viewers (million)" - 2.77) <= 0.01;
+Result:
+- no in series: 57 | no in season: 11 | title: family business | us viewers (million): 2.77
+
+3) Interpretation check (if "episode 11" were meant as overall series episode #11)
+SQL:
+SELECT count(*) FROM public.list_of_white_collar_episodes WHERE "no in series" = 11;
+Result: 0
+
+Conclusion:
+- In the authoritative White Collar episodes table, the episode with "no in season" = 11 (title "Family Business") has U.S. viewership of 2.77 million. Thus, the claim is supported when "episode 11" refers to the 11th episode within its season.
+
+Assumptions:
+- "Episode 11" is interpreted as the 11th episode within a season ("no in season" = 11) of White Collar, since this is the only available dataset. There is no separate season-number column in the dataset to provide additional season context.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

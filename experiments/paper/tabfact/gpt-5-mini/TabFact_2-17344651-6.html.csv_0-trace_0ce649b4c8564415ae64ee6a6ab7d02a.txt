@@ -1,0 +1,75 @@
+
+<userQuery>
+<query>
+the boston celtic only lose 3 game in the 1984 - 85 season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the boston celtic only lose 3 game in the 1984 - 85 season”
+
+Data discovery
+- Available source: PostgreSQL instance postgres_tabfact30 (TabFact) with a public schema.
+- Relevant table discovered: public.t_1984_85_boston_celtics_season (game-level data; columns: game, date, opponent, score, location, record).
+
+Evidence from the data
+1) How many rows (games) are in the table, and sample rows
+SQL:
+SELECT COUNT(*) AS total_rows FROM public.t_1984_85_boston_celtics_season;
+Result:
+- total_rows = 14
+
+SQL:
+SELECT game, date, opponent, score, location, record FROM public.t_1984_85_boston_celtics_season ORDER BY game ASC LIMIT 5;
+Results (game, date, opponent, score, location, record):
+- 33 | wed jan 2  | new jersey nets        | 110 - 95  | brendan byrne arena   | 27 - 6
+- 34 | fri jan 4  | new york knicks        | 105 - 94  | boston garden         | 28 - 6
+- 35 | mon jan 7  | new york knicks        | 108 - 97  | madison square garden | 29 - 6
+- 36 | wed jan 9  | chicago bulls          | 111 - 108 | boston garden         | 30 - 6
+- 37 | fri jan 11 | washington bullets     | 103 - 101 | boston garden         | 31 - 6
+
+SQL:
+SELECT game, date, opponent, score, location, record FROM (SELECT * FROM public.t_1984_85_boston_celtics_season ORDER BY game DESC LIMIT 5) AS sub ORDER BY game ASC;
+Results (game, date, opponent, score, location, record):
+- 42 | wed jan 23 | seattle supersonics    | 97 - 107  | boston garden         | 34 - 8
+- 43 | fri jan 25 | indiana pacers         | 125 - 94  | boston garden         | 35 - 8
+- 44 | sun jan 27 | portland trail blazers | 128 - 127 | boston garden         | 36 - 8
+- 45 | tue jan 29 | detroit pistons        | 131 - 130 | hartford civic center | 37 - 8
+- 46 | wed jan 30 | philadelphia 76ers     | 104 - 122 | the spectrum          | 37 - 9
+
+2) Parse the cumulative record to see how many losses were reached in this slice
+SQL:
+SELECT min(game) as min_game, max(game) as max_game FROM public.t_1984_85_boston_celtics_season;
+Result:
+- min_game = 33, max_game = 46
+
+SQL:
+SELECT game, date, opponent, score, location, record,
+CAST(regexp_replace(split_part(record,'-',1),'[^0-9]','','g') AS integer) AS wins,
+CAST(regexp_replace(split_part(record,'-',2),'[^0-9]','','g') AS integer) AS losses
+FROM public.t_1984_85_boston_celtics_season
+WHERE game IN ((SELECT min(game) FROM public.t_1984_85_boston_celtics_season), (SELECT max(game) FROM public.t_1984_85_boston_celtics_season))
+ORDER BY game;
+Results:
+- game 33: record 27 - 6 → wins=27, losses=6
+- game 46: record 37 - 9 → wins=37, losses=9
+
+SQL:
+SELECT MAX(CAST(regexp_replace(split_part(record,'-',2),'[^0-9]','','g') AS integer)) AS max_parsed_losses FROM public.t_1984_85_boston_celtics_season;
+Result:
+- max_parsed_losses = 9
+
+Interpretation
+- Even within this partial set of 1984–85 games (covering games 33–46), the Celtics had already accumulated 9 losses by game 46 (record 37–9). Therefore, the claim that they “only lose 3 game” in the 1984–85 season is contradicted by the data.
+
+Conclusion
+- The claim is false based on the authoritative data slice available: by late January (game 46), losses were already 9 (>3).
+
+Assumptions
+- I interpret “1984–85 season” as the NBA regular season. The table available covers a subset of that season. Regardless of whether “season” is interpreted as regular season or entire season including playoffs, the evidence shows the Celtics’ losses exceeded 3 well before the season ended.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

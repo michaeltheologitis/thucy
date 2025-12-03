@@ -1,0 +1,66 @@
+
+<userQuery>
+<query>
+lukáš melich never throw for greater than 78 m
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Lukáš Melich never threw greater than 78 m.”
+
+Data sources explored
+- Discovered database: TabFact (public schema)
+- Relevant table: public.luk_melich with columns: year, competition, venue, position, notes (notes contains the performance mark in meters)
+
+Step 1: Inspect available data for Lukáš Melich
+Executed SQL:
+SELECT * FROM public.luk_melich;
+Results (year | competition | venue | position | notes):
+- 1998 | world junior championships | annecy , france | 10th | 61.51 m
+- 1999 | european junior championships | riga , latvia | 5th | 64.20 m
+- 2001 | european u23 championships | amsterdam , netherlands | 11th | 66.41 m
+- 2003 | universiade | daegu , south korea | 4th | 71.26 m
+- 2005 | world championships | helsinki , finland | 14th | 74.53 m
+- 2006 | european championships | gothenburg , sweden | 15th | 73.77 m
+- 2008 | olympic games | beijing , pr china | 29th | 70.56 m
+- 2009 | world championships | berlin , germany | 14th | 74.47 m
+- 2012 | olympic games | london , great britain | 6th | 77.17 m
+- 2013 | world championships | moscow , russia | 3rd | 79.36 m
+
+Step 2: Extract numeric marks and check for any throws > 78.00 m
+Executed SQL (list rows > 78.00 m):
+SELECT year, competition, venue, position, notes, (regexp_replace(notes, '.*?([0-9]+(\.[0-9]+)?)\s*m.*', '\\1'))::numeric AS mark_m
+FROM public.luk_melich
+WHERE (regexp_replace(notes, '.*?([0-9]+(\.[0-9]+)?)\s*m.*', '\\1'))::numeric > 78.00
+ORDER BY mark_m DESC;
+Result:
+- 2013 | world championships | moscow , russia | 3rd | 79.36 m | mark_m: 79.36
+
+Executed SQL (count > 78.00 m):
+SELECT COUNT(*) AS count_over_78
+FROM (
+  SELECT (regexp_replace(notes, '.*?([0-9]+(\.[0-9]+)?)\s*m.*', '\\1'))::numeric AS mark_m
+  FROM public.luk_melich
+) t
+WHERE mark_m > 78.00;
+Result:
+- count_over_78: 1
+
+Executed SQL (best mark):
+SELECT MAX((regexp_replace(notes, '.*?([0-9]+(\.[0-9]+)?)\s*m.*', '\\1'))::numeric) AS best_mark_m
+FROM public.luk_melich;
+Result:
+- best_mark_m: 79.36
+
+Conclusion
+- The data shows Lukáš Melich threw 79.36 m at the 2013 World Championships in Moscow, which is greater than 78 m. Therefore, the claim is contradicted by the evidence.
+
+Assumptions
+- The "notes" field reliably encodes the distance in meters as a numeric value followed by the letter "m" (e.g., "79.36 m").
+- The public.luk_melich table represents authoritative performance records for Lukáš Melich.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

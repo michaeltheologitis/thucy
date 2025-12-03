@@ -1,0 +1,50 @@
+
+<userQuery>
+<query>
+bradford city go against port vale 2 time accord to the chart , on 13 september 2008 and 28 march 2009
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Conclusion:
+- Bradford City did play Port Vale twice in the 2008–09 season, but not on 13 September 2008 and 28 March 2009. According to the authoritative season table, the matches occurred on 6 September 2008 (Away) and 21 March 2009 (Home).
+
+Evidence from data:
+1) Identify all Bradford City vs Port Vale fixtures in 2008–09
+- Executed SQL:
+  SELECT date, opponent, venue, result, attendance 
+  FROM public.t_2008_09_bradford_city_a_f_c_season 
+  WHERE LOWER(opponent) = 'port vale' 
+  ORDER BY TO_DATE(date, 'DD Month YYYY') ASC;
+- Result rows:
+  • Date: 6 September 2008 | Opponent: Port Vale | Venue: Away | Result: 2 - 0 | Attendance: 7,273
+  • Date: 21 March 2009    | Opponent: Port Vale | Venue: Home | Result: 0 - 1 | Attendance: 12,436
+
+2) Count of matches vs Port Vale (case-insensitive)
+- Executed SQL:
+  SELECT COUNT(*) AS match_count FROM public.t_2008_09_bradford_city_a_f_c_season WHERE LOWER(opponent) = LOWER('Port Vale');
+- Result: 2 matches
+
+3) Check whether matches occurred on the claimed dates (13 September 2008 and 28 March 2009)
+- Executed SQL:
+  SELECT date, opponent, venue, result, attendance 
+  FROM public.t_2008_09_bradford_city_a_f_c_season 
+  WHERE date = '13 September 2008' OR date = '28 March 2009';
+- Result: No rows returned for either date
+
+Data source discovered:
+- PostgreSQL database containing table public.t_2008_09_bradford_city_a_f_c_season with columns: game (bigint), date (text), opponent (text), venue (text), result (text), attendance (bigint).
+
+Assessment:
+- True: Bradford City and Port Vale faced each other twice in the 2008–09 season.
+- False: The specific dates cited (13 September 2008 and 28 March 2009) do not match the database records; the actual dates were 6 September 2008 and 21 March 2009.
+
+Assumptions:
+- “go against” is interpreted as “played against.”
+- The table represents Bradford City’s complete 2008–09 competitive fixtures/results, with dates stored as text in the format ‘DD Month YYYY’.
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

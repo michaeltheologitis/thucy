@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+the principal activities of subsidiary klm health service be health service
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim interpreted: The subsidiary “KLM Health Service” has principal activities of “health service.”
+- Finding: In the TabFact database, the company recorded as “klm health services” (lowercase, plural) is of type “subsidiary” and its principal activities are “health services.” This supports the claim, with only minor casing/pluralization differences.
+
+Data source discovery
+- Tool: discover_data_sources
+- Result: Accessible data source: a PostgreSQL database named "TabFact" was discovered. It exposes at least the default "public" schema and contains one or more table-level objects. No additional databases, external APIs, or other data stores were discovered or accessible via the available tooling for this survey.
+
+Schema inspection
+- Tool: schema_query
+- Result:
+  - Database: TabFact
+  - Table: klm (schema: public)
+    - Columns:
+      - company — text
+      - type — text
+      - principal activities — text
+      - incorporated in — text
+      - group 's equity shareholding — text
+  - Notes: The klm table appears to store corporate information including company name, type, and principal activities.
+
+Evidence queries and results
+1) Identify relevant company rows containing “KLM” (case-insensitive)
+- Executed SQL:
+  SELECT company, type, "principal activities" FROM klm WHERE company ILIKE '%KLM%';
+- Returned row (excerpt):
+  {company: "klm health services", type: "subsidiary", principal activities: "health services"}
+
+2) Retrieve the exact stored row
+- Executed SQL:
+  SELECT company, type, "principal activities" FROM klm WHERE company = 'klm health services';
+- Result:
+  {company: "klm health services", type: "subsidiary", principal activities: "health services"}
+
+Assessment
+- The table records the entity as “klm health services” (plural) with type “subsidiary,” matching the user’s reference to a subsidiary.
+- The “principal activities” field is “health services,” matching the claim’s “health service” aside from singular/plural and capitalization.
+- Therefore, the data supports the claim.
+
+Conclusion
+- The principal activities of the subsidiary recorded as “klm health services” are “health services,” which substantiates the user’s claim.
+
+Assumptions
+- “KLM Health Service” refers to the entity stored as “klm health services” (singular/plural and case considered equivalent).
+- The TabFact klm table is authoritative for this verification task.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

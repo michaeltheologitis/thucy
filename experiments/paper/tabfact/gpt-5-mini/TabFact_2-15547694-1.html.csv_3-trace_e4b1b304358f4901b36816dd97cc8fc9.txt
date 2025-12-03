@@ -1,0 +1,47 @@
+
+<userQuery>
+<query>
+nominate by the taoiseach have the most member from 1 party
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Interpreted claim: Among the 5th Seanad members who were “nominated by the Taoiseach,” the largest number comes from a single party (and identify which party it is).
+
+Data source: TabFact database, public.members_of_the_5th_seanad
+
+Evidence and executed SQL:
+1) Rank parties by the count of “nominated by the taoiseach”
+SQL:
+SELECT party, "nominated by the taoiseach" FROM public.members_of_the_5th_seanad ORDER BY "nominated by the taoiseach" DESC;
+Result rows:
+- {"party":"total", "nominated by the taoiseach": 11}
+- {"party":"fianna fáil", "nominated by the taoiseach": 7}
+- {"party":"independent", "nominated by the taoiseach": 3}
+- {"party":"labour party", "nominated by the taoiseach": 2}
+- {"party":"fine gael", "nominated by the taoiseach": 0}
+- {"party":"clann na talmhan", "nominated by the taoiseach": 0}
+
+2) Compute the maximum among actual parties (excluding the aggregate "total")
+SQL:
+SELECT MAX("nominated by the taoiseach") AS max_nominated FROM public.members_of_the_5th_seanad WHERE party <> 'total';
+Result:
+- {"max_nominated": 7}
+
+3) Identify the party/parties that attain this maximum (excluding "total")
+SQL:
+SELECT party, "nominated by the taoiseach" FROM public.members_of_the_5th_seanad WHERE party <> 'total' AND "nominated by the taoiseach" = (SELECT MAX("nominated by the taoiseach") FROM public.members_of_the_5th_seanad WHERE party <> 'total');
+Result rows:
+- {"party":"fianna fáil", "nominated by the taoiseach": 7}
+
+Conclusion:
+- The party with the most members among those nominated by the Taoiseach in the 5th Seanad is Fianna Fáil, with 7 nominees. This maximum is unique (i.e., it comes from one party), so the claim that the Taoiseach’s nominees “have the most members from one party” holds true, and that party is Fianna Fáil.
+
+Assumptions:
+- The row with party = "total" is an aggregate and not a real party, so it is excluded when determining which party has the most nominees.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

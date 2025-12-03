@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+olga govortsova have never reach the final in a grand slam tournament
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Olga Govortsova has never reached the final in a Grand Slam tournament.”
+
+Data source exploration
+- I discovered a PostgreSQL instance (postgres_tabfact22) with a single relevant table: public.olga_govortsova. Columns include tournament and yearly results for 2007–2011. No other tables or views were found.
+
+What the data shows
+1) Full table contents
+Executed SQL:
+SELECT * FROM public.olga_govortsova;
+
+Result (key rows relevant to Grand Slams):
+- australian open: 2007=a, 2008=1r, 2009=1r, 2010=1r, 2011=1r
+- french open: 2007=a, 2008=3r, 2009=3r, 2010=2r, 2011=2r
+- wimbledon: 2007=2r, 2008=1r, 2009=2r, 2010=1r, 2011=1r
+- us open: 2007=2r, 2008=2r, 2009=1r, 2010=1r, 2011=1r
+
+Interpretation: Across 2007–2011 Grand Slam singles entries shown in this dataset, her best results are early rounds (up to 3rd round). There is no indication of any final in this period.
+
+2) Direct search for any final-level indicators across 2007–2011
+Executed SQL (searches for values like 'f', 'final', or 'runner'):
+SELECT tournament, y AS year, v AS value
+FROM public.olga_govortsova,
+LATERAL (VALUES ('2007', "2007"),('2008', "2008"),('2009', "2009"),('2010', "2010"),('2011', "2011")) AS t(y,v)
+WHERE (trim(lower(v)) = 'f' OR trim(lower(v)) = 'final' OR lower(v) LIKE '%final%' OR lower(v) LIKE '%runner%');
+
+Result: No rows returned (0 matches).
+
+Confirmation count query:
+SELECT count(*) AS matches
+FROM public.olga_govortsova,
+LATERAL (VALUES ('2007', "2007"),('2008', "2008"),('2009', "2009"),('2010', "2010"),('2011', "2011")) AS t(y,v)
+WHERE (trim(lower(v)) = 'f' OR trim(lower(v)) = 'final' OR lower(v) LIKE '%final%' OR lower(v) LIKE '%runner%');
+
+Result: matches = 0
+
+Assessment
+- The available data (2007–2011 Grand Slam singles results) shows no finals for Olga Govortsova in that timeframe. This supports the claim for those years and for singles specifically.
+- However, the dataset does not include years outside 2007–2011, nor does it cover doubles or mixed doubles. Therefore, it cannot fully substantiate the absolute statement “never” across her entire career and all Grand Slam disciplines.
+
+Conclusion
+- Based on the accessible, authoritative data, Olga Govortsova did not reach any Grand Slam finals in singles during 2007–2011. The broader claim that she has “never” reached a Grand Slam final in her entire career cannot be completely verified from this dataset alone.
+
+Assumptions and limitations
+- Assumed the table reflects Grand Slam singles main-draw results only (codes like 1r, 2r, 3r are standard for singles rounds). The table contains no doubles/mixed data and covers only 2007–2011.
+- No other data sources were available in the environment to extend coverage beyond 2011 or to other disciplines.
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,52 @@
+
+<userQuery>
+<query>
+larisa latyna have 7 more medal than carl osburn
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “larisa latyna have 7 more medal than carl osburn.” Interpreted as: Larisa Latynina has 7 more Olympic medals than Carl Osburn.
+
+Data source discovery
+- Database: TabFact
+- Schema: public
+- Table: list_of_multiple_olympic_medalists (columns: "medal count" bigint, "date" text, "athlete" text, "nation" text, "sport" text, "record medal event" text)
+
+Step 1 — Confirm athletes and context (sample rows)
+SQL executed:
+SELECT athlete, "medal count" FROM public.list_of_multiple_olympic_medalists ORDER BY "medal count" DESC LIMIT 50;
+Evidence excerpt from results included both athletes:
+- larisa latynina … 18 (also earlier increments 17, 16, ...)
+- carl osburn … 11 (also earlier increments 10, 9, 8)
+
+Step 2 — Retrieve maximum medal counts per athlete
+SQL executed:
+1) For Larisa Latynina
+SELECT MAX("medal count") AS larisa_max
+FROM public.list_of_multiple_olympic_medalists
+WHERE LOWER("athlete") = 'larisa latynina';
+Result: 18
+
+2) For Carl Osburn
+SELECT MAX("medal count") AS carl_max
+FROM public.list_of_multiple_olympic_medalists
+WHERE LOWER("athlete") = 'carl osburn';
+Result: 11
+
+Analysis
+- Difference = 18 (Larisa Latynina) − 11 (Carl Osburn) = 7
+- This matches the claim that Larisa Latynina has 7 more medals than Carl Osburn.
+
+Conclusion
+- The data directly supports the claim.
+
+Assumptions
+- “larisa latyna” refers to Larisa Latynina (Soviet gymnast). Spelling normalized to the athlete name present in the dataset.
+- “medal” refers to total Olympic medals, represented by the maximum recorded “medal count” per athlete in the table.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

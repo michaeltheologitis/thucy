@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+the final ables for the game at giant stadium when chicago bear be the visit team be 26 - 21
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Scope and data sources explored
+- Discovered a single accessible database: TabFact (postgres_tabfact16), public schema.
+- Relevant table: nbc_sunday_night_football_results_2006_present
+  - Columns: date, visiting team, final score, host team, stadium
+  - Coverage: NBC Sunday Night Football results from 2006 to present.
+
+Key checks performed
+1) Identify the exact stadium naming in the data
+- Purpose: Ensure correct filtering by stadium name.
+- SQL executed:
+SELECT DISTINCT stadium FROM nbc_sunday_night_football_results_2006_present WHERE stadium ILIKE '%Giant%' ORDER BY stadium;
+- Result: giants stadium
+
+2) Were the Chicago Bears the visiting team at Giants Stadium on SNF, and what was the final score?
+- SQL executed:
+SELECT date, "visiting team", "host team", "final score", stadium
+FROM nbc_sunday_night_football_results_2006_present
+WHERE lower("visiting team") = 'chicago bears'
+  AND lower(stadium) = 'giants stadium'
+ORDER BY date;
+- Result (single row):
+  - Date: november 12
+  - Visiting team: chicago bears
+  - Host team: new york giants
+  - Final score: 38 - 20
+  - Stadium: giants stadium
+- Finding: The only SNF Bears-at-Giants game at Giants Stadium has final score 38 - 20, not 26 - 21.
+
+3) Was there any SNF game at Giants Stadium with a final score of 26 - 21 (regardless of teams)?
+- SQL executed:
+SELECT "date", "visiting team", "host team", "final score", "stadium" 
+FROM nbc_sunday_night_football_results_2006_present
+WHERE lower(trim("stadium")) = 'giants stadium'
+  AND trim("final score") = '26 - 21';
+- Result (single row):
+  - Date: september 10
+  - Visiting team: indianapolis colts
+  - Host team: new york giants
+  - Final score: 26 - 21
+  - Stadium: giants stadium
+- Finding: A 26 - 21 score did occur at Giants Stadium on SNF, but with the Indianapolis Colts as the visiting team, not the Chicago Bears.
+
+Conclusion
+- The claim that “the final score for the game at Giants Stadium when the Chicago Bears were the visiting team was 26 - 21” is contradicted by the data in the Sunday Night Football results table. The relevant Bears-at-Giants SNF game at Giants Stadium finished 38 - 20. The 26 - 21 score at Giants Stadium corresponds to Colts at Giants, not Bears at Giants.
+
+Assumptions and scope notes
+- Data source covers NBC Sunday Night Football games from 2006–present only. If the claim refers to a non-SNF game or a season outside this range, it would be outside the available dataset. Within this dataset, the claim is inaccurate.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

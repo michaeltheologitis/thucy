@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+7 viral family have a helical virion shape
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “7 viral family have a helical virion shape.”
+
+Data source discovery
+- Available source: PostgreSQL instance for TabFact (postgres_tabfact17). Public schema contains table: public.viral_disease.
+
+Schema overview
+- Table public.viral_disease columns: family (text), baltimore group (text), envelopment (text), virion shape (text), replication site (text).
+
+Evidence
+1) Distinct virion-shape values and their counts
+- SQL executed:
+  SELECT COALESCE("virion shape", '(NULL)') AS virion_shape, COUNT(*) AS row_count
+  FROM public.viral_disease
+  GROUP BY COALESCE("virion shape", '(NULL)')
+  ORDER BY row_count DESC, virion_shape;
+- Result (relevant entries):
+  - icosahedral: 13
+  - helical: 6
+  - complex: 2
+  - helical , bullet shaped: 1
+  - spherical: 1
+
+2) Distinct viral families whose virion shape indicates helical morphology
+- SQL executed:
+  SELECT DISTINCT family, "virion shape" FROM public.viral_disease WHERE lower("virion shape") LIKE '%helical%';
+- Result (families and their virion shape values):
+  - arenaviridae — helical
+  - bunyaviridae — helical
+  - coronaviridae — helical
+  - filoviridae — helical
+  - orthomyxoviridae — helical
+  - paramyxoviridae — helical
+  - rhabdoviridae — helical , bullet shaped
+
+3) Count of distinct families with helical morphology
+- SQL executed:
+  SELECT COUNT(DISTINCT "family") AS distinct_family_count
+  FROM public.viral_disease
+  WHERE LOWER("virion shape") LIKE '%helical%';
+- Result: 7 distinct viral families.
+
+Conclusion
+- The database shows 7 distinct viral families whose virion shape field contains “helical,” supporting the claim.
+
+Assumptions
+- Interpreted “have a helical virion shape” as any virion shape text containing the substring “helical” (case-insensitive), including combined descriptors such as “helical , bullet shaped.”
+- Interpreted “viral family” as the distinct values in the family column of public.viral_disease.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

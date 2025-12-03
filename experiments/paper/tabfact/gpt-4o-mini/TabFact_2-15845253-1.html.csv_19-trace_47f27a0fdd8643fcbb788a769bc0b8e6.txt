@@ -1,0 +1,60 @@
+
+<userQuery>
+<query>
+only 1 of the viral disease have be assign to a family
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim: "only 1 of the viral disease have be assign to a family"
+- Finding: The data shows 22 viral diseases are assigned to a specific family and 1 is labeled as "unassigned." Therefore, the claim is not supported by the data.
+
+Data source discovery
+- Database: TabFact
+- Schema: public
+- Table: viral_disease
+- Columns:
+  - family (text, not null)
+  - baltimore group (text, not null)
+  - envelopment (text, not null)
+  - virion shape (text, not null)
+  - replication site (text, not null)
+- Keys: none
+
+Evidence and executed SQL
+1) Total number of viral disease records
+- Result: 23
+- SQL: SELECT COUNT(*) AS total_records FROM public.viral_disease;
+
+2) Records with a non-empty family value (after trimming)
+- Result: 23
+- SQL: SELECT COUNT(*) FROM public.viral_disease WHERE trim(family) <> '';
+
+3) Distinct non-empty family values
+- Result: 23
+- SQL: SELECT COUNT(DISTINCT trim(family)) FROM public.viral_disease WHERE trim(family) <> '';
+
+4) Family distribution (to inspect whether any records are unassigned)
+- Result excerpt (each has count 1): adenoviridae, arenaviridae, astroviridae, bunyaviridae, caliciviridae, coronaviridae, filoviridae, flaviviridae, hepadnaviridae, hepeviridae, herpesviridae, orthomyxoviridae, papillomaviridae, paramyxoviridae, parvoviridae, picornaviridae, polyomaviridae, poxviridae, reoviridae, retroviridae, rhabdoviridae, togaviridae, unassigned
+- SQL: SELECT family, COUNT(*) AS record_count FROM public.viral_disease GROUP BY family ORDER BY family;
+
+5) Assigned vs. unassigned counts
+- Records with family = 'unassigned': 1
+- Records with family <> 'unassigned': 22
+- Total rows: 23
+- SQL (unassigned count): SELECT COUNT(*) AS unassigned_count FROM viral_disease WHERE family = 'unassigned';
+- SQL (assigned count): SELECT COUNT(*) AS assigned_count FROM viral_disease WHERE family <> 'unassigned';
+- SQL (total): SELECT COUNT(*) AS total_rows FROM viral_disease;
+
+Conclusion
+- The statement "only 1 of the viral disease have be assign to a family" is contradicted by the data. In fact, 22 of 23 records have a specific family assigned, and 1 record is explicitly labeled "unassigned."
+
+Assumptions
+- Interpreted "assigned to a family" as having a specific, non-placeholder family value; the value "unassigned" was treated as not assigned. All other non-empty family names were treated as assigned.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

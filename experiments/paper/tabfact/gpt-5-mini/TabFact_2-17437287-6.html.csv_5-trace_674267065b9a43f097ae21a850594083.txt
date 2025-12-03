@@ -1,0 +1,60 @@
+
+<userQuery>
+<query>
+plymouth argyle play the away team derby county after 14 march 1984
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “plymouth argyle play the away team derby county after 14 march 1984.”
+
+Data sources discovered:
+- Database: TabFact (postgres_tabfact31)
+- Public schema tables: t_1983_84_fa_cup (columns: "tie no", "home team", "score", "away team", "date")
+
+Evidence from the data
+1) Find all Plymouth Argyle vs Derby County ties (showing dates)
+Executed SQL:
+SELECT "home team", "away team", "score", "date"
+FROM public.t_1983_84_fa_cup
+WHERE ("home team" = 'plymouth argyle' AND "away team" = 'derby county')
+   OR ("home team" = 'derby county' AND "away team" = 'plymouth argyle');
+
+Result rows:
+- home team: plymouth argyle | away team: derby county | score: 0 - 0 | date: 10 march 1984
+- home team: derby county | away team: plymouth argyle | score: 0 - 1 | date: 14 march 1984
+
+2) Parse dates and confirm whether any Plymouth Argyle vs Derby County tie occurred strictly after 14 March 1984
+Executed SQL:
+SELECT "home team","away team","score","date", to_date("date",'DD Month YYYY') AS parsed_date
+FROM public.t_1983_84_fa_cup
+WHERE ("home team" ILIKE '%Plymouth%' OR "away team" ILIKE '%Plymouth%')
+  AND ("home team" ILIKE '%Derby%' OR "away team" ILIKE '%Derby%');
+
+Returned rows:
+- plymouth argyle vs derby county | 0 - 0 | 10 march 1984 | parsed_date: 1984-03-10
+- derby county vs plymouth argyle | 0 - 1 | 14 march 1984 | parsed_date: 1984-03-14
+
+3) Explicit filter: dates strictly greater than 1984-03-14
+Executed SQL:
+SELECT "home team","away team","score","date", to_date("date",'DD Month YYYY') AS parsed_date
+FROM public.t_1983_84_fa_cup
+WHERE ("home team" ILIKE '%Plymouth%' OR "away team" ILIKE '%Plymouth%')
+  AND ("home team" ILIKE '%Derby%' OR "away team" ILIKE '%Derby%')
+  AND to_date("date",'DD Month YYYY') > DATE '1984-03-14';
+
+Result: 0 rows returned.
+
+Conclusion
+- The only Plymouth Argyle vs Derby County matches in the available 1983–84 FA Cup data occurred on 10 March 1984 (Plymouth home) and 14 March 1984 (Plymouth away). There are no matches between these teams after 14 March 1984 in this dataset. Therefore, the claim that Plymouth Argyle play Derby County (as an away tie) after 14 March 1984 is not supported by the data.
+
+Assumptions
+- “After 14 March 1984” is interpreted strictly as dates later than 14 March 1984 (i.e., 15 March 1984 or later).
+- The verification is grounded in the only accessible dataset (public.t_1983_84_fa_cup) and thus applies to FA Cup fixtures from the 1983–84 season.
+- Team names were matched case-insensitively where noted to account for lowercase storage in the table.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

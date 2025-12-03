@@ -1,0 +1,87 @@
+
+<userQuery>
+<query>
+arienai kisu have 5.8% more rating than the title with the earliest broadcast date
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “arienai kisu have 5.8% more rating than the title with the earliest broadcast date.”
+
+Findings based on the data
+- The dataset contains episodes of “tsuki_no_koibito” with episode titles, romanized titles, broadcast dates, and ratings (as text).
+- The episode with the earliest broadcast date is おまえが欲しい (romanized: omae ga hosii), which aired on May 10, 2010, with a rating of 22.4%.
+- The episode “arienai kisu” has a rating of 19.2% and aired on May 17, 2010.
+- Comparison: 19.2% (arienai kisu) vs 22.4% (earliest). “arienai kisu” is 3.2 percentage points lower, not 5.8% more. In relative terms, it is about 14.29% lower: ((19.2 − 22.4) / 22.4) × 100 ≈ −14.29%.
+
+Evidence and executed SQL
+1) Inspect the table contents
+SQL Query:
+SELECT "episode title", "romanized title", "broadcast date", "ratings" FROM public.tsuki_no_koibito;
+Result (abridged):
+- おまえが欲しい | omae ga hosii | may 10 , 2010 | 22.4%
+- ありえないキス | arienai kisu  | may 17 , 2010 | 19.2%
+- 復讐のプロポーズ | fukusyū no puropōzu | may 24 , 2010 | 15.6%
+- こんなに好きだったんだ… | konna ni suki dattanda… | may 31 , 2010 | 15.5%
+- 好きと言えたらいいのに | suki to ietara iinoni | june 7 , 2010 | 17.4%
+- 最終章序幕・別れ | saishūshōjomakuwakare | june 14 , 2010 | 13.4%
+
+2) Get the rating of “arienai kisu”
+SQL Query:
+SELECT "episode title", "ratings", "broadcast date" 
+FROM public.tsuki_no_koibito 
+WHERE LOWER("romanized title") = LOWER('arienai kisu');
+Result: Episode Title = ありえないキス; Broadcast Date = May 17, 2010; Rating = 19.2%
+
+3) Identify the earliest broadcast episode and its numeric rating (properly parsing dates)
+SQL Query:
+SELECT "episode title", "romanized title", "broadcast date", REPLACE("ratings", '%','')::numeric AS numeric_rating 
+FROM public.tsuki_no_koibito 
+ORDER BY to_date(initcap(regexp_replace("broadcast date", '\s+,', ',', 'g')), 'FMMonth DD, YYYY') ASC 
+LIMIT 1;
+Result: Episode Title = おまえが欲しい; Broadcast Date = 2010-05-10; Numeric Rating = 22.4
+
+4) Compute the differences in a single, reproducible query
+SQL Query:
+WITH earliest_episode AS (
+    SELECT 
+        "episode title" AS title, 
+        to_date(initcap(regexp_replace("broadcast date", '\s+,', ',', 'g')), 'FMMonth DD, YYYY') AS broadcast_date, 
+        REPLACE(ratings, '%', '')::numeric AS rating
+    FROM tsuki_no_koibito
+    ORDER BY broadcast_date
+    LIMIT 1
+), arienai_kisu AS (
+    SELECT REPLACE(ratings, '%', '')::numeric AS rating
+    FROM tsuki_no_koibito
+    WHERE "romanized title" = 'arienai kisu'
+)
+SELECT 
+    ak.rating AS arienai_kisu_rating, 
+    e.title AS earliest_episode_title, 
+    e.broadcast_date AS earliest_broadcast_date, 
+    e.rating AS earliest_rating, 
+    (ak.rating - e.rating) AS point_difference, 
+    ((ak.rating - e.rating) / e.rating) * 100 AS relative_percent_difference
+FROM earliest_episode e, arienai_kisu ak;
+Results:
+- arienai_kisu_rating = 19.2
+- earliest_episode_title = おまえが欲しい
+- earliest_broadcast_date = 2010-05-10
+- earliest_rating = 22.4
+- point_difference = -3.2
+- relative_percent_difference ≈ -14.29%
+
+Conclusion
+- The claim is not supported. “arienai kisu” does not have 5.8% more rating than the earliest-broadcast episode; it has 3.2 percentage points less (≈14.29% lower relatively).
+
+Assumptions
+- “Rating” refers to the numeric value in the ratings column (percent), comparing by percentage points unless otherwise specified.
+- “Title with the earliest broadcast date” means the episode with the minimum parsed date in the broadcast date column.
+- Case-insensitive matching is used for the romanized title “arienai kisu.”
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

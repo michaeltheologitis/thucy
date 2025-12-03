@@ -1,0 +1,50 @@
+
+<userQuery>
+<query>
+all about christmas eve be the title of the episode number 12
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “All About Christmas Eve” is the title of episode number 12.
+
+Available data sources discovered:
+- PostgreSQL database (TabFact) with a single relevant table: public.will_grace_season_5 (Will & Grace Season 5 episodes).
+
+Schema check (structure of the available table):
+- Columns: series (bigint), season (text), title (text), directed by (text), written by (text), original air date (text), us viewers (millions) (double precision)
+- Note: There is no explicit “episode number in season” column. We derive the episode’s position in the season by ordering by original air date.
+
+Evidence 1: Full season ordering by original air date to compute in-season episode numbers
+SQL executed:
+SELECT series AS overall_series_number, title, "original air date", to_date(initcap(regexp_replace("original air date","\\s+,\\s+",", ")),"FMMonth DD, YYYY") AS air_date, row_number() OVER (ORDER BY to_date(initcap(regexp_replace("original air date","\\s+,\\s+",", ")),"FMMonth DD, YYYY")) AS episode_in_season
+FROM public.will_grace_season_5
+ORDER BY air_date;
+
+Key rows from the result:
+- Episode_in_season 10: overall_series_number 102, title: all about christmas eve, original air date: december 12 , 2002
+- Episode_in_season 12: overall_series_number 104, title: fagmalion part i : gay it forward, original air date: january 16 , 2003
+
+Evidence 2: Direct lookup of the specific title with computed in-season episode number
+SQL executed:
+1) SELECT series, title, "original air date" FROM public.will_grace_season_5 WHERE lower(title) = 'all about christmas eve';
+Result: {"series":102, "title":"all about christmas eve", "original air date":"december 12 , 2002"}
+
+2) SELECT series, title, "original air date", episode_in_season FROM (
+  SELECT *, ROW_NUMBER() OVER (ORDER BY to_date(initcap("original air date"), 'FMMonth DD , YYYY')) AS episode_in_season
+  FROM public.will_grace_season_5
+) t
+WHERE lower(title) = 'all about christmas eve';
+Result: {"series":102, "title":"all about christmas eve", "original air date":"december 12 , 2002", "episode_in_season":10}
+
+Conclusion:
+- In the only available authoritative dataset (Will & Grace Season 5), “All About Christmas Eve” is episode 10 of the season by air-date order, not episode 12. Episode 12 is titled “Fagmalion Part I: Gay It Forward.” Therefore, the claim is not supported by the data.
+
+Assumptions made:
+- Because the only accessible data source is will_grace_season_5, I interpret “episode number 12” as referring to the 12th episode within that season. The table has no explicit in-season episode number, so I derived it by ordering episodes by their original air dates.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

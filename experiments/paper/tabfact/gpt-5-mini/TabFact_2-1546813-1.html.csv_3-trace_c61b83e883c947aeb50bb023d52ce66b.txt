@@ -1,0 +1,64 @@
+
+<userQuery>
+<query>
+the solheim cup be host outside of the united state 6 time from 1990 - 2013
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the solheim cup be host outside of the united state 6 time from 1990 - 2013.”
+
+Step 1 — Explore available data sources
+- Discovered data source: PostgreSQL instance “TabFact”, schema “public”. It includes a relevant table:
+  - solheim_cup — Columns: year (bigint), venue (text), "winning team" (text), score (text), "usa captain" (text), "europe captain" (text).
+
+Step 2 — Retrieve tournaments from 1990–2013 and inspect venues
+Executed SQL:
+SELECT year, venue FROM solheim_cup WHERE year BETWEEN 1990 AND 2013 ORDER BY year;
+
+Returned rows (year — venue):
+- 1990 — lake nona golf & country club, florida, usa
+- 1992 — dalmahoy country club, scotland
+- 1994 — the greenbrier, west virginia, usa
+- 1996 — st pierre golf & country club, wales
+- 1998 — muirfield village, ohio, usa
+- 2000 — loch lomond golf club, scotland
+- 2002 — interlachen country club, minnesota, usa
+- 2003 — barsebäck golf & country club, sweden
+- 2005 — crooked stick golf club, indiana, usa
+- 2007 — halmstad gk, sweden
+- 2009 — rich harvest farms, illinois, usa
+- 2011 — killeen castle golf resort, ireland
+- 2013 — colorado golf club, colorado, usa
+
+Step 3 — Count how many were hosted outside the United States
+Executed SQL:
+SELECT COUNT(*) AS outside_us_count FROM solheim_cup WHERE year BETWEEN 1990 AND 2013 AND LOWER(venue) NOT LIKE '%usa%';
+
+Result:
+- outside_us_count = 6
+
+Step 4 — List the specific years and venues outside the U.S.
+Executed SQL:
+SELECT year, venue FROM solheim_cup WHERE year BETWEEN 1990 AND 2013 AND LOWER(venue) NOT LIKE '%usa%' ORDER BY year;
+
+Result:
+- 1992 — Dalmahoy Country Club, Scotland
+- 1996 — St Pierre Golf & Country Club, Wales
+- 2000 — Loch Lomond Golf Club, Scotland
+- 2003 — Barsebäck Golf & Country Club, Sweden
+- 2007 — Halmstad GK, Sweden
+- 2011 — Killeen Castle Golf Resort, Ireland
+
+Conclusion
+- The data show that from 1990 through 2013 (inclusive), the Solheim Cup was hosted outside the United States 6 times. This matches the claim.
+
+Assumptions
+- “From 1990–2013” is treated as inclusive of both years.
+- A venue is considered “outside the United States” when the venue field does not contain the substring “usa” (case-insensitive). The venue values in the table use country names such as “usa,” “scotland,” “sweden,” etc., enabling this identification.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

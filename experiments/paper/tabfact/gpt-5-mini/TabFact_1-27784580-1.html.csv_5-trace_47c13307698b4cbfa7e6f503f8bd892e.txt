@@ -1,0 +1,73 @@
+
+<userQuery>
+<query>
+arienai kisu be broadcast 14 day after the title with the earliest broadcast date
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Arienai kisu be broadcast 14 day after the title with the earliest broadcast date.”
+
+Summary conclusion: The episode with romanized title “arienai kisu” aired 7 days after the earliest broadcast date in the dataset, not 14 days. Therefore, the claim is not supported by the data.
+
+Data source discovered:
+- Database: TabFact (postgres_tabfact10)
+- Schema: public
+- Table: tsuki_no_koibito (columns: Unnamed: 0, episode title, romanized title, translation of title, broadcast date, ratings)
+
+Key evidence from executed SQL:
+1) Retrieve and parse the broadcast date for “arienai kisu”
+SQL:
+SELECT "romanized title", "broadcast date", to_date(initcap(regexp_replace("broadcast date", '\\s*,\\s*', ', ')), 'FMMonth DD, YYYY')::date AS broadcast_date_parsed
+FROM tsuki_no_koibito
+WHERE lower("romanized title") = 'arienai kisu';
+Result:
+- romanized title: arienai kisu
+- broadcast date (raw): may 17 , 2010
+- parsed broadcast date: 2010-05-17
+
+2) Compute the earliest broadcast date in the table
+SQL:
+SELECT MIN(to_date(initcap(regexp_replace("broadcast date", '\\s*,\\s*', ', ')), 'FMMonth DD, YYYY'))::date AS earliest_broadcast_date
+FROM tsuki_no_koibito
+WHERE "broadcast date" IS NOT NULL;
+Result:
+- earliest_broadcast_date: 2010-05-10
+
+3) Identify the title with that earliest broadcast date
+SQL:
+SELECT "episode title", "romanized title", "broadcast date",
+       to_date(initcap(trim(replace("broadcast date",' ,',','))), 'FMMonth DD, YYYY') AS parsed_broadcast_date
+FROM tsuki_no_koibito
+WHERE to_date(initcap(trim(replace("broadcast date",' ,',','))), 'FMMonth DD, YYYY') = DATE '2010-05-10';
+Result:
+- episode title: おまえが欲しい
+- romanized title: omae ga hosii
+- broadcast date (raw): may 10 , 2010
+- parsed broadcast date: 2010-05-10
+
+4) Compute the day difference between “arienai kisu” and the earliest broadcast date
+SQL:
+SELECT (
+  to_date(initcap(regexp_replace((SELECT "broadcast date" FROM tsuki_no_koibito WHERE lower("romanized title")='arienai kisu' LIMIT 1), '\\s*,\\s*', ', ')), 'FMMonth DD, YYYY')::date
+  -
+  (SELECT MIN(to_date(initcap(regexp_replace("broadcast date", '\\s*,\\s*', ', ')), 'FMMonth DD, YYYY'))::date FROM tsuki_no_koibito WHERE "broadcast date" IS NOT NULL)
+) AS diff_days;
+Result:
+- diff_days: 7
+
+Finding:
+- Earliest broadcast date: 2010-05-10 (episode “omae ga hosii”).
+- “arienai kisu” broadcast date: 2010-05-17.
+- Difference: 7 days, not 14 days.
+
+Assumptions made:
+- “arienai kisu” refers to the romanized title field in the tsuki_no_koibito table.
+- “the title with the earliest broadcast date” refers to the episode whose parsed broadcast date is the minimum in this table.
+- Date parsing standardized the stored text format by removing extra spaces around commas and using to_date with the format 'FMMonth DD, YYYY'.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

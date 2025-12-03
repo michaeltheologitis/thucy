@@ -1,0 +1,75 @@
+
+<userQuery>
+<query>
+there be more than 12.42 million viewer for the entry with rating / share 3.2 / 8
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “there be more than 12.42 million viewer for the entry with rating / share 3.2 / 8.”
+
+Data source discovery and schema:
+- Discovered database: TabFact (TabFact21), schema: public, table: my_info_table with columns:
+  - rating (double precision)
+  - share (bigint)
+  - rating / share (18 - 49) (text)
+  - viewers (millions) (double precision)
+  - rank (overall) (bigint)
+
+Evidence collected:
+1) Initial exact match attempts (no rows found)
+Executed SQL:
+SELECT rating, share, "rating / share (18 - 49)", "viewers (millions)"
+FROM public.my_info_table
+WHERE (rating = 3.2 AND share = 8)
+   OR ("rating / share (18 - 49)" = '3.2/8');
+Result: no rows returned.
+
+Executed SQL:
+SELECT rating, share, "rating / share (18 - 49)", "viewers (millions)"
+FROM public.my_info_table
+WHERE (ABS(rating - 3.2) < 1e-6 AND share = 8)
+   OR (regexp_replace("rating / share (18 - 49)", '\s+', '', 'g') = '3.2/8');
+Result: no rows returned.
+
+2) Identify available rating/share values
+Executed SQL:
+SELECT "rating / share (18 - 49)" AS rating_share, AVG("viewers (millions)") AS avg_viewers, COUNT(*) AS cnt
+FROM public.my_info_table
+WHERE "rating / share (18 - 49)" IS NOT NULL
+GROUP BY "rating / share (18 - 49)"
+ORDER BY rating_share;
+Result excerpt includes: 3.2 / 8 — avg_viewers = 12.42 (millions), count = 1.
+
+3) Retrieve the specific entry
+Executed SQL:
+SELECT rating, share, "rating / share (18 - 49)", "viewers (millions)", "rank (overall)"
+FROM public.my_info_table
+WHERE "rating / share (18 - 49)" = '3.2 / 8';
+Result:
+- rating: 7.2
+- share: 11
+- rating / share (18 - 49): 3.2 / 8
+- viewers (millions): 12.42
+- rank (overall): 15
+
+4) Check “more than 12.42” explicitly
+Executed SQL:
+SELECT "viewers (millions)", ("viewers (millions)" > 12.42) AS exceeds_12_42
+FROM public.my_info_table
+WHERE "rating / share (18 - 49)" = '3.2 / 8';
+Result:
+viewers (millions) = 12.42; exceeds_12_42 = false.
+
+Conclusion:
+- The only entry with rating/share “3.2 / 8” (18–49) has exactly 12.42 million viewers. Therefore, it is not “more than 12.42 million.”
+
+Assumptions:
+- “rating / share 3.2 / 8” refers to the text column “rating / share (18 - 49)” with the exact formatting “3.2 / 8”.
+- “more than 12.42” is interpreted as a strict greater-than comparison (> 12.42).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

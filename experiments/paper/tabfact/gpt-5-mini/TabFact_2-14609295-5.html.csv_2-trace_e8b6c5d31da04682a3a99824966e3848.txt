@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+in 2011 , the southwest region win a total of 5 game and lose 1 game create a record of 28 - 12
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "in 2011, the southwest region win a total of 5 game and lose 1 game create a record of 28 - 12"
+
+Data sources checked: TabFact PostgreSQL database (public schema).
+
+Evidence 1: Retrieve 2011 row with region, record, and results
+- Executed SQL:
+  SELECT year, region, record, seed, results FROM public.vcu_rams_men_s_basketball WHERE year = 2011;
+- Result:
+  year: 2011
+  region: southwest
+  record: 28 - 12
+  seed: 11
+  results: "w 59 - 46 w 74 - 56 w 94 - 76 w 72 - 71 ot w 71 - 61 l 62 - 70"
+
+Interpretation: The 2011 entry shows region = "southwest", season record = "28 - 12", and a sequence of tournament game results that includes five wins (w) and one loss (l).
+
+Evidence 2: Count wins and losses in 2011 results
+- Executed SQL:
+  SELECT t.year,
+         SUM(wc.cnt) AS wins_count,
+         SUM(lc.cnt) AS losses_count
+  FROM vcu_rams_men_s_basketball t
+  LEFT JOIN LATERAL (
+    SELECT COUNT(*) AS cnt
+    FROM regexp_matches(t.results, '(^|[[:space:]])w([[:space:]]|$)', 'g')
+  ) wc ON true
+  LEFT JOIN LATERAL (
+    SELECT COUNT(*) AS cnt
+    FROM regexp_matches(t.results, '(^|[[:space:]])l([[:space:]]|$)', 'g')
+  ) lc ON true
+  WHERE t.year = 2011
+  GROUP BY t.year;
+- Result:
+  year: 2011, wins_count: 5, losses_count: 1
+
+Conclusion:
+- The data shows for 2011: region = "southwest", wins = 5, losses = 1 (in tournament results), and overall record = 28 - 12. This aligns with the claim.
+
+Assumptions made (for clarity):
+- "southwest region" refers to the team’s NCAA Tournament region assignment (the row corresponds to VCU Rams men’s basketball placed in the Southwest region in 2011).
+- "win a total of 5 game and lose 1 game" refers to the tournament game outcomes encoded in the "results" field for 2011, not the full-season game count.
+- "record of 28 - 12" refers to the season record shown in the "record" column for 2011.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

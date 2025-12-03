@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+when the away team be south melbourne , the crowd be 22824
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Data sources explored
+- Discovered database: TabFact (public schema)
+- Relevant table: public.t_1975_vfl_season with columns: "home team" (text), "home team score" (text), "away team" (text), "away team score" (text), "venue" (text), "crowd" (bigint), "date" (text)
+
+Claim to verify
+- "when the away team be south melbourne , the crowd be 22824"
+
+Evidence from data
+1) Check for exact case-sensitive match of away team "South Melbourne"
+SQL:
+SELECT COUNT(*) FROM public.t_1975_vfl_season WHERE "away team" = 'South Melbourne';
+Result:
+[{"count":0}]
+Interpretation: No row uses the exact case "South Melbourne".
+
+2) Retrieve rows where away team matches "south melbourne" case-insensitively
+SQL:
+SELECT "date","home team","away team","venue","crowd" FROM public.t_1975_vfl_season WHERE lower("away team") = 'south melbourne' ORDER BY to_date(initcap("date"), 'DD FMMonth YYYY');
+Result:
+[{"date":"19 april 1975","home team":"st kilda","away team":"south melbourne","venue":"moorabbin oval","crowd":15736}]
+Interpretation: The only row with away team south melbourne has crowd 15,736, not 22,824.
+
+3) Cross-check rows where crowd equals 22,824
+SQL:
+SELECT "date", "home team", "away team", "venue", "crowd" FROM public.t_1975_vfl_season WHERE crowd = 22824;
+Result:
+[{"date":"19 april 1975","home team":"essendon","away team":"melbourne","venue":"windy hill","crowd":22824}]
+Interpretation: The crowd 22,824 occurs for Essendon vs Melbourne, not when the away team is South Melbourne.
+
+Conclusion
+- The data shows that when the away team is South Melbourne (case-insensitive), the recorded crowd is 15,736, not 22,824. The crowd value 22,824 corresponds to a different match (Essendon vs Melbourne).
+
+Assumptions
+- Interpreted the claim within the available TabFact public.t_1975_vfl_season table.
+- Treated team name matching case-insensitively to account for lowercase storage in the dataset.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

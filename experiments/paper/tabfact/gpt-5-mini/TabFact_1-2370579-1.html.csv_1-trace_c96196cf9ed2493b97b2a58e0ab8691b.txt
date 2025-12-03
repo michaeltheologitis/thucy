@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+jeremy summer direct the episode written by tony o'grady (pseudonym of brian clemens)
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “jeremy summer direct the episode written by tony o'grady (pseudonym of brian clemens)”
+
+Data sources explored:
+- Database: postgres_tabfact13 (public schema)
+- Table: public.the_baron (columns: episode, prod, title, directed by, written by, originalairdate, filmed)
+
+Step 1 — Find episodes written by Tony O’Grady and see who directed them.
+Executed SQL (exact):
+SELECT episode, title, "written by", "directed by" 
+FROM public.the_baron
+WHERE "written by" ILIKE '%Tony O''Grady%'
+   OR "written by" ILIKE '%O''Grady%'
+   OR "written by" ILIKE '%Tony OGrady%'
+   OR "written by" ILIKE '%OGrady%';
+
+Results:
+- 12 — the maze — tony o'grady (pseudonym of brian clemens) — jeremy summers
+- 26 — the long , long day — tony o'grady — roy baker
+
+Step 2 — Identify all episodes directed by Jeremy Summers (to cross-check the match).
+Executed SQL (exact):
+SELECT episode, title, "directed by", "written by"
+FROM public.the_baron
+WHERE lower("directed by") LIKE '%jeremy%';
+
+Results:
+- 5 — enemy of the state — jeremy summers — dennis spooner
+- 12 — the maze — jeremy summers — tony o'grady (pseudonym of brian clemens)
+- 17 — time to kill — jeremy summers — dennis spooner
+
+Analysis:
+- Episode 12 (“the maze”) is explicitly credited as written by “tony o'grady (pseudonym of brian clemens)” and directed by “jeremy summers,” directly satisfying the claim.
+
+Conclusion: The claim is supported by the data.
+
+Assumptions:
+- “jeremy summer” refers to “Jeremy Summers” (director), allowing for a missing final “s”.
+- The claim pertains to the TV series represented in the available dataset (The Baron), as that is the only accessible data source.
+- Case-insensitive matching was used to account for capitalization and apostrophes in names.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

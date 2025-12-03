@@ -1,0 +1,62 @@
+
+<userQuery>
+<query>
+miguel zapata be the goalkeeper with 24 goal and an average of 0.61
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of verification
+- Claim interpreted: The user asserts that “Miguel Zapata” is a goalkeeper with 24 goals and an average of 0.61 (goals per match).
+- Finding: In the available 2008–09 Segunda División B dataset, Miguel Zapata has 17 goals, 28 matches, and an average of 0.61. Players with 24 goals exist, but they have different averages and are not Miguel Zapata.
+
+Data source discovery
+- Available database: public schema with table t_2008_09_segunda_divisi_n_b (2008–09 Spanish Segunda División B).
+
+Schema (for context)
+- t_2008_09_segunda_divisi_n_b columns:
+  - goalkeeper (text): player name
+  - goals (bigint): total goals
+  - matches (bigint): total matches
+  - average (double precision): goals per match
+  - team (text): team name
+
+Evidence and executed SQL
+1) Locate any record for “Zapata” or “Miguel”
+- Result: Found one row for miguel zapata with 17 goals, 28 matches, average 0.61, team atlético ciudad.
+- SQL executed:
+SELECT * FROM public.t_2008_09_segunda_divisi_n_b WHERE goalkeeper ILIKE '%Zapata%' OR goalkeeper ILIKE 'Miguel%';
+
+2) Check for any player(s) with exactly 24 goals; and any with average = 0.61
+- Result: Players with 24 goals are Rubén Martínez (avg 0.75) and Álvaro Campos (avg 0.86). Player with average 0.61 is Miguel Zapata with 17 goals.
+- SQL executed (24 goals):
+SELECT goalkeeper, goals, matches, average, team 
+FROM public.t_2008_09_segunda_divisi_n_b 
+WHERE goals = 24;
+- SQL executed (average = 0.61):
+SELECT goalkeeper, goals, matches, average, team 
+FROM public.t_2008_09_segunda_divisi_n_b 
+WHERE average = 0.61;
+
+3) Exact match on name and compute the implied average
+- Result: Miguel Zapata — goals 17, matches 28, stored average 0.61. Computed average = 17/28 ≈ 0.6071, which rounds to 0.61.
+- SQL executed (exact match):
+SELECT goalkeeper, goals, matches, average, team FROM public.t_2008_09_segunda_divisi_n_b WHERE LOWER(goalkeeper) = 'miguel zapata';
+- SQL executed (computed average):
+SELECT goals::numeric / NULLIF(matches, 0) AS avg_calc, average
+FROM public.t_2008_09_segunda_divisi_n_b
+WHERE LOWER(goalkeeper) = 'miguel zapata';
+
+Conclusion
+- The statement is partly incorrect. The dataset shows Miguel Zapata with an average of 0.61, but with 17 goals (not 24). Players with 24 goals are different individuals and have different averages.
+
+Assumptions
+- “Average” refers to goals per match, as represented by the “average” column in the dataset.
+- The claim pertains to the 2008–09 Segunda División B data available in the connected database.
+- The “goalkeeper” column name denotes the player name in this dataset, per the provided schema description.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,52 @@
+
+<userQuery>
+<query>
+aldershot town be the opponent when bradford city score their highest point total
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: Was Aldershot Town the opponent when Bradford City recorded their highest scoring match (most goals) in the 2008–09 season?
+
+Data sources explored
+- Database: TabFact (postgres_tabfact15)
+- Table: public.t_2008_09_bradford_city_a_f_c_season
+  - Columns: game (bigint), date (text), opponent (text), venue (text), result (text), attendance (bigint)
+
+Evidence and executed SQL
+1) Verify result format is parsable as X - Y (X = Bradford City goals)
+SQL:
+SELECT COUNT(*) AS total_rows,
+       COUNT(*) FILTER (WHERE result ~ '^\s*\d+\s*-\s*\d+\s*$') AS matches_with_score,
+       COUNT(*) FILTER (WHERE NOT result ~ '^\s*\d+\s*-\s*\d+\s*$') AS others
+FROM public.t_2008_09_bradford_city_a_f_c_season;
+Result: {"total_rows": 43, "matches_with_score": 43, "others": 0} (all rows in X - Y format)
+
+2) Find the maximum number of goals Bradford City scored in any match
+SQL:
+SELECT MAX((trim(split_part(result, ' - ', 1)))::int) AS max_goals
+FROM public.t_2008_09_bradford_city_a_f_c_season
+WHERE result LIKE '% - %';
+Result: {"max_goals": 5}
+
+3) List the match(es) where Bradford City scored this maximum
+SQL:
+SELECT game, date, opponent, venue, result
+FROM public.t_2008_09_bradford_city_a_f_c_season
+WHERE (split_part(result, ' - ', 1))::int = 5
+ORDER BY game;
+Result:
+- Game 35 | 7 march 2009 | opponent: aldershot town | venue: home | result: 5 - 0
+
+Conclusion
+- In the 2008–09 season, Bradford City’s highest goals scored in a single match was 5, and the opponent in that match was Aldershot Town (5–0 at home on 7 March 2009). This directly supports the claim within the scope of the available dataset.
+
+Assumptions
+- “Highest point total” is interpreted as “most goals scored in a single match,” since the dataset provides match scores but not season points totals.
+- The verification is limited to the 2008–09 Bradford City A.F.C. season table, the only available data source discovered.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

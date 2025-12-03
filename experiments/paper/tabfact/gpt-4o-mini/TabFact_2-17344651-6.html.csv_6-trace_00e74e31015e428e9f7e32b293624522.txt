@@ -1,0 +1,75 @@
+
+<userQuery>
+<query>
+the new york knicks win all home game play against the boston celtic in the 1984 - 1985 season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "the new york knicks win all home game play against the boston celtic in the 1984 - 1985 season"
+
+Data sources discovered
+- Connected database: PostgreSQL
+- Available relevant table: public.t_1984_85_boston_celtics_season (Boston Celtics 1984–85 season log)
+
+Schema inspection
+- Table: public.t_1984_85_boston_celtics_season
+  - Columns: game (bigint), date (text), opponent (text), score (text), location (text), record (text)
+  - No foreign keys or related tables reported
+
+Evidence from data
+1) Retrieve all Celtics games vs Knicks (to see dates, locations, and scores)
+Executed SQL:
+SELECT game, date, opponent, location, score, record 
+FROM public.t_1984_85_boston_celtics_season 
+WHERE opponent ILIKE '%Knicks%'
+
+Result:
+- Game 34 | Date: Fri Jan 4 | Opponent: New York Knicks | Location: Boston Garden | Score: 105 - 94 | Record: 28 - 6
+- Game 35 | Date: Mon Jan 7 | Opponent: New York Knicks | Location: Madison Square Garden | Score: 108 - 97 | Record: 29 - 6
+
+2) Confirm the outcome by parsing the score and computing Boston win indicator
+Executed SQL:
+SELECT date, location, opponent, score,
+       TRIM(SPLIT_PART(score, '-', 1))::int AS celtics_pts,
+       TRIM(SPLIT_PART(score, '-', 2))::int AS opponent_pts,
+       (TRIM(SPLIT_PART(score, '-', 1))::int > TRIM(SPLIT_PART(score, '-', 2))::int) AS boston_win
+FROM public.t_1984_85_boston_celtics_season
+WHERE opponent ILIKE '%Knicks%'
+
+Result:
+- Jan 4, 1985 | Boston Garden | New York Knicks | 105 - 94 | celtics_pts=105 | opponent_pts=94 | boston_win=TRUE
+- Jan 7, 1985 | Madison Square Garden | New York Knicks | 108 - 97 | celtics_pts=108 | opponent_pts=97 | boston_win=TRUE
+
+3) Count and list Knicks home (Madison Square Garden) games vs Celtics and outcome
+Executed SQL (count):
+SELECT COUNT(*) AS total_rows
+FROM public.t_1984_85_boston_celtics_season
+WHERE opponent ILIKE '%Knicks%' AND location ILIKE '%Madison Square Garden%';
+
+Executed SQL (details with computed result):
+SELECT *, 
+  CASE 
+    WHEN CAST(SUBSTRING(score FROM '^[0-9]+') AS INTEGER) > CAST(SUBSTRING(score FROM '[0-9]+$') AS INTEGER) THEN 'Celtics Win'
+    ELSE 'Celtics Lose'
+  END AS result
+FROM public.t_1984_85_boston_celtics_season
+WHERE opponent ILIKE '%Knicks%' AND location ILIKE '%Madison Square Garden%';
+
+Results:
+- total_rows = 1
+- Game at Madison Square Garden (Jan 7): Score 108 - 97 → Result: Celtics Win
+
+Conclusion
+- The data show one Knicks home game vs the Celtics in the 1984–85 season (Jan 7 at Madison Square Garden), and Boston won 108–97. Therefore, the claim that the Knicks won all home games against the Celtics in 1984–85 is contradicted by the data.
+
+Assumptions made
+- "Home game" for the Knicks is interpreted as games with location listed as "Madison Square Garden."
+- The score column is from the Boston Celtics perspective (first number = Celtics points, second number = opponent points), consistent with the computed win flags and progression of the Boston record.
+- The table represents the 1984–85 season game log for the Celtics (regular season). No additional Knicks home games beyond what is present in this authoritative dataset are assumed.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

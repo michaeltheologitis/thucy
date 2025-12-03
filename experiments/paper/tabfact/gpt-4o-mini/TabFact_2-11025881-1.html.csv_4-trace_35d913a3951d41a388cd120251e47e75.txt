@@ -1,0 +1,97 @@
+
+<userQuery>
+<query>
+the gap between first and last be a total of 58.04
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “the gap between first and last be a total of 58.04.”
+
+Interpretation and scope
+- Dataset used: public.t_1976_world_junior_figure_skating_championships (1976 World Junior Figure Skating Championships).
+- “First” interpreted as rank = 1 (winner). “Last” interpreted as the competitor with the maximum rank in the table (last place).
+- “Gap” interpreted as the difference in total points between first and last.
+
+Findings
+- First place: Mark Cockerell — 172.42 points
+- Last place: Marc Franquet — 114.38 points
+- Gap (first_points − last_points): 58.04
+- Absolute gap: 58.04
+
+This matches the claimed value of 58.04.
+
+Executed SQL (primary evidence)
+-- Single query computing the gap between first and last by rank
+WITH ranked_competitors AS (
+    SELECT 
+        rank,
+        name,
+        points
+    FROM 
+        t_1976_world_junior_figure_skating_championships
+),
+first AS (
+    SELECT 
+        name AS first_name, 
+        points AS first_points
+    FROM 
+        ranked_competitors
+    WHERE 
+        rank = (SELECT MIN(rank) FROM ranked_competitors)
+),
+last AS (
+    SELECT 
+        name AS last_name, 
+        points AS last_points
+    FROM 
+        ranked_competitors
+    WHERE 
+        rank = (SELECT MAX(rank) FROM ranked_competitors)
+)
+SELECT 
+    first.first_name,
+    first.first_points,
+    last.last_name,
+    last.last_points,
+    (first.first_points - last.last_points) AS gap,
+    ABS(first.first_points - last.last_points) AS absolute_gap 
+FROM 
+    first, last;
+
+Result: first_name = Mark Cockerell, first_points = 172.42; last_name = Marc Franquet, last_points = 114.38; gap = 58.04; absolute_gap = 58.04.
+
+Supporting checks (to confirm “gap” pertains to points)
+- Difference in places and “sp + fs” between first and last do not equal 58.04.
+
+Executed SQL (supporting evidence)
+-- First (rank=1) places and sp+fs
+SELECT places AS first_places, "sp + fs" AS first_spfs
+FROM public.t_1976_world_junior_figure_skating_championships
+WHERE rank = 1;
+
+-- Max rank
+SELECT MAX(rank) AS max_rank FROM public.t_1976_world_junior_figure_skating_championships;
+
+-- Last (max rank) places and sp+fs
+SELECT places AS last_places, "sp + fs" AS last_spfs 
+FROM public.t_1976_world_junior_figure_skating_championships
+WHERE rank = (SELECT MAX(rank) FROM public.t_1976_world_junior_figure_skating_championships);
+
+-- Differences
+SELECT 11 - 167 AS diff_places, 1 - 19 AS diff_spfs;
+
+Results: diff_places = -156 (absolute 156), diff_spfs = -18 (absolute 18).
+
+Conclusion
+- The points gap between the first and last ranked competitors is 58.04, confirming the claim.
+
+Assumptions
+- “First” and “last” refer to rank order (min rank = 1, max rank = last place).
+- “Gap” refers to the difference in the points column (the primary total-scoring metric).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

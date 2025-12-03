@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+there be only 2 game where the score be 0 - 0 for the 1st leg
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Scope and data sources explored
+- Available source: PostgreSQL instance (TabFact), schema public, with one relevant table: public.t_1992_african_cup_of_champions_clubs.
+- Table columns: "team 1" (text), "agg" (text), "team 2" (text), "1st leg" (text), "2nd leg" (text).
+
+Verification steps and evidence
+1) Establish table size and inspect formatting of 1st-leg scores
+- SQL executed:
+SELECT COUNT(*) AS total_rows FROM public.t_1992_african_cup_of_champions_clubs;
+Result: total_rows = 10
+
+- SQL executed:
+SELECT DISTINCT "1st leg" FROM public.t_1992_african_cup_of_champions_clubs ORDER BY "1st leg" NULLS FIRST;
+Distinct values observed:
+- 0 - 0
+- 1 - 0
+- 1 - 1
+- 1 - 3
+- 2 - 1
+- 2 - 3
+- 3 - 0
+
+2) Count ties where the 1st leg score is 0-0 (allowing common separators and spaces)
+- SQL executed (regex accepts hyphen/en dash/em dash/colon separators with optional spaces and anchors to full string):
+SELECT COUNT(*) AS zero_zero_first_leg FROM public.t_1992_african_cup_of_champions_clubs WHERE "1st leg" ~ '^[[:space:]]*0[[:space:]]*[-–—:][[:space:]]*0[[:space:]]*$';
+Result: zero_zero_first_leg = 2
+
+3) List the matching ties for transparency
+- SQL executed:
+SELECT "team 1","team 2","1st leg" FROM public.t_1992_african_cup_of_champions_clubs WHERE "1st leg" ~ '^[[:space:]]*0[[:space:]]*[-–—:][[:space:]]*0[[:space:]]*$' ORDER BY "team 1","team 2";
+Rows returned:
+- team 1: port autonome, team 2: sporting clube da praia, 1st leg: 0 - 0
+- team 1: tourbillon fc, team 2: forces armées ca, 1st leg: 0 - 0
+
+Conclusion
+- The data shows exactly 2 ties with a first-leg score of 0-0 in this dataset.
+
+Assumptions
+- The claim refers to the available dataset (1992 African Cup of Champions Clubs) and treats each row as a tie with a recorded first-leg score.
+- Formatting variants for 0-0 were considered via regex; the actual values present were precisely "0 - 0".
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

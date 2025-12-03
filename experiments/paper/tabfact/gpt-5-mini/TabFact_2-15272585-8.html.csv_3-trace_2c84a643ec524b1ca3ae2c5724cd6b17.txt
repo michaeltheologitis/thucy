@@ -1,0 +1,79 @@
+
+<userQuery>
+<query>
+galina voskoboeva never play the same opponent more than 1 time
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “galina voskoboeva never play the same opponent more than 1 time.”
+
+Data source discovery
+- Accessible dataset: TabFact (postgres_tabfact13)
+- Available table: public.galina_voskoboeva
+
+Schema details (from tool)
+- Columns: outcome (text), date (text), tournament (text), surface (text), opponent (text), score (text)
+- No keys or constraints
+
+Evidence and executed SQL
+1) Check for any opponents faced more than once
+SQL:
+SELECT opponent, COUNT(*) AS matches
+FROM public.galina_voskoboeva
+WHERE opponent IS NOT NULL AND opponent <> ''
+GROUP BY opponent
+HAVING COUNT(*) > 1
+ORDER BY matches DESC, opponent;
+Result: No rows returned (no opponent appears more than once).
+
+2) Summary stats and normalization check (lowercase, trim, collapse internal whitespace)
+2a) Total matches
+SQL:
+SELECT COUNT(*) AS total_matches FROM public.galina_voskoboeva;
+Result: total_matches = 5
+
+2b) Unique opponents (raw)
+SQL:
+SELECT COUNT(DISTINCT opponent) AS unique_opponents_raw FROM public.galina_voskoboeva;
+Result: unique_opponents_raw = 5
+
+2c) Unique opponents (normalized)
+SQL:
+SELECT COUNT(DISTINCT lower(regexp_replace(trim(opponent), '\s+', ' ', 'g'))) AS unique_opponents_normalized FROM public.galina_voskoboeva;
+Result: unique_opponents_normalized = 5
+
+2d) Maximum number of matches against any single normalized opponent
+SQL:
+SELECT normalized, cnt FROM (
+  SELECT lower(regexp_replace(trim(opponent), '\s+', ' ', 'g')) AS normalized,
+         COUNT(*) AS cnt
+  FROM public.galina_voskoboeva
+  GROUP BY normalized
+) t
+ORDER BY cnt DESC
+LIMIT 1;
+Result: normalized = 'oleksandra kravets', cnt = 1
+
+3) Full match list for transparency
+SQL:
+SELECT date, tournament, opponent, outcome, score FROM public.galina_voskoboeva ORDER BY to_date(date, 'DD Month YYYY') ASC;
+Results (ordered by date ascending):
+- 28 january 2003 | tipton | matea mezak | runner - up | 6 - 4 , 4 - 6 , 4 - 6
+- 29 june 2003 | mont - de - marsan | oleksandra kravets | winner | 6 - 4 , 6 - 2
+- 3 october 2003 | latina | roberta vinci | runner - up | 3 - 6 , 4 - 6
+- 8 november 2005 | pittsburgh | lilia osterloh | runner - up | 6 - 7 , 4 - 6
+- 6 june 2006 | cuneo , italy | alice canepa | winner | 6 - 1 , 6 - 2
+
+Conclusion
+- Based on the contents of public.galina_voskoboeva, Galina Voskoboeva did not face any opponent more than once. All checks—including a normalization step to mitigate minor name-format differences—show each opponent appears exactly once.
+
+Assumptions
+- Treating the discovered dataset as authoritative for this verification task.
+- Opponent names are consistently recorded; normalization (lowercase/trim/collapse spaces) was applied to reduce formatting-induced duplication risk.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

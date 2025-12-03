@@ -1,0 +1,45 @@
+
+<userQuery>
+<query>
+the only invitational event type be in the 2005 season in los angeles
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary conclusion
+- Supported by the data: There is exactly one event with an event type containing “invitational” in the dataset, and it occurred in the 2005 season in Los Angeles.
+- Important nuance: In the 2005 season in Los Angeles, there were two events total: one “invitational” and one “pro tour.” Thus, if the claim were interpreted as “the only event type in Los Angeles in 2005 was ‘invitational,’” that would be incorrect. But interpreted as “the only ‘invitational’ event occurred in 2005 in Los Angeles,” it is correct.
+
+Evidence from data (with executed SQL)
+1) Find all rows where the event type is invitational (case-insensitive)
+SQL executed:
+SELECT season, "event type", location, date FROM public.tsuyoshi_fujita WHERE "event type" ILIKE '%invitational%';
+Result:
+- season: 2005, event type: invitational, location: los angeles, date: 17 - 20 may 2005
+
+2) Distinct (season, location) for invitational events
+SQL executed:
+SELECT DISTINCT season, location FROM public.tsuyoshi_fujita WHERE "event type" ILIKE '%invitational%' ORDER BY season, location;
+Result:
+- (season: 2005, location: los angeles)
+
+3) Cross-check: all events in Los Angeles in the 2005 season
+SQL executed:
+SELECT "event type", "date" FROM public.tsuyoshi_fujita WHERE season = '2005' AND location ILIKE '%los angeles%';
+Result rows:
+- event type: invitational, date: 17 - 20 may 2005
+- event type: pro tour,      date: 28 - 30 october 2005
+
+Data context discovered
+- Database: TabFact (public schema)
+- Table used: public.tsuyoshi_fujita (columns: season, event type, location, format, date, rank)
+
+Assumptions
+- Interpreted the claim as: “The only invitational event (i.e., rows where event type contains ‘invitational’) in the dataset occurred in the 2005 season in Los Angeles.”
+- Event type matching done case-insensitively using ILIKE '%invitational%' and location matched case-insensitively where noted.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+the most point score by the lion in a single game be 41
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim interpreted: The Detroit Lions’ highest (most) points scored in a single game (within the available season data) is 41.
+- Data source discovered: postgres_tabfact17 (TabFact), schema public, table t_1976_detroit_lions_season.
+
+Data exploration and evidence
+1) Inspect result field format
+Executed SQL:
+SELECT week, result FROM public.t_1976_detroit_lions_season ORDER BY week;
+Key returned rows (as observed by the tool):
+- week 1: l 10 - 3
+- week 2: w 24 - 10
+- week 3: l 10 - 9
+- week 4: l 24 - 14
+- week 5: w 30 - 10
+- week 6: l 20 - 7
+- week 7: w 41 - 14
+- week 8: w 27 - 6
+- week 9: l 31 - 23
+- week 10: l 17 - 16
+- week 11: w 14 - 10
+- week 12: w 27 - 14
+- week 13: l 24 - 10
+- week 14: l 20 - 17
+Interpretation: The string begins with W/L followed by the Lions’ score and the opponent score (e.g., "w 41 - 14").
+
+2) Compute the maximum Lions points in a single game
+Executed SQL:
+SELECT MAX(CAST(substring(result FROM '^[A-Za-z]\s*([0-9]+)') AS INTEGER)) AS max_points FROM public.t_1976_detroit_lions_season;
+Result returned:
+- max_points: 41
+
+Conclusion
+- The data shows the Detroit Lions’ highest single-game point total in the 1976 season is 41 points. Therefore, the claim is supported by the available evidence.
+
+Assumptions
+- "lion" refers to the Detroit Lions NFL team.
+- Scope is the 1976 season, which is the only Lions-related dataset available in the connected data source.
+- "most point score" means the maximum points scored by the Lions in any one game that season.
+- The result field’s first integer after W/L represents the Lions’ points in that game, consistent across rows.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

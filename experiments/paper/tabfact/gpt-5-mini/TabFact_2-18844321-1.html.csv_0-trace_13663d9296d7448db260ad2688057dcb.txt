@@ -1,0 +1,86 @@
+
+<userQuery>
+<query>
+there be 13 tour match in the last 3 month of 1978
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "there be 13 tour match in the last 3 month of 1978"
+
+Data source discovery
+- Available data: TabFact (postgres_tabfact17) database with a public schema.
+- Relevant table: public.t_1978_new_zealand_rugby_union_tour_of_britain_and_ireland
+
+Schema context
+- Table: t_1978_new_zealand_rugby_union_tour_of_britain_and_ireland
+  - Columns: "opposing team" (text), against (bigint), date (text), venue (text), status (text)
+
+Step 1: Confirm possible match types and date format
+- SQL (distinct status values):
+  SELECT DISTINCT status FROM public.t_1978_new_zealand_rugby_union_tour_of_britain_and_ireland ORDER BY status;
+  Result: test match; tour match
+
+- SQL (sample of dates to confirm format):
+  SELECT DISTINCT date FROM public.t_1978_new_zealand_rugby_union_tour_of_britain_and_ireland ORDER BY date LIMIT 30;
+  Sample result includes: 18 october 1978; 21 october 1978; 31 october 1978; 7 november 1978; 2 december 1978; 16 december 1978 (dates are stored as text like 'DD month YYYY').
+
+Step 2: Count tour matches between Oct 1, 1978 and Dec 31, 1978
+- SQL (count):
+  SELECT COUNT(*) AS tour_match_count
+  FROM public.t_1978_new_zealand_rugby_union_tour_of_britain_and_ireland
+  WHERE status = 'tour match'
+    AND to_date(date, 'DD month YYYY') BETWEEN DATE '1978-10-01' AND DATE '1978-12-31';
+  Result: tour_match_count = 14
+
+Step 3: List the tour matches in that period (verification)
+- SQL (list rows):
+  SELECT date, "opposing team", venue
+  FROM public.t_1978_new_zealand_rugby_union_tour_of_britain_and_ireland
+  WHERE status = 'tour match'
+    AND to_date(date, 'DD month YYYY') BETWEEN DATE '1978-10-01' AND DATE '1978-12-31'
+  ORDER BY to_date(date, 'DD month YYYY');
+  Result (14 rows):
+  - 18 october 1978 — cambridge university — grange road , cambridge
+  - 21 october 1978 — cardiff — cardiff arms park , cardiff
+  - 25 october 1978 — west wales xv — st helen 's , swansea
+  - 28 october 1978 — london counties — twickenham , london
+  - 31 october 1978 — munster — thomond park , limerick
+  - 7 november 1978 — ulster — ravenhill , belfast
+  - 15 november 1978 — south and south - west counties — memorial ground , bristol
+  - 18 november 1978 — midland counties — welford road , leicester
+  - 21 november 1978 — combined services — aldershot military stadium , aldershot
+  - 29 november 1978 — monmouthshire — rodney parade , newport
+  - 2 december 1978 — north of england — birkenhead park , birkenhead
+  - 5 december 1978 — north and midland of scotland — linksfield stadium , aberdeen
+  - 13 december 1978 — bridgend — brewery field , bridgend
+  - 16 december 1978 — barbarians — cardiff arms park , cardiff
+
+Step 4: Cross-check counts by month and status
+- SQL (grouped summary):
+  SELECT extract(month FROM to_date(initcap(date), 'FMDD FMMonth YYYY'))::int AS month_num,
+         to_char(to_date(initcap(date), 'FMDD FMMonth YYYY'), 'Mon') AS month_abbr,
+         status, COUNT(*) AS matches
+  FROM public.t_1978_new_zealand_rugby_union_tour_of_britain_and_ireland
+  WHERE to_date(initcap(date), 'FMDD FMMonth YYYY') BETWEEN DATE '1978-10-01' AND DATE '1978-12-31'
+  GROUP BY month_num, month_abbr, status
+  ORDER BY month_num, status;
+  Results:
+  - Oct: tour match = 5
+  - Nov: tour match = 5; test match = 3
+  - Dec: tour match = 4; test match = 1
+  Cross-check: 5 + 5 + 4 = 14 tour matches in Oct–Dec 1978
+
+Conclusion
+- The data shows 14 tour matches in the last three months (Oct–Dec) of 1978, not 13. Therefore, the claim is contradicted by the evidence.
+
+Assumptions
+- "tour match" corresponds to rows where status = 'tour match'.
+- "last 3 month of 1978" is interpreted as October, November, and December 1978.
+- The relevant context is the 1978 New Zealand rugby union tour of Britain and Ireland, as represented by the available table.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

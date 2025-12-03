@@ -1,0 +1,51 @@
+
+<userQuery>
+<query>
+the company of epcor have a joint control entity type
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim assessed: “the company of epcor have a joint control entity type.”
+
+Data source discovery
+- Explored available sources and found one database: TabFact (public schema).
+- Schema inspection shows a relevant table: public.klm with columns: company (text), type (text), principal activities (text), incorporated in (text), "group 's equity shareholding" (text).
+
+Evidence from data (exact executed SQL and results)
+1) Check presence of EPCOR in the company column
+SQL:
+SELECT count(*) AS match_count FROM public.klm WHERE company ILIKE '%EPCOR%';
+Result:
+match_count = 1
+
+2) Retrieve EPCOR’s type
+SQL:
+SELECT company, type FROM public.klm WHERE company ILIKE '%EPCOR%';
+Result:
+company = epcor
+type = subsidiary
+
+3) Check for any “joint control(l)ed” entity types in the table
+SQL:
+SELECT company, type FROM public.klm WHERE type ILIKE '%joint%control%';
+Result:
+company = schiphol logistics park
+type = joint controlled entity
+
+Assessment
+- The only EPCOR entry in the dataset has type = “subsidiary,” not a joint control entity.
+- The table does contain an example of “joint controlled entity,” but it is associated with “schiphol logistics park,” not EPCOR.
+
+Conclusion
+Based on the authoritative TabFact public.klm table, EPCOR does not have a joint control entity type; it is listed as a subsidiary.
+
+Assumptions
+- “the company of epcor” refers to the row(s) where public.klm.company matches “EPCOR” (case-insensitive, substring). 
+- The TabFact.public.klm table is the authoritative source for company type in this context.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

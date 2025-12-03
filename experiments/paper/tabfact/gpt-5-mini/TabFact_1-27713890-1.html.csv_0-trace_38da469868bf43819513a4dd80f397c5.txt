@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+the one where everybody find out be episode number 111.0
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “The One Where Everybody Finds Out” is episode number 111 (written as 111.0).
+
+Data source discovery:
+- Available authoritative source: PostgreSQL database “TabFact”, schema: public.
+- Relevant table: public.friends_season_5, which includes episode metadata with columns such as "no in series" (overall episode number), "no in season", title, and "original air date".
+
+Evidence gathered:
+1) Locate the episode by title and retrieve its overall and season numbers
+Executed SQL:
+SELECT title, "no in series", "no in season", "original air date"
+FROM public.friends_season_5
+WHERE title ILIKE '%Everybody Finds Out%'
+LIMIT 1;
+Result:
+- title: the one where everybody finds out
+- no in series: 111
+- no in season: 14
+- original air date: february 11 , 1999
+
+2) Confirm the match is unique in the table
+Executed SQL (count):
+SELECT COUNT(*) AS match_count
+FROM public.friends_season_5
+WHERE title ILIKE '%Everybody Finds Out%';
+Result:
+- match_count: 1
+
+Executed SQL (list matching rows):
+SELECT "no in series", "no in season", title
+FROM public.friends_season_5
+WHERE title ILIKE '%Everybody Finds Out%'
+ORDER BY "no in series";
+Result:
+- no in series: 111 | no in season: 14 | title: the one where everybody finds out
+
+Findings:
+- The episode titled “The One Where Everybody Finds Out” has overall series number ("no in series") = 111 and is Season 5, Episode 14, aired February 11, 1999.
+
+Conclusion:
+- The claim that it is episode number 111 (111.0) is supported by the data.
+
+Assumptions:
+- “The one where everybody find out” refers to the Friends episode “The One Where Everybody Finds Out”.
+- “Episode number” refers to the overall series number (“no in series”), not the season-specific number.
+- Case-insensitive title matching (ILIKE) was used to locate the row due to capitalization differences in stored data.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

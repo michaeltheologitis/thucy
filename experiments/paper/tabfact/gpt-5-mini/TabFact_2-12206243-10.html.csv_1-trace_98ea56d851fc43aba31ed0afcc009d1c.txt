@@ -1,0 +1,79 @@
+
+<userQuery>
+<query>
+on september 22 23 , 3380 crowd witness a win against the yankee of 8 - 1
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “on september 22 23 , 3380 crowd witness a win against the yankee of 8 - 1”
+
+Summary conclusion:
+- Date/opponent: A Blue Jays vs. Yankees game did occur on September 22 (1997 season data).
+- Score: The score was “8 - 1” in that game, but this table formats scores as opponent-first. So Yankees 8, Blue Jays 1. It was not a Blue Jays win.
+- Attendance: 23,380 (not 3,380).
+
+Evidence from the data (with exact executed SQL):
+1) How the Yankees are labeled in the data
+- SQL:
+  SELECT DISTINCT opponent FROM public.t_1997_toronto_blue_jays_season ORDER BY opponent;
+- Result includes: “yankees”
+
+2) All Yankees games around that date (chronology and the Sept 22 line with attendance)
+- SQL (chronological listing for Yankees games by parsing date text as 1997 dates):
+  SELECT date, score, attendance, to_date(initcap(date) || ' 1997','FMMonth DD YYYY') AS parsed_date
+  FROM public.t_1997_toronto_blue_jays_season
+  WHERE opponent ILIKE '%Yankees%'
+  ORDER BY parsed_date;
+- Relevant returned rows:
+  • september 19 — score: 3 - 0 — attendance: 31,195
+  • september 20 — score: 4 - 3 (11) — attendance: 38,332
+  • september 21 — score: 5 - 4 (10) — attendance: 40,038
+  • september 22 — score: 8 - 1 — attendance: 23,380
+
+3) The specific September 22 game details (outcome, attendance, record after the game)
+- SQL:
+  SELECT date, opponent, score, loss, attendance, record
+  FROM public.t_1997_toronto_blue_jays_season
+  WHERE lower(date) LIKE '%september 22%'
+    AND lower(opponent) LIKE '%yankee%';
+- Result:
+  • date: september 22
+  • opponent: yankees
+  • score: 8 - 1
+  • loss: hentgen (15 - 10)
+  • attendance: 23380
+  • record: 72 - 84
+- Interpretation: “loss: hentgen” indicates the losing pitcher was Blue Jays’ Pat Hentgen; the record became 72–84, meaning Toronto lost that game. Thus the 8–1 score is Yankees 8, Blue Jays 1.
+
+4) How we know the score ordering is opponent-first (using prior games in the same series)
+- SQL:
+  SELECT date, opponent, score, loss, attendance, record
+  FROM public.t_1997_toronto_blue_jays_season
+  WHERE opponent ILIKE '%Yankee%'
+    AND (date ILIKE '%September 19%' OR date ILIKE '%September 20%' OR date ILIKE '%September 21%')
+  ORDER BY date;
+- Results:
+  • Sept 19: score 3 - 0, loss: gooden (8 - 5), record: 72 - 81 → Blue Jays loss (losses increased to 81) → score reads Yankees 3, Blue Jays 0.
+  • Sept 20: score 4 - 3 (11), loss: janzen (1 - 1), record: 72 - 82 → Blue Jays loss → score reads Yankees 4, Blue Jays 3.
+  • Sept 21: score 5 - 4 (10), loss: almanzar (0 - 1), record: 72 - 83 → Blue Jays loss → score reads Yankees 5, Blue Jays 4.
+- Therefore the “score” field is opponent runs first, Blue Jays runs second. By the same convention, Sept 22’s “8 - 1” is Yankees 8, Blue Jays 1.
+
+Assessment of each part of the claim:
+- “on september 22” — Supported (the game occurred on Sept 22).
+- “against the yankee” — Supported (opponent is “yankees”).
+- “win … of 8 - 1” — Contradicted. The Blue Jays lost; the 8–1 line is Yankees 8, Blue Jays 1.
+- “3380 crowd” — Contradicted. The recorded attendance is 23,380.
+
+Final determination: The core outcome (win) and the attendance figure are incorrect according to the data. The date and opponent are correct.
+
+Assumptions made:
+- The available table (t_1997_toronto_blue_jays_season) represents the 1997 Toronto Blue Jays season and the date “september 22” is in 1997.
+- The “record” column is the Blue Jays’ record after the game, allowing inference of win/loss.
+- The “score” field is formatted as “opponent_runs - blue_jays_runs,” as evidenced by the series on Sept 19–21 combined with record changes.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

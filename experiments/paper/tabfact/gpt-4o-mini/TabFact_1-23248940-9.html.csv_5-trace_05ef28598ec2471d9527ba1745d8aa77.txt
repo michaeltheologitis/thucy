@@ -1,0 +1,99 @@
+
+<userQuery>
+<query>
+the second low attendance figure for a game be 12376
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “the second-lowest attendance figure for a game is 12,376.” We verify this against the available dataset for the Charlotte Bobcats 2009–10 season.
+
+Data sources discovered
+- PostgreSQL database with table: t_2009_10_charlotte_bobcats_season
+
+Schema details (attendance field)
+- Retrieved schema indicates an attendance field embedded in a text column named "location attendance".
+- Tool evidence:
+  SQL executed:
+  -- via schema inspection tool
+  (Tool-reported columns)
+  1. game - bigint
+  2. date - text
+  3. team - text
+  4. score - text
+  5. high points - text
+  6. high rebounds - text
+  7. high assists - text
+  8. location attendance - text
+  9. record - text
+
+Format check of location attendance
+- Sample rows show the venue name followed by a trailing numeric attendance (e.g., "Target Center 13352").
+- SQL executed:
+  SELECT DISTINCT "location attendance", game, date FROM t_2009_10_charlotte_bobcats_season LIMIT 10;
+- Result excerpt:
+  | Game | Date        | Location Attendance                  |
+  | 51   | February 10 | Target Center 13352                  |
+  | 47   | February 1  | Rose Garden 20106                    |
+  | 48   | February 3  | Staples Center 18997                 |
+  | 49   | February 6  | Time Warner Cable Arena 19164        |
+  | 56   | February 24 | Energysolutions Arena 19911          |
+  | 52   | February 16 | Time Warner Cable Arena 13712        |
+  | 53   | February 19 | Time Warner Cable Arena 19568        |
+  | 50   | February 9  | Time Warner Cable Arena 12376        |
+  | 54   | February 20 | Bradley Center 17174                 |
+  | 55   | February 22 | Staples Center 15892                 |
+
+Computation of attendance values
+- We parse the trailing number from "location attendance" as the numeric attendance.
+
+1) Lowest attendances (overall order)
+- SQL executed:
+  SELECT game, date, "location attendance", CAST(SUBSTRING("location attendance" FROM '([0-9]+)$') AS INTEGER) AS attendance
+  FROM t_2009_10_charlotte_bobcats_season
+  ORDER BY attendance ASC, game ASC
+  LIMIT 10;
+- Results (lowest 10):
+  1) Game 50 | Feb 9  | Time Warner Cable Arena 12376 | 12,376
+  2) Game 51 | Feb 10 | Target Center 13352           | 13,352
+  3) Game 52 | Feb 16 | Time Warner Cable Arena 13712 | 13,712
+  4) Game 55 | Feb 22 | Staples Center 15892          | 15,892
+  5) Game 54 | Feb 20 | Bradley Center 17174          | 17,174
+  6) Game 48 | Feb 3  | Staples Center 18997          | 18,997
+  7) Game 49 | Feb 6  | Time Warner Cable Arena 19164 | 19,164
+  8) Game 53 | Feb 19 | Time Warner Cable Arena 19568 | 19,568
+  9) Game 56 | Feb 24 | EnergySolutions Arena 19911    | 19,911
+  10) Game 47 | Feb 1 | Rose Garden 20106             | 20,106
+- The single second entry (overall, including duplicates) is 13,352.
+- Confirmation query for the second overall entry:
+  SQL executed:
+  SELECT game, date, "location attendance", CAST(SUBSTRING("location attendance" FROM '([0-9]+)$') AS INTEGER) AS attendance
+  FROM t_2009_10_charlotte_bobcats_season
+  ORDER BY attendance ASC, game ASC
+  OFFSET 1 LIMIT 1;
+- Result: Game 51 (February 10) at Target Center with attendance 13,352.
+
+2) Second-lowest unique attendance
+- SQL executed:
+  WITH parsed AS (
+    SELECT CAST(SUBSTRING("location attendance" FROM '([0-9]+)$') AS INTEGER) AS attendance
+    FROM t_2009_10_charlotte_bobcats_season
+  ), uniq AS (
+    SELECT DISTINCT attendance FROM parsed
+  )
+  SELECT attendance FROM uniq ORDER BY attendance ASC OFFSET 1 LIMIT 1;
+- Result: 13,352.
+
+Conclusion
+- The lowest attendance is 12,376 (Game 50, Feb 9).
+- The second-lowest attendance (both as the second entry overall and as the second unique value) is 13,352, not 12,376.
+- Therefore, the claim that the second-lowest attendance figure is 12,376 is contradicted by the data.
+
+Assumptions
+- “Second low attendance figure for a game” was interpreted within the available dataset (Charlotte Bobcats 2009–10 season) and evaluated both as: (a) second item when ordering all games by attendance, and (b) second-lowest unique attendance value. Both interpretations yield 13,352, not 12,376.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

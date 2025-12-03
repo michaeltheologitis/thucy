@@ -1,0 +1,71 @@
+
+<userQuery>
+<query>
+the lion finish with a record of 4 win and 8 loss
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "the lion finish with a record of 4 win and 8 loss"
+
+Data source discovery
+- Available database: TabFact
+- Schema: public
+- Table: public.t_1976_detroit_lions_season (columns: week bigint, date text, opponent text, result text, attendance bigint)
+
+Evidence
+1) Game-by-game results for the 1976 Detroit Lions
+Executed SQL:
+SELECT week, opponent, result FROM public.t_1976_detroit_lions_season ORDER BY week;
+Result (abridged to key fields):
+Week 1: chicago bears — l 10 - 3
+Week 2: atlanta falcons — w 24 - 10
+Week 3: minnesota vikings — l 10 - 9
+Week 4: green bay packers — l 24 - 14
+Week 5: new england patriots — w 30 - 10
+Week 6: washington redskins — l 20 - 7
+Week 7: seattle seahawks — w 41 - 14
+Week 8: green bay packers — w 27 - 6
+Week 9: minnesota vikings — l 31 - 23
+Week 10: new orleans saints — l 17 - 16
+Week 11: chicago bears — w 14 - 10
+Week 12: buffalo bills — w 27 - 14
+Week 13: new york giants — l 24 - 10
+Week 14: los angeles rams — l 20 - 17
+
+2) Aggregated record calculation from the result column
+- Wins
+Executed SQL:
+SELECT COUNT(*) as wins FROM public.t_1976_detroit_lions_season WHERE result LIKE 'w %'
+Query result: 6
+
+- Losses
+Executed SQL:
+SELECT COUNT(*) as losses FROM public.t_1976_detroit_lions_season WHERE result LIKE 'l %'
+Query result: 8
+
+- Total games
+Executed SQL:
+SELECT COUNT(*) as total_games FROM public.t_1976_detroit_lions_season
+Query result: 14
+
+- Final record (computed in one query)
+Executed SQL:
+SELECT CONCAT(SUM(CASE WHEN result LIKE 'w %' THEN 1 ELSE 0 END), ' - ', SUM(CASE WHEN result LIKE 'l %' THEN 1 ELSE 0 END)) AS final_record FROM public.t_1976_detroit_lions_season
+Query result: 6 - 8
+
+Assessment
+- The verified 1976 Detroit Lions final record is 6–8 over 14 games.
+- The claim states a 4–8 record (12 games), which does not match the data. The team recorded 6 wins, not 4, and played 14 games, not 12.
+
+Conclusion
+- The claim is contradicted by the data.
+
+Assumptions
+- Interpreted "the lion" as the Detroit Lions NFL team and, given the available data source, evaluated the 1976 season contained in the database. If a different team, league, or season was intended, that information was not present in the accessible data sources.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

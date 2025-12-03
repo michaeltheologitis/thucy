@@ -1,0 +1,66 @@
+
+<userQuery>
+<query>
+dwight phillips be the first person to set a long jump record
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Dwight Phillips [was] the first person to set a long jump record.”
+
+Conclusion: The claim is false. Data shows both (a) the standing world record is from 1991 by Mike Powell, and (b) there are top long-jump marks recorded decades before Dwight Phillips’ best jump in 2009. There is no evidence that Dwight Phillips set the first long jump record (nor the world record at any time).
+
+Evidence from the available data source (TabFact Postgres, public.long_jump):
+
+1) Verify Dwight Phillips’ best mark and date
+- Executed SQL:
+SELECT * FROM public.long_jump WHERE athlete ILIKE '%Dwight%';
+- Result:
+  athlete: dwight phillips; date: june 7 , 2009; mark: 8.74 m (28ft8in); nationality: united states; venue: eugene; wind: 1.2
+- Interpretation: Dwight Phillips’ top listed performance here is 8.74 m on June 7, 2009.
+
+2) Identify the world record (maximum metric mark) in this table
+- Executed SQL (max meters value):
+SELECT MAX((substring(mark from '^\\s*([0-9]+(?:\\.[0-9]+)?)'))::numeric) AS max_meters
+FROM public.long_jump
+WHERE substring(mark from '^\\s*([0-9]+(?:\\.[0-9]+)?)') IS NOT NULL;
+- Result: max_meters = 8.95
+
+- Executed SQL (row at that max):
+SELECT athlete, date, venue, mark, (substring(mark from '^\\s*([0-9]+(?:\\.[0-9]+)?)'))::numeric AS meters
+FROM public.long_jump
+WHERE (substring(mark from '^\\s*([0-9]+(?:\\.[0-9]+)?)'))::numeric = (
+  SELECT MAX((substring(mark from '^\\s*([0-9]+(?:\\.[0-9]+)?)'))::numeric) FROM public.long_jump
+  WHERE substring(mark from '^\\s*([0-9]+(?:\\.[0-9]+)?)') IS NOT NULL
+)
+ORDER BY athlete;
+- Result: mike powell | august 30 , 1991 | tokyo | 8.95 m (29ft4¼in) | 8.95
+- Interpretation: The top mark is Mike Powell’s 8.95 m from 1991 (the men’s world record). This predates Dwight Phillips’ 2009 performance by 18 years.
+
+3) Show that notable top marks exist long before 2009
+- Executed SQL (inspect/parse dates and find earliest):
+SELECT athlete, mark, date, to_date(date, 'FMMonth DD , YYYY') AS parsed_date FROM long_jump ORDER BY parsed_date LIMIT 20;
+- Result excerpt (ordered by earliest parsed date):
+  bob beamon | 8.90 m (29ft2¼in) a | october 18 , 1968 | parsed_date: 1968-10-18
+  robert emmiyan | 8.86 m (29ft0¾in) a | may 22 , 1987 | parsed_date: 1987-05-22
+  larry myricks | 8.74 m | july 18 , 1988 | parsed_date: 1988-07-18
+  mike powell | 8.95 m | august 30 , 1991 | parsed_date: 1991-08-30
+- Executed SQL (earliest date explicitly):
+SELECT MIN(to_date(date, 'FMMonth DD , YYYY')) AS earliest_date FROM long_jump;
+- Result: earliest_date: 1968-10-18
+- Executed SQL (row at earliest date):
+SELECT athlete, mark, date, to_date(date, 'FMMonth DD , YYYY') AS parsed_date FROM long_jump WHERE to_date(date, 'FMMonth DD , YYYY') = (SELECT MIN(to_date(date, 'FMMonth DD , YYYY')) FROM long_jump);
+- Result: bob beamon | 8.90 m (29ft2¼in) a | october 18 , 1968 | parsed_date: 1968-10-18
+- Interpretation: Top historical marks in this dataset clearly predate Dwight Phillips by decades (e.g., Bob Beamon 1968; Mike Powell 1991). Thus, Dwight Phillips was not the first to set a long jump record.
+
+Overall assessment: The dataset shows the recognized top mark (world record) belongs to Mike Powell (1991), with other earlier historic top marks (e.g., Bob Beamon 1968). Dwight Phillips’ best listed mark is from 2009 and is below the world record. Therefore, the claim that he was the first person to set a long jump record is contradicted by the data.
+
+Assumptions made:
+- “Long jump record” is interpreted as the men’s world record or record-setting performances reflected by all-time top marks. The long_jump table aligns with top historical marks and includes the world record entry (Mike Powell 1991).
+- Dates in the table were parsed using to_date(date, 'FMMonth DD , YYYY'). The sample rows necessary to evaluate the claim parsed correctly.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

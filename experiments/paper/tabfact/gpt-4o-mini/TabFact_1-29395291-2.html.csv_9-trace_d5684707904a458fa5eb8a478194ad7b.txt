@@ -1,0 +1,50 @@
+
+<userQuery>
+<query>
+vodafone have 8704 subscriber (thousands) in 2006 with a 38 growth percentage
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “vodafone have 8704 subscriber (thousands) in 2006 with a 38 growth percentage.”
+
+Data sources checked
+- Database: public schema (authoritative mobile telephony in Africa dataset)
+- Table: mobile_telephony_in_africa
+  - Columns: provider (text), country (text), subscribers (2005) (thousands) (bigint), subscribers (2006) (thousands) (bigint), growth % (double precision)
+
+Evidence from data (with executed SQL)
+1) Locate Vodafone entries with 8,704k subscribers in 2006
+SQL:
+SELECT provider, country, "subscribers (2006) (thousands)", "growth %" 
+FROM mobile_telephony_in_africa 
+WHERE provider ILIKE '%Vodafone%' 
+  AND "subscribers (2006) (thousands)" = 8704;
+Result:
+- Provider: Vodafone; Country: Egypt; Subscribers (2006): 8704 (thousands); Growth %: 42
+
+2) Verify 2005→2006 growth by recalculation
+SQL:
+SELECT provider, country, "subscribers (2005) (thousands)", "subscribers (2006) (thousands)", "growth %",
+  ROUND(("subscribers (2006) (thousands)" - "subscribers (2005) (thousands)")::numeric / NULLIF("subscribers (2005) (thousands)", 0) * 100, 1) AS calc_growth_pct
+FROM mobile_telephony_in_africa
+WHERE provider ILIKE '%Vodafone%'
+  AND country ILIKE '%Egypt%';
+Result:
+- Provider: Vodafone; Country: Egypt; Subscribers (2005): 6125 (thousands); Subscribers (2006): 8704 (thousands); Growth % (recorded): 42; Calculated Growth %: 42.1%
+
+Assessment of each part of the claim
+- “8704 subscriber (thousands) in 2006”: Supported for Vodafone (Egypt) — exact match at 8,704k.
+- “with a 38 growth percentage”: Not supported. The dataset records 42%, and independent calculation yields 42.1%.
+
+Conclusion
+- The subscriber figure is correct for Vodafone in Egypt (2006). The growth percentage is incorrect per the data, which shows approximately 42% growth, not 38%.
+
+Assumptions made
+- The claim refers to Vodafone within the African market dataset, and specifically to the entry matching 8,704k subscribers in 2006, which corresponds to Vodafone Egypt. The claim did not specify a country; the dataset is country-specific, and this is the only Vodafone record matching 8,704k in 2006.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

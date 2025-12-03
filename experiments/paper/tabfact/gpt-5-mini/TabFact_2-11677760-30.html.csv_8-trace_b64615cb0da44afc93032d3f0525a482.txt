@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+the home town of cody zeller be wichita , ks
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “The hometown of Cody Zeller is Wichita, KS.”
+
+Data source exploration
+- Available source: postgres_tabfact23 (public schema)
+- Discovered table: public.usa_today_all_usa_high_school_basketball_team
+- Table schema (from inspection):
+  - player (text), height (text), school (text), hometown (text), college (text)
+
+Evidence gathered
+1) Retrieve Cody Zeller’s hometown
+- SQL executed:
+  SELECT player, hometown FROM public.usa_today_all_usa_high_school_basketball_team WHERE player ILIKE '%Cody Zeller%';
+- Result:
+  player: cody zeller | hometown: washington , in
+
+2) Check for any record that lists Cody Zeller with Wichita, KS
+- Exact “Wichita, KS” check
+  SQL executed:
+  SELECT * FROM public.usa_today_all_usa_high_school_basketball_team WHERE player ILIKE 'Cody Zeller' AND hometown ILIKE 'Wichita, KS';
+  Result: 0 rows
+- Broader “Wichita” check (in case of variant formatting)
+  SQL executed:
+  SELECT * FROM public.usa_today_all_usa_high_school_basketball_team WHERE player ILIKE 'Cody Zeller' AND hometown ILIKE '%Wichita%';
+  Result: 0 rows
+
+3) Confirm uniqueness of Cody Zeller entry and stored hometown
+- SQL executed:
+  SELECT COUNT(*) AS count FROM public.usa_today_all_usa_high_school_basketball_team WHERE player ILIKE 'Cody Zeller';
+  Result: count = 1
+- SQL executed:
+  SELECT player, height, school, hometown, college FROM public.usa_today_all_usa_high_school_basketball_team WHERE player ILIKE 'Cody Zeller' ORDER BY hometown NULLS LAST, school NULLS LAST;
+  Result:
+  - player: cody zeller | height: 6 - 11 | school: washington high school | hometown: washington , in | college: indiana
+
+Conclusion
+- The authoritative dataset lists Cody Zeller’s hometown as “washington , in” (i.e., Washington, Indiana), not Wichita, KS. No records exist in this dataset linking Cody Zeller to Wichita.
+
+Assumptions
+- The “hometown” field reflects city and state for the player’s high-school profile in this dataset.
+- Case-insensitive matching (ILIKE) was used to ensure robust name lookup.
+- Minor formatting differences (spacing/case) do not affect the interpretation: “washington , in” corresponds to “Washington, IN.”
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+the solheim cup be host in the united state 6 time from 1990 - 2013
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “the solheim cup be host in the united state 6 time from 1990 - 2013.”
+
+Data source discovery:
+- Available source: PostgreSQL database with table public.solheim_cup containing Solheim Cup years and venues.
+
+Evidence 1: List all events from 1990–2013 with venues
+- Executed SQL:
+  SELECT year, venue FROM public.solheim_cup WHERE year BETWEEN 1990 AND 2013 ORDER BY year ASC;
+- Results:
+  - 1990: Lake Nona Golf & Country Club, Florida, USA
+  - 1992: Dalmahoy Country Club, Scotland
+  - 1994: The Greenbrier, West Virginia, USA
+  - 1996: St Pierre Golf & Country Club, Wales
+  - 1998: Muirfield Village, Ohio, USA
+  - 2000: Loch Lomond Golf Club, Scotland
+  - 2002: Interlachen Country Club, Minnesota, USA
+  - 2003: Barsebäck Golf & Country Club, Sweden
+  - 2005: Crooked Stick Golf Club, Indiana, USA
+  - 2007: Halmstad GK, Sweden
+  - 2009: Rich Harvest Farms, Illinois, USA
+  - 2011: Killeen Castle Golf Resort, Ireland
+  - 2013: Colorado Golf Club, Colorado, USA
+
+Evidence 2: Identify and count United States hosts in 1990–2013
+- Executed SQL to list US-hosted entries:
+  SELECT year, venue FROM public.solheim_cup WHERE year BETWEEN 1990 AND 2013 AND (venue ILIKE '%USA%' OR venue ILIKE '%United States%') ORDER BY year;
+- Matching years and venues (7 total): 1990 (FL, USA); 1994 (WV, USA); 1998 (OH, USA); 2002 (MN, USA); 2005 (IN, USA); 2009 (IL, USA); 2013 (CO, USA)
+
+- Executed SQL to return only the count:
+  SELECT COUNT(*) 
+  FROM public.solheim_cup 
+  WHERE year BETWEEN 1990 AND 2013 
+  AND (venue ILIKE '%USA%' OR venue ILIKE '%United States%') 
+  AND venue IS NOT NULL;
+- Result: 7
+
+Conclusion:
+- From 1990 through 2013 (inclusive), the Solheim Cup was hosted in the United States 7 times, not 6. Therefore, the claim is not supported by the data.
+
+Assumptions:
+- “From 1990 - 2013” is interpreted as inclusive of both years.
+- A venue string containing “USA” or “United States” indicates hosting in the United States.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

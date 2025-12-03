@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+there be 80079 crowd attendance when alabama be the opponent
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "there be 80079 crowd attendance when alabama be the opponent"
+
+Data sources explored
+- Discovered a PostgreSQL database with a table: public.east_carolina_pirates_football_1990_99 (East Carolina Pirates football games from 1990–1999). Columns: date (text), opponent (text), site (text), result (text), attendance (text).
+
+Evidence gathered
+1) Identify any games vs Alabama and review their attendance
+- Executed SQL:
+  SELECT date, opponent, site, result, attendance 
+  FROM east_carolina_pirates_football_1990_99 
+  WHERE LOWER(opponent) LIKE '%alabama%' 
+  ORDER BY date;
+- Result (single row found):
+  • Date: October 17
+  • Opponent: Alabama
+  • Site: Legion Field, Birmingham, AL
+  • Result: L 22 - 23
+  • Attendance: 80,079
+
+2) Verify attendance equals 80079 (numeric normalization)
+- Executed SQL:
+  SELECT date, opponent, site, result, attendance 
+  FROM east_carolina_pirates_football_1990_99 
+  WHERE CAST(REPLACE(attendance, ',', '') AS INTEGER) = 80079;
+- Result (single row found):
+  • Date: October 17
+  • Opponent: Alabama
+  • Site: Legion Field, Birmingham, AL
+  • Result: L 22 - 23
+  • Attendance: 80079
+
+3) Confirm uniqueness (optional cross-check)
+- Executed SQL:
+  SELECT COUNT(*) AS game_count FROM east_carolina_pirates_football_1990_99 WHERE opponent ILIKE '%Alabama%' AND attendance::int = 80079;
+- Result: game_count = 1
+
+Conclusion
+- The dataset shows one East Carolina game vs Alabama with attendance equal to 80,079 (i.e., 80079). This directly supports the claim.
+
+Assumptions
+- Interpreted the claim within the scope of the available dataset (East Carolina Pirates football, 1990–1999).
+- Treated “80079 crowd attendance” as the game’s official attendance figure and “Alabama” as the University of Alabama football team.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

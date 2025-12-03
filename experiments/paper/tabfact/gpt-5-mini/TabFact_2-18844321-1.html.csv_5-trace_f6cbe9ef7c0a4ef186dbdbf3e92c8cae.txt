@@ -1,0 +1,52 @@
+
+<userQuery>
+<query>
+all 4 test match take place in october of 1978
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim assessed: "all 4 test match take place in october of 1978"
+
+What I checked
+- The available authoritative dataset concerns the 1978 New Zealand rugby union tour of Britain and Ireland, which is a well-known tour that featured four Test matches (Ireland, Wales, England, Scotland). I verified when those Test matches occurred.
+
+Evidence from data
+1) Full table contents (to see dates and the “status” field for each match)
+Executed SQL:
+SELECT "opposing team", "against", "date", "venue", "status"
+FROM public."t_1978_new_zealand_rugby_union_tour_of_britain_and_ireland";
+Key rows relevant to Test matches returned by the query:
+- ireland — 4 november 1978 — test match
+- wales — 11 november 1978 — test match
+- england — 25 november 1978 — test match
+- scotland — 9 december 1978 — test match
+(October entries exist in the table, but they are all labeled "tour match," not "test match." For example: 18 october 1978 (cambridge university, tour match); 21 october 1978 (cardiff, tour match); 25 october 1978 (west wales xv, tour match); 28 october 1978 (london counties, tour match); 31 october 1978 (munster, tour match).)
+
+2) Filter only Test matches and order by date (to confirm months)
+Executed SQL:
+SELECT "date", "opposing team", status FROM public.t_1978_new_zealand_rugby_union_tour_of_britain_and_ireland WHERE status = 'test match';
+SELECT "date", "opposing team" FROM public.t_1978_new_zealand_rugby_union_tour_of_britain_and_ireland WHERE status = 'test match' ORDER BY to_date("date", 'FMDD FMMonth YYYY');
+Returned (chronological):
+- 4 november 1978 — ireland
+- 11 november 1978 — wales
+- 25 november 1978 — england
+- 9 december 1978 — scotland
+
+3) Explicit count of Test matches in October 1978
+Executed SQL:
+SELECT COUNT(*) AS cnt FROM public.t_1978_new_zealand_rugby_union_tour_of_britain_and_ireland WHERE "status" = 'test match' AND lower("date") LIKE '%oct%' AND "date" LIKE '%1978%';
+Result:
+- cnt = 0
+
+Conclusion
+- The four Test matches on this 1978 tour did not take place in October. Three occurred in November 1978 and one in December 1978. The data shows zero Test matches in October 1978. Therefore, the claim is contradicted by the evidence.
+
+Assumptions
+- "test match" refers to rugby union Test matches from the 1978 New Zealand tour of Britain and Ireland (the only available dataset). The claim was interpreted as: “All four Test matches took place in October 1978.”
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

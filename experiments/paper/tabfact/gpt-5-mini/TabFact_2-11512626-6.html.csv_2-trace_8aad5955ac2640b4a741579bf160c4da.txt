@@ -1,0 +1,45 @@
+
+<userQuery>
+<query>
+the attendance on august 26 and august 27 be 48063 and 48032
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the attendance on August 26 and August 27 be 48063 and 48032.”
+
+Data source discovery:
+- Available database: TabFact (public schema)
+- Relevant table: t_1997_colorado_rockies_season — game logs for the 1997 Colorado Rockies season, including an attendance column.
+
+Schema inspection (summary):
+- Columns: date (text), opponent (text), score (text), loss (text), attendance (bigint), record (text)
+
+Evidence and executed SQL:
+1) Establish date format present in the table
+- SQL:
+  SELECT DISTINCT date FROM t_1997_colorado_rockies_season ORDER BY date;
+- Observation: Dates are stored as lowercase strings like “august 1”, “august 26”, etc.
+
+2) Retrieve August entries and their attendance values
+- SQL:
+  SELECT date, attendance FROM t_1997_colorado_rockies_season WHERE date LIKE 'august %' ORDER BY (split_part(date, ' ', 2))::int;
+- Result excerpts (date — attendance):
+  - august 26 — 48063
+  - august 27 — 48032
+  - Context around those dates also shows nearby days (e.g., august 25 — 48143 and 48081; august 28 — 48422), confirming consistency.
+
+Assessment:
+- The table records august 26 with attendance 48063 and august 27 with attendance 48032.
+- These values match the claim exactly.
+
+Conclusion: The claim is supported by the data.
+
+Assumptions made:
+- The claim refers to the dates within the 1997 Colorado Rockies season dataset (the only available relevant dataset). The date strings do not include a year, but the table is for the 1997 season.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

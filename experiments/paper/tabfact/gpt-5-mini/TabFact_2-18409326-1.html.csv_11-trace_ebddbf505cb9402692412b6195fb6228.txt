@@ -1,0 +1,51 @@
+
+<userQuery>
+<query>
+the owner of the radio station that play adult hit be bell media
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Scope and data sources explored:
+- Discovered an accessible PostgreSQL database (TabFact) with a relevant table: public.media_in_kelowna (columns: frequency, call sign, branding, format, owner). This table lists radio stations in Kelowna, BC, including their formats and owners.
+
+Verification steps and evidence:
+1) Identify any station(s) with an Adult Hits format
+- Executed SQL:
+  SELECT "call sign", branding, frequency, "format", owner
+  FROM media_in_kelowna
+  WHERE lower("format") LIKE '%adult hits%';
+- Result:
+  • call sign: cjui - fm; branding: 103.9 the juice; frequency: 0 103.9 fm; format: adult hits; owner: vista broadcast group
+
+2) Broaden match to any substring 'adult hit' (singular or plural)
+- Executed SQL:
+  SELECT "call sign", "branding", "frequency", "format", "owner"
+  FROM public.media_in_kelowna
+  WHERE "format" ILIKE '%adult hit%';
+- Result (1 row):
+  • cjui - fm | 103.9 the juice | 0 103.9 fm | adult hits | vista broadcast group
+- Interpretation: The only Adult Hits station in this dataset is CJUI-FM (103.9 The Juice), and its owner is Vista Broadcast Group—not Bell Media.
+
+3) Check which stations in Kelowna are owned by Bell Media and their formats
+- Executed SQL:
+  SELECT "call sign", branding, frequency, format, owner
+  FROM media_in_kelowna
+  WHERE owner ILIKE '%bell media%'
+  ORDER BY "call sign";
+- Results:
+  • chsu - fm | 99.9 sun fm | 00 99.9 fm | contemporary hits radio | bell media
+  • cilk - fm | 101.5 ez rock | 0 101.5 fm | adult contemporary | bell media
+- Interpretation: In the Kelowna dataset, Bell Media owns CHSU-FM (Contemporary Hits Radio) and CILK-FM (Adult Contemporary), but not the Adult Hits station.
+
+Conclusion:
+- The data shows the Adult Hits station (CJUI-FM, 103.9 The Juice) is owned by Vista Broadcast Group. Therefore, the claim that the owner is Bell Media is contradicted by the evidence in this authoritative dataset.
+
+Assumptions made:
+- Due to the available data scope, I interpreted “the radio station that play adult hit” as referring to the Adult Hits-format station listed in the media_in_kelowna table (Kelowna, BC). If a different city or specific station was intended, the verification would need the corresponding local dataset.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

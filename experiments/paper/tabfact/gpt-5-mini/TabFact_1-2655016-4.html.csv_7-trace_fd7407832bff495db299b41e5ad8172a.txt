@@ -1,0 +1,90 @@
+
+<userQuery>
+<query>
+the episode call aaliyah be the first episode to air
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The user is asking whether the episode titled “Aaliyah” was the first episode to air (within the available dataset of episodes).
+
+Data source discovery
+- Available database: TabFact (postgres_tabfact22), public schema.
+- Relevant table: public.list_of_all_that_episodes with columns: season (bigint), series (bigint), episode title (text), original air date (text), nick prod (bigint).
+
+Evidence 1: Find the episode titled “Aaliyah” and its air date
+SQL executed:
+SELECT season, series, "episode title", "original air date"
+FROM public.list_of_all_that_episodes
+WHERE "episode title" ILIKE '%Aaliyah%'
+ORDER BY "original air date" ASC;
+
+Result:
+- season: 16; series: 53; episode title: aaliyah; original air date: october 4 , 1997
+
+Evidence 2: Determine the earliest episode air date in the dataset and compare to “Aaliyah”
+SQL executed (Top 5 earliest episodes by parsed date):
+WITH t AS (
+  SELECT *, replace(initcap(trim("original air date")), ' ,', ',') AS norm
+  FROM public.list_of_all_that_episodes
+)
+SELECT season, series, "episode title", "original air date",
+ CASE
+  WHEN norm ~ '^[A-Za-z]+ [0-9]{1,2}, [0-9]{4}$' THEN to_date(norm,'FMMonth FMDD, YYYY')
+  WHEN norm ~ '^[0-9]{1,2} [A-Za-z]+ [0-9]{4}$' THEN to_date(norm,'FMDD FMMonth YYYY')
+  WHEN norm ~ '^[A-Za-z]+ [0-9]{4}$' THEN to_date(norm,'FMMonth YYYY')
+  WHEN norm ~ '^[0-9]{4}$' THEN to_date(norm,'YYYY')
+  WHEN norm ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' THEN norm::date
+  ELSE NULL
+ END AS parsed_date
+FROM t
+ORDER BY parsed_date NULLS LAST, "original air date"
+LIMIT 5;
+
+Top results returned (earliest first):
+1) season: 1; series: 38; episode title: tia & tamera mowry / ll cool j; original air date: november 16 , 1996; parsed_date: 1996-11-16
+2) season: 2; series: 39; episode title: montell jordan; original air date: november 23 , 1996; parsed_date: 1996-11-23
+3) season: 4; series: 41; episode title: dru hill; original air date: december 7 , 1996; parsed_date: 1996-12-07
+4) season: 5; series: 42; episode title: tyra banks / blackstreet; original air date: december 14 , 1996; parsed_date: 1996-12-14
+5) season: 6; series: 43; episode title: music special; original air date: december 17 , 1996; parsed_date: 1996-12-17
+
+SQL executed (direct comparison of earliest date vs the “aaliyah” episode):
+WITH t AS (
+  SELECT *, replace(initcap(trim("original air date")), ' ,', ',') AS norm
+  FROM public.list_of_all_that_episodes
+), p AS (
+  SELECT *,
+   CASE
+    WHEN norm ~ '^[A-Za-z]+ [0-9]{1,2}, [0-9]{4}$' THEN to_date(norm,'FMMonth FMDD, YYYY')
+    WHEN norm ~ '^[0-9]{1,2} [A-Za-z]+ [0-9]{4}$' THEN to_date(norm,'FMDD FMMonth YYYY')
+    WHEN norm ~ '^[A-Za-z]+ [0-9]{4}$' THEN to_date(norm,'FMMonth YYYY')
+    WHEN norm ~ '^[0-9]{4}$' THEN to_date(norm,'YYYY')
+    WHEN norm ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' THEN norm::date
+    ELSE NULL
+   END AS parsed_date
+  FROM t
+)
+SELECT (SELECT min(parsed_date) FROM p) AS earliest_overall,
+       (SELECT parsed_date FROM p WHERE lower("episode title") LIKE 'aaliyah' LIMIT 1) AS aaliyah_exact,
+       (SELECT parsed_date FROM p WHERE lower("episode title") LIKE 'aaliyah%' LIMIT 1) AS aaliyah_like;
+
+Result:
+earliest_overall: 1996-11-16
+aaliyah_exact: 1997-10-04
+aaliyah_like: 1997-10-04
+
+Conclusion
+- The episode titled “aaliyah” aired on 1997-10-04.
+- The earliest episode in this dataset aired on 1996-11-16, which is earlier than 1997-10-04.
+- Therefore, the episode called “Aaliyah” was not the first episode to air (within the scope of the available data).
+
+Assumptions made
+- Interpreted the claim as: “Was the episode titled ‘Aaliyah’ the first episode to air in the dataset?”
+- Trusted the available TabFact dataset (public.list_of_all_that_episodes) as authoritative for this verification.
+- Parsed textual dates into dates using standard patterns; results showed consistent, valid parsing for the compared entries.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

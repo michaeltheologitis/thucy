@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+none of the england player take as many wicket as bill johnston
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: In the context of the 1948 Ashes series (as represented by the available dataset public.t_1948_ashes_series), no England player took as many wickets as Bill Johnston.
+
+Data discovery and schema
+- Discovered data sources: One table available in the TabFact database: public.t_1948_ashes_series.
+- Schema (via schema inspection):
+  - Columns: player (text), team (text), matches (bigint), wickets (bigint), average (double precision), best bowling (text).
+
+Evidence from executed SQL
+1) Bill Johnston’s wickets
+- SQL:
+  SELECT player, team, matches, wickets, average, "best bowling" FROM public.t_1948_ashes_series WHERE player ILIKE '%Bill Johnston%';
+- Result:
+  player: bill johnston; team: australia; matches: 5; wickets: 27; average: 23.33; best bowling: 5 / 36.
+- Finding: Bill Johnston took 27 wickets.
+
+2) England players’ wickets (context and top values)
+- Context sample (to view table makeup):
+  SQL:
+  SELECT * FROM public.t_1948_ashes_series LIMIT 10;
+  Returned rows included (excerpt):
+  - ray lindwall (australia) 27 wickets
+  - bill johnston (australia) 27 wickets
+  - alec bedser (england) 18 wickets
+  - norman yardley (england) 9 wickets
+  - jim laker (england) 9 wickets
+
+- Top England wicket-takers:
+  SQL:
+  SELECT player, wickets FROM public.t_1948_ashes_series WHERE team = 'england' ORDER BY wickets DESC NULLS LAST LIMIT 5;
+- Result:
+  - alec bedser — 18 wickets
+  - norman yardley — 9 wickets
+  - jim laker — 9 wickets
+- Finding: The maximum wickets by an England player in this series is 18 (Alec Bedser).
+
+Analysis
+- Bill Johnston’s wickets: 27
+- Highest England wickets: 18
+- Since 18 < 27, no England player took as many wickets as Bill Johnston in the 1948 Ashes series, according to the dataset.
+
+Conclusion: The claim is supported by the data provided in public.t_1948_ashes_series.
+
+Assumptions
+- The claim refers specifically to the 1948 Ashes series, consistent with the scope of the available dataset.
+- “As many wickets as” is interpreted as greater than or equal to Bill Johnston’s tally; no England player matches or exceeds 27 in this dataset.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

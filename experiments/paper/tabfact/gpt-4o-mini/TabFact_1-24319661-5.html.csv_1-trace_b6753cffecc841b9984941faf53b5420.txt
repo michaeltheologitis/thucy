@@ -1,0 +1,54 @@
+
+<userQuery>
+<query>
+give sentence : the production code for the episode direct by robert duncan mcneill be bcw404
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “the production code for the episode directed by Robert Duncan McNeill is BCW404.”
+
+Data source discovery:
+- Available database: PostgreSQL public schema with table list_of_white_collar_episodes (episodes of the TV series White Collar).
+
+Schema (relevant columns):
+- title (text), directed by (text), production code (text), no in season (bigint), no in series (bigint)
+
+Evidence:
+1) Check for episodes directed by Robert Duncan McNeill
+Executed SQL:
+SELECT "title", "no in season", "no in series", "production code" 
+FROM list_of_white_collar_episodes 
+WHERE "directed by" = 'Robert Duncan McNeill';
+Result: No rows (exact match not found; likely formatting variation).
+
+2) Case-insensitive, partial-name search for director
+Executed SQL:
+SELECT title, "no in season", "no in series", "directed by", "production code"
+FROM list_of_white_collar_episodes
+WHERE "directed by" ILIKE '%McNeill%' OR "directed by" ILIKE '%Robert%';
+Result:
+- Title: Parting Shots; No in Season: 4; No in Series: 50; Directed By: Robert Duncan McNeill; Production Code: BCW404.
+
+3) Verify production code contains BCW404 (case-insensitive)
+Executed SQL:
+SELECT title, "directed by", "production code"
+FROM list_of_white_collar_episodes
+WHERE LOWER("production code") LIKE '%bcw404%';
+Result:
+- Title: Parting Shots; Directed By: Robert Duncan McNeill; Production Code: BCW404.
+
+Conclusion:
+- The White Collar episode “Parting Shots” (S4E4; No. in series 50) is directed by Robert Duncan McNeill and has production code BCW404. This supports the claim.
+
+Requested sentence:
+- The production code for the White Collar episode directed by Robert Duncan McNeill is BCW404.
+
+Assumptions:
+- Interpreted “the episode directed by Robert Duncan McNeill” within the scope of the available White Collar episodes dataset. There may be other episodes he directed in other series, but verification is constrained to this dataset.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

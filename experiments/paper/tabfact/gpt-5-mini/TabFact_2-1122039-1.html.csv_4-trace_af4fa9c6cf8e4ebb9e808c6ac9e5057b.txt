@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+when the engine be ferrari v12s and the driver be peter whitehead the tyre be p and when the engine be ferrari v12s and the driver be luigi villoresi the tyre be p
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify:
+- When the engine is Ferrari V12s and the driver is Peter Whitehead, the tyre is p.
+- When the engine is Ferrari V12s and the driver is Luigi Villoresi, the tyre is p.
+
+Data discovery and schema
+- Available data source: TabFact (PostgreSQL), public schema.
+- Table: public.t_1950_swiss_grand_prix with columns: driver (text), entrant (text), constructor (text), chassis (text), engine (text), tyre (text).
+
+Evidence
+1) Check which engine values exist
+- Executed SQL:
+  SELECT engine, COUNT(*) AS count FROM t_1950_swiss_grand_prix GROUP BY engine ORDER BY count DESC, engine;
+- Result (excerpt relevant to claim):
+  - ferrari v12s — 4 rows
+
+2) Initial exact-case attempt for ‘Ferrari V12s’ (returned no rows due to case)
+- Executed SQL:
+  SELECT driver, engine, tyre FROM t_1950_swiss_grand_prix WHERE engine = 'Ferrari V12s';
+- Result: no rows.
+
+3) Case-correct query for engine = 'ferrari v12s'
+- Executed SQL:
+  SELECT driver, engine, tyre
+  FROM public.t_1950_swiss_grand_prix
+  WHERE engine = 'ferrari v12s';
+- Result (driver — engine — tyre):
+  - alberto ascari — ferrari v12s — p
+  - raymond sommer — ferrari v12s — p
+  - luigi villoresi — ferrari v12s — p
+  - peter whitehead — ferrari v12s — p
+
+Assessment
+- For driver Peter Whitehead with engine ferrari v12s, tyre is p. Supported by evidence in query (3).
+- For driver Luigi Villoresi with engine ferrari v12s, tyre is p. Supported by evidence in query (3).
+
+Conclusion
+- Both parts of the claim are supported by the data in t_1950_swiss_grand_prix.
+
+Assumptions
+- “tyre be p” refers to the exact value 'p' in the tyre column.
+- The claim pertains to the 1950 Swiss Grand Prix table (public.t_1950_swiss_grand_prix).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

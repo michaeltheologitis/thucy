@@ -1,0 +1,72 @@
+
+<userQuery>
+<query>
+there be 3 year show when the reader 's vote be na and the lifetime achievement be na
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: There are 3 years where both the "reader 's vote" and the "lifetime achievement" fields are recorded as 'na' in the data.
+
+Data source discovery
+- Available source: PostgreSQL (TabFact) public schema.
+
+Relevant schema located
+- Table: public.ned_kelly_awards
+  - Columns: year (bigint), "reader 's vote" (text), "lifetime achievement" (text), plus others.
+
+Step 1: Check how missing values are represented in the two columns
+Executed SQL (distinct values and counts for "reader 's vote"):
+SELECT "reader 's vote" AS value, COUNT(*) AS cnt
+FROM public.ned_kelly_awards
+GROUP BY "reader 's vote"
+ORDER BY cnt DESC NULLS LAST, value;
+Result (abridged): 'na' = 14, 'apartment 255 by bunty avieson' = 1, 'bleeding hearts by lindy cameron' = 1
+
+Executed SQL (NULL count for "reader 's vote"):
+SELECT COUNT(*) AS null_count
+FROM public.ned_kelly_awards
+WHERE "reader 's vote" IS NULL;
+Result: null_count = 0
+
+Executed SQL (distinct values and counts for "lifetime achievement"):
+SELECT "lifetime achievement" AS value, COUNT(*) AS cnt
+FROM public.ned_kelly_awards
+GROUP BY "lifetime achievement"
+ORDER BY cnt DESC NULLS LAST, value;
+Result (abridged): 'na' = 3; multiple named honorees each = 1
+
+Executed SQL (NULL count for "lifetime achievement"):
+SELECT COUNT(*) AS null_count
+FROM public.ned_kelly_awards
+WHERE "lifetime achievement" IS NULL;
+Result: null_count = 0
+
+Interpretation: In both columns, missing values are encoded as the literal text 'na' (not SQL NULL).
+
+Step 2: Count rows where both columns are 'na' and list the years
+Executed SQL (count rows where both are 'na'):
+SELECT COUNT(*) AS count_rows
+FROM public.ned_kelly_awards
+WHERE "reader 's vote" = 'na'
+  AND "lifetime achievement" = 'na';
+Result: count_rows = 3
+
+Executed SQL (list the years for those rows):
+SELECT year
+FROM public.ned_kelly_awards
+WHERE "reader 's vote" = 'na'
+  AND "lifetime achievement" = 'na'
+ORDER BY year;
+Result: years = 1998, 2000, 2011
+
+Conclusion: The data shows exactly 3 years where both "reader 's vote" and "lifetime achievement" are 'na'.
+
+Assumptions
+- Treated 'na' as the literal text string, case-sensitive as stored, not as SQL NULL or other variants (e.g., 'NA', 'n/a').
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

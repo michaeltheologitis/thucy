@@ -1,0 +1,74 @@
+
+<userQuery>
+<query>
+west berkshire brewery 's dr hexter healer beer win 3 gold medal between 1995 and 2009
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Conclusion: Verified. Data shows Dr Hexter's Healer from West Berkshire Brewery won three gold medals between 1995 and 2009 (inclusive).
+
+What I checked
+- Explored the available data source and identified a single table containing West Berkshire Brewery awards data.
+- Queried for entries related to “Dr Hexter’s Healer” and counted gold medals within 1995–2009.
+
+Data source and structure
+- Database schema: public
+- Table: public.west_berkshire_brewery
+- Columns: year (bigint), beer name (text), prize (text), category (text), competition (text)
+
+Evidence from the database
+1) Exploration of all relevant entries (to see available records for the beer):
+SQL:
+SELECT year, "beer name", prize, category, competition 
+FROM public.west_berkshire_brewery 
+WHERE "beer name" ILIKE '%hexter%' OR "beer name" ILIKE '%healer%'
+Results (filtered to the Healer beer):
+- 2008 | dr hexter 's healer | gold medal | best local beer | camra reading branch beer festival
+- 2009 | dr hexter 's healer | gold medal | best local beer | camra reading branch beer festival
+- 2009 | dr hexter 's healer | gold medal | in category | camra london and south east regional competition
+(Other non-gold/non-Healer entries also exist, e.g., runner up in 1997 and silver in 2002; “dr hexter’s wedding ale” in 2005 is a different beer.)
+
+2) Attempted exact-match count (returned zero due to exact case/formatting not matching stored values). Shown here for completeness:
+SQL (count):
+SELECT COUNT(*) AS medal_count
+FROM public.west_berkshire_brewery
+WHERE year BETWEEN 1995 AND 2009 AND prize = 'Gold Medal' AND "beer name" = 'Dr Hexter''s Healer';
+SQL (list):
+SELECT year, "beer name", prize, category, competition
+FROM public.west_berkshire_brewery
+WHERE year BETWEEN 1995 AND 2009 AND prize = 'Gold Medal' AND "beer name" = 'Dr Hexter''s Healer';
+Result: 0 rows (due to capitalization and spacing in stored text)
+
+3) Case-insensitive, substring-based verification query (authoritative for the claim):
+SQL (count):
+SELECT COUNT(*) AS total_gold_medals
+FROM public.west_berkshire_brewery
+WHERE "beer name" ILIKE '%healer%'
+AND prize ILIKE '%gold%'
+AND year BETWEEN 1995 AND 2009;
+Result: 3
+
+SQL (list rows):
+SELECT *
+FROM public.west_berkshire_brewery
+WHERE "beer name" ILIKE '%healer%'
+AND prize ILIKE '%gold%'
+AND year BETWEEN 1995 AND 2009;
+Returned rows:
+- 2008 | dr hexter 's healer | gold medal | best local beer | camra reading branch beer festival
+- 2009 | dr hexter 's healer | gold medal | best local beer | camra reading branch beer festival
+- 2009 | dr hexter 's healer | gold medal | in category | camra london and south east regional competition
+
+Interpretation
+- The data lists exactly three gold medal awards for Dr Hexter’s Healer within 1995–2009.
+
+Assumptions
+- “Between 1995 and 2009” is interpreted inclusively (1995 ≤ year ≤ 2009).
+- “Dr Hexter Healer” refers to the beer recorded as “dr hexter 's healer” in the dataset; case and punctuation normalized via ILIKE matching.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

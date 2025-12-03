@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+stuart potts be the man of the match during the league / cup competition on the 22nd
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Stuart Potts was the man of the match during the league / cup competition on the 22nd.”
+
+Data sources explored
+- Discovered data source: postgres_tabfact19 (TabFact) on PostgreSQL.
+- Relevant table identified via schema inspection: public.t_2008_09_guildford_flames_season with columns: date (text), opponent (text), venue (text), result (text), attendance (text), competition (text), "man of the match" (text).
+
+Evidence and executed SQL
+1) Sample rows to understand date format and presence of relevant fields
+SQL executed:
+SELECT date, opponent, venue, result, attendance, competition, "man of the match" FROM public.t_2008_09_guildford_flames_season LIMIT 10;
+Key returned rows (excerpt):
+- Row 8: date='22nd', opponent='wightlink raiders', venue='away', result='lost 5 - 4', attendance='509', competition='league / cup', man of the match='stuart potts'.
+Observation: The date column uses day-of-month strings with ordinal suffixes (e.g., '22nd').
+
+2) Direct check for matches on date = '22nd'
+SQL executed:
+SELECT opponent, venue, result, attendance, competition, "man of the match" FROM public.t_2008_09_guildford_flames_season WHERE date = '22nd';
+Result:
+- opponent: wightlink raiders; venue: away; result: lost 5 - 4; attendance: 509; competition: league / cup; man of the match: stuart potts.
+
+3) Frequency of “Stuart Potts” as man of the match and associated date/competition
+SQL executed:
+- Listing rows:
+SELECT date, competition FROM public.t_2008_09_guildford_flames_season WHERE lower("man of the match") = 'stuart potts' ORDER BY date;
+Result: [{"date":"22nd","competition":"league / cup"}]
+- Counting rows:
+SELECT count(*) AS cnt FROM public.t_2008_09_guildford_flames_season WHERE lower("man of the match") = 'stuart potts';
+Result: [{"cnt":1}]
+
+Assessment
+- The table shows a single match with date = '22nd' and competition = 'league / cup' where the man of the match is 'stuart potts'. This directly supports the claim.
+
+Conclusion
+- The claim is supported by the data.
+
+Assumptions
+- “On the 22nd” is interpreted as the day-of-month value '22nd' used in the table’s date column (the table does not include month/year).
+- Case-insensitive matching is used for the player name.
+- The TabFact/postgres_tabfact19 dataset is treated as authoritative within the available scope.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

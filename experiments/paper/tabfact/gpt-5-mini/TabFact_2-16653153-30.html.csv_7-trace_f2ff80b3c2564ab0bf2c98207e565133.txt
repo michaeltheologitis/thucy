@@ -1,0 +1,39 @@
+
+<userQuery>
+<query>
+the new zealand breaker win 2 game more than the melbourne tiger
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Conclusion: Inaccurate. In the available NBL 2008–09 season data, the Melbourne Tigers had 2 more wins than the New Zealand Breakers, not the other way around.
+
+Evidence from data (with executed SQL):
+1) Identify teams and their home/away records
+SQL:
+SELECT team, home, away FROM public.t_2008_09_nbl_season WHERE team ILIKE '%Breakers%' OR team ILIKE '%Tigers%';
+Result:
+[{"away":"9 - 6","home":"11 - 4","team":"melbourne tigers"},{"away":"8 - 7","home":"10 - 5","team":"new zealand breakers"}]
+
+2) Compute total wins from home/away records
+SQL:
+SELECT team, split_part(home,'-',1)::int AS home_wins, split_part(away,'-',1)::int AS away_wins, (split_part(home,'-',1)::int + split_part(away,'-',1)::int) AS total_wins FROM public.t_2008_09_nbl_season WHERE team IN ('new zealand breakers','melbourne tigers');
+Result:
+[{"away_wins":9,"home_wins":11,"team":"melbourne tigers","total_wins":20},{"away_wins":8,"home_wins":10,"team":"new zealand breakers","total_wins":18}]
+
+3) Compute difference (Breakers minus Tigers)
+SQL:
+WITH wins AS (SELECT team, (split_part(home,'-',1)::int + split_part(away,'-',1)::int) AS total_wins FROM public.t_2008_09_nbl_season WHERE team IN ('new zealand breakers','melbourne tigers')) SELECT (MAX(CASE WHEN team='new zealand breakers' THEN total_wins END) - MAX(CASE WHEN team='melbourne tigers' THEN total_wins END)) AS difference FROM wins;
+Result:
+[{"difference":-2}]
+
+Interpretation: New Zealand Breakers had 18 wins; Melbourne Tigers had 20 wins; Breakers had 2 fewer wins than Tigers.
+
+Assumptions:
+- I interpreted the claim as referring to the 2008–09 NBL regular season, which is the scope of the available dataset (table public.t_2008_09_nbl_season).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

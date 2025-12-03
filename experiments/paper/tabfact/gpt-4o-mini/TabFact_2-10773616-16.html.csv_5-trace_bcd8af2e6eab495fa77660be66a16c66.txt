@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+collingwood have a home team score that be 3 time higher than that of geelong
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Collingwood have a home team score that is 3 times higher than that of Geelong.”
+
+Data source consulted: TabFact database, table public.t_1954_vfl_season (1954 VFL match data; scores stored as text in format goals.behinds (total)).
+
+Step 1: Confirm relevant teams exist as home teams
+- Executed SQL:
+  SELECT DISTINCT "home team" FROM public.t_1954_vfl_season ORDER BY "home team" ASC;
+- Result (excerpt):
+  carlton; collingwood; geelong; north melbourne; richmond; st kilda
+
+Step 2: Retrieve Collingwood home match(es)
+- Executed SQL:
+  SELECT date, "home team", "home team score", "away team", "away team score", venue 
+  FROM public.t_1954_vfl_season 
+  WHERE "home team" = 'collingwood';
+- Result:
+  Date: 14 August 1954; Home Team: Collingwood; Home Team Score: 12.16 (88); Away Team: South Melbourne; Away Team Score: 13.12 (90); Venue: Victoria Park
+
+Step 3: Retrieve Geelong home match(es)
+- Executed SQL:
+  SELECT date, "home team", "home team score", "away team", "away team score", venue 
+  FROM public.t_1954_vfl_season 
+  WHERE "home team" = 'geelong';
+- Result:
+  Date: 14 August 1954; Home Team: Geelong; Home Team Score: 13.12 (90); Away Team: Hawthorn; Away Team Score: 7.6 (48); Venue: Kardinia Park
+
+Step 4: Extract total points for direct comparison
+- Executed SQL:
+  SELECT "home team", "home team score", 
+         CAST(SUBSTRING("home team score" FROM '\\((\\d+)\\)') AS INTEGER) AS numeric_total_points
+  FROM public.t_1954_vfl_season
+  WHERE "home team" IN ('collingwood', 'geelong');
+- Result:
+  • Geelong — 13.12 (90) → 90 points
+  • Collingwood — 12.16 (88) → 88 points
+
+Assessment
+- Collingwood’s home score in the available data is 88; Geelong’s is 90. 88 is not three times as high as 90 (88/90 ≈ 0.98). There is no evidence in the dataset that Collingwood has a home team score three times Geelong’s home team score.
+
+Conclusion: The claim is contradicted by the available data.
+
+Assumptions and scope notes
+- “Three times higher” is interpreted as “three times as high.”
+- Verification is performed against the available public.t_1954_vfl_season data, which appears to cover a single round dated 14 August 1954 (one home entry each for Collingwood and Geelong). The dataset is treated as authoritative within its scope, per the grounding instructions.
+- “Home team score” is taken as the total points in parentheses in the score string (e.g., 12.16 (88) → 88).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,46 @@
+
+<userQuery>
+<query>
+mark brook and kenny perry tie for have the lowest to par
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: In the 1996 PGA Championship table, Mark Brooks and Kenny Perry are tied for the lowest to-par score.
+
+Data source discovery
+- Database: TabFact (PostgreSQL)
+- Schema: public
+- Table: t_1996_pga_championship(place text, player text, country text, score text, "to par" text, money bigint)
+
+Method
+1) Compute the minimum numeric to-par value (treat 'E' as 0; strip spaces and '+' before casting).
+2) List all players whose normalized to-par equals that minimum.
+
+Evidence
+1) Minimum to-par value
+SQL executed:
+SELECT MIN((CASE WHEN replace(trim("to par"),' ', '') = 'E' THEN '0' WHEN replace(trim("to par"),' ', '') ~ '^[+-]?[0-9]+$' THEN replace(replace(trim("to par"),' ', ''), '+', '') ELSE NULL END)::integer) AS min_topar FROM public.t_1996_pga_championship;
+Result: min_topar = -11
+
+2) Players at the minimum to-par
+SQL executed:
+SELECT place, player, "to par" AS original_to_par, (CASE WHEN replace(trim("to par"),' ', '') = 'E' THEN '0' WHEN replace(trim("to par"),' ', '') ~ '^[+-]?[0-9]+$' THEN replace(replace(trim("to par"),' ', ''), '+', '') ELSE NULL END)::integer AS normalized_to_par FROM public.t_1996_pga_championship WHERE (CASE WHEN replace(trim("to par"),' ', '') = 'E' THEN '0' WHEN replace(trim("to par"),' ', '') ~ '^[+-]?[0-9]+$' THEN replace(replace(trim("to par"),' ', ''), '+', '') ELSE NULL END)::integer = -11 ORDER BY player;
+Returned rows:
+- place: 1, player: mark brooks, original_to_par: "- 11", normalized_to_par: -11
+- place: 2, player: kenny perry, original_to_par: "- 11", normalized_to_par: -11
+
+Conclusion
+- The data shows the lowest to-par in this event is -11, and both Mark Brooks and Kenny Perry have -11. This supports that they tie for the lowest to-par in the 1996 PGA Championship table.
+- Note: The table records places as 1 (Brooks) and 2 (Perry), consistent with a playoff deciding the winner, but their to-par values are equal.
+
+Assumptions
+- The claim refers to the 1996 PGA Championship dataset found in the connected database.
+- Interpreted "to par" as a numeric value after normalizing text (handling 'E' as 0 and removing spaces/plus signs).
+- Interpreted the misspelling "mark brook" as Mark Brooks.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

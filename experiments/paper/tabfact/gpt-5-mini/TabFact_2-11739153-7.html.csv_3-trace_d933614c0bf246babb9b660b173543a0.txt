@@ -1,0 +1,58 @@
+
+<userQuery>
+<query>
+during the 2007 - 08 minnesota wild season , minnesota play home 2 time less than they play away
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: During the 2007–08 Minnesota Wild season, Minnesota played at home 2 fewer times than they played away.
+
+Data source discovery
+- Explored available data sources and found a PostgreSQL database (TabFact) with a public schema containing a relevant table: public.t_2007_08_minnesota_wild_season.
+- This table contains game-level rows for the Minnesota Wild 2007–08 season with columns: date, visitor, score, home, decision, attendance, record.
+
+Evidence and SQL queries
+1) Total games present in the table (context check)
+SQL:
+SELECT COUNT(*) AS total_games FROM public.t_2007_08_minnesota_wild_season;
+Result:
+- total_games: 14
+
+2) Identify team name format for accurate filtering (visitor column)
+SQL:
+SELECT DISTINCT visitor FROM public.t_2007_08_minnesota_wild_season ORDER BY visitor;
+Results (visitor values include):
+- calgary, dallas, detroit, minnesota, nashville, ny islanders, vancouver
+
+3) Identify team name format (home column)
+SQL:
+SELECT DISTINCT home FROM public.t_2007_08_minnesota_wild_season ORDER BY home;
+Results (home values include):
+- chicago, columbus, edmonton, florida, minnesota, st louis, tampa bay, vancouver, washington
+
+4) Count home vs. away games for Minnesota and compute difference (away − home)
+SQL:
+SELECT
+  SUM(CASE WHEN home = 'minnesota' THEN 1 ELSE 0 END) AS home_games,
+  SUM(CASE WHEN visitor = 'minnesota' THEN 1 ELSE 0 END) AS away_games,
+  SUM(CASE WHEN visitor = 'minnesota' THEN 1 ELSE 0 END)
+  - SUM(CASE WHEN home = 'minnesota' THEN 1 ELSE 0 END) AS away_minus_home
+FROM public.t_2007_08_minnesota_wild_season;
+Result:
+- home_games: 6
+- away_games: 8
+- away_minus_home: 2
+
+Conclusion
+- In this dataset, Minnesota played 6 home games and 8 away games, meaning they played at home exactly 2 fewer times than away. This directly supports the claim.
+
+Assumptions
+- Interpreted the claim as: home_games = away_games − 2.
+- Assumed the table public.t_2007_08_minnesota_wild_season fully represents the season context for the purpose of verification and that the team is labeled as 'minnesota' (lowercase) in the data.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

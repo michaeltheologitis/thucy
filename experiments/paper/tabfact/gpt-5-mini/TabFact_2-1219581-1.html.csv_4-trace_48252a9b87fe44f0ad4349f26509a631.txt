@@ -1,0 +1,57 @@
+
+<userQuery>
+<query>
+the zakspeed s4 t / c engine be use on all chassis from 1985 until 1988
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “the zakspeed s4 t / c engine be use on all chassis from 1985 until 1988.”
+
+Data source discovery:
+- Available database: TabFact (public schema). Identified a relevant table: public.zakspeed with columns year, chassis, engine (s), tyres, points.
+
+Schema details used:
+- Table: public.zakspeed
+  - Columns: year (bigint), chassis (text), engine (s) (text), tyres (text), points (bigint)
+
+Evidence gathered:
+1) Query: Retrieve all rows for 1985–1988 with chassis and engine(s)
+Executed SQL:
+SELECT year, chassis, "engine (s)" FROM public.zakspeed WHERE year BETWEEN 1985 AND 1988 ORDER BY year ASC;
+Results:
+- 1985 | chassis: zakspeed 841 | engine(s): zakspeed s4 t / c
+- 1986 | chassis: zakspeed 861 | engine(s): zakspeed s4 t / c
+- 1987 | chassis: zakspeed 861 zakspeed 871 | engine(s): zakspeed s4 t / c
+- 1988 | chassis: zakspeed 881 | engine(s): zakspeed s4 t / c
+
+2) Query: Check distinct engine values used 1985–1988
+Executed SQL:
+SELECT DISTINCT "engine (s)" AS engine FROM public.zakspeed WHERE year BETWEEN 1985 AND 1988 ORDER BY "engine (s)";
+Results:
+- zakspeed s4 t / c
+
+3) Context check (post-1988):
+Executed SQL:
+SELECT year, chassis, "engine (s)", tyres, points FROM public.zakspeed WHERE year IN (1989, 1990) ORDER BY year;
+Results:
+- 1989 | chassis: zakspeed 891 | engine (s): yamaha v8 | tyres: p | points: 0
+Executed SQL:
+SELECT DISTINCT year FROM public.zakspeed WHERE year > 1988 ORDER BY year;
+Results:
+- 1989
+
+Assessment:
+- For each year 1985, 1986, 1987, and 1988, the engine(s) field is exactly “zakspeed s4 t / c,” and no other engine appears in those years. In 1987 multiple chassis (861 and 871) are listed, and both are associated with “zakspeed s4 t / c.” Therefore, the claim that the Zakspeed S4 T/C engine was used on all chassis from 1985 until 1988 is supported by the data. The table also shows a change to “yamaha v8” in 1989, consistent with the end of the period in the claim.
+
+Conclusion: The claim is supported by the evidence in the public.zakspeed table.
+
+Assumptions:
+- Interpreted “S4 T/C” as the engine string recorded in the data as “zakspeed s4 t / c.”
+- Interpreted “all chassis from 1985 until 1988” as all Zakspeed Formula One chassis listed for those years in the table (841, 861, 871, 881).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

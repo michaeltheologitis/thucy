@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+reason to be pretty be nominate for best play more than 1 time
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+What I verified
+- Claim interpreted: whether the play “reasons to be pretty” received more than one nomination in a “Best Play”-type top play category across recognized award bodies.
+
+Available data source
+- Database: TabFact
+- Table: reasons_to_be_pretty
+  - Columns: year (bigint), award ceremony (text), category (text), nominee (text), result (text)
+
+Evidence from the data (with executed SQL)
+1) Check for categories explicitly containing the phrase “best play”
+SQL:
+SELECT year, category, nominee, result
+FROM reasons_to_be_pretty
+WHERE category ILIKE '%best play%';
+Result:
+- 2009 | best play | neil labute | nominated
+Interpretation: One nomination in a category explicitly named “best play” (Tony Award).
+
+2) Check for Drama Desk “Outstanding Play” (a top play category analogous to Best Play)
+SQL:
+SELECT year, category, nominee, result
+FROM reasons_to_be_pretty
+WHERE category ILIKE 'outstanding play';
+Result:
+- 2009 | outstanding play | outstanding play | nominated
+Interpretation: One nomination in Drama Desk’s top play category (“Outstanding Play”).
+
+3) Count nominations in top play categories
+SQL:
+SELECT 
+    COUNT(*) FILTER (WHERE category ILIKE '%best play%' AND result ILIKE 'nomin%') AS count_best_play,
+    COUNT(*) FILTER (WHERE (category ILIKE '%best play%' OR category ILIKE 'outstanding play') AND result ILIKE 'nomin%') AS count_top_play_any
+FROM reasons_to_be_pretty;
+Result:
+- count_best_play = 1
+- count_top_play_any = 2
+
+Conclusion
+- Literal “Best Play” category: 1 nomination (Tony Award, 2009).
+- Including equivalent top play category (“Outstanding Play” at Drama Desk): total of 2 nominations in 2009.
+
+Therefore, the statement that it was nominated for “best play” more than once is supported if “best play” is interpreted broadly to include equivalent top play categories across award bodies; if interpreted strictly as the literal category name “Best Play,” it occurred once.
+
+Assumptions
+- “Best Play” may reasonably encompass equivalent top play categories used by different award organizations (e.g., Drama Desk “Outstanding Play”).
+- The reasons_to_be_pretty table consolidates this play’s award history for the relevant awards and year(s).
+
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

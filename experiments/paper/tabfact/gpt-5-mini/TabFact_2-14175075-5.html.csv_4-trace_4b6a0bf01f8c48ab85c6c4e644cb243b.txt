@@ -1,0 +1,60 @@
+
+<userQuery>
+<query>
+wrestling be the sport with the latest date in 2007
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim assessed: “Wrestling [is] the sport with the latest date in 2007.”
+- Conclusion: Supported by the data in the TabFact public.iowa_corn_cy_hawk_series table.
+
+Evidence from data (with executed SQL)
+1) Identify all 2007 events to inspect available rows and formats
+Executed SQL:
+SELECT date, sport, site
+FROM public.iowa_corn_cy_hawk_series
+WHERE date LIKE '%2007%'
+ORDER BY date ASC;
+Result excerpt (raw text ordering):
+- december 5 , 2007 — w basketball — ames
+- december 7 , 2007 — w swimming — ames
+- december 8 , 2007 — m basketball — ames
+- december 9 , 2007 — wrestling — ames
+- november 10 , 2007 — w cross country — peoria
+- november 10 , 2007 — m cross country — peoria
+- september 15 , 2007 — football — ames
+- september 4 , 2007 — m golf — cedar rapids
+- september 8 , 2007 — volleyball — des moines
+- september 9 , 2007 — w soccer — iowa city
+
+2) Parse and order 2007 events chronologically to find the latest date
+Executed SQL:
+SELECT date, sport, site,
+       to_date(REGEXP_REPLACE(INITCAP(date), '\s*,\s*', ', '), 'FMMonth FMDD, YYYY') AS parsed_date
+FROM public.iowa_corn_cy_hawk_series
+WHERE date LIKE '%2007%'
+ORDER BY parsed_date DESC;
+Top results (ordered by parsed_date DESC):
+1) date: december 9 , 2007 — sport: wrestling — site: ames — parsed_date: 2007-12-09
+2) date: december 8 , 2007 — sport: m basketball — site: ames — parsed_date: 2007-12-08
+3) date: december 7 , 2007 — sport: w swimming — site: ames — parsed_date: 2007-12-07
+4) date: december 5 , 2007 — sport: w basketball — site: ames — parsed_date: 2007-12-05
+
+Findings
+- The chronologically latest event in 2007 is on 2007-12-09, and its sport is wrestling.
+
+Conclusion
+- The claim is supported: wrestling is the sport with the latest date in 2007 in this dataset.
+
+Assumptions
+- “Latest date in 2007” is interpreted as the chronologically latest event date during the year 2007 in the table public.iowa_corn_cy_hawk_series.
+- Dates are stored as free text; I normalized and parsed them as shown to compare chronologically.
+
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

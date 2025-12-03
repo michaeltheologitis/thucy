@@ -1,0 +1,60 @@
+
+<userQuery>
+<query>
+equestrian at the asian game happen every 4 year from 1982 to 2010
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Equestrian at the Asian Games happen every 4 year from 1982 to 2010.”
+
+Summary of findings:
+- The equestrian-at-the-Asian-Games table shows editions in 1982, 1986, 1994, 1998, 2002, 2006, and 2010.
+- The expected 4-year cadence from 1982 to 2010 would include 1990, but 1990 is missing in the data.
+- Therefore, the statement that equestrian happened “every 4 year from 1982 to 2010” is contradicted by the data.
+
+Evidence and executed SQL:
+1) Distinct years present (1980–2012)
+- SQL:
+  SELECT DISTINCT year FROM public.equestrian_at_the_asian_games WHERE year BETWEEN 1980 AND 2012 ORDER BY year ASC;
+- Result:
+  1982, 1986, 1994, 1998, 2002, 2006, 2010
+
+2) Distinct years present (1982–2010)
+- SQL:
+  SELECT DISTINCT year FROM public.equestrian_at_the_asian_games WHERE year BETWEEN 1982 AND 2010 ORDER BY year;
+- Result:
+  1982, 1986, 1994, 1998, 2002, 2006, 2010
+
+3) Missing expected quadrennial years from 1982 to 2010 (inclusive)
+- SQL:
+  SELECT g.y AS missing_expected_year
+  FROM generate_series(1982,2010,4) g(y)
+  LEFT JOIN (SELECT DISTINCT year FROM public.equestrian_at_the_asian_games WHERE year BETWEEN 1982 AND 2010) e ON g.y = e.year
+  WHERE e.year IS NULL
+  ORDER BY g.y;
+- Result:
+  1990
+
+4) Check for unexpected years in range that do not follow the 4-year cadence
+- SQL:
+  SELECT DISTINCT year AS unexpected_year
+  FROM public.equestrian_at_the_asian_games
+  WHERE year BETWEEN 1982 AND 2010
+    AND year NOT IN (SELECT generate_series(1982,2010,4))
+  ORDER BY year;
+- Result:
+  no rows (none)
+
+Conclusion:
+- The dataset shows a gap at 1990; hence, equestrian at the Asian Games did not occur in every 4-year interval from 1982 through 2010.
+
+Assumptions:
+- The table public.equestrian_at_the_asian_games comprehensively reflects the years equestrian was held at the Asian Games.
+- “Every 4 year from 1982 to 2010” is interpreted as the quadrennial sequence: 1982, 1986, 1990, 1994, 1998, 2002, 2006, 2010.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

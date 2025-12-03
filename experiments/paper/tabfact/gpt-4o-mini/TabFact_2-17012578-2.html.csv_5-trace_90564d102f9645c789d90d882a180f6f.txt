@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+brendan melnyk be the lead and ted appelman be skip
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim: “brendan melnyk be the lead and ted appelman be skip.”
+- Finding: In the available dataset for the 2009 Canadian Olympic Curling Trials, there is a team entry where Ted Appelman is listed as the Skip and Brendan Melnyk is listed as the Lead. This supports the claim.
+
+Data source discovery
+- Available source: PostgreSQL database with table public.t_2009_canadian_olympic_curling_trials.
+
+Schema inspection (evidence)
+- Columns present in public.t_2009_canadian_olympic_curling_trials: skip (text), third / vice skip (text), second (text), lead (text), city (text). No primary key defined.
+- Executed SQL to retrieve columns and data types:
+SELECT column_name, data_type 
+FROM information_schema.columns 
+WHERE table_name = 't_2009_canadian_olympic_curling_trials' 
+AND table_schema = 'public';
+- Executed SQL to check for primary key:
+SELECT tc.constraint_type, kcu.column_name 
+FROM information_schema.table_constraints AS tc 
+JOIN information_schema.key_column_usage AS kcu 
+ON tc.constraint_name = kcu.constraint_name 
+WHERE tc.table_name = 't_2009_canadian_olympic_curling_trials' 
+AND tc.table_schema = 'public' 
+AND tc.constraint_type = 'PRIMARY KEY';
+
+Record verification (evidence)
+- Result found: Skip: Ted Appelman; Third / Vice Skip: Tom Appelman; Second: Bradon Klassen; Lead: Brendan Melnyk; City: Edmonton.
+- Executed SQL used to find the record:
+SELECT skip, "third / vice skip", second, lead, city 
+FROM public.t_2009_canadian_olympic_curling_trials 
+WHERE skip ILIKE '%appelman%' OR lead ILIKE '%melnyk%';
+
+Conclusion
+- The dataset contains a row explicitly listing Ted Appelman as Skip and Brendan Melnyk as Lead, confirming the claim within the scope of the 2009 Canadian Olympic Curling Trials data.
+
+Assumptions
+- The claim refers to team roles as recorded for the 2009 Canadian Olympic Curling Trials. Names are matched exactly as stored in the dataset.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,46 @@
+
+<userQuery>
+<query>
+before 2009 be the only year that reason to be pretty have a nominee at the drama desk award ceremony
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Conclusion: The data shows that 2009 is the only year in which Reasons to Be Pretty had nominations at the Drama Desk Awards.
+
+Evidence:
+1) Distinct years with Drama Desk entries for Reasons to Be Pretty
+- SQL executed:
+  SELECT DISTINCT year FROM reasons_to_be_pretty WHERE "award ceremony" ILIKE '%drama desk%' ORDER BY year;
+- Result:
+  - 2009
+
+2) Detailed Drama Desk entries for those years
+- SQL executed:
+  SELECT year, "category", nominee, result FROM reasons_to_be_pretty WHERE "award ceremony" ILIKE '%drama desk%' AND year IN (2009) ORDER BY year, "category";
+- Result rows:
+  - year: 2009 | category: outstanding actor in a play | nominee: thomas sadoski | result: nominated
+  - year: 2009 | category: outstanding director of a play | nominee: terry kinney | result: nominated
+  - year: 2009 | category: outstanding play | nominee: outstanding play | result: nominated
+
+3) Cross-check of available award ceremonies and Drama Desk counts by year
+- SQL executed:
+  SELECT DISTINCT "award ceremony" FROM public.reasons_to_be_pretty ORDER BY "award ceremony";
+- Result:
+  - drama desk award
+  - theatre world award
+  - tony award
+
+- SQL executed:
+  SELECT year, COUNT(*) AS drama_desk_count FROM public.reasons_to_be_pretty WHERE lower("award ceremony") LIKE '%drama desk%' GROUP BY year ORDER BY year;
+- Result:
+  - year: 2009 | drama_desk_count: 3
+
+Interpretation and assumptions:
+- I interpreted the claim as asking whether 2009 was the only year that Reasons to Be Pretty had a nominee at the Drama Desk Awards. The table contains a dedicated record set for this play’s awards and indicates Drama Desk entries only in 2009. Matching for the ceremony name was done case-insensitively (values appear as 'drama desk award').
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,70 @@
+
+<userQuery>
+<query>
+2 home team have the same score as the away team that they be play
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “2 home team have the same score as the away team that they be play.” Interpreted as: In the available match data, there are exactly 2 matches where the home team’s total points equal the away team’s total points (i.e., two draws).
+
+Data source explored
+- Database: postgres_tabfact8 (public schema)
+- Table: public.t_1938_vfl_season
+  Columns: "home team" (text), "home team score" (text), "away team" (text), "away team score" (text), "venue" (text), "crowd" (bigint), "date" (text)
+
+What “same score” means in this dataset
+- Scores are stored in the format goals.behinds (total), e.g., “11.23 (89)”. A draw occurs when the integers inside the parentheses (total points) are equal for home and away.
+
+Evidence and executed SQL
+1) Context: list all rows to see the score format
+SQL:
+SELECT "home team", "home team score", "away team", "away team score", "date", "venue" FROM public.t_1938_vfl_season;
+Result (6 rows):
+- geelong 11.23 (89) vs hawthorn 6.13 (49)
+- fitzroy 16.12 (108) vs south melbourne 8.8 (56)
+- st kilda 14.12 (96) vs melbourne 16.16 (112)
+- richmond 15.14 (104) vs essendon 15.9 (99)
+- footscray 13.9 (87) vs collingwood 10.5 (65)
+- north melbourne 11.5 (71) vs carlton 16.25 (121)
+
+2) Per-match extraction of total points and equality check
+SQL:
+select "home team","home team score",
+       replace(split_part("home team score",'(',2),')','') as h_total,
+       "away team","away team score",
+       replace(split_part("away team score",'(',2),')','') as a_total,
+       (replace(split_part("home team score",'(',2),')','') = replace(split_part("away team score",'(',2),')','')) as totals_equal
+from public.t_1938_vfl_season;
+Results (totals_equal is false for every row):
+- 89 vs 49 → false
+- 108 vs 56 → false
+- 96 vs 112 → false
+- 104 vs 99 → false
+- 87 vs 65 → false
+- 71 vs 121 → false
+
+3) Aggregate count of draws (equal total points)
+SQL:
+SELECT COUNT(*) AS total_rows FROM t_1938_vfl_season;
+Result: total_rows = 6
+
+SQL:
+SELECT COUNT(*) AS equal_total_points_rows
+FROM t_1938_vfl_season
+WHERE "home team score" LIKE '%(%' AND "away team score" LIKE '%(%'
+  AND (replace(split_part("home team score",'(',2),')',''))::int = (replace(split_part("away team score",'(',2),')',''))::int;
+Result: equal_total_points_rows = 0
+
+Conclusion based on data
+- The table contains 6 matches, and none have equal total points. Therefore, the claim that “2” such matches exist is contradicted by the data.
+
+Assumptions made
+- “Same score” refers to equal total points shown inside parentheses in the score strings (the conventional way to identify draws in this sport).
+- The claim pertains to the available table public.t_1938_vfl_season; no other match tables are present in the accessible data environment.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

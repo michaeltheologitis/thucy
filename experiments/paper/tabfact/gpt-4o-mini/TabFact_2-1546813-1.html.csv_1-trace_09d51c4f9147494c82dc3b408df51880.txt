@@ -1,0 +1,70 @@
+
+<userQuery>
+<query>
+the united state team win 8 of the solheim cup start in 1990 and the last be in 2009
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “The United States team won 8 Solheim Cups; the event started in 1990; the United States’ last win in that span was in 2009.”
+
+Data discovery
+- Available source: PostgreSQL database with table public.solheim_cup (columns: year, venue, "winning team", score, "usa captain", "europe captain").
+
+Evidence and executed SQL
+1) Solheim Cup start year
+- Finding: The earliest year recorded is 1990.
+- SQL (minimum year): SELECT MIN(year) AS min_year FROM public.solheim_cup;
+  Result: 1990
+- SQL (maximum year): SELECT MAX(year) AS max_year FROM public.solheim_cup;
+  Result: 2013
+
+2) Distinct winning teams
+- Finding: Only Europe and United States are present as winners.
+- SQL: SELECT DISTINCT "winning team" FROM public.solheim_cup ORDER BY "winning team" ASC;
+  Result: [Europe, United States]
+
+3) Total wins by team
+- Finding: United States has 8 wins; Europe has 5 wins (total 13 events from 1990–2013).
+- SQL: SELECT "winning team", COUNT(*) AS wins FROM public.solheim_cup GROUP BY "winning team" ORDER BY wins DESC;
+  Result: United States = 8; Europe = 5
+
+4) Year-by-year winners (to confirm last U.S. win year)
+- SQL: SELECT year, "winning team" FROM public.solheim_cup ORDER BY year ASC;
+  Result (year – winner):
+  1990 – United States
+  1992 – Europe
+  1994 – United States
+  1996 – United States
+  1998 – United States
+  2000 – Europe
+  2002 – United States
+  2003 – Europe
+  2005 – United States
+  2007 – United States
+  2009 – United States
+  2011 – Europe
+  2013 – Europe
+  Observation: The United States’ most recent win in this dataset is 2009.
+
+5) Most recent United States win (direct check)
+- Finding: 2009.
+- SQL: SELECT MAX(year) AS most_recent_us_win FROM public.solheim_cup WHERE "winning team" ILIKE '%United%States%';
+  Result: 2009
+
+6) Count of United States wins up to and including 2009
+- Finding: 8 wins through 2009.
+- SQL: SELECT COUNT(*) AS count FROM public.solheim_cup WHERE year <= 2009 AND "winning team" ILIKE '%United%States%';
+  Result: 8
+
+Conclusion
+- The data shows the event began in 1990, the United States has 8 wins total, and their most recent win in the covered period is 2009. This fully supports the claim as stated.
+
+Assumptions
+- “last be in 2009” is interpreted as the most recent U.S. win within the dataset’s coverage (1990–2013).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

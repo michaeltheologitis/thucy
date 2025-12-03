@@ -1,0 +1,87 @@
+
+<userQuery>
+<query>
+the highest score for a winning team be 18 and the lowest score be 11.5
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the highest score for a winning team be 18 and the lowest score be 11.5.”
+
+Data sources explored
+- Discovered available source: PostgreSQL TabFact database with table public.solheim_cup (contains year, venue, "winning team", score, "usa captain", "europe captain").
+- Schema review confirmed: score is stored as text (e.g., "15–13", with possible half-points like "14½–13½").
+
+Method
+- Parse the left-hand number in the score text as the winning team’s score, normalizing en dash to hyphen and converting the half character (½) to .5, then cast to numeric to compute minima and maxima.
+
+Evidence (executed SQL and returned results)
+1) Inspect parsed winning scores for all rows
+SQL executed:
+SELECT year, "winning team", score,
+       (replace(replace(split_part(replace(score, E'–', '-'), '-', 1), '½', '.5'), ' ', ''))::numeric AS win_score
+FROM public.solheim_cup
+ORDER BY year;
+
+Returned rows (excerpt showing parsed win_score):
+- year=1990, winning team=united states, score=11½ - 4½, win_score=11.5
+- year=1992, winning team=europe, score=11½ - 6½, win_score=11.5
+- year=1994, winning team=united states, score=13 - 7, win_score=13
+- year=1996, winning team=united states, score=17 - 11, win_score=17
+- year=1998, winning team=united states, score=16 - 12, win_score=16
+- year=2000, winning team=europe, score=14½ - 11½, win_score=14.5
+- year=2002, winning team=united states, score=15½ - 12½, win_score=15.5
+- year=2003, winning team=europe, score=17½ - 10½, win_score=17.5
+- year=2005, winning team=united states, score=15½ - 12½, win_score=15.5
+- year=2007, winning team=united states, score=16 - 12, win_score=16
+- year=2009, winning team=united states, score=16 - 12, win_score=16
+- year=2011, winning team=europe, score=15 - 13, win_score=15
+- year=2013, winning team=europe, score=18 - 10, win_score=18
+
+2) Compute extrema of winning scores
+SQL executed:
+SELECT MAX(win_score) AS max_winning_score, MIN(win_score) AS min_winning_score
+FROM (
+  SELECT (replace(replace(split_part(replace(score, E'–', '-'), '-', 1), '½', '.5'), ' ', ''))::numeric AS win_score
+  FROM public.solheim_cup
+) t;
+
+Returned:
+- max_winning_score = 18
+- min_winning_score = 11.5
+
+3) List rows achieving the extremes
+SQL executed:
+WITH parsed AS (
+  SELECT year, "winning team", score,
+         (replace(replace(split_part(replace(score, E'–', '-'), '-', 1), '½', '.5'), ' ', ''))::numeric AS win_score
+  FROM public.solheim_cup
+)
+SELECT year, "winning team", score, win_score
+FROM parsed
+WHERE win_score = (SELECT MAX(win_score) FROM parsed)
+   OR win_score = (SELECT MIN(win_score) FROM parsed)
+ORDER BY win_score DESC, year;
+
+Returned rows:
+- year=2013, winning team=europe, score=18 - 10, win_score=18
+- year=1990, winning team=united states, score=11½ - 4½, win_score=11.5
+- year=1992, winning team=europe, score=11½ - 6½, win_score=11.5
+
+Findings
+- Highest winning team score in the dataset: 18.0 (Europe, 2013).
+- Lowest winning team score in the dataset: 11.5 (United States, 1990; Europe, 1992).
+
+Conclusion
+- The claim is supported by the data: highest = 18 and lowest = 11.5 for winning team scores in public.solheim_cup.
+
+Assumptions
+- “Winning team score” is the left-hand value in the score text field.
+- Score text may contain an en dash (–) and the half character (½); both were normalized as shown in the SQL before numeric casting.
+- The claim refers to the Solheim Cup results contained in the only available dataset (public.solheim_cup).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

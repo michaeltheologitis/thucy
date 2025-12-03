@@ -1,0 +1,57 @@
+
+<userQuery>
+<query>
+more viewer in the us watch the second episode of dexter 's third season than the fourth episode
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “More viewers in the US watched the second episode of Dexter’s third season than the fourth episode.”
+
+Data source discovered
+- Database: TabFact (postgres_tabfact9)
+- Table: public.dexter_season_3 (columns include: "no in series", "no in season", "title", "original air date", "us viewers (millions)")
+
+Evidence gathered
+1) Retrieve raw viewership values for episodes 2 and 4
+Executed SQL:
+SELECT "no in season", "title", "us viewers (millions)" FROM public.dexter_season_3 WHERE "no in season" IN (2,4) ORDER BY "no in season";
+Results:
+- no in season: 2, title: finding freebo, us viewers (millions): 0.79
+- no in season: 4, title: all in the family, us viewers (millions): 0.86
+
+2) Parse viewership to numeric and compare
+Executed SQL:
+WITH ep AS (
+  SELECT "no in season", "title", regexp_replace("us viewers (millions)", '[^0-9.]', '', 'g')::numeric AS viewers
+  FROM public.dexter_season_3
+  WHERE "no in season" IN (2,4)
+)
+SELECT
+  json_agg(json_build_object('no in season', "no in season", 'title', "title", 'viewers', viewers) ORDER BY "no in season") AS episodes,
+  (SELECT max(viewers)-min(viewers) FROM ep) AS difference_millions,
+  (SELECT title FROM ep ORDER BY viewers DESC LIMIT 1) AS highest_title,
+  (SELECT viewers FROM ep ORDER BY viewers DESC LIMIT 1) AS highest_viewers,
+  (SELECT title FROM ep ORDER BY viewers ASC LIMIT 1) AS lowest_title,
+  (SELECT viewers FROM ep ORDER BY viewers ASC LIMIT 1) AS lowest_viewers
+FROM ep;
+Results:
+- Episode 2 (finding freebo): 0.79 million
+- Episode 4 (all in the family): 0.86 million
+- Difference: 0.07 million (70,000) more viewers for Episode 4
+
+Finding
+- Episode 4 had higher US viewership (0.86M) than Episode 2 (0.79M).
+
+Conclusion
+- The claim is contradicted by the data: fewer US viewers watched the second episode than the fourth.
+
+Assumptions
+- “Second episode” and “fourth episode” are mapped to rows where "no in season" = 2 and 4, respectively.
+- The "us viewers (millions)" field is taken as the authoritative measure of US viewership and was parsed to numeric by stripping non-numeric characters if present.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

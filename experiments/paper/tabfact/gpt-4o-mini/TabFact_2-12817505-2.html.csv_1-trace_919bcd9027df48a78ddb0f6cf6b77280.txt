@@ -1,0 +1,58 @@
+
+<userQuery>
+<query>
+manchester unite have beat portsmouth 2 out of 2 time since 13 august 2005
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of data sources explored
+- Available database: public schema with table t_2005_06_manchester_united_f_c_season, which lists Manchester United’s 2005–06 season matches with columns: date (text), opponents (text), h / a (text), result f - a (text), attendance (bigint), league position (text).
+
+Evidence gathered
+1) List of all matches vs Portsmouth in the dataset
+Executed SQL:
+SELECT date, opponents, "h / a", "result f - a"
+FROM public.t_2005_06_manchester_united_f_c_season
+WHERE opponents ILIKE '%Portsmouth%';
+
+Result rows:
+- Date: 3 December 2005 | Opponents: Portsmouth | Home/Away: h | Result: 3 - 0
+- Date: 11 February 2006 | Opponents: Portsmouth | Home/Away: a | Result: 3 - 1
+
+2) Count of all matches vs Portsmouth (sanity check)
+Executed SQL:
+SELECT COUNT(*)
+FROM public.t_2005_06_manchester_united_f_c_season
+WHERE opponents ILIKE '%Portsmouth%';
+
+Result:
+- 2
+
+3) Count of wins vs Portsmouth (score parsed as goals for minus goals against from Manchester United’s perspective)
+Executed SQL:
+SELECT COUNT(*) AS wins
+FROM public.t_2005_06_manchester_united_f_c_season
+WHERE opponents ILIKE '%Portsmouth%'
+  AND split_part("result f - a", ' - ', 1)::int > split_part("result f - a", ' - ', 2)::int;
+
+Result:
+- wins: 2
+
+Analysis
+- Both listed fixtures against Portsmouth took place after 13 August 2005 (on 3 December 2005 and 11 February 2006).
+- Both matches were Manchester United wins (3-0 and 3-1), yielding 2 wins out of 2 matches since that date within the 2005–06 season data.
+
+Conclusion
+- Within the authoritative dataset for the 2005–06 season, Manchester United played Portsmouth twice after 13 August 2005 and won both matches. This supports the claim “beat Portsmouth 2 out of 2” since that date.
+
+Assumptions
+- “Since 13 August 2005” is interpreted within the scope of the available 2005–06 season dataset.
+- “Beat” is interpreted as a win where Manchester United’s goals for exceed goals against.
+- No other competitions against Portsmouth are present in the dataset beyond those listed above.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

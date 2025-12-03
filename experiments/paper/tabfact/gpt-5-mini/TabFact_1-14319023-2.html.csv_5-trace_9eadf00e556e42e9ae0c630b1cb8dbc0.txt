@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+in 2010 , the girl double be ayu pratiwi anggi widia and the boy double be jones ralfy jansen and dandi prabudita
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “In 2010, the girls’ doubles were Ayu Pratiwi and Anggi Widia, and the boys’ doubles were Jones Ralfy Jansen and Dandi Prabudita.”
+
+Data source consulted: TabFact database, public.indonesian_national_badminton_championships (treated as authoritative per instructions).
+
+Evidence
+1) Champions for 2010 (direct check)
+- Executed SQL:
+  SELECT year, "boys doubles", "girls doubles" FROM public.indonesian_national_badminton_championships WHERE year = 2010;
+- Result:
+  { "year": 2010, "boys doubles": "jones ralfy jansen dandi prabudita", "girls doubles": "aris budiharti dian fitriani" }
+- Interpretation:
+  • Boys’ doubles 2010: Jones Ralfy Jansen / Dandi Prabudita (matches the claim)
+  • Girls’ doubles 2010: Aris Budiharti / Dian Fitriani (does not match the claim)
+
+2) Check for any year with girls’ doubles including “Ayu” or “Anggi” (to identify possible year mismatch)
+- Executed SQL:
+  SELECT year, "girls doubles" FROM public.indonesian_national_badminton_championships WHERE lower("girls doubles") LIKE '%ayu%' OR lower("girls doubles") LIKE '%anggi%';
+- Result:
+  year: 2009, girls doubles: ayu pratiwi anggi widia
+- Interpretation:
+  • The pair Ayu Pratiwi / Anggi Widia appears in 2009, not 2010.
+
+3) Side-by-side for 2009 and 2010
+- Executed SQL:
+  SELECT "year", "boys doubles", "girls doubles" FROM public.indonesian_national_badminton_championships WHERE "year" IN (2009, 2010) ORDER BY "year";
+- Returned rows:
+  • 2009 — boys doubles: jones ralfy jansen dandi prabudita; girls doubles: ayu pratiwi anggi widia
+  • 2010 — boys doubles: jones ralfy jansen dandi prabudita; girls doubles: aris budiharti dian fitriani
+- Interpretation:
+  • The boys’ pair Jones Ralfy Jansen / Dandi Prabudita won in both 2009 and 2010.
+  • The girls’ pair Ayu Pratiwi / Anggi Widia were champions in 2009, while in 2010 it was Aris Budiharti / Dian Fitriani.
+
+Conclusion
+- Boys’ doubles (2010): Verified as Jones Ralfy Jansen and Dandi Prabudita.
+- Girls’ doubles (2010): Not Ayu Pratiwi and Anggi Widia; per the data, it was Aris Budiharti and Dian Fitriani. The claimed girls’ pair corresponds to 2009, not 2010.
+
+Assumptions
+- “girl double” and “boy double” are interpreted as the Girls’ Doubles and Boys’ Doubles winners at the Indonesian National Badminton Championships.
+- Names are reported exactly as stored (all lowercase, concatenated by spaces).
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

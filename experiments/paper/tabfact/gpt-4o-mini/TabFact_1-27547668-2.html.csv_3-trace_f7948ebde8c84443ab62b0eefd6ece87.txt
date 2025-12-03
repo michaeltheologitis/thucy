@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+there be 3 different director that direct 2 episode
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: There are 3 different directors who each directed 2 episodes.
+
+Data sources discovered:
+- PostgreSQL database with table public.list_of_republic_of_doyle_episodes (columns include: title, directed by, written by, viewers, original airdate, prod code).
+
+Method:
+- Treat each row as an episode and the "directed by" field as the director name for that episode.
+- Verify whether any episodes list multiple directors; if not, counts by the "directed by" field reflect per-director episode counts.
+- Count directors with exactly 2 episodes and list their names.
+
+Evidence and executed SQL:
+1) Total number of episodes
+- Result: 10
+- SQL: SELECT COUNT(*) AS total_episodes FROM public.list_of_republic_of_doyle_episodes;
+
+2) Directors with their episode counts (top by frequency)
+- Result (name -> count):
+  - Mike Clattenburg -> 2
+  - Steve DiMarco (also displayed earlier as Steve Dimarco) -> 2
+  - Robert Lieberman -> 2
+  - Jerry Ciccoritti -> 1
+  - Larry McLean -> 1
+  - Phil Earnshaw -> 1
+  - Steve Scaini -> 1
+- SQL: SELECT "directed by", COUNT(*) AS count FROM public.list_of_republic_of_doyle_episodes GROUP BY "directed by" ORDER BY count DESC LIMIT 50;
+
+3) Sanity check for multiple-director entries in the field
+- Result: 0 episodes list multiple directors using comma, " and ", "&", or "/".
+- SQL: SELECT COUNT(*) AS episode_count FROM public.list_of_republic_of_doyle_episodes WHERE "directed by" LIKE '%,%' OR "directed by" LIKE '% and %' OR "directed by" LIKE '%&%' OR "directed by" LIKE '%/%';
+
+4) List directors who directed exactly 2 episodes
+- Result: Steve DiMarco; Mike Clattenburg; Robert Lieberman
+- SQL: SELECT "directed by", COUNT(*) AS episode_count FROM public.list_of_republic_of_doyle_episodes GROUP BY "directed by" HAVING COUNT(*) = 2;
+
+5) Count of distinct directors who directed exactly 2 episodes
+- Result: 3
+- SQL: SELECT COUNT(*) AS director_count FROM ( SELECT "directed by", COUNT(*) AS episode_count FROM public.list_of_republic_of_doyle_episodes GROUP BY "directed by" HAVING COUNT(*) = 2 ) AS subquery;
+
+Conclusion: The data shows exactly 3 distinct directors each directed 2 episodes, which matches the claim.
+
+Assumptions made:
+- The claim refers to the available dataset (Republic of Doyle episodes) and counts each row as one episode credited to the single director named in the "directed by" field. A sanity check confirmed no multi-director entries under common delimiters, so per-field counts accurately reflect per-director episode counts.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

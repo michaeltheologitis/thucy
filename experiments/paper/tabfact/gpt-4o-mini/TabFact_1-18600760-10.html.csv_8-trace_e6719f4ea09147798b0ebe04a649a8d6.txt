@@ -1,0 +1,41 @@
+
+<userQuery>
+<query>
+the township of jackson be in the mountrail county
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The user is asking whether there is a township named Jackson located in Mountrail County (North Dakota).
+
+Data source explored: public.list_of_townships_in_north_dakota
+- Key columns: township (text), county (text), plus population, area, coordinates, and IDs.
+
+Evidence collected:
+1) Direct check for a Jackson township in Mountrail County
+- Executed SQL: SELECT * FROM public.list_of_townships_in_north_dakota WHERE county ILIKE 'Mountrail' AND township ILIKE 'Jackson%';
+- Result: No rows returned (no such township found in Mountrail County).
+
+2) Count of such matches
+- Executed SQL: SELECT COUNT(*) FROM public.list_of_townships_in_north_dakota WHERE county ILIKE 'Mountrail' AND township ILIKE 'Jackson%';
+- Result: 0
+
+3) Check where Jackson-named township(s) exist statewide
+- Executed SQL: SELECT township, county FROM public.list_of_townships_in_north_dakota WHERE LOWER(township) LIKE 'jackson%';
+- Result: Jackson | Sargent (indicates a Jackson township exists in Sargent County, not Mountrail County).
+
+4) List the township names recorded for Mountrail County (for context)
+- Executed SQL: SELECT township FROM list_of_townships_in_north_dakota WHERE LOWER(county) = LOWER('Mountrail') ORDER BY township;
+- Result: James Hill (no Jackson listed under Mountrail County in this dataset).
+
+Conclusion: The dataset shows no Jackson township in Mountrail County. It shows a Jackson township in Sargent County. Therefore, the claim that Jackson township is in Mountrail County is not supported by the data.
+
+Assumptions made:
+- The term “township” refers to civil townships as listed in the provided table for North Dakota.
+- Spelling and naming are matched case-insensitively and include names beginning with “Jackson” (e.g., Jackson, Jackson No. X) to account for common variants.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,67 @@
+
+<userQuery>
+<query>
+ngc 1705 redshift faster than ngc2082 by 441 kilometer per second plus or minus 6 kilometer per second
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “NGC 1705 redshift faster than NGC 2082 by 441 km/s ± 6 km/s.”
+
+What the data show
+- NGC 1705 has radial (recessional) velocity 633 ± 6 km/s.
+- NGC 2082 has radial (recessional) velocity 1184 ± 6 km/s.
+- Therefore, NGC 1705 is slower than NGC 2082 by 551 km/s, not faster. Propagating the given ±6 km/s uncertainties (in quadrature) gives a difference uncertainty of ~8.49 km/s.
+
+Conclusion
+- The claim is contradicted by the data in both sign and magnitude. The measured difference is −551 ± 8.49 km/s (NGC 1705 − NGC 2082), not +441 ± 6 km/s.
+
+Executed SQL evidence
+1) Locate entries for the two objects and show their stored velocities
+SQL:
+SELECT name, "redshift (km / s )" FROM public.dorado_group WHERE name LIKE '%1705%' OR name LIKE '%2082%';
+Results:
+- ngc 2082 — 1184 ± 6 km/s
+- ngc 1705 — 633 ± 6 km/s
+
+2) Show tokenization used to parse the value and uncertainty
+SQL:
+SELECT name, "redshift (km / s )" AS redshift_raw,
+       split_part("redshift (km / s )", ' ', 1) AS rv_str,
+       split_part("redshift (km / s )", ' ', 3) AS err_str
+FROM public.dorado_group
+WHERE name IN ('ngc 1705','ngc 2082');
+Results (relevant fields):
+- name = ngc 2082, redshift_raw = "1184 ± 6", rv_str = "1184", err_str = "6"
+- name = ngc 1705, redshift_raw = "633 ± 6", rv_str = "633", err_str = "6"
+
+3) Compute the velocity difference and propagated uncertainty
+SQL:
+WITH vals AS (
+  SELECT name,
+         split_part("redshift (km / s )",' ',1)::numeric AS rv_kms,
+         split_part("redshift (km / s )",' ',3)::numeric AS rv_err_kms
+  FROM public.dorado_group
+  WHERE name IN ('ngc 1705','ngc 2082')
+)
+SELECT v1.name as name1, v1.rv_kms as rv1, v1.rv_err_kms as err1,
+       v2.name as name2, v2.rv_kms as rv2, v2.rv_err_kms as err2,
+       v1.rv_kms - v2.rv_kms as difference_kms,
+       sqrt(v1.rv_err_kms^2 + v2.rv_err_kms^2) as diff_err_kms
+FROM (SELECT * FROM vals WHERE name='ngc 1705') v1,
+     (SELECT * FROM vals WHERE name='ngc 2082') v2;
+Results:
+- name1 = ngc 1705, rv1 = 633, err1 = 6
+- name2 = ngc 2082, rv2 = 1184, err2 = 6
+- difference_kms = −551
+- diff_err_kms ≈ 8.4853
+
+Assumptions
+- “Redshift faster” is interpreted as higher radial/recessional velocity (km/s). The column "redshift (km / s )" is treated as radial velocity in km/s, consistent with its unit label.
+
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

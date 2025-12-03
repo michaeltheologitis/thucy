@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+coherence be the name when window and web interface be partial
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Interpretation of the claim:
+- I interpret the user’s statement as a verifiable claim against the available UPnP AV media servers dataset: “The entry whose Windows support is partial and whose Web interface is partial has the name ‘coherence.’”
+
+Data source exploration:
+- Available database discovered: TabFact
+- Relevant table: comparison_of_upnp_av_media_servers (columns: name, license, os x, unix - like, windows, web interface)
+
+Evidence from executed SQL:
+1) Check if any row has BOTH Windows = partial and Web interface = partial (case-insensitive)
+SQL:
+SELECT name, windows, "web interface" 
+FROM comparison_of_upnp_av_media_servers 
+WHERE LOWER(windows) LIKE '%partial%' AND LOWER("web interface") LIKE '%partial%';
+Result: No rows returned. This directly contradicts the condition that both fields are partial for any server.
+
+2) Show rows where EITHER Windows or Web interface contains the word 'partial' (to see what exists and how 'coherence' appears)
+SQL:
+SELECT name, windows, "web interface" 
+FROM comparison_of_upnp_av_media_servers 
+WHERE LOWER(windows) LIKE '%partial%' 
+OR LOWER("web interface") LIKE '%partial%';
+Results:
+- coherence | windows: partial | web interface: yes
+- minidlna  | windows: yes     | web interface: partial
+Interpretation: Coherence has Windows = partial but Web interface = yes (not partial). Minidlna has Web interface = partial but Windows = yes (not partial). No entry has both as partial.
+
+3) Explicitly confirm the values for 'coherence'
+SQL:
+SELECT name, windows, "web interface" FROM comparison_of_upnp_av_media_servers WHERE name = 'coherence';
+Result:
+- name: coherence | windows: partial | web interface: yes
+This confirms Coherence does not have a partial Web interface in this dataset.
+
+Conclusion:
+- The dataset contains no entry where both Windows and Web interface are partial. Specifically, ‘coherence’ has Windows = partial but Web interface = yes. Therefore, the claim that “coherence be the name when window and web interface be partial” is not supported by the data.
+
+Assumptions made (due to ambiguous phrasing):
+- “window” refers to the “windows” column (Windows OS support) in the comparison_of_upnp_av_media_servers table.
+- “web interface” refers to the “web interface” column in the same table.
+- “be the name” means the name of the media server entry that matches the stated conditions.
+- Matching of “partial” was performed case-insensitively and by substring to capture any variations; results show exact values in this dataset are simply 'partial' or 'yes'.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,44 @@
+
+<userQuery>
+<query>
+charlie wi and aaron baddeley be from the united state
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Charlie Wi and Aaron Baddeley are from the United States.”
+
+Data sources consulted
+- PostgreSQL database: TabFact (public schema)
+- Table: public.t_2008_pga_championship (contains player and country fields for the 2008 PGA Championship)
+
+What the data shows
+- The table lists each player’s country. Queries for Charlie Wi and Aaron Baddeley return:
+  - Charlie Wi — south korea
+  - Aaron Baddeley — australia
+
+Executed SQL (evidence)
+1) Broad lookup by name fragments
+SQL:
+SELECT player, country FROM public.t_2008_pga_championship WHERE player ILIKE '%Charlie%' OR player ILIKE '%Baddeley%';
+Result:
+- charlie wi — south korea
+- aaron baddeley — australia
+
+2) Case-insensitive exact-match lookup
+SQL:
+SELECT player, country FROM public.t_2008_pga_championship WHERE lower(player) IN ('charlie wi','aaron baddeley');
+Result rows:
+[{"player":"charlie wi","country":"south korea"}, {"player":"aaron baddeley","country":"australia"}]
+
+Conclusion
+- According to the authoritative dataset used, neither Charlie Wi nor Aaron Baddeley is from the United States. Charlie Wi is from South Korea, and Aaron Baddeley is from Australia.
+
+Assumptions
+- “From the United States” is interpreted as the country listed for the player in the tournament dataset (i.e., nationality/represented country).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

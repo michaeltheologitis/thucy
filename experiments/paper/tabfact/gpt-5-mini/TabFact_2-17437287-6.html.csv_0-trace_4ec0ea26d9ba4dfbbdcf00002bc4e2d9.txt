@@ -1,0 +1,38 @@
+
+<userQuery>
+<query>
+the score for the game where birmingham city be the home team on 10 march 1984 be 1 - 3
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of approach
+- Discovered available data sources and inspected the schema to ground the verification in actual data.
+- Queried the 1983–84 FA Cup matches table for a record where Birmingham City were the home team on 10 March 1984 and retrieved the recorded score.
+
+Data source discovery and schema
+- Discovered database: TabFact (postgres_tabfact26), public schema.
+- Relevant table: public.t_1983_84_fa_cup with columns: "tie no" (text), "home team" (text), "score" (text), "away team" (text), "date" (text).
+
+Evidence query and result
+- Executed SQL:
+  SELECT "home team", "score", "away team", "date"
+  FROM public.t_1983_84_fa_cup
+  WHERE "home team" ILIKE 'Birmingham City'
+    AND "date" ~* '10[^0-9A-Za-z]*mar(ch)?[^0-9A-Za-z]*1984';
+
+- Query result:
+  {"home team":"birmingham city", "score":"1 - 3", "away team":"watford", "date":"10 march 1984"}
+
+Conclusion
+- The data shows that on 10 March 1984, Birmingham City (home) played Watford (away) and the recorded score was 1 - 3. This matches the claim.
+
+Assumptions
+- The date field is stored as text with varying capitalization, so a case-insensitive regex was used to match "10 March 1984".
+- The match in question is contained within the 1983/84 FA Cup dataset available in this database, which we treat as authoritative per instructions.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

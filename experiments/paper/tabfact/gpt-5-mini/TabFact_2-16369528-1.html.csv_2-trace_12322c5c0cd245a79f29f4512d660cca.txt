@@ -1,0 +1,93 @@
+
+<userQuery>
+<query>
+after 2005 , the winner of the lifetime achievement award be andrew rule john silvester , sandra harvey lindsay simpson , marele day , shane maloney , and peter doyle
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify
+"After 2005, the winners of the Lifetime Achievement award are Andrew Rule & John Silvester; Sandra Harvey & Lindsay Simpson; Marele Day; Shane Maloney; and Peter Doyle."
+
+Data source discovery
+- Accessible database: postgres_tabfact28 (TabFact)
+- Relevant table: public.ned_kelly_awards
+- Relevant columns: year (bigint), "lifetime achievement" (text)
+
+Schema details (from schema inspection)
+- Table public.ned_kelly_awards with columns:
+  • year — bigint
+  • best teenage / young adult — text
+  • reader 's vote — text
+  • best non - fiction — text
+  • lifetime achievement — text
+
+Evidence 1: Lifetime Achievement entries after 2005
+SQL executed:
+SELECT year, "lifetime achievement" FROM public.ned_kelly_awards WHERE year > 2005 ORDER BY year;
+Results:
+- 2006 → andrew rule and john silvester
+- 2007 → sandra harvey and lindsay simpson
+- 2008 → marele day
+- 2009 → shane maloney
+- 2010 → peter doyle
+- 2011 → na
+
+Evidence 2: Distinct, normalized winner names after 2005
+SQL executed:
+SELECT DISTINCT trim(regexp_replace(x,'\s+',' ','g')) AS name
+FROM (
+  SELECT unnest(string_to_array(replace(replace(lower("lifetime achievement"), ' & ', '|'), ' and ', '|'), '|')) AS x
+  FROM public.ned_kelly_awards
+  WHERE year > 2005
+) sub
+WHERE lower(trim(x)) <> 'na'
+ORDER BY name;
+Results (normalized):
+- andrew rule
+- john silvester
+- lindsay simpson
+- marele day
+- peter doyle
+- sandra harvey
+- shane maloney
+
+Evidence 3: Direct comparison to the claimed set
+SQL executed:
+WITH normalized AS (
+  SELECT DISTINCT trim(regexp_replace(x,'\s+',' ','g')) AS name
+  FROM (
+    SELECT unnest(string_to_array(replace(replace(lower("lifetime achievement"), ' & ', '|'), ' and ', '|'), '|')) AS x
+    FROM public.ned_kelly_awards
+    WHERE year > 2005
+  ) sub
+  WHERE lower(trim(x)) <> 'na'
+)
+SELECT c.claimed_name, CASE WHEN n.name IS NOT NULL THEN true ELSE false END AS present
+FROM (VALUES
+('Andrew Rule'),('John Silvester'),('Sandra Harvey'),('Lindsay Simpson'),('Marele Day'),('Shane Maloney'),('Peter Doyle')
+) AS c(claimed_name)
+LEFT JOIN normalized n ON lower(c.claimed_name) = n.name
+ORDER BY c.claimed_name;
+Results:
+- Andrew Rule → true
+- John Silvester → true
+- Lindsay Simpson → true
+- Marele Day → true
+- Peter Doyle → true
+- Sandra Harvey → true
+- Shane Maloney → true
+
+Conclusion
+The database shows that, for years after 2005, the Lifetime Achievement award entries correspond exactly to: Andrew Rule, John Silvester, Sandra Harvey, Lindsay Simpson, Marele Day, Shane Maloney, and Peter Doyle. The claim matches the evidence.
+
+Assumptions
+- Interpreted "after 2005" as year > 2005 (i.e., 2006 onward).
+- Treated the literal value "na" (2011) as indicating no award/unknown and excluded it from the winner list.
+- Normalized names case-insensitively and split multiple names on " and " and " & ".
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

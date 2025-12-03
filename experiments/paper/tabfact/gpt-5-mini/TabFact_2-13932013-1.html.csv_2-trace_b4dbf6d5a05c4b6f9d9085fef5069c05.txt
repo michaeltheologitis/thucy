@@ -1,0 +1,35 @@
+
+<userQuery>
+<query>
+the cleveland brown have tie a total of 10 game
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “The Cleveland Browns have tied a total of 10 games.”
+
+Data sources discovered:
+- TabFact PostgreSQL instance containing a table relevant to the Browns: list_of_cleveland_browns_starting_quarterbacks (columns: quarterback, uniform no (s), games started, wins, losses, ties, winning pct).
+
+Evidence and executed SQL:
+1) Total franchise ties (via summing ties credited to each starting QB)
+- SQL:
+  SELECT SUM(ties) AS total_ties FROM list_of_cleveland_browns_starting_quarterbacks;
+- Result: total_ties = 10
+
+2) Consistency check (wins + losses + ties vs. games started)
+- SQL:
+  SELECT SUM("games started") AS games_started_sum, SUM(wins) AS wins_sum, SUM(losses) AS losses_sum, SUM(ties) AS ties_sum, (SUM(wins)+SUM(losses)+SUM(ties)) AS wl_ties_sum, (SUM(wins)+SUM(losses)+SUM(ties) = SUM("games started")) AS equal_flag FROM list_of_cleveland_browns_starting_quarterbacks;
+- Result: games_started_sum = 883; wins_sum = 451; losses_sum = 422; ties_sum = 10; wl_ties_sum = 883; equal_flag = true
+- Interpretation: The dataset is internally consistent; ties_sum = 10 corroborates the total from query (1).
+
+Conclusion: The available data shows the Cleveland Browns have 10 ties (as counted across all starts by their starting quarterbacks in this dataset).
+
+Assumptions made:
+- The “ties” column in the table reflects the team’s regular-season ties in games started by each quarterback. Since every game has a starting quarterback, summing ties across all starters yields the team’s total ties represented in this dataset. Postseason games are typically excluded from such tables; the claim did not specify regular season vs postseason, so this verification pertains to regular-season ties represented in the table.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

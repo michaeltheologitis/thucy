@@ -1,0 +1,84 @@
+
+<userQuery>
+<query>
+the detroit piston win by over 10 point in 4 game during this period of their 2010 - 2011 season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the detroit piston win by over 10 point in 4 game during this period of their 2010 - 2011 season.”
+
+What the data covers
+- Discovered data source: public.t_2010_11_detroit_pistons_season
+- The table contains 12 games from March 1–26, 2011 (games 62–73 of the season). See evidence below.
+
+Step 1 — Confirm the period covered by the dataset
+SQL (summary of rows and game range):
+SELECT MIN(game) AS min_game, MAX(game) AS max_game, COUNT(*) AS total_rows, COUNT(DISTINCT date) AS distinct_date_count FROM t_2010_11_detroit_pistons_season;
+Result:
+- MIN(game): 62, MAX(game): 73, COUNT(*): 12, COUNT(DISTINCT date): 12
+
+SQL (parse date range by assuming year 2011):
+SELECT MIN(to_date(initcap(trim(date)) || ' 2011','Month DD YYYY')) AS min_parsed_date, MAX(to_date(initcap(trim(date)) || ' 2011','Month DD YYYY')) AS max_parsed_date FROM t_2010_11_detroit_pistons_season;
+Result:
+- MIN(parsed date): 2011-03-01, MAX(parsed date): 2011-03-26
+
+Step 2 — List all games and compute point differential
+SQL (compute Pistons points minus opponent points for every row):
+SELECT game, date, team, score,
+(split_part(regexp_replace(score, '[^0-9\-]+', '', 'g'), '-', 1)::int - split_part(regexp_replace(score, '[^0-9\-]+', '', 'g'), '-', 2)::int) AS point_differential
+FROM t_2010_11_detroit_pistons_season
+ORDER BY game;
+Result (game | date | opponent | score | point differential):
+62 | march 1 | milwaukee | l 90 - 92 (ot) | -2
+63 | march 2 | minnesota | l 105 - 116 (ot) | -11
+64 | march 6 | washington | w 113 - 102 (ot) | 11
+65 | march 9 | san antonio | l 104 - 111 (ot) | -7
+66 | march 11 | oklahoma city | l 94 - 104 (ot) | -10
+67 | march 12 | denver | l 101 - 131 (ot) | -30
+68 | march 16 | toronto | w 107 - 93 (ot) | 14
+69 | march 18 | new york | w 99 - 95 (ot) | 4
+70 | march 20 | atlanta | l 96 - 104 (ot) | -8
+71 | march 23 | miami | l 94 - 100 (ot) | -6
+72 | march 25 | cleveland | l 91 - 97 (ot) | -6
+73 | march 26 | indiana | w 100 - 88 (ot) | 12
+
+Step 3 — Count wins by more than 10 points
+SQL (count wins with margin > 10):
+SELECT COUNT(*) AS wins_by_more_than_10
+FROM public.t_2010_11_detroit_pistons_season
+WHERE score ~* '^\s*w'
+  AND score ~ '[0-9]+\s*-\s*[0-9]+'
+  AND ((substring(score from '([0-9]+)\s*-'))::int - (substring(score from '-\s*([0-9]+)'))::int) > 10;
+Result:
+- wins_by_more_than_10 = 3
+
+Step 4 — List all wins and verify margins
+SQL (list wins with computed points and point differentials, ordered by margin):
+SELECT game, date, team AS opponent, score,
+CAST(regexp_replace(split_part(score, '-', 1), '[^0-9]', '', 'g') AS INTEGER) AS pistons_pts,
+CAST(regexp_replace(split_part(score, '-', 2), '[^0-9]', '', 'g') AS INTEGER) AS opp_pts,
+(CAST(regexp_replace(split_part(score, '-', 1), '[^0-9]', '', 'g') AS INTEGER) - CAST(regexp_replace(split_part(score, '-', 2), '[^0-9]', '', 'g') AS INTEGER)) AS point_diff
+FROM t_2010_11_detroit_pistons_season
+WHERE lower(score) LIKE 'w %'
+ORDER BY point_diff DESC, game;
+Results (wins only):
+- Game 68 — march 16 — vs toronto — w 107 - 93 (ot) — point_diff: 14
+- Game 73 — march 26 — vs indiana — w 100 - 88 (ot) — point_diff: 12
+- Game 64 — march 6 — vs washington — w 113 - 102 (ot) — point_diff: 11
+- Game 69 — march 18 — vs new york — w 99 - 95 (ot) — point_diff: 4
+
+Conclusion
+- Within this period (games 62–73, March 1–26, 2011), the Pistons had 4 wins total, and 3 of those wins were by more than 10 points. The claim that they won by over 10 points in 4 games during this period is not supported by the data.
+
+Assumptions
+- “This period” refers to the period represented in the table, which spans March 1–26, 2011 (games 62–73).
+- “Over 10 point” is interpreted as strictly greater than 10 points (not including exactly 10). Even if interpreted as ≥10, the count remains 3 in this period.
+- The score string’s first number corresponds to Pistons points and the second to opponent points, as implied by the leading W/L indicator and standard formatting.
+
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

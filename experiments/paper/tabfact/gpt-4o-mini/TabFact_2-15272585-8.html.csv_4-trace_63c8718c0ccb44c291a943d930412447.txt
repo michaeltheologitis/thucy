@@ -1,0 +1,99 @@
+
+<userQuery>
+<query>
+on average , galina voskoboeva lose with only 4 point
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “On average, Galina Voskoboeva loses by only 4 points.” The available data contains only her final-match results (Winner vs Runner-up) with set scores, not point-by-point stats. I interpret “points” as total games margin in the match (opponent games minus Voskoboeva’s games) for losses (Runner-up results).
+
+Data source overview
+- Database: TabFact
+- Table: public.galina_voskoboeva (outcome text, date text, tournament text, surface text, opponent text, score text)
+
+Step 1: Inspect available rows to confirm structure and score format
+SQL executed:
+SELECT * FROM public.galina_voskoboeva LIMIT 50;
+Result (excerpt):
+- 28 January 2003 | Matea Mezak | Runner - Up | 6 - 4 , 4 - 6 , 4 - 6 | Hard (i) | Tipton
+- 29 June 2003 | Oleksandra Kravets | Winner | 6 - 4 , 6 - 2 | Hard (i) | Mont - de - Marsan
+- 3 October 2003 | Roberta Vinci | Runner - Up | 3 - 6 , 4 - 6 | Clay | Latina
+- 8 November 2005 | Lilia Osterloh | Runner - Up | 6 - 7 , 4 - 6 | Hard | Pittsburgh
+- 6 June 2006 | Alice Canepa | Winner | 6 - 1 , 6 - 2 | Clay | Cuneo , Italy
+
+Step 2: Count losses (Runner-up) in this dataset
+SQL executed:
+SELECT COUNT(*) AS loss_count FROM public.galina_voskoboeva WHERE lower(outcome) = 'runner - up';
+Result:
+- loss_count = 3
+
+Step 3: Compute games margin per loss
+Method: Parse each score string set-by-set, summing (opponent games − Voskoboeva games) across sets in that match.
+SQL executed:
+WITH matches AS (
+  SELECT date, opponent, score, replace(score, ' ', '') AS score_clean
+  FROM public.galina_voskoboeva
+  WHERE lower(outcome) = 'runner - up'
+),
+sets AS (
+  SELECT date, opponent, score, unnest(string_to_array(score_clean, ',')) AS set_str
+  FROM matches
+),
+parsed AS (
+  SELECT date, opponent, score,
+         CAST(split_part(set_str, '-', 1) AS int) AS my_games,
+         CAST(split_part(set_str, '-', 2) AS int) AS opp_games
+  FROM sets
+)
+SELECT date, opponent, score,
+       SUM(opp_games - my_games) AS games_margin
+FROM parsed
+GROUP BY date, opponent, score
+ORDER BY date ASC;
+Results:
+- 28 January 2003 | Matea Mezak | 6 - 4, 4 - 6, 4 - 6 | games_margin = 2
+- 3 October 2003 | Roberta Vinci | 3 - 6, 4 - 6 | games_margin = 5
+- 8 November 2005 | Lilia Osterloh | 6 - 7, 4 - 6 | games_margin = 3
+
+Step 4: Compute the average games margin across losses
+SQL executed:
+WITH matches AS (
+  SELECT date, opponent, score, replace(score, ' ', '') AS score_clean
+  FROM public.galina_voskoboeva
+  WHERE lower(outcome) = 'runner - up'
+),
+sets AS (
+  SELECT date, opponent, score, unnest(string_to_array(score_clean, ',')) AS set_str
+  FROM matches
+),
+parsed AS (
+  SELECT date, opponent, score,
+         CAST(split_part(set_str, '-', 1) AS int) AS my_games,
+         CAST(split_part(set_str, '-', 2) AS int) AS opp_games
+  FROM sets
+),
+by_match AS (
+  SELECT date, opponent, score, SUM(opp_games - my_games) AS games_margin
+  FROM parsed
+  GROUP BY date, opponent, score
+)
+SELECT AVG(games_margin) AS avg_games_margin
+FROM by_match;
+Result:
+- avg_games_margin ≈ 3.33
+
+Conclusion
+- The dataset shows that in her three recorded final losses, Voskoboeva’s average losing margin is about 3.33 games, not 4. The statement “on average … lose with only 4 point” is imprecise on two fronts: it refers to points (the data has games), and the numeric average here is 3.33, not 4. However, the spirit of “only about four” as a small losing margin is directionally consistent with the data.
+
+Assumptions and limitations
+- “Point” was interpreted as “games” because the dataset provides set scores in games and contains no point-level data.
+- The scores are assumed to be listed from Voskoboeva’s perspective (left side = her games), which matches the loss examples.
+- The dataset appears to include only final matches (Winner vs Runner-up), not her entire match history. The averages above apply only to these recorded finals.
+- The claim is evaluated against the available data only; we are not inferring unrecorded matches.
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

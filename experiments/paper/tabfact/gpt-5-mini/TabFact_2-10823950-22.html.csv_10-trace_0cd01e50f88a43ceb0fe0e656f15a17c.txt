@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+32393 crowd attend melbourne 's away game
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim interpreted: A crowd of 32,393 attended Melbourne’s away game.
+- Data checked: TabFact database, table public.t_1981_vfl_season (1981 VFL match records including crowd/attendance).
+- Finding: In the available 1981 VFL data, no match where the away team is “melbourne” has a recorded crowd of 32,393. A crowd of 32,393 is recorded for a different match (Collingwood vs Fitzroy), not involving Melbourne as the away team.
+
+Evidence and executed SQL
+1) Inspect table and data types
+SQL:
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 't_1981_vfl_season';
+How this supports the conclusion: Confirms the column names and that crowd is suitable for numeric comparison.
+
+2) Direct check: Melbourne as away team with crowd 32,393
+SQL:
+SELECT "date", "home team", "away team", "venue", "crowd"
+FROM public.t_1981_vfl_season
+WHERE lower("away team") = 'melbourne'
+  AND "crowd" = 32393
+ORDER BY "date";
+Result: No rows returned.
+How this supports the conclusion: Shows there is no 1981 VFL match in this table where Melbourne were the away team with a crowd of 32,393.
+
+3) List matches with crowd exactly 32,393 (to see where that number appears)
+SQL:
+SELECT "date","home team","home team score","away team","away team score","venue","crowd"
+FROM public.t_1981_vfl_season
+WHERE REPLACE(crowd::text,',','')::int = 32393;
+Result:
+- 29 august 1981 — home: collingwood (4.9 (33)) vs away: fitzroy (8.11 (59)) — venue: victoria park — crowd: 32393
+How this supports the conclusion: The only occurrence of a 32,393 crowd in the dataset is Collingwood vs Fitzroy, not Melbourne’s away game.
+
+4) Confirm the club naming and list all Melbourne-away rows with their crowds
+SQL:
+SELECT DISTINCT "away team" FROM public.t_1981_vfl_season ORDER BY "away team";
+Result: carlton; essendon; fitzroy; footscray; melbourne; north melbourne.
+SQL:
+SELECT "date", "home team" AS opponent, "home team score", "away team score", "venue", "crowd"
+FROM public.t_1981_vfl_season
+WHERE "away team" = 'melbourne'
+ORDER BY "date";
+Result:
+- 29 august 1981 — opponent: hawthorn — home score: 15.20 (110) — away (melbourne) score: 8.9 (57) — venue: princes park — crowd: 7912
+How this supports the conclusion: Confirms the dataset’s label for Melbourne and shows the actual recorded crowd(s) for Melbourne as the away team; none equal 32,393.
+
+Conclusion
+- Based on the available 1981 VFL data, the statement “32,393 crowd attend Melbourne’s away game” is not supported. The only 32,393 attendance recorded is for Collingwood vs Fitzroy (not Melbourne as away), while Melbourne’s away game in this data has a crowd of 7,912.
+
+Assumptions
+- Interpreted “Melbourne” as the Melbourne Football Club (VFL/AFL club) and “away game” as matches where "away team" = 'melbourne'.
+- Interpreted the claim as referring to matches covered by the available dataset (1981 VFL season in the TabFact database). Broader seasons or leagues were not accessible in the current data environment.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

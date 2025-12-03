@@ -1,0 +1,71 @@
+
+<userQuery>
+<query>
+wrestling be the sport with the latest date in 2008
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: In the available dataset (Iowa Corn Cy-Hawk Series), determine whether wrestling is the sport with the latest (most recent) event date in 2008.
+
+Data source discovery
+- Database: TabFact
+- Schema: public
+- Table: iowa_corn_cy_hawk_series
+  - Columns: date (text), site (text), sport (text), winning team (text), series (text)
+
+Step 1: Identify 2008 records and inspect dates
+Executed SQL:
+SELECT date, sport, site 
+FROM public.iowa_corn_cy_hawk_series 
+WHERE date LIKE '%2008%' 
+ORDER BY date ASC 
+LIMIT 50;
+
+Result (truncated to actual 2008 rows returned):
+- February 22, 2008 – Women’s Gymnastics – Ames
+- March 7, 2008 – Women’s Gymnastics – Iowa City
+- April 1, 2008 – Softball – Ames
+
+Step 2: Compute the latest chronological date in 2008 and the associated sport/site
+Executed SQL (max date):
+SELECT MAX(to_date(date, 'FMMonth FMDD, YYYY')) AS latest_date
+FROM public.iowa_corn_cy_hawk_series
+WHERE to_date(date, 'FMMonth FMDD, YYYY') BETWEEN '2008-01-01' AND '2008-12-31';
+
+Executed SQL (sport/site on that max date):
+SELECT sport, site
+FROM public.iowa_corn_cy_hawk_series
+WHERE to_date(date, 'FMMonth FMDD, YYYY') = (SELECT MAX(to_date(date, 'FMMonth FMDD, YYYY'))
+FROM public.iowa_corn_cy_hawk_series
+WHERE to_date(date, 'FMMonth FMDD, YYYY') BETWEEN '2008-01-01' AND '2008-12-31');
+
+Result:
+- Latest date in 2008: April 1, 2008
+- Sport on that date: Softball; Site: Ames
+
+Step 3: Full listing of 2008 rows ordered by parsed date (to confirm no wrestling and confirm ordering)
+Executed SQL:
+SELECT date, sport, site 
+FROM public.iowa_corn_cy_hawk_series 
+WHERE to_date(date, 'FMMonth FMDD, YYYY') BETWEEN '2008-01-01' AND '2008-12-31' 
+ORDER BY to_date(date, 'FMMonth FMDD, YYYY') DESC;
+
+Result (descending by date):
+1) April 1, 2008 – Softball – Ames
+2) March 7, 2008 – Women’s Gymnastics – Iowa City
+3) February 22, 2008 – Women’s Gymnastics – Ames
+
+Conclusion
+- Wrestling does not appear among 2008 rows in this dataset, and the latest 2008 event is Softball on April 1, 2008. Therefore, the claim that wrestling is the sport with the latest date in 2008 is not supported by the data.
+
+Assumptions
+- The claim refers to the Iowa Corn Cy-Hawk Series dataset available here.
+- “Latest date in 2008” is interpreted as the maximum chronological event date within calendar year 2008 in this table.
+- Dates were parsed from text using PostgreSQL to_date with format 'FMMonth FMDD, YYYY'.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

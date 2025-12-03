@@ -1,0 +1,67 @@
+
+<userQuery>
+<query>
+ngc 2082 redshift faster than ngc 1705 by 551 kilometer per second plus or minus 6 kilometer per second
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “NGC 2082 redshift faster than NGC 1705 by 551 kilometer per second plus or minus 6 kilometer per second.”
+
+Summary conclusion:
+- The data show NGC 2082 has a recession velocity of 1184 ± 6 km/s and NGC 1705 has 633 ± 6 km/s, so the nominal difference is 551 km/s. However, the dataset does not provide an uncertainty for the difference itself. If the two ±6 km/s uncertainties are independent, standard propagation would give an uncertainty larger than 6 km/s (about ±8.5 km/s). Therefore, the 551 km/s difference is supported, but the ±6 km/s margin on that difference is not supported by the provided data.
+
+Data discovery and schema:
+- Discovered data source: TabFact (postgres_tabfact11), schema public, table dorado_group with a text column for redshift (km / s ) that stores values like “1184 ± 6”.
+
+Executed queries and evidence:
+1) List sample names in the table to confirm naming format
+SQL:
+SELECT name FROM public.dorado_group ORDER BY name LIMIT 50;
+Result (partial): [{"name":"ic 2056"},{"name":"ngc 1515"},{"name":"ngc 1533"},{"name":"ngc 1543"},{"name":"ngc 1546"},{"name":"ngc 1549"},{"name":"ngc 1553"},{"name":"ngc 1559"},{"name":"ngc 1566"},{"name":"ngc 1574"},{"name":"ngc 1596"},{"name":"ngc 1617"},{"name":"ngc 1672"},{"name":"ngc 1688"},{"name":"ngc 1705"},{"name":"ngc 1796"},{"name":"ngc 1947"},{"name":"ngc 2082"}]
+
+2) Confirm exact column names (notably the redshift column with spaces)
+SQL:
+SELECT column_name, data_type FROM information_schema.columns WHERE table_schema='public' AND table_name='dorado_group';
+Result: [{"column_name":"name","data_type":"text"},{"column_name":"type","data_type":"text"},{"column_name":"ra ( j2000 )","data_type":"text"},{"column_name":"dec ( j2000 )","data_type":"text"},{"column_name":"redshift (km / s )","data_type":"text"},{"column_name":"apparent magnitude","data_type":"double precision"}]
+
+3) Retrieve rows for NGC 2082 and NGC 1705 (raw redshift strings)
+SQL:
+SELECT name, "redshift (km / s )" FROM public.dorado_group WHERE name IN ('ngc 2082', 'ngc 1705');
+Result: [{"name":"ngc 2082","redshift (km / s )":"1184 ± 6"},{"name":"ngc 1705","redshift (km / s )":"633 ± 6"}]
+
+4) Extract central velocities and uncertainties, and compute the difference (NGC 2082 minus NGC 1705)
+SQL:
+SELECT name, "redshift (km / s )" AS redshift_raw,
+       split_part("redshift (km / s )", ' ± ', 1) AS central_str,
+       split_part("redshift (km / s )", ' ± ', 2) AS uncert_str,
+       CAST(split_part("redshift (km / s )", ' ± ', 1) AS integer) AS central_kms,
+       CAST(split_part("redshift (km / s )", ' ± ', 2) AS integer) AS uncertainty_kms
+FROM dorado_group
+WHERE lower(name) IN ('ngc 2082','ngc 1705');
+Result rows:
+- ngc 2082: central_kms = 1184, uncertainty_kms = 6
+- ngc 1705: central_kms = 633, uncertainty_kms = 6
+
+SQL:
+SELECT
+CAST(split_part(MAX(CASE WHEN lower(name)='ngc 2082' THEN "redshift (km / s )" END), ' ± ',1) AS integer) AS ngc_2082_kms,
+CAST(split_part(MAX(CASE WHEN lower(name)='ngc 1705' THEN "redshift (km / s )" END), ' ± ',1) AS integer) AS ngc_1705_kms,
+CAST(split_part(MAX(CASE WHEN lower(name)='ngc 2082' THEN "redshift (km / s )" END), ' ± ',1) AS integer) - CAST(split_part(MAX(CASE WHEN lower(name)='ngc 1705' THEN "redshift (km / s )" END), ' ± ',1) AS integer) AS difference_kms
+FROM dorado_group
+WHERE lower(name) IN ('ngc 2082','ngc 1705');
+Result: {"ngc_2082_kms":1184, "ngc_1705_kms":633, "difference_kms":551}
+
+Assessment against the claim:
+- Supported: NGC 2082 has higher recession velocity than NGC 1705 by 551 km/s (1184 − 633 = 551) according to the dataset.
+- Not supported as stated: The dataset lists ±6 km/s for each object individually; it does not specify the uncertainty on the difference. Under typical independent-error propagation, the uncertainty on the difference would be larger than 6 km/s (approximately ±8.5 km/s). Thus, the ±6 km/s uncertainty on the difference is not justified by the provided data.
+
+Assumptions made:
+- “Redshift faster” is interpreted as a larger heliocentric recession velocity (km/s) as recorded in the "redshift (km / s )" column.
+- The ± values given are 1σ-like uncertainties for each object’s listed velocity. No correlation information is provided in the dataset, so independence is the default assumption when discussing propagated uncertainty.
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

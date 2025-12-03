@@ -1,0 +1,78 @@
+
+<userQuery>
+<query>
+the united state team win 8 of the solheim cup start in 1990 and the last be in 2009
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the united state team win 8 of the solheim cup start in 1990 and the last be in 2009.”
+
+Data source discovery
+- Used the discovery tool and found a PostgreSQL instance: postgres_tabfact20 (TabFact) with a table public.solheim_cup.
+
+Schema inspection
+- Table: public.solheim_cup
+  - Columns: year (bigint), venue (text), "winning team" (text), score (text), "usa captain" (text), "europe captain" (text)
+  - No foreign keys/constraints; standalone table.
+
+Evidence from data (with executed SQL and results)
+1) List of all Solheim Cup records (ordered by year)
+SQL:
+SELECT year, "winning team", score, venue FROM public.solheim_cup ORDER BY year ASC;
+Results (year — winning team — score — venue):
+- 1990 — united states — 11½ - 4½ — lake nona golf & country club , florida , usa
+- 1992 — europe — 11½ - 6½ — dalmahoy country club , scotland
+- 1994 — united states — 13 - 7 — the greenbrier , west virginia , usa
+- 1996 — united states — 17 - 11 — st pierre golf & country club , wales
+- 1998 — united states — 16 - 12 — muirfield village , ohio , usa
+- 2000 — europe — 14½ - 11½ — loch lomond golf club , scotland
+- 2002 — united states — 15½ - 12½ — interlachen country club , minnesota , usa
+- 2003 — europe — 17½ - 10½ — barsebäck golf & country club , sweden
+- 2005 — united states — 15½ - 12½ — crooked stick golf club , indiana , usa
+- 2007 — united states — 16 - 12 — halmstad gk , sweden
+- 2009 — united states — 16 - 12 — rich harvest farms , illinois , usa
+- 2011 — europe — 15 - 13 — killeen castle golf resort , ireland
+- 2013 — europe — 18 - 10 — colorado golf club , colorado , usa
+
+2) Distinct winners
+SQL:
+SELECT DISTINCT "winning team" FROM public.solheim_cup;
+Results:
+- united states
+- europe
+
+3) Total wins by each team
+SQL:
+SELECT "winning team", COUNT(*) AS wins FROM public.solheim_cup GROUP BY "winning team" ORDER BY wins DESC;
+Results:
+- united states — 8 wins
+- europe — 5 wins
+
+4) United States wins up to and including 2009
+SQL:
+SELECT COUNT(*) AS us_wins_up_to_2009 FROM public.solheim_cup WHERE LOWER("winning team") = 'united states' AND year <= 2009;
+Result:
+- us_wins_up_to_2009: 8
+
+5) Most recent year the United States won
+SQL:
+SELECT MAX(year) AS most_recent_us_win_year FROM public.solheim_cup WHERE LOWER("winning team") = 'united states';
+Result:
+- most_recent_us_win_year: 2009
+
+Assessment
+- The event starts in 1990 (first record is 1990).
+- The United States has 8 total wins in the dataset and 8 wins through 2009.
+- The most recent U.S. win is 2009.
+- Therefore, the claim is supported by the data.
+
+Assumptions
+- Treated the value in "winning team" as case-insensitive (matched 'united states').
+- Interpreted “the last be in 2009” as “the most recent U.S. win was in 2009.”
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

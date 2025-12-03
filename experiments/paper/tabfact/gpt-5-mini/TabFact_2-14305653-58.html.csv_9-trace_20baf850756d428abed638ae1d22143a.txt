@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+the yugoslavian national team score 7 goal and allow 3 against in the 2 1982 world cup qualify score
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify (interpreted): Yugoslavia’s national team scored 7 and conceded 3 in the 1982 World Cup qualifiers.
+
+Conclusion: The dataset shows three matches labeled “1982 wcq” with an aggregate score of 7 scored and 3 conceded. The totals match the claim, though they were achieved across 3 matches (not 2). 
+
+Evidence from the database
+1) Identify how World Cup qualifiers are labeled
+- SQL executed:
+  SELECT DISTINCT "type of game" FROM yugoslavia_national_football_team_results ORDER BY "type of game";
+- Result:
+  - 1982 wcq
+  - balkan cup
+  - friendly
+
+2) List all 1982 World Cup qualifier matches for Yugoslavia
+- SQL executed:
+  SELECT date, city, opponent, results
+  FROM yugoslavia_national_football_team_results
+  WHERE "type of game" = '1982 wcq'
+  ORDER BY to_date(initcap(date), 'Month DD');
+- Result (chronological):
+  - september 10 — luxembourg — opponent: luxembourg — results: 5:0
+  - september 27 — ljubljana — opponent: denmark — results: 2:1
+  - november 15 — torino , italy — opponent: italy — results: 0:2
+
+3) Compute totals (goals for/against) in 1982 WCQ
+- SQL executed:
+  SELECT COUNT(*) AS matches,
+         SUM((split_part(results, ':', 1))::int) AS goals_for,
+         SUM((split_part(results, ':', 2))::int) AS goals_against
+  FROM yugoslavia_national_football_team_results
+  WHERE "type of game" = '1982 wcq';
+- Result:
+  - matches: 3
+  - goals_for: 7
+  - goals_against: 3
+
+Assessment
+- Supported: The aggregate goals (7 scored, 3 conceded) in the 1982 World Cup qualifiers match the claim.
+- Note: These totals come from 3 qualifiers, not 2. If the mention of “2” in the claim was intended to refer to the number of matches, it is inconsistent with the data here.
+
+Assumptions
+- I interpret “2 1982 world cup qualify” as referring to the 1982 World Cup qualifying campaign, with “2” being a typographical artifact rather than the number of matches. If “2” was meant to indicate two matches, that is contradicted by the data, which shows three matches.
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

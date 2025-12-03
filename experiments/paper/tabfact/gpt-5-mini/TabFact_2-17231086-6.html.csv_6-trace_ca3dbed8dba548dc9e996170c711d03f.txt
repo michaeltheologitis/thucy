@@ -1,0 +1,126 @@
+
+<userQuery>
+<query>
+a majority of the people who score over par be from the united state
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: Among players who scored over par (to-par > 0), a majority are from the United States.
+
+Data sources explored
+- Database: TabFact (postgres_tabfact29)
+- Schema: public
+- Table: t_1989_u_s_open_golf (columns: place, player, country, score, to par, money)
+
+Key checks and evidence
+1) Inspect distinct raw values of the to-par field
+- Purpose: Understand formatting to normalize to numeric values.
+- Executed SQL:
+SELECT DISTINCT "to par" FROM public.t_1989_u_s_open_golf ORDER BY "to par" NULLS LAST LIMIT 100;
+- Result examples: "- 1", "- 2", "+ 1", "+ 2", "+ 3", "e"
+
+2) Distinct to-par values with normalization (E/e→0; remove spaces; handle unicode minus and leading +) and counts
+- Executed SQL:
+SELECT "to par" AS original,
+       COUNT(*) AS count,
+       CASE
+         WHEN lower(regexp_replace(replace(replace(replace("to par", '−', '-'), chr(160), ''), ' ', ''), '^\+', '')) = 'e' THEN 0
+         ELSE CASE WHEN regexp_replace(replace(replace(replace("to par", '−', '-'), chr(160), ''), ' ', ''), '^\+', '') ~ '^[-]?\d+$'
+                   THEN CAST(regexp_replace(replace(replace(replace("to par", '−', '-'), chr(160), ''), ' ', ''), '^\+', '') AS integer)
+                   ELSE NULL END
+       END AS normalized_value
+FROM public.t_1989_u_s_open_golf
+GROUP BY "to par"
+ORDER BY normalized_value NULLS LAST, original;
+- Result summary: values present were −2 (1 row), −1 (3), 0 via e (1), +1 (2), +2 (1), +3 (4)
+
+3) Count players with over-par scores (normalized to-par > 0)
+- Executed SQL:
+WITH normalized AS (
+  SELECT *,
+    CASE
+      WHEN lower(trim("to par")) = 'e' THEN 0
+      ELSE
+        CASE WHEN regexp_replace(replace(replace(replace(trim("to par"), '−','-'),'–','-'),' ',''), '^\+', '') ~ '^[+-]?[0-9]+(\.[0-9]+)?$'
+             THEN CAST(regexp_replace(replace(replace(replace(trim("to par"), '−','-'),'–','-'),' ',''), '^\+', '') AS numeric)
+             ELSE NULL
+        END
+    END AS to_par_num
+  FROM public.t_1989_u_s_open_golf
+)
+SELECT count(*) AS total_over_par FROM normalized WHERE to_par_num > 0;
+- Result: total_over_par = 7
+
+4) Breakdown of over-par players by country
+- Executed SQL:
+WITH normalized AS (
+  SELECT *,
+    CASE
+      WHEN lower(trim("to par")) = 'e' THEN 0
+      ELSE
+        CASE WHEN regexp_replace(replace(replace(replace(trim("to par"), '−','-'),'–','-'),' ',''), '^\+', '') ~ '^[+-]?[0-9]+(\.[0-9]+)?$'
+             THEN CAST(regexp_replace(replace(replace(replace(trim("to par"), '−','-'),'–','-'),' ',''), '^\+', '') AS numeric)
+             ELSE NULL
+        END
+    END AS to_par_num
+  FROM public.t_1989_u_s_open_golf
+)
+SELECT country, count(*) AS count
+FROM normalized
+WHERE to_par_num > 0
+GROUP BY country
+ORDER BY count DESC, country;
+- Result: united states = 5, japan = 1, spain = 1
+
+5) United States share among over-par players
+- Executed SQL:
+WITH normalized AS (
+  SELECT *,
+    CASE
+      WHEN lower(trim("to par")) = 'e' THEN 0
+      ELSE
+        CASE WHEN regexp_replace(replace(replace(replace(trim("to par"), '−','-'),'–','-'),' ',''), '^\+', '') ~ '^[+-]?[0-9]+(\.[0-9]+)?$'
+             THEN CAST(regexp_replace(replace(replace(replace(trim("to par"), '−','-'),'–','-'),' ',''), '^\+', '') AS numeric)
+             ELSE NULL
+        END
+    END AS to_par_num
+  FROM public.t_1989_u_s_open_golf
+)
+SELECT
+  SUM(CASE WHEN lower(country) = 'united states' THEN 1 ELSE 0 END) AS us_count,
+  COUNT(*) AS total_over_par,
+  100.0 * SUM(CASE WHEN lower(country) = 'united states' THEN 1 ELSE 0 END)::numeric / NULLIF(COUNT(*),0) AS us_percentage
+FROM normalized
+WHERE to_par_num > 0;
+- Result: us_count = 5; total_over_par = 7; us_percentage ≈ 71.43%
+
+6) Listing of over-par players for transparency
+- Executed SQL:
+SELECT player, country, "to par" AS raw_to_par,
+  CASE WHEN lower(trim("to par")) IN ('e') THEN 0 ELSE CAST(replace("to par",' ', '') AS INTEGER) END AS to_par_num
+FROM public.t_1989_u_s_open_golf
+WHERE (CASE WHEN lower(trim("to par")) IN ('e') THEN 0 ELSE CAST(replace("to par",' ', '') AS INTEGER) END) > 0
+ORDER BY to_par_num DESC, player;
+- Result rows:
+  - hubert green — united states — "+ 3" — 3
+  - josé maría olazábal — spain — "+ 3" — 3
+  - paul azinger — united states — "+ 3" — 3
+  - tom kite — united states — "+ 3" — 3
+  - peter jacobsen — united states — "+ 2" — 2
+  - masashi ozaki — japan — "+ 1" — 1
+  - scott simpson — united states — "+ 1" — 1
+
+Conclusion
+- Supported by the data in public.t_1989_u_s_open_golf: Among players who scored over par, 5 of 7 (71.43%) are from the United States. This constitutes a majority.
+
+Assumptions
+- Scope: The claim was evaluated on the available dataset t_1989_u_s_open_golf (1989 U.S. Open Golf). No other tournaments or years were accessible via the provided tools.
+- Definition: “Score over par” means normalized to-par > 0. Value 'E'/'e' denotes even (0). Spaces between sign and digits were removed; leading '+' removed; any Unicode minus/en-dash normalized to '-'.
+- Country matching: Case-insensitive exact match on the string "united states" for United States.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

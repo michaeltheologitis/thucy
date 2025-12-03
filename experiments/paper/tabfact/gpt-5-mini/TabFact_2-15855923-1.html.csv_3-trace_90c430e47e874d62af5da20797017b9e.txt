@@ -1,0 +1,43 @@
+
+<userQuery>
+<query>
+the game with a score of 3 - 2 be hold in chongqing , china
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Data sources explored:
+- Discovered a PostgreSQL (TabFact) database with a single accessible table in the public schema: public.kwak_tae_hwi (columns: date, venue, score, result, competition).
+
+Verification steps and evidence:
+1) Queried for any matches where the score is 3-2 (including dash variants) and the venue mentions Chongqing, China.
+
+Executed SQL (exact):
+SELECT date, venue, score, result, competition
+FROM public.kwak_tae_hwi
+WHERE venue ILIKE '%chongqing%' AND venue ILIKE '%china%'
+  AND (
+    score ILIKE '%3-2%'
+    OR score ILIKE '%3–2%'
+    OR score ~ '(^|[^0-9])3\s*[-–—‑]\s*2([^0-9]|$)'
+  );
+
+Result:
+- date: february 17 , 2008
+- venue: chongqing , china
+- score: 3 - 2
+- result: 3 - 2
+- competition: 2008 east asian cup
+
+Conclusion:
+- The data contains a match with a score of 3-2 that was held in Chongqing, China. This supports the claim.
+
+Assumptions:
+- Interpreted “the game with a score of 3 - 2” as an existence claim (i.e., whether there is a game recorded with that score held in Chongqing, China), since no specific match was referenced.
+- Treated 3-2 as including common dash variants and optional spacing.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,68 @@
+
+<userQuery>
+<query>
+in season 1 of gary unmarried , the least viewed episode of the season be the finale , which air on may 20 , 2009
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “In season 1 of Gary Unmarried, the least viewed episode of the season is the finale, which aired on May 20, 2009.”
+
+Data source exploration
+- Discovered data source: PostgreSQL instance (TabFact, schema: public) with table public.gary_unmarried.
+- Table schema (key columns): episode (text), air date (text), timeslot (text), 18 - 49 (text), viewers (double precision).
+
+Key checks and evidence
+1) Confirm the dataset covers a single season and episode count
+- SQL executed:
+  SELECT COUNT(*) AS total_rows FROM public.gary_unmarried;
+- Result: total_rows = 20
+- SQL executed:
+  SELECT COUNT(*) AS episodes_listed FROM public.gary_unmarried WHERE episode IS NOT NULL AND trim(episode) <> '';
+- Result: episodes_listed = 20
+Interpretation: The table lists 20 episodes, consistent with a single season run for Season 1.
+
+2) Find the minimum viewers value and the episode(s) at that minimum
+- SQL executed:
+  SELECT MIN(viewers) AS min_viewers FROM public.gary_unmarried;
+- Result: min_viewers = 5.55
+- SQL executed (no hard-coded value):
+  SELECT episode, "air date", timeslot, "18 - 49", viewers
+  FROM public.gary_unmarried
+  WHERE viewers = (SELECT MIN(viewers) FROM public.gary_unmarried);
+- Result row:
+  episode: gary fixes allison 's garbage disposal
+  air date: may 20 , 2009
+  timeslot: wednesday 8:30 pm
+  18 - 49: 1.7 / 5
+  viewers: 5.55
+Interpretation: The least viewed episode has 5.55 million viewers and is “gary fixes allison’s garbage disposal,” with an air date of May 20, 2009.
+
+3) Confirm that this episode is the season finale (last aired chronologically)
+- SQL executed:
+  SELECT episode, "air date", viewers, to_date(initcap(trim(regexp_replace("air date", '\\s*,\\s*', ', '))), 'FMMonth DD, YYYY') AS parsed_date
+  FROM public.gary_unmarried
+  ORDER BY parsed_date DESC
+  LIMIT 1;
+- Result:
+  episode: gary fixes allison 's garbage disposal
+  air date: may 20 , 2009
+  parsed_date: 2009-05-20
+  viewers: 5.55
+Interpretation: The chronologically last-aired episode (i.e., the finale) is the same episode, aired on 2009-05-20.
+
+Conclusion
+- The data shows the least viewed episode (5.55 million viewers) is “gary fixes allison’s garbage disposal.”
+- This episode is also the last aired in the dataset (finale) and aired on May 20, 2009.
+Therefore, the claim is supported by the data.
+
+Assumptions
+- The table public.gary_unmarried corresponds to Season 1 of Gary Unmarried. The presence of exactly 20 episodes aligns with the known Season 1 count.
+- “air date” is stored as text and was normalized and parsed to determine chronological order.
+- “viewers” values are in millions (as commonly reported for TV ratings).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

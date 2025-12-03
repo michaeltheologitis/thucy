@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+7 viral family have a helical virion shape
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of approach
+- Discovered available data sources and relevant schema.
+- Queried the viral_disease table to count and list viral families whose virion shape is helical, first using exact matches, then using a case-insensitive contains search to capture composite labels (e.g., “bullet-shaped helical”).
+
+Data source discovery
+- Available schema: public
+- Table: viral_disease
+- Columns: family (text), baltimore group (text), envelopment (text), virion shape (text), replication site (text)
+
+Evidence and executed SQL
+1) Exact match on virion shape = 'helical'
+- Result: 6 distinct families
+- Families: Arenaviridae, Bunyaviridae, Coronaviridae, Filoviridae, Orthomyxoviridae, Paramyxoviridae
+- SQL:
+  SELECT COUNT(DISTINCT family) AS distinct_family_count
+  FROM viral_disease
+  WHERE "virion shape" = 'helical';
+
+  SELECT DISTINCT family
+  FROM viral_disease
+  WHERE "virion shape" = 'helical';
+
+2) Case-insensitive contains match for 'helical' in virion shape
+- Result: 7 distinct families
+- Families: Arenaviridae, Bunyaviridae, Coronaviridae, Filoviridae, Orthomyxoviridae, Paramyxoviridae, Rhabdoviridae
+- SQL:
+  SELECT DISTINCT family FROM public.viral_disease WHERE LOWER("virion shape") LIKE '%helical%';
+
+3) Count of distinct families for the contains match
+- Result: 7
+- SQL:
+  SELECT COUNT(DISTINCT family) AS distinct_family_count
+  FROM public.viral_disease
+  WHERE LOWER("virion shape") LIKE '%helical%';
+
+Conclusion
+- The dataset shows 7 distinct viral families with a virion shape that contains the descriptor “helical.” Therefore, the claim is supported by the data when interpreting “have a helical virion shape” to include composite descriptors that contain “helical.”
+
+Assumptions
+- “Have a helical virion shape” is interpreted to include any virion shape description containing the word “helical” (case-insensitive), not only those equal to exactly “helical.”
+- Distinctness is evaluated at the family level using COUNT(DISTINCT family) within the viral_disease table.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

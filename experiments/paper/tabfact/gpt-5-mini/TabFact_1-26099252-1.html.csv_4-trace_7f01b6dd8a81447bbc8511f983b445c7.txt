@@ -1,0 +1,47 @@
+
+<userQuery>
+<query>
+when theora be 2.3 and the h264 be 3.0 , the vp8 ( webm ) be r47759
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “when theora be 2.3 and the h264 be 3.0, the vp8 ( webm ) be r47759.”
+
+Data source discovery and schema grounding:
+- Discovered database: TabFact (postgres_tabfact22)
+- Relevant table: public.html5_video with columns: browser (text), operating system (text), latest stable release (text), theora (text), h264 (text), vp8 ( webm ) (text), vp9 ( webm ) (text)
+
+Evidence 1: What is the vp8 ( webm ) value when theora = '2.3' and h264 = '3.0'?
+Executed SQL:
+SELECT browser, "operating system", theora, h264, "vp8 ( webm )" FROM public.html5_video WHERE theora = '2.3' AND h264 = '3.0';
+Result (1 row):
+- browser: android browser; operating system: android; theora: 2.3; h264: 3.0; vp8 ( webm ): 2.3
+Interpretation: For the only row where theora = 2.3 and h264 = 3.0, vp8 ( webm ) equals 2.3, not r47759.
+
+Evidence 2: Where does vp8 ( webm ) = 'r47759' appear, if anywhere?
+Executed SQL:
+SELECT * FROM public.html5_video WHERE "vp8 ( webm )" LIKE '%r47759%';
+Result (1 row):
+- browser: chromium; operating system: all supported; latest stable release: n / a; theora: r18297; h264: manual install; vp8 ( webm ): r47759; vp9 ( webm ): r172738
+Interpretation: The value r47759 for vp8 ( webm ) exists, but in a row where theora ≠ 2.3 (it is r18297) and h264 ≠ 3.0 (it is manual install).
+
+Evidence 3: Direct check for a row matching all three conditions simultaneously
+Executed SQL:
+SELECT COUNT(*) AS cnt FROM public.html5_video
+WHERE theora = '2.3' AND h264 = '3.0' AND "vp8 ( webm )" = 'r47759';
+Result: cnt = 0
+Interpretation: There is no row where theora = 2.3, h264 = 3.0, and vp8 ( webm ) = r47759 at the same time.
+
+Conclusion: The claim is contradicted by the data. When theora is 2.3 and h264 is 3.0, vp8 ( webm ) is 2.3 (not r47759). While r47759 appears as a vp8 ( webm ) value in another row, it does not coincide with theora 2.3 and h264 3.0.
+
+Assumptions made:
+- The claim refers to codec support/version fields as represented in the public.html5_video table described above.
+- Exact text equality was used for matching values (case- and whitespace-sensitive) as per the executed SQL.
+
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

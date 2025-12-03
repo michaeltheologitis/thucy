@@ -1,0 +1,71 @@
+
+<userQuery>
+<query>
+north melbourne home team record an home score of 7.8 (50) while south melbourne record an home score of 9.14 (68)
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "north melbourne home team record an home score of 7.8 (50) while south melbourne record an home score of 9.14 (68)"
+
+Summary conclusion: The data shows the opposite. In the available 1961 VFL season table, North Melbourne’s home score was 9.14 (68) and South Melbourne’s home score was 7.8 (50), both on 3 June 1961. No record matches the claim as stated.
+
+Evidence from the database (TabFact -> public.t_1961_vfl_season)
+
+Context check — distinct home teams stored (to understand naming/casing):
+- Executed SQL:
+  SELECT DISTINCT "home team" FROM public.t_1961_vfl_season ORDER BY "home team" ASC;
+- Result (exact values): collingwood; geelong; hawthorn; melbourne; north melbourne; south melbourne
+
+Test 1 — Does North Melbourne have a home score of '7.8 (50)'?
+- Executed SQL:
+  SELECT "home team","home team score","away team","away team score","venue","crowd","date"
+  FROM t_1961_vfl_season
+  WHERE lower("home team") = 'north melbourne' AND "home team score" = '7.8 (50)';
+- Result: no rows returned
+
+What score does North Melbourne have (as home) in this table?
+- Executed SQL:
+  SELECT "home team","home team score","away team","away team score","venue","crowd","date"
+  FROM t_1961_vfl_season
+  WHERE lower("home team") = 'north melbourne'
+  ORDER BY date;
+- Result:
+  home team: north melbourne | home team score: 9.14 (68) | away team: st kilda | away team score: 11.16 (82) | venue: arden street oval | crowd: 13000 | date: 3 june 1961
+
+Test 2 — Does South Melbourne have a home score of '9.14 (68)'?
+- Executed SQL:
+  SELECT "home team","home team score","away team","away team score","venue","crowd","date"
+  FROM public.t_1961_vfl_season
+  WHERE lower("home team") = 'south melbourne'
+  LIMIT 50;
+- Result:
+  home team: south melbourne | home team score: 7.8 (50) | away team: fitzroy | away team score: 17.15 (117) | venue: lake oval | crowd: 14500 | date: 3 june 1961
+
+Cross-check — who has home score '9.14 (68)'?
+- Executed SQL:
+  SELECT "home team","home team score","away team","away team score","venue","crowd","date"
+  FROM public.t_1961_vfl_season
+  WHERE "home team score" = '9.14 (68)'
+  LIMIT 50;
+- Result:
+  home team: north melbourne | home team score: 9.14 (68) | away team: st kilda | venue: arden street oval | crowd: 13000 | date: 3 june 1961
+
+Cross-check — who has home score '7.8 (50)'?
+- Executed SQL:
+  SELECT "home team", "away team", "venue", "date" FROM public.t_1961_vfl_season WHERE "home team score" = '7.8 (50)';
+- Result:
+  home team: south melbourne | away team: fitzroy | venue: lake oval | date: 3 june 1961
+
+Assessment
+- The dataset shows that on 3 June 1961, North Melbourne’s home score was 9.14 (68) and South Melbourne’s home score was 7.8 (50). The claim states the reverse. Therefore, the claim is contradicted by the data.
+
+Assumptions
+- Verification is grounded in the available table public.t_1961_vfl_season (1961 VFL season). Team names in the data are lowercased; queries matched team names case-insensitively and scores as exact text values.
+
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+china have win 39 more gold medal than iran for wushu at the asian game
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: "china have win 39 more gold medal than iran for wushu at the asian game"
+
+Data source consulted: TabFact (PostgreSQL) database, schema public, table wushu_at_the_asian_games with columns: rank (text), nation (text), gold (bigint), silver (bigint), bronze (bigint), total (bigint).
+
+Evidence
+1) Identify exact nation names used in the table
+SQL executed:
+SELECT DISTINCT nation FROM public.wushu_at_the_asian_games ORDER BY nation;
+Result:
+[{"nation":"china (chn)"},{"nation":"chinese taipei (tpe)"},{"nation":"hong kong (hkg)"},{"nation":"india (ind)"},{"nation":"indonesia (ina)"},{"nation":"iran (iri)"},{"nation":"japan (jpn)"},{"nation":"kazakhstan (kaz)"},{"nation":"laos (lao)"},{"nation":"macau (mac)"},{"nation":"malaysia (mas)"},{"nation":"mongolia (mgl)"},{"nation":"myanmar (mya)"},{"nation":"pakistan (pak)"},{"nation":"philippines (phi)"},{"nation":"singapore (sin)"},{"nation":"south korea (kor)"},{"nation":"thailand (tha)"},{"nation":"total"},{"nation":"vietnam (vie)"},{"nation":"yemen (yem)"}]
+
+2) Retrieve gold counts for China and Iran (using exact nation labels)
+SQL executed:
+SELECT nation, gold FROM public.wushu_at_the_asian_games WHERE nation IN ('china (chn)','iran (iri)') ORDER BY nation;
+Result:
+[{"gold":43,"nation":"china (chn)"},{"gold":4,"nation":"iran (iri)"}]
+
+3) Compute the difference in gold medals (China minus Iran)
+SQL executed:
+SELECT (SELECT gold FROM public.wushu_at_the_asian_games WHERE nation='china (chn)') - (SELECT gold FROM public.wushu_at_the_asian_games WHERE nation='iran (iri)') AS gold_difference;
+Result:
+[{"gold_difference":39}]
+
+Analysis
+- The table shows China has 43 gold medals in Wushu at the Asian Games, while Iran has 4.
+- The computed difference is 43 − 4 = 39.
+
+Conclusion
+- The claim is supported by the data: China has 39 more Wushu gold medals than Iran at the Asian Games.
+
+Assumptions
+- Interpreted "asian game" as the Asian Games.
+- Used the wushu_at_the_asian_games table as the authoritative aggregate of Wushu medal counts across Asian Games editions.
+- Interpreted "china" and "iran" as the rows labeled "china (chn)" and "iran (iri)" in the dataset.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

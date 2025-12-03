@@ -1,0 +1,88 @@
+
+<userQuery>
+<query>
+the dallas cowboys lose at texas stadium on december 10 to the new orleans saint
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Step 1: Discover available data sources
+- Tool: Data source discovery
+- Finding: A PostgreSQL database named “TabFact” (postgres_tabfact10) is available, with a public schema.
+
+Step 2: Inspect the schema
+- Tool: Schema inspection
+- Result:
+  Database: TabFact (postgres_tabfact10)
+  Table: public.nbc_sunday_night_football_results_2006_present
+  Columns:
+    • date (text)
+    • visiting team (text)
+    • final score (text)
+    • host team (text)
+    • stadium (text)
+
+Step 3: Find Cowboys–Saints Sunday Night Football game(s) at Dallas and retrieve details
+- Tool: SQL (natural-language to SQL with trace)
+- Executed SQL:
+  SELECT "date", "visiting team", "host team", "stadium", "final score"
+  FROM public.nbc_sunday_night_football_results_2006_present
+  WHERE "host team" ILIKE '%Dallas%'
+    AND "visiting team" ILIKE '%New Orleans%';
+- Result summary: On December 10, the visiting team was New Orleans Saints, the host team was Dallas Cowboys, at Texas Stadium; final score 42 - 17.
+
+Step 4: Normalize casing and confirm exact row, stadium, and date
+- Tool: SQL (natural-language to SQL with trace)
+- Executed SQL and results:
+  1) Exact-case match check (to determine stored casing):
+     SELECT COUNT(*) FROM public.nbc_sunday_night_football_results_2006_present
+     WHERE "host team" = 'Dallas Cowboys' AND "visiting team" = 'New Orleans Saints';
+     Result: [{"count":0}]
+
+  2) Determine stored values for team names:
+     SELECT DISTINCT "host team" FROM public.nbc_sunday_night_football_results_2006_present
+     WHERE "host team" ILIKE '%Dallas%' OR "host team" ILIKE '%Cowboys%';
+     Result: [{"host team":"dallas cowboys"}]
+
+     SELECT DISTINCT "visiting team" FROM public.nbc_sunday_night_football_results_2006_present
+     WHERE "visiting team" ILIKE '%New%' OR "visiting team" ILIKE '%Saints%';
+     Result: [{"visiting team":"new orleans saints"}]
+
+  3) Retrieve the row using case-insensitive equality and show date, stadium, final score:
+     SELECT "date", "stadium", "final score"
+     FROM public.nbc_sunday_night_football_results_2006_present
+     WHERE LOWER("host team") = 'dallas cowboys'
+       AND LOWER("visiting team") = 'new orleans saints';
+     Result: [{"date":"december 10","final score":"42 - 17","stadium":"texas stadium"}]
+
+  4) Confirm stadium and date:
+     SELECT COUNT(*) FROM public.nbc_sunday_night_football_results_2006_present
+     WHERE LOWER("host team") = 'dallas cowboys'
+       AND LOWER("visiting team") = 'new orleans saints'
+       AND LOWER("stadium") = 'texas stadium';
+     Result: [{"count":1}]
+
+     SELECT COUNT(*) FROM public.nbc_sunday_night_football_results_2006_present
+     WHERE LOWER("host team") = 'dallas cowboys'
+       AND LOWER("visiting team") = 'new orleans saints'
+       AND LOWER("date") LIKE '%december 10%';
+     Result: [{"count":1}]
+
+Findings relative to the claim
+- Opponent and venue: Data shows a Dallas Cowboys home game vs the New Orleans Saints at Texas Stadium.
+- Date: The game date in the dataset is recorded as “december 10” (text). The table is for Sunday Night Football results from 2006 to the present, which aligns with the well-known Dec 10, 2006 game.
+- Outcome: The final score is “42 - 17”. The dataset’s “final score” field is a plain text string that does not explicitly map which team had which points. While the 42–17 score strongly suggests a decisive result and is historically known as a Saints win, the table itself does not label the winner/loser or associate the numbers to home/away in the schema.
+
+Conclusion
+- The data directly verifies the matchup, venue (Texas Stadium), and date (December 10), and provides the final score 42–17 for that game. The dataset does not explicitly indicate which team won based solely on the “final score” field, though external knowledge of that game indicates the Cowboys lost. Based strictly on the provided dataset, the “lose” part is implicitly suggested by the score but not explicitly encoded.
+
+Assumptions noted
+- Case-insensitive matching was used because the table stores values in lowercase (e.g., “dallas cowboys”, “new orleans saints”, “texas stadium”, “december 10”).
+- The table covers NBC Sunday Night Football games from 2006 onward; “december 10” here corresponds to that scope.
+
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

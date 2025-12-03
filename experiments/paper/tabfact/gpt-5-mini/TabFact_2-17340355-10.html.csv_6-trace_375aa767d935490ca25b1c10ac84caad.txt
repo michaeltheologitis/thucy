@@ -1,0 +1,82 @@
+
+<userQuery>
+<query>
+the highest attendance be at the target center
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the highest attendance be at the target center.”
+
+Data source discovery
+- Discovered database: TabFact (public schema) with table t_2008_09_phoenix_suns_season.
+
+Schema (from discovery)
+- Table: t_2008_09_phoenix_suns_season
+  Columns: game (bigint), date (text), team (text), "location attendance" (text), record (text)
+
+Evidence collection
+1) Inspect sample rows and row count
+Executed SQL:
+SELECT game, date, team, "location attendance", record
+FROM public.t_2008_09_phoenix_suns_season
+ORDER BY game
+LIMIT 10;
+
+SELECT count(*) AS total_rows
+FROM public.t_2008_09_phoenix_suns_season;
+
+Key rows observed (8 total rows):
+- game 77: location attendance = "american airlines center 20301"
+- game 80: location attendance = "target center 18478"
+- Several US Airways Center rows at 18422, etc.; one row missing an attendance number.
+
+2) Compute the maximum attendance and identify its venue
+Executed SQL (compute max parsed attendance):
+SELECT MAX( (replace(substring(trim("location attendance") FROM '([0-9,]+)$'), ',', '') )::int ) AS max_att
+FROM t_2008_09_phoenix_suns_season
+WHERE substring(trim("location attendance") FROM '([0-9,]+)$') IS NOT NULL;
+
+Result:
+- max_att = 20301
+
+Executed SQL (rows at that maximum, extracting venue):
+SELECT game, date, team,
+       trim(regexp_replace(trim("location attendance"), '([[:space:]]*[0-9,]+)$','')) AS venue,
+       (replace(substring(trim("location attendance") FROM '([0-9,]+)$'), ',', '') )::int AS attendance,
+       "location attendance"
+FROM t_2008_09_phoenix_suns_season
+WHERE (replace(substring(trim("location attendance") FROM '([0-9,]+)$'), ',', '') )::int = 20301
+ORDER BY game;
+
+Result:
+- game 77, date: april 5, team: dallas, venue: american airlines center, attendance: 20301
+
+3) Context: full ordered list by attendance and Target Center’s rank
+Executed SQL:
+SELECT game, date, team,
+       trim(regexp_replace("location attendance", '[0-9].*$', '')) AS venue,
+       regexp_replace("location attendance", '[^0-9]+', '', 'g')::int AS attendance
+FROM t_2008_09_phoenix_suns_season
+WHERE regexp_replace("location attendance", '[^0-9]+', '', 'g') <> ''
+ORDER BY attendance DESC;
+
+Top results (desc):
+- 20301 — american airlines center (game 77)
+- 18478 — target center (game 80)
+- 18422 — us airways center (multiple games)
+- 17781 — new orleans arena
+- 15908 — fedexforum
+
+Conclusion
+- The highest attendance in the available data is 20301 at American Airlines Center, not at Target Center (18478). Therefore, the claim is contradicted by the data.
+
+Assumptions
+- “Highest attendance” refers to the maximum attendance value parsed from the "location attendance" field within this specific table.
+- Attendance was parsed as the trailing digits in the field; rows without a trailing number were excluded from max computations.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

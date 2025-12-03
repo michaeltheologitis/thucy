@@ -1,0 +1,43 @@
+
+<userQuery>
+<query>
+as porto novo score 3 point against the victoria club mokanda
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+What I checked
+- Discovered available data source: a PostgreSQL database (TabFact) with a public schema.
+- Relevant table identified: public.t_1971_african_cup_of_champions_clubs (fields: team 1, team 2, 1st leg, 2nd leg, agg), containing match results for the 1971 African Cup of Champions Clubs.
+
+Evidence from the data
+1) Locate any rows involving the mentioned teams
+- Result: Found a tie between as porto novo and victoria club mokanda with leg scores shown below.
+- Executed SQL:
+SELECT "team 1", "team 2", "1st leg", "2nd leg" FROM public.t_1971_african_cup_of_champions_clubs WHERE "team 1" ILIKE '%porto%' OR "team 2" ILIKE '%porto%' OR "team 1" ILIKE '%porto-novo%' OR "team 2" ILIKE '%porto-novo%' OR "team 1" ILIKE '%victoria%' OR "team 2" ILIKE '%victoria%' OR "team 1" ILIKE '%mokanda%' OR "team 2" ILIKE '%mokanda%';
+- Returned row:
+  team 1: as porto novo; team 2: victoria club mokanda; 1st leg: 0 - 1; 2nd leg: 0 - 2
+
+2) Retrieve the aggregate score for that tie
+- Result: Aggregate score 0 - 3 (as porto novo vs victoria club mokanda)
+- Executed SQL:
+SELECT "agg", "1st leg", "2nd leg", "team 1", "team 2"
+FROM public.t_1971_african_cup_of_champions_clubs
+WHERE (lower("team 1") = 'as porto novo' AND lower("team 2") = 'victoria club mokanda')
+   OR (lower("team 1") = 'victoria club mokanda' AND lower("team 2") = 'as porto novo');
+- Returned row:
+  {"1st leg":"0 - 1", "2nd leg":"0 - 2", "agg":"0 - 3", "team 1":"as porto novo", "team 2":"victoria club mokanda"}
+
+Assessment of the claim
+- The claim states (interpreted): “AS Porto Novo scored 3 points against Victoria Club Mokanda.” The data shows the opposite: AS Porto Novo lost both legs (0-1 and 0-2) and the aggregate was 0-3 against them. Therefore, they did not secure 3 points or a 3-goal tally; rather, Victoria Club Mokanda advanced 3–0 on aggregate.
+
+Conclusion: The claim is contradicted by the evidence.
+
+Assumptions
+- Interpreted “score 3 point” as claiming AS Porto Novo won/earned three points or scored three goals versus Victoria Club Mokanda in their tie. The only available authoritative data concerns the 1971 African Cup of Champions Clubs meeting between these teams, which I used for verification.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

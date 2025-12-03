@@ -1,0 +1,64 @@
+
+<userQuery>
+<query>
+2007 - 2008 be the season where september 26 , 2007 have the season premier
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The 2007–2008 TV season (for the CSI franchise table available) has a season premiere on September 26, 2007.
+
+Data source discovery and schema grounding
+- Discovered database: TabFact (public schema)
+- Relevant table: public.csi_franchise
+
+Executed SQL evidence
+1) Verify table structure (to understand available fields)
+SQL:
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'csi_franchise'
+ORDER BY ordinal_position;
+Result (abridged): season; episodes; time slot (est); season premiere; season finale; tv season; rank; viewers (in millions)
+
+2) Broad search for any 2007 season premieres to locate the relevant row
+SQL:
+SELECT season, "tv season", "season premiere"
+FROM public.csi_franchise
+WHERE "season premiere" ILIKE '%2007%'
+ORDER BY season;
+Result: { season: 4, tv season: '2007 - 2008', season premiere: 'september 26 , 2007' }
+
+3) Direct exact-match verification (case/whitespace-normalized)
+SQL:
+SELECT season, episodes, "time slot (est)", "season premiere", "season finale", "tv season", rank, "viewers (in millions)"
+FROM public.csi_franchise
+WHERE regexp_replace(lower("season premiere"), '\s+', ' ', 'g') = 'september 26 , 2007';
+Result:
+- season: 4
+- episodes: 21
+- time slot (est): wednesday 10 pm / 9c
+- season premiere: september 26 , 2007
+- season finale: may 21 , 2008
+- tv season: 2007 - 2008
+- rank: 28
+- viewers (in millions): 11.71
+
+4) Containment check (case-insensitive) confirming the same row
+SQL:
+SELECT season, episodes, "time slot (est)", "season premiere", "season finale", "tv season", rank, "viewers (in millions)"
+FROM public.csi_franchise
+WHERE lower("season premiere") LIKE '%september 26%' AND lower("season premiere") LIKE '%2007%';
+Result: same as Query 3 (season 4; tv season: 2007 - 2008; season premiere: september 26 , 2007)
+
+Conclusion
+- The data explicitly shows a row where the TV season is 2007 - 2008 and the season premiere date is September 26, 2007. Therefore, the claim is supported by the available data in the CSI franchise table.
+
+Assumptions
+- The claim refers to the season data represented in the available public.csi_franchise table. The table does not include a series-name column; findings are limited to what this table records.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

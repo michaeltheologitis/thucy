@@ -1,0 +1,52 @@
+
+<userQuery>
+<query>
+1 - 0 be the score when the home team be wimbledon
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “1-0 be the score when the home team be Wimbledon.” I interpret this as asserting that there exists at least one match in the available data where the home team is Wimbledon and the score is 1-0.
+
+Data sources explored:
+- Database: postgres_tabfact14
+- Relevant table identified: public.t_1990_91_fa_cup (columns: "tie no", "home team", "score", "away team", "date")
+
+Evidence and executed SQL:
+1) Check for any match with home team = Wimbledon and score = 1-0
+SQL:
+SELECT "home team", "score", "away team", "date" FROM public.t_1990_91_fa_cup WHERE "home team" = 'Wimbledon' AND "score" = '1-0' ORDER BY "date";
+Result: No rows matched (empty result set).
+
+2) Check whether Wimbledon appears as a home team at all (exact match)
+SQL:
+SELECT COUNT(*) AS cnt FROM public.t_1990_91_fa_cup WHERE "home team" = 'Wimbledon';
+Result: cnt = 0
+
+3) Check whether Wimbledon appears as a home team in any case-insensitive/substring form
+SQL:
+SELECT COUNT(*) FROM public.t_1990_91_fa_cup WHERE "home team" ILIKE '%wimbledon%';
+Result: count = 0
+
+4) Context check: does Wimbledon appear at all (home or away)?
+SQL:
+SELECT "tie no", "home team", "score", "away team", "date" 
+FROM public.t_1990_91_fa_cup
+WHERE "home team" ILIKE '%wimbledon%' OR "away team" ILIKE '%wimbledon%';
+Result:
+- tie no: 6, home team: shrewsbury town, score: 1 - 0, away team: wimbledon, date: 26 / 01 / 1991
+Interpretation: The only Wimbledon occurrence in this table is as the away team in a 1-0 loss at Shrewsbury Town. There are no rows with Wimbledon as the home team.
+
+Conclusion:
+- Within the available data (1990–91 FA Cup table), there are no matches where Wimbledon is the home team, and therefore no evidence that “1-0” is the score when the home team is Wimbledon. The closest related record shows a 1-0 score with Wimbledon away, not home.
+
+Assumptions:
+- Scope is limited to the discovered dataset (postgres_tabfact14, public.t_1990_91_fa_cup). No other football match tables were discoverable with the required columns.
+- “Wimbledon” was matched case-insensitively and as a substring to guard against naming variations; none appeared for home team.
+- The claim is evaluated against this dataset only, which the instructions designate as authoritative within its scope.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

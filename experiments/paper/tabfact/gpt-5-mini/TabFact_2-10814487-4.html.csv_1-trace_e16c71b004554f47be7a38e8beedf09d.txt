@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+the super league xii score on 21 / 07 / 07 be 14 - 10
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the super league xii score on 21 / 07 / 07 be 14 - 10.”
+
+Data source exploration:
+- Available database: TabFact (postgres_tabfact1), public schema.
+- Relevant table identified via schema inspection: public.t_2007_bradford_bulls_season (columns: date, home team, score, away team, goals, attendance, competition).
+
+Context check of table contents and formats:
+- SQL executed:
+  SELECT * FROM public.t_2007_bradford_bulls_season LIMIT 10;
+- Purpose: Inspect date and score formats. Observed date format like “D / M / YY(YY)” and score format “X - Y”, with competition values including “super league xii”.
+
+Evidence 1: Locate matches on 21 July 2007 in Super League XII
+- SQL executed:
+  SELECT date, "home team", score, "away team", competition
+  FROM public.t_2007_bradford_bulls_season
+  WHERE lower(competition) = 'super league xii' AND date ~* '21.*07';
+- Returned rows (relevant one shown):
+  • date: 21 / 07 / 07 | home team: salford city reds | score: 14 - 10 | away team: bradford | competition: super league xii
+  (Note: Also returned a different date 21 / 9 / 07, which is not relevant.)
+
+Evidence 2: Exact confirmation for 21 / 07 / 07 in Super League XII
+- SQL executed:
+  SELECT date, "home team", score, "away team", goals, attendance
+  FROM public.t_2007_bradford_bulls_season
+  WHERE date = '21 / 07 / 07' AND competition = 'super league xii';
+- Result (single row):
+  • date: 21 / 07 / 07 | home team: salford city reds | score: 14 - 10 | away team: bradford | goals: deacon 1 / 2 | attendance: 3438
+
+Conclusion:
+- The database shows that on 21/07/07 in Super League XII, the match Salford City Reds vs Bradford finished 14 - 10. This supports the claim that “the super league xii score on 21 / 07 / 07 [was] 14 - 10.”
+
+Assumptions:
+- Interpreted “the super league xii score” as referring to the Bradford Bulls fixture on that date (the accessible dataset covers Bradford’s 2007 season). Other Super League matches that day are outside this dataset.
+- Date interpreted in day/month/year format based on the data and UK context.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

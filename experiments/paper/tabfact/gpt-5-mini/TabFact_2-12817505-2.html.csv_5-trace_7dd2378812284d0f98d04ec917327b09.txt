@@ -1,0 +1,51 @@
+
+<userQuery>
+<query>
+manchester unite have always lose 3 out of 3 time to portsmouth since 10 september 2005
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Manchester United have always lost 3 out of 3 times to Portsmouth since 10 September 2005.”
+
+Data sources discovered:
+- PostgreSQL database: TabFact (public schema)
+- Relevant table: public.t_2005_06_manchester_united_f_c_season (Manchester United’s 2005–06 season match log)
+  - Columns: date (text), opponents (text), h / a (text), result f - a (text), attendance (bigint), league position (text)
+
+Method:
+1) Identify all matches vs Portsmouth in the available Manchester United 2005–06 season table.
+2) Parse the text dates and filter for matches on or after 10 September 2005.
+3) Check the number of matches and their results to see if Manchester United lost all and if there were three such matches.
+
+Evidence from executed SQL:
+- Query 1 (inspect all Portsmouth matches and date format):
+  SELECT date, opponents, "h / a", "result f - a" FROM public.t_2005_06_manchester_united_f_c_season WHERE opponents ILIKE '%Portsmouth%';
+
+  Results:
+  1) date: 3 december 2005 | opponents: portsmouth | h / a: h | result f - a: 3 - 0
+  2) date: 11 february 2006 | opponents: portsmouth | h / a: a | result f - a: 3 - 1
+
+- Query 2 (filter to matches on or after 2005-09-10 and show parsed dates):
+  SELECT date, to_date(date, 'DD Month YYYY') AS parsed_date, opponents, "h / a", "result f - a" FROM public.t_2005_06_manchester_united_f_c_season WHERE opponents ILIKE '%Portsmouth%' AND to_date(date, 'DD Month YYYY') >= DATE '2005-09-10' ORDER BY to_date(date, 'DD Month YYYY');
+
+  Results:
+  1) date: 3 december 2005 | parsed_date: 2005-12-03 | opponents: portsmouth | h / a: h | result f - a: 3 - 0
+  2) date: 11 february 2006 | parsed_date: 2006-02-11 | opponents: portsmouth | h / a: a | result f - a: 3 - 1
+
+Findings:
+- Number of matches vs Portsmouth on or after 10 September 2005 in the 2005–06 season: 2 (not 3).
+- Results of those matches: Manchester United won 3–0 (home) and 3–1 (away). They did not lose either match.
+
+Conclusion:
+- The available data directly contradicts the claim. Since 10 September 2005 (within the 2005–06 season data available), Manchester United did not lose to Portsmouth; they won both meetings. There are not “3 out of 3” losses, nor even three matches in this timeframe within the dataset.
+
+Assumptions and scope notes:
+- The only accessible dataset contains Manchester United’s 2005–06 season. I treated this as authoritative within its scope, but it does not include other seasons. The claim spans “since 10 September 2005,” which could include later seasons; I cannot assess those here. However, the fact that United won both relevant matches in 2005–06 already contradicts the core assertion that they “always lose 3 out of 3 times.”
+- Date strings were parsed using to_date(date, 'DD Month YYYY'), which correctly handled the lowercase month names present in the table.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

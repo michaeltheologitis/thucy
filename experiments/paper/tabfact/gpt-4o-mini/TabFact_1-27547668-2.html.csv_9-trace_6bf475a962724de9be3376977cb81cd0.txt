@@ -1,0 +1,75 @@
+
+<userQuery>
+<query>
+steve scaini direct one more episode than mike clattenburg
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Scope and data source
+- Explored available sources: a PostgreSQL database with schema public containing table public.list_of_republic_of_doyle_episodes (one row per episode). Relevant column for directors: "directed by" (text).
+- Schema (key columns): title (text), directed by (text), original airdate (text), prod code (bigint).
+
+Key evidence
+1) Episode counts by director (case-insensitive substring match on "directed by")
+- SQL (Steve Scaini):
+  SELECT 'Steve Scaini' AS director_name, COUNT(*) AS episode_count
+  FROM public.list_of_republic_of_doyle_episodes
+  WHERE LOWER("directed by") LIKE '%steve scaini%'
+  GROUP BY director_name;
+  Result: director_name = Steve Scaini, episode_count = 1
+
+- SQL (Mike Clattenburg):
+  SELECT 'Mike Clattenburg' AS director_name, COUNT(*) AS episode_count
+  FROM public.list_of_republic_of_doyle_episodes
+  WHERE LOWER("directed by") LIKE '%mike clattenburg%'
+  GROUP BY director_name;
+  Result: director_name = Mike Clattenburg, episode_count = 2
+
+- Combined SQL (for convenience):
+  (SELECT 'Steve Scaini' AS director_name, COUNT(*) AS episode_count
+   FROM public.list_of_republic_of_doyle_episodes
+   WHERE LOWER("directed by") LIKE '%steve scaini%'
+   GROUP BY director_name)
+  UNION ALL
+  (SELECT 'Mike Clattenburg' AS director_name, COUNT(*) AS episode_count
+   FROM public.list_of_republic_of_doyle_episodes
+   WHERE LOWER("directed by") LIKE '%mike clattenburg%'
+   GROUP BY director_name);
+  Combined result: Steve Scaini = 1; Mike Clattenburg = 2
+
+2) Episode titles for each director
+- SQL (Steve Scaini):
+  SELECT title, "original airdate", "prod code"
+  FROM public.list_of_republic_of_doyle_episodes
+  WHERE LOWER("directed by") ILIKE '%steve scaini%';
+  Results:
+  - Title: A Horse Divided | Original Airdate: March 31, 2010 | Prod Code: 111
+
+- SQL (Mike Clattenburg):
+  SELECT title, "original airdate", "prod code"
+  FROM public.list_of_republic_of_doyle_episodes
+  WHERE LOWER("directed by") ILIKE '%mike clattenburg%';
+  Results:
+  - Title: Fathers and Sons | Original Airdate: January 6, 2010 | Prod Code: 101
+  - Title: Duchess of George | Original Airdate: January 20, 2010 | Prod Code: 103
+
+3) Check for co-directed overlap (same episode listing both names)
+- SQL:
+  SELECT title
+  FROM public.list_of_republic_of_doyle_episodes
+  WHERE LOWER("directed by") LIKE '%steve scaini%'
+    AND LOWER("directed by") LIKE '%mike clattenburg%';
+  Result: No rows returned (no episode lists both names together).
+
+Conclusion
+- Within the Republic of Doyle episodes data, Steve Scaini directed 1 episode and Mike Clattenburg directed 2 episodes. Therefore, Steve Scaini did not direct one more episode than Mike Clattenburg; he directed one fewer.
+
+Assumptions
+- The claim is evaluated within the scope of the available dataset (Republic of Doyle episodes). Matching is case-insensitive and counts any episode where the director’s name appears anywhere in the "directed by" text. No episodes are co-credited to both individuals in this dataset.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

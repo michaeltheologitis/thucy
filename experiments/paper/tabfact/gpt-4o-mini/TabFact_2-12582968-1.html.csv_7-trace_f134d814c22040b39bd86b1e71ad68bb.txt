@@ -1,0 +1,52 @@
+
+<userQuery>
+<query>
+lukáš melich 's highest finish be as a junior
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Conclusion: Lukáš Melich’s highest (best) finish as a junior was 5th place at the 1999 European Junior Championships in Riga, Latvia (64.20 m).
+
+Evidence from data:
+- Junior competitions found in the database and their positions:
+  - 1999 European Junior Championships — Riga, Latvia — Position: 5th — Notes: 64.20 m
+  - 1998 World Junior Championships — Annecy, France — Position: 10th — Notes: 61.51 m
+- Best (lowest) numeric position among junior events: 5
+
+Executed SQL queries (exact):
+1) List all junior competitions
+SELECT year, competition, venue, position, notes 
+FROM luk_melich 
+WHERE notes ILIKE '%Junior%' OR competition ILIKE '%Junior%';
+
+2) Order junior competitions by best finishing position (pattern-based)
+SELECT year, competition, venue, position, notes 
+FROM luk_melich 
+WHERE notes ILIKE '%Junior%' OR competition ILIKE '%Junior%' ORDER BY 
+    CASE 
+        WHEN position ILIKE '%1st%' THEN 1 
+        WHEN position ILIKE '%2nd%' THEN 2 
+        WHEN position ILIKE '%3rd%' THEN 3 
+        WHEN position ILIKE '%4th%' THEN 4 
+        WHEN position ILIKE '%5th%' THEN 5 
+        ELSE 100 
+    END;
+
+3) Compute numeric position robustly and rank
+SELECT year, competition, venue, position, notes, 
+       CAST(REGEXP_REPLACE(position, '[^0-9]', '', 'g') AS INTEGER) AS numeric_position
+FROM public.luk_melich
+WHERE competition ILIKE '%junior%'
+ORDER BY numeric_position ASC;
+
+Assumptions made:
+- “Junior” refers to competitions explicitly labeled with the word “Junior” in the competition or notes fields.
+- “Highest finish” is interpreted as the best rank (lowest numeric position).
+- The luk_melich.public.luk_melich table contains all of Lukáš Melich’s junior-level international competition results needed for this verification.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

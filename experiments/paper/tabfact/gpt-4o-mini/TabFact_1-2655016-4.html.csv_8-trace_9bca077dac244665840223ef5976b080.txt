@@ -1,0 +1,47 @@
+
+<userQuery>
+<query>
+each of the episode title have letter somewhere within the title
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of approach
+- Explored available data sources and identified a single table with episode titles.
+- Verified whether every episode title contains at least one alphabetic character (A–Z), treating this as the intended meaning of “have letter somewhere within the title.”
+
+Data sources discovered
+- Database: TabFact
+- Schema: public
+- Table: public."list_of_all_that_episodes"
+- Columns: season (bigint), series (bigint), "episode title" (text), "original air date" (text), "nick prod" (bigint)
+
+Evidence and executed SQL
+1) Count all episodes
+SQL:
+SELECT COUNT(*) AS total_episodes FROM public."list_of_all_that_episodes";
+Result: 18
+
+2) Count titles that are NULL, empty, or contain no alphabetic letters
+SQL:
+SELECT COUNT(*) AS invalid_titles_count FROM public."list_of_all_that_episodes" WHERE "episode title" IS NULL OR "episode title" = '' OR NOT "episode title" ~ '[A-Za-z]';
+Result: 2
+
+3) Examples of titles that contain no alphabetic letters
+SQL:
+SELECT season, series, "episode title" FROM public."list_of_all_that_episodes" WHERE "episode title" IS NULL OR "episode title" = '' OR NOT "episode title" ~ '[A-Za-z]' LIMIT 50;
+Results (subset up to 50):
+- Season: 8, Series: 45, Episode Title: 702
+- Season: 11, Series: 48, Episode Title: 112
+
+Conclusion
+- Not all episode titles contain an alphabetic letter. 2 out of 18 titles have no letters, so the claim that “each of the episode title have letter somewhere within the title” is contradicted by the data.
+
+Assumptions
+- Interpreted “letter” to mean any alphabetic character (A–Z, case-insensitive), not the literal substring “letter.”
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,69 @@
+
+<userQuery>
+<query>
+during the 1961 vfl season , mcg venue record the highest crowd participation
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: During the 1961 VFL season, the MCG venue recorded the highest crowd participation.
+
+Data source explored
+- Database: TabFact (public schema)
+- Table: t_1961_vfl_season
+  - Columns: "home team" (text), "home team score" (text), "away team" (text), "away team score" (text), "venue" (text), "crowd" (bigint), "date" (text)
+
+Evidence 1: Highest single-game crowd and its venue
+- Executed SQL 1:
+  SELECT MAX(crowd) AS max_crowd FROM t_1961_vfl_season;
+  Result: max_crowd = 49678
+- Executed SQL 2:
+  SELECT venue, date, "home team", "away team", crowd FROM t_1961_vfl_season WHERE crowd = 49678;
+  Result: { venue: "mcg", date: "3 june 1961", home team: "melbourne", away team: "carlton", crowd: 49678 }
+- Interpretation: The single match with the highest attendance (49,678) was held at the MCG.
+
+Evidence 2: Top matches by crowd (to check for ties and confirm ranking)
+- Executed SQL:
+  SELECT "venue", "date", "home team", "away team", "crowd"
+  FROM public.t_1961_vfl_season
+  ORDER BY "crowd" DESC
+  LIMIT 5;
+- Results (top 5):
+  1) mcg, 3 june 1961, melbourne vs carlton, 49678
+  2) victoria park, 3 june 1961, collingwood vs essendon, 28290
+  3) kardinia park, 3 june 1961, geelong vs footscray, 18683
+  4) glenferrie oval, 3 june 1961, hawthorn vs richmond, 15000
+  5) lake oval, 3 june 1961, south melbourne vs fitzroy, 14500
+- Interpretation: The MCG match is clearly the highest-attended; no ties observed.
+
+Evidence 3: Aggregate attendance by venue (to test an alternative reading: highest total attendance at a venue during the season)
+- Executed SQL:
+  SELECT venue,
+         COUNT(*) AS matches_hosted,
+         SUM("crowd") AS total_crowd,
+         MAX("crowd") AS max_single_game_crowd
+  FROM public.t_1961_vfl_season
+  GROUP BY venue
+  ORDER BY total_crowd DESC;
+- Results (ordered by total_crowd):
+  - mcg — matches_hosted: 1, total_crowd: 49678, max_single_game_crowd: 49678
+  - victoria park — matches_hosted: 1, total_crowd: 28290, max_single_game_crowd: 28290
+  - kardinia park — matches_hosted: 1, total_crowd: 18683, max_single_game_crowd: 18683
+  - glenferrie oval — matches_hosted: 1, total_crowd: 15000, max_single_game_crowd: 15000
+  - lake oval — matches_hosted: 1, total_crowd: 14500, max_single_game_crowd: 14500
+  - arden street oval — matches_hosted: 1, total_crowd: 13000, max_single_game_crowd: 13000
+- Interpretation: By total crowd aggregated per venue, the MCG also ranks highest in this dataset.
+
+Conclusion
+- The evidence shows that in the 1961 VFL season data, the MCG hosted the highest-attended match (49,678) and, by aggregation, had the highest total attendance among venues. The claim is supported.
+
+Assumptions
+- Interpreted “highest crowd participation” primarily as the highest single-game attendance; also validated the interpretation as highest total attendance by venue.
+- Treated the table t_1961_vfl_season as the authoritative representation of the 1961 VFL season within the available data source.
+
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

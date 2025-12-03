@@ -1,0 +1,74 @@
+
+<userQuery>
+<query>
+glasgow govan be 1 the 5 constituency with result as snp gain
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Glasgow Govan is one of the five constituencies with result as ‘SNP gain’.” I verify this against the available Scottish Parliament 2007 election table.
+
+Data sources explored
+- Database discovered: TabFact (schema public)
+- Table: public.scottish_parliament_general_election_2007
+  Columns: rank, constituency, winning party 2003, swing to gain, snp 's place 2003, result
+
+Key evidence from executed SQL
+1) Exact case ‘SNP gain’ check (case-sensitive)
+SQL:
+SELECT COUNT(*) AS count_snp_gain FROM public.scottish_parliament_general_election_2007 WHERE result = 'SNP gain';
+Result: count_snp_gain = 0
+
+SQL:
+SELECT EXISTS(SELECT 1 FROM public.scottish_parliament_general_election_2007 WHERE result = 'SNP gain' AND constituency = 'Glasgow Govan') AS glasgow_govan_exact_case;
+Result: glasgow_govan_exact_case = false
+
+2) Inspect distinct result values to understand casing used in the data
+SQL:
+SELECT result, COUNT(*) AS cnt FROM public.scottish_parliament_general_election_2007 GROUP BY result ORDER BY cnt DESC;
+Results (result → cnt):
+- lab hold → 5
+- snp gain → 4
+- ld hold → 1
+- con hold → 1
+
+3) Case-insensitive verification for ‘SNP gain’ (normalize to lowercase)
+SQL:
+SELECT COUNT(DISTINCT constituency) AS snp_gain_count
+FROM public.scottish_parliament_general_election_2007
+WHERE lower(result) = 'snp gain';
+Result: snp_gain_count = 4
+
+SQL:
+SELECT DISTINCT constituency
+FROM public.scottish_parliament_general_election_2007
+WHERE lower(result) = 'snp gain'
+ORDER BY constituency;
+Results (constituencies):
+- dundee west
+- glasgow govan
+- kilmarnock & loudoun
+- western isles
+
+4) Direct membership confirmation for Glasgow Govan (lowercase stored value)
+SQL:
+SELECT EXISTS(SELECT 1 FROM public.scottish_parliament_general_election_2007 WHERE result = 'snp gain' AND constituency = 'glasgow govan') AS glasgow_govan_lowercase;
+Result: glasgow_govan_lowercase = true
+
+Findings
+- Glasgow Govan does have result = ‘snp gain’ in this dataset.
+- There are 4 constituencies with result = ‘snp gain’, not 5.
+
+Conclusion
+- The statement that Glasgow Govan is one of five constituencies with result ‘SNP gain’ is numerically incorrect given the available data. Glasgow Govan is indeed among those with ‘snp gain’, but there are only four such constituencies in this table.
+
+Assumptions
+- The claim refers to the 2007 Scottish Parliament general election data in table public.scottish_parliament_general_election_2007.
+- ‘SNP gain’ was treated case-insensitively since the table stores values in lowercase.
+- ‘Glasgow Govan’ is matched to the stored value ‘glasgow govan’.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

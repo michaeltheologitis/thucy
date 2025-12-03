@@ -1,0 +1,64 @@
+
+<userQuery>
+<query>
+bob beamon be the athlete who set his long jump record the longest time ago
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Bob Beamon is the athlete who set his long jump record the longest time ago.”
+
+Data source exploration:
+- Database: TabFact
+- Schema: public
+- Table: public.long_jump
+  - Columns: mark (text), wind (double precision), athlete (text), nationality (text), venue (text), date (text)
+  - Dates are stored as text in the format “Month DD, YYYY” (e.g., “October 18, 1968”).
+
+Evidence collected:
+1) Inspect sample rows to confirm date format and content
+- SQL executed:
+  SELECT * FROM public.long_jump LIMIT 10;
+- Result excerpt (relevant rows):
+  - Mike Powell — August 30, 1991 — 8.95 m (29ft4¼in)
+  - Bob Beamon — October 18, 1968 — 8.90 m (29ft2¼in) a
+  - Carl Lewis — August 30, 1991 — 8.87 m (29ft1in)
+  - Robert Emmiyan — May 22, 1987 — 8.86 m (29ft0¾in) a
+  (…)
+
+2) Order by chronological date (casting the text date) to find earliest entries
+- SQL executed:
+  SELECT athlete, date, mark 
+  FROM public.long_jump 
+  ORDER BY TO_TIMESTAMP(date, 'Month DD, YYYY') ASC 
+  LIMIT 5;
+- Result (earliest first):
+  1) Bob Beamon — October 18, 1968 — 8.90 m (29ft 2¼in) a
+  2) Robert Emmiyan — May 22, 1987 — 8.86 m (29ft 0¾in) a
+  3) Larry Myricks — July 18, 1988 — 8.74 m (28ft 8in)
+  4) Mike Powell — August 30, 1991 — 8.95 m (29ft 4¼in)
+  5) Carl Lewis — August 30, 1991 — 8.87 m (29ft 1in)
+
+3) Compute the minimum chronological date, then list athletes on that date
+- SQL executed (earliest date):
+  SELECT MIN(TO_TIMESTAMP(date, 'Month DD, YYYY')) AS earliest_date
+  FROM long_jump;
+- Result: 1968-10-18
+
+- SQL executed (athletes on earliest date):
+  SELECT athlete, mark
+  FROM long_jump
+  WHERE TO_TIMESTAMP(date, 'Month DD, YYYY') = '1968-10-18';
+- Result: Bob Beamon — 8.90 m (29ft 2¼in) a
+
+Conclusion:
+- The earliest long jump performance date recorded in the dataset is October 18, 1968, and it belongs to Bob Beamon. Therefore, within this data, Bob Beamon is indeed the athlete whose recorded long jump mark was set the longest time ago.
+
+Assumptions:
+- “Record” is interpreted as the recorded performance entries present in the public.long_jump table (not necessarily limited to official “world record” status). The verification is strictly within the scope of this dataset and its entries.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

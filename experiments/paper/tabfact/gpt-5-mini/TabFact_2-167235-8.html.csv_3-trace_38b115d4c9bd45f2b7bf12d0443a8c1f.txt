@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+sali berisha be the first person since aleksandër meksi , to be elect as a member of the democratic party of albania political party
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim (interpreted): Sali Berisha was the first person since Aleksandër Meksi to become Prime Minister of Albania from the Democratic Party of Albania.
+
+Data sources checked: TabFact database, public schema.
+Relevant table: public.list_of_prime_ministers_of_albania (columns: name, born - died, term start, term end, political party)
+
+Evidence 1: List all Prime Ministers from the Democratic Party, ordered by term start
+Executed SQL:
+SELECT name, "term start", "term end", "political party", to_date(initcap("term start"), 'DD Month YYYY') AS start_date
+FROM public.list_of_prime_ministers_of_albania
+WHERE "political party" ILIKE '%Democratic%'
+ORDER BY start_date;
+
+Result:
+- aleksandër meksi — term start: 13 april 1992 — term end: 11 march 1997 — political party: democratic party of albania
+- sali berisha — term start: 11 september 2005 — term end: 15 september 2013 — political party: democratic party of albania
+
+Evidence 2: Identify the next Democratic Party Prime Minister after Aleksandër Meksi
+Executed SQL:
+WITH dem AS (
+  SELECT name, "term start", "term end", "political party",
+         to_date(initcap("term start"), 'DD Month YYYY') AS start_date
+  FROM public.list_of_prime_ministers_of_albania
+  WHERE "political party" ILIKE '%Democratic%'
+)
+SELECT name, "term start", "term end", "political party"
+FROM dem
+WHERE start_date > (SELECT start_date FROM dem WHERE name ILIKE 'aleksandër meksi')
+ORDER BY start_date
+LIMIT 1;
+
+Result:
+- sali berisha — term start: 11 september 2005 — term end: 15 september 2013 — political party: democratic party of albania
+
+Assessment:
+- The ordered list shows Aleksandër Meksi (Democratic Party) served starting in 1992, and the next Prime Minister from the Democratic Party by term start date is Sali Berisha in 2005. Therefore, Sali Berisha was indeed the first Prime Minister from the Democratic Party after Aleksandër Meksi.
+
+Assumptions made:
+- "be elect as a member of the Democratic Party of Albania" was interpreted as "become Prime Minister representing the Democratic Party of Albania" rather than simply being a party member.
+- Matching of party used a case-insensitive contains filter on "Democratic".
+- Term start text was parsed as dates using the format 'DD Month YYYY' for ordering.
+
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

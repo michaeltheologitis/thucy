@@ -1,0 +1,62 @@
+
+<userQuery>
+<query>
+essendon be the away team which play against footscray
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim interpreted: Essendon were the away team in a match against Footscray.
+- Scope: Verified against the accessible match-level dataset for the 1946 VFL season (public.t_1946_vfl_season).
+- Finding: No match exists with Essendon as the away team and Footscray as the home team in this dataset. A match does exist with Essendon as the home team versus Footscray.
+
+Data source discovery
+- Database: TabFact (PostgreSQL), schema: public
+- Relevant table: public.t_1946_vfl_season (columns: "home team", "home team score", "away team", "away team score", "venue", "crowd", "date").
+
+Evidence and executed SQL
+1) Verify exact team name spellings
+Executed SQL:
+SELECT DISTINCT team_name
+FROM (
+  SELECT "home team" AS team_name FROM public.t_1946_vfl_season
+  UNION
+  SELECT "away team" FROM public.t_1946_vfl_season
+) t
+ORDER BY team_name;
+Result (excerpt): essendon, footscray (among others) — confirming names are lowercase.
+
+2) Test the claim (Essendon away at Footscray home)
+Executed SQL:
+SELECT "home team", "home team score", "away team", "away team score", venue, crowd, date
+FROM public.t_1946_vfl_season
+WHERE "away team" = 'essendon' AND "home team" = 'footscray';
+Result: 0 rows returned.
+
+3) Check the reverse orientation for context (Essendon home vs Footscray away)
+Executed SQL:
+SELECT "home team","home team score","away team","away team score",venue,crowd,date
+FROM public.t_1946_vfl_season
+WHERE "home team"='essendon' AND "away team"='footscray';
+Result (1 row):
+- home team: essendon
+- home team score: 16.24 (120)
+- away team: footscray
+- away team score: 14.8 (92)
+- venue: windy hill
+- crowd: 29000
+- date: 13 july 1946
+
+Conclusion
+- Within the 1946 VFL season dataset, there is no evidence that Essendon were the away team in a match against Footscray. The only match between these clubs shows Essendon at home and Footscray away.
+
+Assumptions
+- The claim was evaluated within the scope of the available dataset (1946 VFL season) because that is the authoritative data accessible here.
+- Team names are matched exactly as stored (lowercase strings).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+the new york jet have 992 more crowd attendance in their second game against the miami dolphins then from their first game play against them during the 1993 season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary conclusion
+- The New York Jets played the Miami Dolphins twice in the 1993 season: Week 2 (away) and Week 10 (home). Attendance was 70,314 in the first meeting and 71,306 in the second. The second game had 992 more attendees than the first, matching the claim.
+
+Data source discovery
+- Available database: public
+- Table: public.t_1993_new_york_jets_season (columns: week BIGINT, date TEXT, opponent TEXT, result TEXT, game site TEXT, attendance BIGINT)
+
+Schema details used
+- Columns relevant to this check: week, date, opponent, game site, attendance
+
+Evidence and executed SQL
+1) Retrieve both Dolphins games with details
+SQL:
+SELECT week, date, opponent, "game site", attendance 
+FROM public.t_1993_new_york_jets_season 
+WHERE opponent IN ('miami dolphins', 'Dolphins') 
+ORDER BY week ASC;
+Result:
+- Week 2 | September 12, 1993 | Miami Dolphins | Joe Robbie Stadium | Attendance: 70,314
+- Week 10 | November 7, 1993 | Miami Dolphins | The Meadowlands | Attendance: 71,306
+
+2) Cross-check games and attendance using case-insensitive match
+SQL:
+SELECT week, attendance 
+FROM public.t_1993_new_york_jets_season 
+WHERE opponent ILIKE 'Miami Dolphins';
+Result:
+- Week 2 | Attendance: 70,314
+- Week 10 | Attendance: 71,306
+
+Computation
+- Difference (second minus first) = 71,306 − 70,314 = 992
+- The second meeting (Week 10) had higher attendance than the first (Week 2) by 992.
+
+Conclusion
+- The claim is fully supported by the data.
+
+Assumptions
+- “First game” and “second game” refer to the two regular-season meetings ordered by week within the 1993 season (Week 2 first, Week 10 second).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

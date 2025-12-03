@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+the sla4h (m0) model have a release date of q2 2008
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the sla4h (m0) model have a release date of q2 2008.”
+
+Data sources explored
+- Discovered a PostgreSQL source: postgres_tabfact0 (TabFact) with a single table public.list_of_intel_pentium_dual_core_microprocessors containing Intel Pentium Dual-Core microprocessor entries, including S-Specs and release dates.
+
+Method
+1) Searched for an entry with S-Spec containing “SLA4H” and inspected its release date.
+
+Executed SQL and evidence
+1) Check for exact case-insensitive equality (no matches):
+SELECT COUNT(*) AS cnt
+FROM public.list_of_intel_pentium_dual_core_microprocessors
+WHERE "sspec number" ILIKE 'SLA4H';
+
+Result: cnt = 0.
+
+2) Check for S-Spec values that contain “SLA4H” as a substring (case-insensitive):
+SELECT COUNT(*) AS cnt
+FROM public.list_of_intel_pentium_dual_core_microprocessors
+WHERE "sspec number" ILIKE '%SLA4H%';
+
+Result: cnt = 1.
+
+3) Retrieve the matching row and extract stepping (if present within parentheses in the S-Spec field), along with the release date:
+SELECT "model number", "sspec number", regexp_replace("sspec number", '^.*\\(([^)]+)\\).*$','\\1') AS stepping, "release date"
+FROM public.list_of_intel_pentium_dual_core_microprocessors
+WHERE "sspec number" ILIKE '%SLA4H%';
+
+Result row:
+- model number: pentium dual - core t2390
+- sspec number: sla4h (m0)
+- stepping: m0
+- release date: q2 2008
+
+Conclusion
+- The dataset explicitly lists the S-Spec “sla4h (m0)” with release date “q2 2008.” This supports the claim.
+
+Assumptions
+- Interpreted “sla4h (m0) model” as referring to the S-Spec code SLA4H with stepping M0 as recorded in the “sspec number” field. The table has no separate stepping column; stepping was parsed from the text in parentheses. Matching was done case-insensitively.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

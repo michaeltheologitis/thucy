@@ -1,0 +1,74 @@
+
+<userQuery>
+<query>
+west berkshire brewery 's dr hexter healer beer win 3 gold medal between 1995 and 2009
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “West Berkshire Brewery’s Dr Hexter Healer beer won 3 gold medals between 1995 and 2009.”
+
+Data source discovery
+- Available database: TabFact (postgres_tabfact20), schema: public
+- Relevant table: public.west_berkshire_brewery
+  - Columns: year (bigint), "beer name" (text), prize (text), category (text), competition (text)
+  - No primary/foreign keys
+
+Schema evidence query (structure)
+- Tool: Schema inspection
+  - Table: public.west_berkshire_brewery with columns as listed above
+
+Evidence step 1: Identify exact beer name variants for Dr Hexter’s Healer
+Executed SQL:
+SELECT DISTINCT "beer name" FROM public.west_berkshire_brewery WHERE "beer name" ILIKE '%hexter%' OR "beer name" ILIKE '%healer%';
+Results:
+- dr hexter 's healer
+- dr hexter 's wedding ale
+
+Executed SQL (rows for context):
+SELECT year, "beer name", prize, category, competition FROM public.west_berkshire_brewery WHERE "beer name" ILIKE '%hexter%' OR "beer name" ILIKE '%healer%' ORDER BY year, "beer name";
+Results (subset relevant to Healer):
+- 1997 | dr hexter 's healer | runner up | beer of the festival | camra northamptonshire branch beer festival
+- 2002 | dr hexter 's healer | silver medal | strong ale | siba south east region beer competition
+- 2008 | dr hexter 's healer | gold medal | best local beer | camra reading branch beer festival
+- 2009 | dr hexter 's healer | gold medal | best local beer | camra reading branch beer festival
+- 2009 | dr hexter 's healer | gold medal | in category | camra london and south east regional competition
+
+Evidence step 2: Count gold medals for Dr Hexter’s Healer between 1995 and 2009 (inclusive)
+Executed SQL (list matching awards):
+SELECT year, prize, category, competition FROM west_berkshire_brewery
+WHERE year BETWEEN 1995 AND 2009
+  AND lower("beer name") LIKE '%hexter%'
+  AND lower("beer name") LIKE '%healer%'
+  AND lower(prize) LIKE '%gold%'
+ORDER BY year;
+Results:
+- 2008 | gold medal | best local beer | camra reading branch beer festival
+- 2009 | gold medal | best local beer | camra reading branch beer festival
+- 2009 | gold medal | in category | camra london and south east regional competition
+
+Executed SQL (count):
+SELECT COUNT(*) AS total FROM west_berkshire_brewery
+WHERE year BETWEEN 1995 AND 2009
+  AND lower("beer name") LIKE '%hexter%'
+  AND lower("beer name") LIKE '%healer%'
+  AND lower(prize) LIKE '%gold%';
+Result:
+- total = 3
+
+Analysis
+- The dataset records three entries for Dr Hexter’s Healer with prize containing “gold” during 2008–2009, all within the 1995–2009 window. No additional “gold” entries appear for this beer in that period. Therefore, the beer won 3 gold medals between 1995 and 2009 per the data.
+
+Conclusion
+- The evidence supports the claim: Dr Hexter’s Healer won 3 gold medals between 1995 and 2009.
+
+Assumptions
+- “Gold medal” interpreted as any prize text containing the substring “gold” (case-insensitive); in this data, the matching rows explicitly contain “gold medal”.
+- Beer matching restricted to names containing both “hexter” and “healer” to isolate Dr Hexter’s Healer and exclude “dr hexter ’s wedding ale”.
+- Year range treated as inclusive (1995 through 2009).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

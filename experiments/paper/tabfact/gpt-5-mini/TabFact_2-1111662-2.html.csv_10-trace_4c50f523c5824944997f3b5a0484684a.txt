@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+pole vault be the event before august 26 2005
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Pole vault be the event before August 26, 2005.” I interpret “before” strictly as occurring earlier than 2005-08-26.
+
+What the data shows
+- On 2005-08-26, the event is “pole vault,” with a record of 4.93 m by Yelena Isinbayeva (Russia).
+- The most recent event(s) strictly before 2005-08-26 occurred on 2003-09-05 and are “1500 m” and “triple jump.” Thus, “pole vault” is not the event before that date; it is on that date.
+
+Executed SQL (evidence)
+1) Events on 26 August 2005
+SQL:
+SELECT event, record, athlete, nationality, date, to_char(parsed_date,'YYYY-MM-DD') AS parsed_date
+FROM (
+  SELECT *, to_date(initcap(trim(substring(date from '([0-9]{1,2} [A-Za-z]+ [0-9]{4})'))),'DD Month YYYY') AS parsed_date
+  FROM public.memorial_van_damme
+) t
+WHERE parsed_date = DATE '2005-08-26';
+Result:
+- event: pole vault; record: 4.93 m; athlete: yelena isinbayeva; nationality: russia; date: 26 august 2005; parsed_date: 2005-08-26
+
+2) Latest date strictly before 26 August 2005
+SQL:
+SELECT max(parsed_date) AS last_before
+FROM (
+  SELECT to_date(initcap(trim(substring(date from '([0-9]{1,2} [A-Za-z]+ [0-9]{4})'))),'DD Month YYYY') AS parsed_date
+  FROM public.memorial_van_damme
+) t
+WHERE parsed_date < DATE '2005-08-26';
+Result:
+- last_before: 2003-09-05
+
+3) Event(s) on that latest prior date (2003-09-05)
+SQL:
+SELECT event, record, athlete, nationality, date, to_char(parsed_date,'YYYY-MM-DD') AS parsed_date
+FROM (
+  SELECT *, to_date(initcap(trim(substring(date from '([0-9]{1,2} [A-Za-z]+ [0-9]{4})'))),'DD Month YYYY') AS parsed_date
+  FROM public.memorial_van_damme
+) t
+WHERE parsed_date = DATE '2003-09-05';
+Results:
+- event: 1500 m; record: 3:55.33; athlete: süreyya ayhan; nationality: turkey; date: 5 september 2003; parsed_date: 2003-09-05
+- event: triple jump; record: 15.14 m ( + 0.3 m / s); athlete: tatyana lebedeva; nationality: russia; date: 5 september 2003; parsed_date: 2003-09-05
+
+Conclusion
+- Because “pole vault” occurs on 2005-08-26 (not before it), and the events strictly before that date are “1500 m” and “triple jump,” the claim is not supported by the data.
+
+Assumptions
+- “Before” is interpreted strictly as a date earlier than 2005-08-26, not “on or before.”
+- The verification is grounded in the accessible public.memorial_van_damme table. Dates are parsed from the text field using the first occurrence of a D Month YYYY pattern.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

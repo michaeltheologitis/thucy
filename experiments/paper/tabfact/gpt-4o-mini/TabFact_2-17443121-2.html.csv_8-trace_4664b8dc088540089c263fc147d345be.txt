@@ -1,0 +1,99 @@
+
+<userQuery>
+<query>
+the title of every episode in season 1 mention both gary and allison
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the title of every episode in season 1 mention both gary and allison.”
+
+Data sources explored
+- Discovered data source: a PostgreSQL database with a table named public.gary_unmarried that lists episodes of the show “Gary Unmarried.”
+- Schema (public.gary_unmarried):
+  - episode (text): Episode title
+  - air date (text)
+  - timeslot (text)
+  - 18 - 49 (text)
+  - viewers (double precision)
+
+Evidence
+1) Season context and episode listing
+- I retrieved all rows to see the episode titles and air dates (they span Sep 2008 – May 2009, which corresponds to Season 1 and the table contains 20 episodes):
+  SQL:
+  SELECT episode, "air date" FROM public.gary_unmarried ORDER BY "air date" ASC;
+  Result (Episode Title | Air Date):
+  - pilot | september 24 , 2008
+  - gary gets boundaries | october 1 , 2008
+  - gary gets his stuff back | october 15 , 2008
+  - gary marries off his ex | october 8 , 2008
+  - gary breaks up his ex - wife and girlfriend | october 22 , 2008
+  - gary meets the gang | november 5 , 2008
+  - gary and allison brooks | november 19 , 2008
+  - gary gives thanks | november 26 , 2008
+  - gary and allison 's restaurant | november 12 , 2008
+  - gary goes first | december 10 , 2008
+  - gary toughens up tom | december 17 , 2008
+  - gary dates louise 's teacher | january 14 , 2009
+  - gary moves back in | january 21 , 2009
+  - gary 's ex - brother - in - law | february 18 , 2009
+  - gary and dennis' sister | february 11 , 2009
+  - gary uses his veto | march 11 , 2009
+  - gary hooks up allison | march 18 , 2009
+  - gary and his half brother | may 6 , 2009
+  - gary fixes allison 's garbage disposal | may 20 , 2009
+  - gary and the trophy | april 8 , 2009
+
+2) Total number of episodes in the table
+  SQL:
+  SELECT COUNT(*) AS total_episodes FROM public.gary_unmarried;
+  Result: 20
+
+3) Episodes whose titles contain both “gary” and “allison” (case-insensitive)
+  SQL:
+  SELECT episode FROM public.gary_unmarried WHERE episode ILIKE '%gary%' AND episode ILIKE '%allison%';
+  Results (4 titles):
+  - gary and allison 's restaurant
+  - gary and allison brooks
+  - gary hooks up allison
+  - gary fixes allison 's garbage disposal
+
+4) Episodes whose titles do NOT contain both “gary” and “allison” (case-insensitive)
+  Listing query used:
+  SQL:
+  SELECT episode FROM gary_unmarried WHERE LOWER(episode) NOT LIKE '%gary%' OR LOWER(episode) NOT LIKE '%allison%';
+  Results (16 titles):
+  - pilot
+  - gary gets boundaries
+  - gary marries off his ex
+  - gary gets his stuff back
+  - gary breaks up his ex - wife and girlfriend
+  - gary meets the gang
+  - gary gives thanks
+  - gary goes first
+  - gary toughens up tom
+  - gary dates louise 's teacher
+  - gary moves back in
+  - gary and dennis' sister
+  - gary 's ex - brother - in - law
+  - gary uses his veto
+  - gary and the trophy
+  - gary and his half brother
+
+  Count using a single boolean condition:
+  SQL:
+  SELECT COUNT(*) AS episode_count FROM gary_unmarried WHERE NOT (LOWER(episode) LIKE '%gary%' AND LOWER(episode) LIKE '%allison%');
+  Result: 16
+
+Conclusion
+- Only 4 out of 20 episode titles contain both “gary” and “allison.” Therefore, it is not true that every Season 1 episode title mentions both names.
+
+Assumptions
+- The table public.gary_unmarried corresponds to Season 1 of “Gary Unmarried” (supported by the 2008–2009 air dates and 20-episode count).
+- Matching for names is case-insensitive and based on substring presence within the title (punctuation and spacing variations are disregarded).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

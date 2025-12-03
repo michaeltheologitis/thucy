@@ -1,0 +1,63 @@
+
+<userQuery>
+<query>
+when 16.22 (118) be the away team score , the home team score be the highest
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “When 16.22 (118) is the away team score, the home team score is the highest.”
+
+Data source examined: PostgreSQL database TabFact (postgres_tabfact7), schema public, table t_1982_vfl_season. Scores are stored as text in the format goals.behinds (total), e.g., 20.20 (140).
+
+Step 1 — Find the match(es) where the away team score is exactly “16.22 (118)”
+SQL:
+SELECT "home team", "home team score", "away team", "away team score", date
+FROM public.t_1982_vfl_season
+WHERE "away team score" = '16.22 (118)';
+
+Result:
+- Home team: hawthorn; Home team score: 20.20 (140); Away team: collingwood; Away team score: 16.22 (118); Date: 7 august 1982
+
+Step 2 — Parse the home team’s total points for that match
+SQL:
+SELECT "home team", "home team score", "away team", "away team score", venue, crowd, date,
+       split_part(split_part("home team score",'(',2),')',1)::int AS home_points
+FROM public.t_1982_vfl_season
+WHERE "away team score" = '16.22 (118)';
+
+Result:
+- Home team: hawthorn; Home team score: 20.20 (140); Parsed home_points: 140
+
+Step 3 — Determine the highest home team total across the entire table
+SQL (maximum points):
+SELECT MAX(split_part(split_part("home team score",'(',2),')',1)::int) AS max_home_points
+FROM public.t_1982_vfl_season;
+
+Result:
+- max_home_points: 150
+
+SQL (list the match(es) achieving that maximum):
+SELECT "home team", "home team score", "away team", "away team score", date,
+       split_part(split_part("home team score",'(',2),')',1)::int AS home_points
+FROM public.t_1982_vfl_season
+WHERE split_part(split_part("home team score",'(',2),')',1)::int = 150
+ORDER BY date;
+
+Result:
+- north melbourne 22.18 (150) vs geelong 11.16 (82), date: 7 august 1982; home_points: 150
+
+Conclusion
+- In the match where the away team scored 16.22 (118), the home team (hawthorn) scored 20.20 (140), i.e., 140 points.
+- The highest home team total in the table is 150 points (north melbourne vs geelong), which is greater than 140.
+- Therefore, the claim that “the home team score be the highest” in the scenario where the away team score is 16.22 (118) is not supported by the data.
+
+Assumptions made
+- “The highest” was interpreted as the highest home-team total points in the t_1982_vfl_season table (the 1982 VFL season dataset).
+- Score parsing extracts the integer inside parentheses as the total points, using split_part. The away team score was matched by exact text equality.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

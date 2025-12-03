@@ -1,0 +1,50 @@
+
+<userQuery>
+<query>
+katie kansa coach 1 episode
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Overview
+- Interpreted claim: “Katie Kansa(s) — coach — 1 episode.” I searched authoritative tabular data for any coach named like “Katie Kansas/Kansa/Katie” and verified the number of episodes they appear in.
+
+Data source exploration
+- Available source discovered: TabFact (postgres_tabfact31) database, schema public.
+- Relevant table: public.made_tv_series (columns: season, episode, episode summary, premier date, external link, coach). This appears to catalog coaches for episodes of the TV series “Made.”
+
+Evidence
+1) Retrieve any rows where coach resembles “kansa/kansas/katie”
+Executed SQL:
+SELECT season, episode, coach, "episode summary"
+FROM public.made_tv_series
+WHERE coach ILIKE '%kansa%' OR coach ILIKE '%kansas%' OR coach ILIKE '%katie%'
+ORDER BY season, episode;
+
+Result:
+- season: 13, episode: 11, coach: katie kansas, episode summary: shambre is made into a gogo dancer
+
+2) Count distinct episodes per matching coach
+Executed SQL:
+SELECT coach, COUNT(DISTINCT (season, episode)) AS distinct_episode_count
+FROM public.made_tv_series
+WHERE coach ILIKE '%kansa%' OR coach ILIKE '%kansas%' OR coach ILIKE '%katie%'
+GROUP BY coach
+ORDER BY distinct_episode_count DESC, coach;
+
+Result:
+- coach: katie kansas, distinct_episode_count: 1
+
+Conclusion
+- The data shows a coach named “katie kansas” appears in exactly 1 distinct episode (Season 13, Episode 11) of the Made TV series. This supports the claim “katie kansa coach 1 episode.”
+
+Assumptions
+- The claim refers to the MTV series “Made,” given the table name made_tv_series.
+- Case-insensitive substring matching is appropriate for handling the query text “kansa/kansas/katie.”
+- An episode is uniquely identified by the (season, episode) pair in this dataset.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

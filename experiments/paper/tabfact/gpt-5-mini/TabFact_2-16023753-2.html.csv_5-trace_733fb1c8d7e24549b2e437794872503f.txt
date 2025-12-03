@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+the dolphins' defense record 3 shutout during the 1983 season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “The Miami Dolphins’ defense recorded 3 shutouts during the 1983 season.” I verify this by counting 1983 games where the opponent scored 0 points.
+
+Data source discovery:
+- Available database: TabFact (PostgreSQL), public schema.
+- Relevant table: t_1983_miami_dolphins_season(week bigint, date text, opponent text, result text, attendance bigint).
+
+Step 1 — Inspect table contents and result format
+Executed SQL:
+SELECT * FROM t_1983_miami_dolphins_season;
+Key results (excerpt):
+- week: 1, opponent: buffalo bills, result: w 12 - 0
+- week: 12, opponent: baltimore colts, result: w 37 - 0
+(Distinct results show the format is '<w|l> <team_score> - <opponent_score>'. No other rows have opponent score 0.)
+
+Step 2 — Count shutouts (opponent points = 0)
+Executed SQL (count):
+SELECT COUNT(*) AS shutout_count
+FROM t_1983_miami_dolphins_season
+WHERE result IS NOT NULL
+  AND trim(split_part(result, '-', 2)) ~ '^\d+$'
+  AND CAST(trim(split_part(result, '-', 2)) AS integer) = 0;
+Result:
+- shutout_count: 2
+
+Step 3 — List the shutout games
+Executed SQL (list):
+SELECT week, opponent, result
+FROM t_1983_miami_dolphins_season
+WHERE result IS NOT NULL
+  AND trim(split_part(result, '-', 2)) ~ '^\d+$'
+  AND CAST(trim(split_part(result, '-', 2)) AS integer) = 0
+ORDER BY week;
+Results:
+- week: 1, opponent: buffalo bills, result: w 12 - 0
+- week: 12, opponent: baltimore colts, result: w 37 - 0
+
+Conclusion
+- The data shows 2 shutouts in the 1983 season, not 3. Therefore, the claim is contradicted by the evidence.
+
+Assumptions and scope notes
+- “Shutout” is interpreted as the opponent scoring 0 points in the game, using the result field formatted as '<w|l> <team_score> - <opponent_score>'.
+- The table t_1983_miami_dolphins_season contains regular-season games; no playoff games are present in this table. The verification is based on this dataset.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

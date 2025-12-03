@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+there be 12 t - 260 eu aircraft currently in service that originate from switzerland
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of the claim
+Claim: “there be 12 t - 260 eu aircraft currently in service that originate from switzerland.”
+
+What the data shows
+- The TabFact database (public schema) contains one relevant table: uruguayan_air_force, with columns: aircraft, origin, type, versions, in service.
+- There is a row for “aermacchi sf260” with versions “t - 260 eu,” origin “italy,” and “in service” equal to 12.
+- No rows show “t - 260 eu” with origin “switzerland.”
+
+Evidence and executed SQL
+1) Locate any entries mentioning “260”
+SQL:
+SELECT aircraft, origin, type, versions, "in service" FROM public.uruguayan_air_force WHERE aircraft ILIKE '%260%' OR type ILIKE '%260%';
+Result:
+- aircraft: aermacchi sf260
+  origin: italy
+  type: trainer
+  versions: t - 260 eu
+  in service: 12
+
+2) Directly query entries for versions containing “t - 260 eu”
+SQL:
+SELECT aircraft, origin, versions, "in service" FROM uruguayan_air_force WHERE versions = 't - 260 eu' OR versions ILIKE '%t - 260 eu%';
+Result:
+- aircraft: aermacchi sf260
+  origin: italy
+  versions: t - 260 eu
+  in service: 12
+
+3) Check whether any such entries originate from Switzerland
+SQL:
+SELECT COUNT(*) AS count_switzerland_t260eu FROM uruguayan_air_force WHERE lower(origin) = 'switzerland' AND versions ILIKE '%t - 260 eu%';
+Result: 0
+
+For context, count entries with origin = Italy
+SQL:
+SELECT COUNT(*) AS count_italy FROM uruguayan_air_force WHERE lower(origin) = 'italy';
+Result: 1
+
+Assessment of the claim
+- “12 … t - 260 eu … currently in service”: Supported by the in service value of 12 for the Aermacchi SF-260 with versions “t - 260 eu.”
+- “… originate from switzerland”: Contradicted by the data, which lists the origin as “italy.”
+
+Conclusion: The count is correct (12), but the stated country of origin is not; the data shows Italy, not Switzerland.
+
+Assumptions
+- Interpreted “t - 260 eu” as the “versions” field value for the Aermacchi SF-260 entry in the uruguayan_air_force table.
+- Interpreted “currently in service” as reflected by the “in service” column in this dataset, which we treat as authoritative within its scope (Uruguayan Air Force inventory).
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

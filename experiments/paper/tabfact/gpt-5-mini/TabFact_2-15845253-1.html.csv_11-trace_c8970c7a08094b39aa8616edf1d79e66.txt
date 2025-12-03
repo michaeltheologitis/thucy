@@ -1,0 +1,75 @@
+
+<userQuery>
+<query>
+14 viral family have a replication site in the nucleus
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “14 viral family have a replication site in the nucleus.”
+
+Data source discovery
+- Discovered a PostgreSQL database: postgres_tabfact24, schema: public.
+- Relevant table (from schema inspection): public.viral_disease with columns: family (text), “baltimore group” (text), envelopment (text), “virion shape” (text), “replication site” (text).
+
+What I checked
+1) Count distinct families whose replication site mentions nucleus/nuclear (case-insensitive)
+- SQL executed:
+  SELECT COUNT(DISTINCT family) AS count_nuclear_families
+  FROM public.viral_disease
+  WHERE "replication site" ILIKE '%nucleus%'
+     OR "replication site" ILIKE '%nuclear%';
+- Result: 9
+
+2) List which families these are (and their replication site values)
+- SQL executed:
+  SELECT DISTINCT family, "replication site"
+  FROM public.viral_disease
+  WHERE "replication site" ILIKE '%nucleus%'
+  ORDER BY family;
+- Result:
+  - adenoviridae — nucleus
+  - hepadnaviridae — nucleus
+  - herpesviridae — nucleus
+  - orthomyxoviridae — nucleus
+  - papillomaviridae — nucleus
+  - parvoviridae — nucleus
+  - polyomaviridae — nucleus
+  - retroviridae — nucleus
+  - unassigned — nucleus
+
+3) Context: total number of distinct families recorded
+- SQL executed (count):
+  SELECT COUNT(DISTINCT family) AS distinct_family_count FROM public.viral_disease;
+  Result: 23
+- SQL executed (list):
+  SELECT DISTINCT family FROM public.viral_disease ORDER BY family ASC;
+  Result (alphabetical): adenoviridae, arenaviridae, astroviridae, bunyaviridae, caliciviridae, coronaviridae, filoviridae, flaviviridae, hepadnaviridae, hepeviridae, herpesviridae, orthomyxoviridae, papillomaviridae, paramyxoviridae, parvoviridae, picornaviridae, polyomaviridae, poxviridae, reoviridae, retroviridae, rhabdoviridae, togaviridae, unassigned
+
+4) Robustness check for any other nuclear terms (substring ‘nucl’)
+- SQL executed (list):
+  SELECT DISTINCT family, "replication site"
+  FROM public.viral_disease
+  WHERE "replication site" ILIKE '%nucl%'
+  ORDER BY family;
+- Result (same set as step 2): adenoviridae, hepadnaviridae, herpesviridae, orthomyxoviridae, papillomaviridae, parvoviridae, polyomaviridae, retroviridae, unassigned — all “nucleus”.
+- SQL executed (count):
+  SELECT COUNT(DISTINCT family) AS distinct_family_count
+  FROM public.viral_disease
+  WHERE "replication site" ILIKE '%nucl%';
+- Result: 9
+
+Conclusion
+- The database supports at most 9 entries whose replication site mentions the nucleus; one of these is labeled “unassigned,” which is not a formal viral family. Counting only named families yields 8. Either way, this is well below the claimed 14.
+- Therefore, the claim “14 viral family have a replication site in the nucleus” is not supported by the available data.
+
+Assumptions made
+- Treated any replication site that contains “nucleus”/“nuclear” (case-insensitive) as indicating nuclear replication.
+- Considered “unassigned” not to be a valid viral family for counting families.
+- Relied solely on the public.viral_disease table in the discovered database as the authoritative source available here.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

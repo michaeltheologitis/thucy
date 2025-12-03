@@ -1,0 +1,54 @@
+
+<userQuery>
+<query>
+kenny perry earn 170000 more than mark brook
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of data sources explored
+- Discovered a PostgreSQL database (TabFact instance) with schema public. It contains table t_1996_pga_championship with columns: place (text), player (text), country (text), score (text), to par (text), money (bigint).
+
+What I checked
+- Interpreted “earn” as the prize money recorded in the money column of t_1996_pga_championship.
+- Interpreted “Mark Brook” as “Mark Brooks” (the name present in the table), and verified both names’ amounts, then computed the difference.
+
+Evidence from executed SQL
+1) Retrieve Kenny Perry, Mark Brook, and Mark Brooks money values
+SQL:
+SELECT player, money FROM t_1996_pga_championship WHERE lower(player) IN ('kenny perry','mark brook','mark brooks');
+Result:
+- player: mark brooks, money: 430000
+- player: kenny perry, money: 260000
+
+2) Verify the exact player spellings in the table
+SQL:
+SELECT player, money FROM t_1996_pga_championship ORDER BY player;
+Result (excerpt):
+- mark brooks — 430000
+- kenny perry — 260000
+(Note: No exact match for “Mark Brook”.)
+
+3) Compute the difference (Kenny Perry minus Mark Brooks)
+SQL:
+SELECT
+  (SELECT money FROM public.t_1996_pga_championship WHERE player='kenny perry') -
+  (SELECT money FROM public.t_1996_pga_championship WHERE player='mark brooks') AS diff,
+  (SELECT money FROM public.t_1996_pga_championship WHERE player='kenny perry') AS kenny_money,
+  (SELECT money FROM public.t_1996_pga_championship WHERE player='mark brooks') AS mark_money;
+Result:
+- diff: -170000, kenny_money: 260000, mark_money: 430000
+
+Conclusion
+- In the available dataset (1996 PGA Championship results), Kenny Perry earned 260000 and Mark Brooks earned 430000. Kenny Perry did not earn 170000 more; he earned 170000 less than Mark Brooks.
+
+Assumptions
+- The claim refers to the 1996 PGA Championship prize money (the only relevant dataset available here).
+- “Earn” refers to the money column in that table.
+- “Mark Brook” refers to “Mark Brooks,” the player present in the data.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

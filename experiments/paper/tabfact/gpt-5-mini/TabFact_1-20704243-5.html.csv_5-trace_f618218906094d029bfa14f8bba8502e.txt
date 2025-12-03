@@ -1,0 +1,64 @@
+
+<userQuery>
+<query>
+3.22 million viewer watch the gold job direct by arvin brown
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “3.22 million viewers watched ‘The Gold Job,’ directed by Arvin Brown.” I verified this against the available TabFact database (public schema) containing the table list_of_leverage_episodes.
+
+Findings
+- The episode titled “The Gold Job” is listed as directed by Marc Roskin, not Arvin Brown.
+- Its U.S. viewership is 2.26 million, not 3.22 million.
+- 3.22 million viewers corresponds to a different episode: “The Queen’s Gambit Job,” directed by Jonathan Frakes.
+- Arvin Brown did direct other Leverage episodes, including “The Boiler Room Job” (3.29M viewers) and “The 10 Li’l Grifters Job” (2.46M viewers), but not “The Gold Job.”
+
+Evidence (with executed SQL)
+1) Details for “The Gold Job”
+- SQL executed:
+  SELECT "title", "season", "original air date", "directed by", "us viewers (in millions)"
+  FROM public.list_of_leverage_episodes
+  WHERE "title" ILIKE '%Gold Job%';
+- Result:
+  - title: the gold job
+  - season: 16
+  - original air date: january 1 , 2012
+  - directed by: marc roskin
+  - us viewers (in millions): 2.26
+
+2) Confirmation that “The Gold Job” is not directed by Arvin Brown
+- SQL executed:
+  SELECT title, "directed by", "us viewers (in millions)" FROM list_of_leverage_episodes WHERE lower(title) = 'the gold job';
+- Result:
+  - title: the gold job
+  - directed by: marc roskin
+  - us viewers (in millions): 2.26
+
+3) Episodes directed by Arvin Brown
+- SQL executed:
+  SELECT title, "us viewers (in millions)" FROM public.list_of_leverage_episodes WHERE "directed by" ILIKE '%Arvin Brown%';
+- Results:
+  - the 10 li'l grifters job — 2.46
+  - the boiler room job — 3.29
+
+4) Episodes around 3.22M viewers (to locate a potential source of confusion)
+- SQL executed:
+  SELECT title, "directed by", "us viewers (in millions)" FROM public.list_of_leverage_episodes WHERE "us viewers (in millions)" BETWEEN 3.1 AND 3.3 ORDER BY "us viewers (in millions)" DESC;
+- Results:
+  - the boiler room job — directed by arvin brown (3.29M)
+  - the hot potato job — directed by john harrison (3.25M)
+  - the 15 minutes job — directed by marc roskin (3.24M)
+  - the queen 's gambit job — directed by jonathan frakes (3.22M)
+
+Conclusion
+- The claim is contradicted by the data: “The Gold Job” had 2.26M U.S. viewers and was directed by Marc Roskin. 3.22M viewers pertains to “The Queen’s Gambit Job,” which was directed by Jonathan Frakes, not Arvin Brown.
+
+Assumptions
+- The claim refers to the TV series “Leverage” episode titled “The Gold Job” and the viewership figure refers to U.S. viewers in millions as recorded in the list_of_leverage_episodes table.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

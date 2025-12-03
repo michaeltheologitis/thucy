@@ -1,0 +1,74 @@
+
+<userQuery>
+<query>
+4 of the competition be senior world championship
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “4 of the competitions are senior world championships.” I interpret “senior world championship” as entries where competition = 'world championships' (excluding junior categories).
+
+Data source discovery:
+- Available database: TabFact (postgres_tabfact3), public schema.
+- Tables: public.luk_melich (year bigint, competition text, venue text, position text, notes text).
+
+Schema inspection evidence:
+- Tool: schema_query
+- Result summary: Single table public.luk_melich with columns year, competition, venue, position, notes; no keys.
+
+Evidence 1 — Distinct competitions and counts:
+Executed SQL:
+SELECT competition, COUNT(*) AS count
+FROM public.luk_melich
+GROUP BY competition
+ORDER BY count DESC, competition;
+Result:
+- world championships: 3
+- olympic games: 2
+- european championships: 1
+- european junior championships: 1
+- european u23 championships: 1
+- universiade: 1
+- world junior championships: 1
+
+Evidence 2 — Senior World Championships entries (count and details):
+Executed SQL (count):
+SELECT count(*) AS cnt FROM public.luk_melich WHERE lower(competition) = 'world championships';
+Result: cnt = 3
+
+Executed SQL (details):
+SELECT year, venue, position FROM public.luk_melich WHERE lower(competition) = 'world championships' ORDER BY year NULLS LAST, venue, position;
+Results:
+- 2005 — helsinki , finland — 14th
+- 2009 — berlin , germany — 14th
+- 2013 — moscow , russia — 3rd
+
+Evidence 3 — All “world”-level competitions (to differentiate junior vs senior):
+Executed SQL (rows):
+SELECT year, competition FROM public.luk_melich WHERE competition ILIKE '%world%' ORDER BY competition, year;
+Results:
+- world championships — 2005
+- world championships — 2009
+- world championships — 2013
+- world junior championships — 1998
+
+Executed SQL (grouped counts):
+SELECT competition, COUNT(*) AS count FROM public.luk_melich WHERE competition ILIKE '%world%' GROUP BY competition ORDER BY count DESC, competition;
+Results:
+- world championships — 3
+- world junior championships — 1
+
+Assessment:
+- Senior world championships entries = 3, not 4. Including juniors would total 4 “world”-level entries, but the claim specifies senior.
+
+Conclusion: The claim is contradicted by the data.
+
+Assumptions made:
+- “Senior world championship” corresponds to rows with competition exactly labeled 'world championships'.
+- The phrase “4 of the competition be” is interpreted as “there are four entries in the competition column that are senior world championships.”
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

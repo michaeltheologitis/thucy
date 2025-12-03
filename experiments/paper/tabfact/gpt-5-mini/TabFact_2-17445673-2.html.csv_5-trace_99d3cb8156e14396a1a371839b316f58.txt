@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+2 match result in the result of a draw
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of data sources explored
+- Discovered one accessible PostgreSQL database (TabFact, schema: public) with a single table: public.tim_lajcik. Columns: res (text), record (text), opponent (text), method (text), event (text), round (bigint), time (text).
+
+Interpretation of the claim
+- I interpret the claim as: “Two matches resulted in a draw.” Given the available data, this refers to draws recorded in the tim_lajcik table.
+
+Evidence from the data
+1) Distinct result types and their counts
+- Executed SQL:
+  SELECT res, count(*) AS cnt
+  FROM tim_lajcik
+  GROUP BY res
+  ORDER BY cnt DESC NULLS LAST;
+- Result:
+  win = 7
+  loss = 6
+  draw = 1
+- Interpretation: The table records only one draw.
+
+2) Explicit count of draws
+- Executed SQL:
+  SELECT count(*) AS draw_count
+  FROM tim_lajcik
+  WHERE res = 'draw';
+- Result:
+  draw_count = 1
+- Interpretation: Confirms there is exactly one draw.
+
+3) Details of the draw fight(s)
+- Executed SQL:
+  SELECT opponent, event, method, round, time
+  FROM public.tim_lajcik
+  WHERE res = 'draw';
+- Result:
+  opponent: ron waterman; event: ufc 22; method: draw; round: 3; time: 5:00
+- Interpretation: Only a single fight is recorded as a draw in the dataset.
+
+Conclusion
+- The claim that there are two matches resulting in a draw is not supported by the available data. The dataset shows exactly one draw.
+
+Assumptions
+- The claim pertains to the fights recorded in the public.tim_lajcik table (the only available dataset). The res column’s literal value 'draw' denotes a draw. If the claim intended a different athlete, dataset, or scope, that information is not present in the accessible data; verification is therefore based solely on this database.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

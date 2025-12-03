@@ -1,0 +1,77 @@
+
+<userQuery>
+<query>
+season 2 and 10 both air in january , almost exactly 1 year apart
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “season 2 and 10 both air in january, almost exactly 1 year apart.”
+
+What I checked
+- Whether Season 2 and Season 10 exist in the available dataset.
+- The premiere date (earliest original air date) for Season 2 and Season 10.
+- Whether both premiere in January.
+- The number of days between those premiere dates.
+
+Evidence from the data
+1) Distinct seasons present
+SQL:
+SELECT DISTINCT season FROM public.list_of_all_that_episodes ORDER BY season ASC;
+Result (excerpt): seasons include 2 and 10.
+
+2) Sample episodes for Seasons 2 and 10 (to view dates)
+SQL:
+SELECT "episode title", "original air date" FROM public.list_of_all_that_episodes WHERE season = 2 LIMIT 10;
+SELECT "episode title", "original air date" FROM public.list_of_all_that_episodes WHERE season = 10 LIMIT 10;
+Results:
+- Season 2: episode title = Montell Jordan; original air date = November 23, 1996
+- Season 10: episode title = Chris Farley / Mint Condition; original air date = January 11, 1997
+
+3) Premiere/finale dates and episode counts (dates parsed)
+SQL:
+SELECT season,
+       MIN(to_date("original air date", 'FMMonth DD, YYYY')) AS premiere_date,
+       MAX(to_date("original air date", 'FMMonth DD, YYYY')) AS finale_date,
+       COUNT(*) AS episode_count
+FROM public.list_of_all_that_episodes
+WHERE season IN (2, 10)
+GROUP BY season
+ORDER BY season;
+Results:
+- Season 2: premiere_date = 1996-11-23; finale_date = 1996-11-23; episode_count = 1
+- Season 10: premiere_date = 1997-01-11; finale_date = 1997-01-11; episode_count = 1
+
+4) Day difference between premiere dates
+SQL:
+WITH premiere_dates AS (
+  SELECT season,
+         to_date("original air date", 'FMMonth DD, YYYY') AS premiere_date
+  FROM public.list_of_all_that_episodes
+  WHERE season IN (2, 10)
+)
+SELECT (SELECT premiere_date FROM premiere_dates WHERE season = 2) AS premiere_date_s2,
+       (SELECT premiere_date FROM premiere_dates WHERE season = 10) AS premiere_date_s10,
+       (SELECT premiere_date FROM premiere_dates WHERE season = 10) - (SELECT premiere_date FROM premiere_dates WHERE season = 2) AS day_diff;
+Results:
+- premiere_date_s2 = 1996-11-23
+- premiere_date_s10 = 1997-01-11
+- day_diff = 49 days
+
+Findings
+- Only Season 10’s premiere date is in January (January 11, 1997). Season 2’s premiere date is in November (November 23, 1996).
+- The two premiere dates are 49 days apart, not “almost exactly 1 year apart.”
+
+Conclusion
+- The claim is not supported by the data in the available dataset.
+
+Assumptions
+- “Air” refers to the season premiere (earliest original air date) within each season as recorded in public.list_of_all_that_episodes.
+- The dataset is treated as authoritative as provided; for Seasons 2 and 10 it contains one episode each, which was used to determine premiere dates.
+- Dates in "original air date" are in the format Month DD, YYYY and were parsed accordingly.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+in the period 2000 - 2005 , there be a tfr of 2.25 and an nc of 13.4
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “In the period 2000 - 2005, there is a TFR of 2.25 and an NC of 13.4.”
+
+Data source exploration
+- Available database: TabFact (PostgreSQL), schema: public.
+- Relevant table discovered via schema inspection: public.my_info_table with columns including: period, tfr, nc, cbr, cdr, natural change per year, etc.
+
+Evidence collected
+1) Range-aware retrieval around 2000–2005
+Executed SQL:
+WITH parsed AS (
+  SELECT period, tfr, nc,
+    CASE
+      WHEN period ~ '^\s*(\d{4})\s*[-–]\s*(\d{4})\s*$' THEN (regexp_match(period, '^\s*(\d{4})\s*[-–]\s*(\d{4})\s*$'))[1]::int
+      WHEN period ~ '^\s*(\d{4})\s*[-–]\s*(\d{2})\s*$' THEN (regexp_match(period, '^\s*(\d{4})\s*[-–]\s*(\d{2})\s*$'))[1]::int
+      WHEN period ~ '^\s*(\d{4})\s*$' THEN (regexp_match(period, '^\s*(\d{4})\s*$'))[1]::int
+      ELSE NULL
+    END as start_year,
+    CASE
+      WHEN period ~ '^\s*(\d{4})\s*[-–]\s*(\d{4})\s*$' THEN (regexp_match(period, '^\s*(\d{4})\s*[-–]\s*(\d{4})\s*$'))[2]::int
+      WHEN period ~ '^\s*(\d{4})\s*[-–]\s*(\d{2})\s*$' THEN ((regexp_match(period, '^\s*(\d{4})\s*[-–]\s*(\d{2})\s*$'))[1] || (regexp_match(period, '^\s*(\d{4})\s*[-–]\s*(\d{2})\s*$'))[2])::int
+      WHEN period ~ '^\s*(\d{4})\s*$' THEN (regexp_match(period, '^\s*(\d{4})\s*$'))[1]::int
+      ELSE NULL
+    END as end_year
+  FROM public.my_info_table
+)
+SELECT period, tfr, nc, start_year, end_year
+FROM parsed
+WHERE
+  (start_year IS NOT NULL AND end_year IS NOT NULL AND start_year <= 2005 AND end_year >= 2000)
+  OR (start_year IS NOT NULL AND start_year = end_year AND start_year BETWEEN 2000 AND 2005)
+ORDER BY start_year, end_year, period;
+
+Result excerpts:
+- period: 2000 - 2005, tfr: 2.25, nc: 13.4
+(Also found an adjacent period 1995 - 2000 with tfr: 2.45, nc: 15.1, confirming the table’s periodization.)
+
+2) Exact match for the stated period label
+Executed SQL:
+SELECT period, tfr, nc FROM public.my_info_table WHERE period = '2000 - 2005';
+
+Result:
+- period: 2000 - 2005
+- tfr: 2.25
+- nc: 13.4
+
+Conclusion
+- The table public.my_info_table contains an entry for period “2000 - 2005” with TFR = 2.25 and NC = 13.4. This directly supports the claim.
+
+Assumptions
+- “tfr” and “nc” in the claim refer to the tfr and nc columns in public.my_info_table.
+- The period label “2000 - 2005” corresponds exactly to the row in the table with that period string.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

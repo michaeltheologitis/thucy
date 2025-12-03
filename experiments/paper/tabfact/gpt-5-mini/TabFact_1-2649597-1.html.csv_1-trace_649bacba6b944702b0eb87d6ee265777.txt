@@ -1,0 +1,63 @@
+
+<userQuery>
+<query>
+shane hall have an average finish of 31.39 between 1995 - 2008
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "shane hall have an average finish of 31.39 between 1995 - 2008"
+
+Data sources explored
+- Discovered a PostgreSQL database (TabFact) with a public schema containing a table named shane_hall. Columns include: year, races, wins, poles, top 5, top 10, dnf, finish, start, winnings, season rank, team (s). The finish column appears to be a per-season average finish.
+
+Evidence collected
+1) Full table contents (to inspect available years and the finish values)
+Executed SQL:
+SELECT * FROM public.shane_hall ORDER BY year ASC;
+Key returned rows (subset shown):
+- 1995: races=2, finish=24.0
+- 1996: races=14, finish=26.4
+- 1997: races=28, finish=27.1
+- 1998: races=31, finish=24.9
+- 1999: races=25, finish=25.8
+- 2000: races=2, finish=35.0
+- 2001: races=33, finish=27.9
+- 2002: races=24, finish=27.0
+- 2003: races=5, finish=35.8
+- 2004: races=9, finish=31.4
+- 2005: races=7, finish=40.9
+- 2006: races=9, finish=38.9
+- 2008: races=1, finish=43.0
+
+2) Compute the average finish across 1995–2008 (inclusive), both as a simple season-average and races-weighted average
+Executed SQL:
+SELECT
+  COUNT(*) AS season_count,
+  SUM(races) AS total_races,
+  ROUND(AVG(finish)::numeric, 2) AS simple_avg_finish,
+  ROUND( (SUM(finish * races)::numeric) / NULLIF(SUM(races),0), 2) AS weighted_avg_finish
+FROM public.shane_hall
+WHERE year BETWEEN 1995 AND 2008;
+Results:
+- Count of seasons: 13
+- Total races: 190
+- Simple (unweighted) average of finish: 31.39
+- Races-weighted average of finish: 28.28
+
+Assessment
+- The simple (unweighted) average of the per-season finish values from 1995 to 2008 inclusive is 31.39, matching the claim exactly.
+- Note: If one interprets “average finish” as across all individual races, the races-weighted average would be 28.28, but the claim’s value (31.39) aligns with the simple average of the per-season average finish values in the data.
+
+Conclusion
+- The claim is supported by the data: average finish (simple season-average) for 1995–2008 equals 31.39.
+
+Assumptions
+- “Between 1995 - 2008” is inclusive of both endpoints.
+- “Average finish” refers to the unweighted mean of the per-season finish column in the shane_hall table.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

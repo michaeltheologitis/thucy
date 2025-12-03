@@ -1,0 +1,64 @@
+
+<userQuery>
+<query>
+lleyton hewitt be a runner - up 5 time out of a total of 7
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Lleyton Hewitt be a runner-up 5 times out of a total of 7 [finals].”
+
+Data source discovery
+- Database identified: TabFact
+- Table: lleyton_hewitt(outcome text, year bigint, championship text, surface text, opponent text, score text)
+
+Evidence and executed SQL
+1) Total number of finals recorded
+SQL:
+SELECT COUNT(*) AS total_finals FROM lleyton_hewitt;
+Result:
+[{"total_finals":7}]
+
+2) Count by outcome (runner-up vs winner)
+SQL:
+SELECT outcome, COUNT(*) AS cnt FROM lleyton_hewitt GROUP BY outcome ORDER BY outcome;
+Result:
+[{"cnt":5,"outcome":"runner - up"},{"cnt":2,"outcome":"winner"}]
+
+3) Distinct outcome values (to confirm matching)
+SQL:
+SELECT DISTINCT outcome FROM lleyton_hewitt;
+Result:
+[{"outcome":"runner - up"},{"outcome":"winner"}]
+
+4) Runner-up finals (corroboration)
+SQL:
+SELECT year, championship, opponent, score FROM lleyton_hewitt WHERE outcome = 'runner - up' ORDER BY year;
+Result (ordered by year):
+- 2000, Stuttgart, Wayne Ferreira, 6 - 7 (6 - 8), 6 - 3, 7 - 6 (7 - 5), 6 - 7 (2 - 7), 2 - 6
+- 2002, Cincinnati, Carlos Moyá, 5 - 7, 6 - 7 (5 - 7)
+- 2002, Paris, Marat Safin, 6 - 7 (4 - 7), 0 - 6, 4 - 6
+- 2004, Cincinnati (2), Andre Agassi, 3 - 6, 6 - 3, 2 - 6
+- 2005, Indian Wells, Roger Federer, 2 - 6, 4 - 6, 4 - 6
+
+5) Winner finals (for completeness)
+SQL:
+SELECT year, championship, opponent, score 
+FROM lleyton_hewitt 
+WHERE outcome = 'winner' 
+ORDER BY year;
+Result:
+- 2002, Indian Wells, Tim Henman, 6 - 1, 6 - 2
+- 2003, Indian Wells (2), Gustavo Kuerten, 6 - 1, 6 - 1
+
+Conclusion
+- The data show 7 finals in total, with 5 runner-up outcomes and 2 wins. This matches the claim that he was runner-up 5 times out of 7.
+
+Assumptions
+- Interpreted “total of 7” as the total number of finals recorded in the lleyton_hewitt table of this dataset, with “runner-up” defined by outcome = 'runner - up'.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

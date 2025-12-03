@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+martinair be incorporate in kenya
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Martinair is incorporated in Kenya.”
+
+Data source discovery
+- Available source: TabFact (PostgreSQL). Public schema contains a table named public.klm with relevant columns: company (text), type (text), principal activities (text), incorporated in (text), group 's equity shareholding (text).
+
+Evidence and executed SQL
+1) Existence and details for Martinair
+- SQL executed (count):
+  SELECT COUNT(*) AS match_count FROM public.klm WHERE company ILIKE '%Martinair%';
+  Result: match_count = 1
+- SQL executed (details):
+  SELECT company, type, "principal activities", "incorporated in", "group 's equity shareholding" FROM public.klm WHERE company ILIKE '%Martinair%';
+  Result row:
+  - company: martinair
+  - type: subsidiary
+  - principal activities: cargo airline
+  - incorporated in: netherlands
+  - group 's equity shareholding: 100%
+
+2) Check specifically if Martinair is incorporated in Kenya and list any companies incorporated in Kenya
+- SQL executed:
+  SELECT company, "incorporated in" FROM public.klm WHERE company ILIKE '%martinair%';
+  Result: (company: martinair, incorporated in: netherlands)
+  Conclusion from query: Martinair is incorporated in the Netherlands, not Kenya.
+- SQL executed:
+  SELECT company, "incorporated in" FROM public.klm WHERE "incorporated in" ILIKE '%kenya%';
+  Result: (company: kenya airways, incorporated in: kenya)
+
+Conclusion
+- The data shows Martinair is incorporated in the Netherlands. It is not incorporated in Kenya. The table does list “kenya airways” as incorporated in Kenya, which further confirms the column represents countries of incorporation correctly.
+
+Assumptions
+- Interpreted the user’s query as a factual check: “Is Martinair incorporated in Kenya?”
+- Used case-insensitive matching (ILIKE) on relevant columns in the public.klm table of the TabFact database.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

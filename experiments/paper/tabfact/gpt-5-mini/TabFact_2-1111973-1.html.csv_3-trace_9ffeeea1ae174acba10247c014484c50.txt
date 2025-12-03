@@ -1,0 +1,66 @@
+
+<userQuery>
+<query>
+vclc 32t (35.3tons) have the same vcrt but vclc 160 mm (6.3in) or 350 mm (13.8in) rocket have a vcrt of 7.62 mm (0.3in) fn mag 60 - 20 machine gun
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Scope and approach
+- I first discovered the available data sources and inspected their schemas to find any tables relevant to the claim (VCLC, VCRT, FN MAG, rocket calibers, weights).
+- I then queried the identified table to extract concrete evidence.
+
+Data source discovery
+- Tool: Data source discovery
+- Result: A PostgreSQL TabFact instance (database: TabFact/postgres_tabfact3) with a public schema was available.
+
+Schema inspection
+- Database: TabFact (postgres_tabfact3)
+- Schema: public
+- Relevant table: public.tam_tank
+  - Columns: vctp (text), "vca 155" (text), vctm (text), vcpc (text), vclc (text), vcrt (text)
+  - This table includes columns matching the TAM family variants (VCLc, VCRT, etc.).
+
+Executed SQL and results (evidence)
+- SQL executed:
+  SELECT * FROM public.tam_tank;
+
+- Returned rows (excerpt of fields relevant to the claim):
+  • Row 1 (weights):
+    - vclc: "32t (35.3tons)"
+    - vcrt: "32t (35.3tons)"
+  • Row 2 (armament):
+    - vclc: "160 mm (6.3in) or 350 mm (13.8in) rockets"
+    - vcrt: "7.62 mm (0.3in) fn mag 60 - 20 machine gun"
+  • Row 4 (power-to-weight, corroborating “same” performance figures):
+    - vclc: "22.5hp / t (20.4hp / ton)"
+    - vcrt: "22.5hp / t (20.4hp / ton)"
+  • Row 5 (top speed, corroborating “same” performance figures):
+    - vclc: "75 km / h (47 mph)"
+    - vcrt: "75 km / h (47 mph)"
+
+Assessment of each component of the claim
+- “vclc 32t (35.3tons)”
+  • Supported. Row 1 shows vclc: 32t (35.3tons).
+- “have the same vcrt”
+  • Interpreted as VCLC and VCRT sharing the same key specification(s). The data show VCLC and VCRT have the same weight (32t), the same power-to-weight ratio (22.5 hp/t), and the same top speed (75 km/h). This supports the notion that they share the same key baseline metrics.
+- “vclc 160 mm (6.3in) or 350 mm (13.8in) rocket”
+  • Supported. Row 2 shows vclc armament: 160 mm or 350 mm rockets, with the exact inch conversions provided.
+- “vcrt … 7.62 mm (0.3in) fn mag 60 - 20 machine gun”
+  • Supported. Row 2 shows vcrt armament: 7.62 mm (0.3in) FN MAG 60-20 machine gun.
+
+Conclusion
+- All specific elements in the statement are directly supported by the data returned from public.tam_tank.
+
+Assumptions made to interpret the phrasing
+- “have the same vcrt” was taken to mean that VCLC and VCRT share the same core specifications (at minimum weight; corroborated by matching power-to-weight and top speed figures). If intended differently, the weights and performance figures still substantiate “same” in key metrics.
+- The phrase “have a vcrt of 7.62 mm … FN MAG 60-20 machine gun” was interpreted as “the VCRT variant is armed with a 7.62 mm FN MAG 60-20 machine gun,” matching the table’s armament field for vcrt.
+
+Provenance
+- Evidence was obtained via the executed SQL query shown above against the TabFact PostgreSQL instance’s public.tam_tank table, which is treated as authoritative within this environment.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

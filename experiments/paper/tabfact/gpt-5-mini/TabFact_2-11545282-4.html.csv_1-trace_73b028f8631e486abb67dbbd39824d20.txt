@@ -1,0 +1,71 @@
+
+<userQuery>
+<query>
+paul dawkins play for the jazz 7 year before darryl dawkins
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “paul dawkins play for the jazz 7 year before darryl dawkins.”
+
+Summary of finding
+- The Utah Jazz all-time roster data shows Paul Dawkins played for the Jazz in 1979–80 and Darryl Dawkins in 1987–88. Thus, Paul Dawkins did play for the Jazz before Darryl Dawkins.
+- Interpreting the “7 year before” timing: the gap from the end of Paul’s Jazz season (1980) to the start of Darryl’s Jazz season (1987) is 7 years. However, the difference between their start seasons is 8 years (1979 to 1987). So the claim’s timing is only correct under the specific interpretation of “end of Paul’s tenure to start of Darryl’s tenure.”
+
+Evidence from data (with executed SQL)
+1) Locate all Jazz roster entries with last name “Dawkins”
+SQL executed:
+SELECT player, nationality, position, "years for jazz", "school / club team" FROM public.utah_jazz_all_time_roster WHERE player ILIKE '%Dawkins%';
+Results:
+- darryl dawkins — years for jazz: 1987 - 88 — position: center — nationality: united states — school/club: maynard evans hs
+- paul dawkins — years for jazz: 1979 - 80 — position: guard — nationality: united states — school/club: northern illinois
+
+2) Retrieve the exact seasons for Paul and Darryl and parse the start/end years, then compute differences
+SQL executed:
+SELECT player, "years for jazz" FROM public.utah_jazz_all_time_roster WHERE player ILIKE 'Paul Dawkins' OR player ILIKE 'Darryl Dawkins';
+Returned rows:
+- {player: darryl dawkins, years for jazz: 1987 - 88}
+- {player: paul dawkins, years for jazz: 1979 - 80}
+
+3) Parse season ranges and compute numeric gaps
+SQL executed:
+WITH extracted AS (
+  SELECT player, "years for jazz" AS years,
+         (regexp_match("years for jazz", '([0-9]{4})\s*-\s*([0-9]{2,4})'))[1] AS start_part,
+         (regexp_match("years for jazz", '([0-9]{4})\s*-\s*([0-9]{2,4})'))[2] AS end_part
+  FROM public.utah_jazz_all_time_roster
+  WHERE lower(player) IN ('paul dawkins','darryl dawkins')
+), parsed AS (
+  SELECT player, years,
+         start_part::int AS start_year,
+         CASE WHEN char_length(end_part)=2 THEN (left(start_part,2) || end_part)::int ELSE end_part::int END AS end_year,
+         CASE WHEN char_length(end_part)=2 THEN (left(start_part,2) || end_part)::int ELSE end_part::int END - start_part::int AS seasons_count
+  FROM extracted
+)
+SELECT p1.player AS player1, p1.start_year AS player1_start, p1.end_year AS player1_end, p1.seasons_count AS player1_seasons,
+       p2.player AS player2, p2.start_year AS player2_start, p2.end_year AS player2_end, p2.seasons_count AS player2_seasons,
+       abs(p1.start_year - p2.start_year) AS start_year_diff,
+       abs(p1.end_year - p2.end_year) AS end_year_diff,
+       (p2.start_year - p1.end_year) AS gap_p1_end_to_p2_start
+FROM parsed p1 CROSS JOIN parsed p2
+WHERE lower(p1.player) = 'paul dawkins' AND lower(p2.player) = 'darryl dawkins';
+Returned values:
+- Paul Dawkins start: 1979; end: 1980; seasons: 1
+- Darryl Dawkins start: 1987; end: 1988; seasons: 1
+- start_year_diff: 8
+- end_year_diff: 8
+- gap_p1_end_to_p2_start: 7
+
+Conclusion
+- True that Paul Dawkins played for the Jazz before Darryl Dawkins.
+- The “7 year before” phrasing is only correct if measuring from the end of Paul’s Jazz season (1980) to the start of Darryl’s Jazz season (1987). If comparing their start seasons (1979 vs 1987), the difference is 8 years.
+
+Assumptions
+- Interpreted “play for the jazz 7 year before” as a claim about the relative timing of their Jazz tenures.
+- Parsed “years for jazz” strings of the form YYYY - YY to mean a single NBA season spanning two calendar years in the same century (e.g., 1979 - 80 → 1979–1980).
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

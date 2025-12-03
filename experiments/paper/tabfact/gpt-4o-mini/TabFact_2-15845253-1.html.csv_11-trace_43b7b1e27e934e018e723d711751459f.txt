@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+14 viral family have a replication site in the nucleus
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “14 viral family have a replication site in the nucleus.”
+
+Data sources explored:
+- Discovered available data sources: PostgreSQL database with table public.viral_disease.
+- Schema inspection confirms relevant fields exist for this verification.
+  - Table: viral_disease
+    - Columns: family (text), baltimore group (text), envelopment (text), virion shape (text), replication site (text)
+
+Method:
+- Identify distinct viral families whose replication site includes the nucleus.
+- Criteria: replication site contains the substring “nucleus” or “nuclear” (case-insensitive). This counts families that replicate in the nucleus exclusively or partially (e.g., nuclear and cytoplasmic).
+- Count distinct families and list them for transparency.
+
+Evidence and results:
+1) List distinct families with nuclear replication (case-insensitive match on “nucleus” or “nuclear”)
+Executed SQL:
+SELECT DISTINCT family FROM viral_disease WHERE LOWER("replication site") LIKE '%nucleus%' OR LOWER("replication site") LIKE '%nuclear%';
+
+Resulting families:
+- Adenoviridae
+- Hepadnaviridae
+- Herpesviridae
+- Orthomyxoviridae
+- Papillomaviridae
+- Parvoviridae
+- Polyomaviridae
+- Retroviridae
+- Unassigned
+
+2) Count distinct families with nuclear replication (same criteria)
+Executed SQL:
+SELECT COUNT(DISTINCT family) FROM viral_disease WHERE LOWER("replication site") LIKE '%nucleus%' OR LOWER("replication site") LIKE '%nuclear%';
+
+Result: 9 distinct family entries.
+
+Interpretation:
+- The dataset yields 9 distinct family entries matching the nuclear replication criterion. One entry is labeled “Unassigned,” which is not a formal viral family. If we restrict to named families only, the count is 8.
+
+Conclusion:
+- The claim that 14 viral families have a replication site in the nucleus is not supported by the available data. The data supports 9 (including an “Unassigned” category) or 8 (excluding “Unassigned”) distinct families with nuclear replication, which is substantially below 14.
+
+Assumptions and notes:
+- “Have a replication site in the nucleus” was interpreted as any replication site text containing “nucleus” or “nuclear,” including mixed sites (e.g., nuclear and cytoplasmic).
+- Counting was at the family level using the family column in viral_disease. The presence of “Unassigned” indicates at least one record not mapped to a formal family; this was included in the primary count for completeness and noted separately.
+- Results are based solely on the available TabFact.public.viral_disease table considered authoritative in this environment.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

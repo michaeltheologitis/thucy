@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+5 of the game list end with 0 - 0 result
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “5 of the game list end with 0 - 0 result.”
+
+Data sources explored
+- Discovered a PostgreSQL database with a table: public.t_2008_09_bradford_city_a_f_c_season, which contains match data for Bradford City A.F.C. 2008–09.
+
+Schema evidence
+- Columns in public.t_2008_09_bradford_city_a_f_c_season: game (bigint), date (text), opponent (text), venue (text), result (text), attendance (bigint). No primary key defined.
+- Executed SQL to retrieve schema:
+  1) SELECT column_name, data_type, is_nullable, column_default 
+     FROM information_schema.columns 
+     WHERE table_name = 't_2008_09_bradford_city_a_f_c_season' 
+     AND table_schema = 'public';
+  2) SELECT kcu.column_name 
+     FROM information_schema.table_constraints AS tc 
+     JOIN information_schema.key_column_usage AS kcu 
+     ON kcu.constraint_name = tc.constraint_name 
+     WHERE tc.table_name = 't_2008_09_bradford_city_a_f_c_season' 
+     AND tc.table_schema = 'public' 
+     AND tc.constraint_type = 'PRIMARY KEY';
+
+Verification of the claim
+- Question answered: How many matches in this table have a final score of 0-0 (including minor format variants like “0-0”, “0 - 0”, or with en/em dashes), and which games are they?
+
+Executed SQL and results
+1) Count of 0-0 results:
+   SQL:
+   SELECT COUNT(*) FROM public.t_2008_09_bradford_city_a_f_c_season WHERE result IN ('0-0', '0 - 0', '0–0', '0– 0', '0 - 0', '0- 0');
+   Result: 5
+
+2) List of games with 0-0 results:
+   SQL:
+   SELECT date, opponent, venue, result FROM public.t_2008_09_bradford_city_a_f_c_season WHERE result IN ('0-0', '0 - 0', '0–0', '0– 0', '0 - 0', '0- 0');
+   Result rows:
+   - Date: 20 December 2008, Opponent: Chester City, Venue: Home, Result: 0 - 0
+   - Date: 26 December 2008, Opponent: Lincoln City, Venue: Away, Result: 0 - 0
+   - Date: 3 January 2009, Opponent: Shrewsbury Town, Venue: Home, Result: 0 - 0
+   - Date: 17 February 2009, Opponent: Darlington, Venue: Home, Result: 0 - 0
+   - Date: 28 March 2009, Opponent: Chester City, Venue: Away, Result: 0 - 0
+
+Conclusion
+- The data shows exactly 5 matches in the season table ended 0-0. This supports the claim.
+
+Assumptions
+- “game list” refers to all matches recorded in public.t_2008_09_bradford_city_a_f_c_season.
+- “end with 0 - 0 result” means the result field indicates a nil-nil draw, accounting for minor formatting variations (spacing and dash type).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

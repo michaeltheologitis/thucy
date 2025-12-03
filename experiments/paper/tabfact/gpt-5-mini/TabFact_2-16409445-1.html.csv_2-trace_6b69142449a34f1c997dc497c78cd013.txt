@@ -1,0 +1,52 @@
+
+<userQuery>
+<query>
+on november , 1997 when the new orleans saint be in the opponent have the least attendance of the season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Data source discovery
+- Available database: TabFact (postgres_tabfact11), schema: public
+- Only table available: public.t_1997_oakland_raiders_season (week bigint, date text, opponent text, result text, "tv time" text, attendance bigint)
+- No table for New Orleans Saints’ 1997 season exists in the accessible data. Therefore, all verification is grounded in the 1997 Oakland Raiders season data, which includes their game vs. the New Orleans Saints.
+
+What the data shows
+1) Minimum attendance for the 1997 Raiders season
+- Result: The lowest attendance was 30,171.
+- Game details: Week 1, August 31, 1997, opponent Tennessee Oilers, result L 24-21.
+
+Executed SQL (evidence):
+1a) Find the minimum attendance
+SELECT MIN(attendance) AS min_attendance FROM public.t_1997_oakland_raiders_season;
+Result: {"min_attendance": 30171}
+
+1b) Retrieve the game(s) with that minimum attendance and check if the date is in November 1997
+SELECT week, date, opponent, result, attendance,
+CASE WHEN date ILIKE '%Nov%' OR date ILIKE '%November%' OR date LIKE '1997-11-%' OR date LIKE '%/11/1997%' OR date LIKE '%11/%/1997%' OR date LIKE '%/11/97%' OR date LIKE '%11/%/97%' THEN TRUE ELSE FALSE END AS in_nov_1997
+FROM public.t_1997_oakland_raiders_season
+WHERE attendance = 30171;
+Returned row:
+{ week: 1, date: "august 31 , 1997", opponent: "tennessee oilers", result: "l 24 - 21", attendance: 30171, in_nov_1997: false }
+
+2) Raiders vs. New Orleans Saints game in 1997
+- Result: Week 11, November 9, 1997, opponent New Orleans Saints, result L 13-10 (Raiders lost), attendance 40,091.
+
+Executed SQL (evidence):
+SELECT week, date, opponent, result, attendance
+FROM public.t_1997_oakland_raiders_season
+WHERE LOWER(opponent) LIKE '%saints%';
+Returned row:
+{ week: 11, date: "november 9 , 1997", opponent: "new orleans saints", result: "l 13 - 10", attendance: 40091 }
+
+Conclusion
+- Within the only accessible season dataset (1997 Oakland Raiders), the November 9, 1997 game versus the New Orleans Saints had an attendance of 40,091, which is not the least attendance of the Raiders’ 1997 season (the season minimum was 30,171 on August 31, 1997 vs. the Tennessee Oilers).
+
+Assumptions
+- Because the database contains only the 1997 Oakland Raiders season table and no New Orleans Saints season data, I interpret “least attendance of the season” as referring to the Raiders’ 1997 season. If the claim intended to refer to the Saints’ own 1997 season attendance minima, that cannot be verified with the available data.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

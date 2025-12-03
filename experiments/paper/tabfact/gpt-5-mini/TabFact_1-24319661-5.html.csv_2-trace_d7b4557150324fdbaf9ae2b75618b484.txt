@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+bcw410 be the production code for episode 10
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim being verified: “bcw410 be the production code for episode 10.”
+
+Data sources discovered:
+- Database: TabFact (postgres_tabfact26), schema: public
+- Table: list_of_white_collar_episodes — episode listings for the TV series “White Collar”
+
+Relevant schema (as reported by the schema tool):
+- Columns: "no in series" (bigint), "no in season" (bigint), "title" (text), "directed by" (text), "written by" (text), "us viewers (million)" (double precision), "original air date" (text), "production code" (text)
+
+Evidence and executed SQL:
+1) Check whether production code BCW410 exists and what episode number it maps to
+- SQL:
+  SELECT title, "no in series", "no in season", "production code"
+  FROM public.list_of_white_collar_episodes
+  WHERE LOWER("production code") = 'bcw410';
+- Result:
+  title: vested interest; no in series: 56; no in season: 10; production code: bcw410
+- Interpretation: The row with production code bcw410 corresponds to episode number 10 within its season ("no in season" = 10).
+
+2) Directly confirm which production code corresponds to episode 10 within a season
+- SQL:
+  SELECT "title", "production code" FROM public.list_of_white_collar_episodes WHERE "no in season" = 10;
+- Result:
+  title: vested interest; production code: bcw410
+- Interpretation: Episode 10 in-season has production code bcw410.
+
+Additional context/consistency check (not required but included for clarity):
+- The table contains entries with production codes bcw401 through bcw415 and "no in series" values 47–61, indicating it covers a contiguous run of episodes consistent with White Collar Season 4. This aligns with bcw410 corresponding to season 4, episode 10.
+- SQL to list contents by overall numbering:
+  SELECT "no in series", "title", "production code" FROM public.list_of_white_collar_episodes ORDER BY "no in series";
+  Returned rows included:
+  ... 54 ancient history bcw408; 55 gloves off bcw409; 56 vested interest bcw410; 57 family business bcw411; ...
+
+Conclusion:
+- The production code bcw410 maps to the episode whose in-season number is 10. Therefore, the claim is supported by the data.
+
+Assumptions noted:
+- Interpreted “episode 10” as the in-season episode number (column "no in season").
+- The dataset appears to cover White Collar Season 4 specifically; no explicit season column is present, but the production code pattern (bcw4xx) and contiguous overall numbering support this interpretation.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

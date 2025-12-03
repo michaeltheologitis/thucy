@@ -1,0 +1,57 @@
+
+<userQuery>
+<query>
+memphis international airport have the most cargo ship in and out
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Memphis International Airport has the most cargo in and out.” I interpret “most cargo” as the highest total cargo throughput (freight + mail) by airport, globally, measured in metric tonnes.
+
+Data source exploration
+- Available database: public schema with table world_s_busiest_airports_by_cargo_traffic
+- Table columns: rank, airport, code (iata / icao), total cargo (metric tonnes), % change (no year field shown)
+
+Evidence
+1) Who is ranked #1 by cargo?
+Result: Hong Kong International Airport is ranked #1 with 4,062,261 metric tonnes.
+Executed SQL:
+SELECT airport, "total cargo (metric tonnes)" FROM public.world_s_busiest_airports_by_cargo_traffic WHERE rank = 1;
+
+2) What is Memphis International Airport’s rank and cargo?
+Result: Memphis International Airport — Code: MEM / KMEM — Rank: 2 — Total Cargo: 3,916,535 metric tonnes.
+Executed SQL:
+SELECT airport, "code (iata / icao)", rank, "total cargo (metric tonnes)" 
+FROM public.world_s_busiest_airports_by_cargo_traffic 
+WHERE airport ILIKE '%Memphis%' OR "code (iata / icao)" = 'MEM';
+
+3) Are there any U.S. airports above Memphis?
+Result: Other major U.S. cargo hubs appear below Memphis in rank:
+- Ted Stevens Anchorage International Airport — Rank 5 — 2,449,551
+- Louisville International Airport — Rank 7 — 2,187,766
+- Miami International Airport — Rank 11 — 1,929,889
+- Los Angeles International Airport — Rank 14 — 1,688,351
+- O'Hare International Airport — Rank 17 — 1,512,186
+Executed SQL:
+SELECT airport, "code (iata / icao)" AS code, rank, "total cargo (metric tonnes)" AS total_cargo
+FROM public.world_s_busiest_airports_by_cargo_traffic
+WHERE airport ILIKE '%Anchorage%'
+   OR airport ILIKE '%Louisville%'
+   OR airport ILIKE '%Miami%'
+   OR airport ILIKE '%Los Angeles%'
+   OR airport ILIKE '%O''Hare%'
+   OR airport ILIKE '%Chicago%';
+
+Conclusion
+- The data shows Hong Kong International Airport is #1 globally by cargo; Memphis International Airport is #2. Therefore, the claim that Memphis “has the most cargo in and out” (globally) is not supported. However, among U.S. airports in this dataset, Memphis ranks highest.
+
+Assumptions and notes
+- “Most cargo in and out” is interpreted as total cargo throughput (metric tonnes) handled by the airport.
+- The provided table does not include a year; findings apply to the snapshot represented by the table.
+- Scope (global vs. U.S.) was not specified. I evaluated the claim globally; if the intent was U.S.-only, the data indicates Memphis is the busiest within the U.S. in this dataset.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

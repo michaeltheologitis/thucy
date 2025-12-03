@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+miguel zapata have exactly 24 goal under his name
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim: “miguel zapata have exactly 24 goal under his name.”
+- Data environment explored: A PostgreSQL database with a public table t_2008_09_segunda_divisi_n_b containing goalkeeper stats (goals conceded, matches, average, team) for the 2008–09 Segunda División B season.
+
+What the data shows
+- The table’s columns: goalkeeper (text), goals (bigint), matches (bigint), average (double precision), team (text). In this dataset, “goals” refers to goals conceded by the goalkeeper.
+- Searching for Miguel Zapata yields a single record with goals = 17, not 24.
+
+Executed SQL evidence and results
+1) Retrieve details for goalkeeper named Miguel Zapata
+SQL:
+SELECT goalkeeper, goals, matches, average, team FROM public.t_2008_09_segunda_divisi_n_b WHERE goalkeeper ILIKE 'Miguel Zapata';
+Result:
+[{"average":0.61,"goalkeeper":"miguel zapata","goals":17,"matches":28,"team":"atlético ciudad"}]
+
+2) Verify number of goals for Miguel Zapata
+SQL:
+SELECT goals FROM public.t_2008_09_segunda_divisi_n_b WHERE goalkeeper ILIKE 'Miguel Zapata';
+Result:
+[{"goals":17}]
+
+3) Broader name match (case-insensitive contains both “Miguel” and “Zapata”)
+SQL:
+SELECT goalkeeper, goals, matches, average, team 
+FROM public.t_2008_09_segunda_divisi_n_b 
+WHERE goalkeeper ILIKE '%Miguel%' AND goalkeeper ILIKE '%Zapata%';
+Result:
+- goalkeeper: Miguel Zapata; goals: 17; matches: 28; average: 0.61; team: Atlético Ciudad
+
+Conclusion
+- The data shows Miguel Zapata has 17 goals (conceded) in this dataset, not 24. Therefore, the claim is not supported by the available data.
+
+Assumptions and scope
+- Interpreted “goal under his name” as the “goals” field for the goalkeeper in the 2008–09 Segunda División B dataset (goals conceded, not scored).
+- If the claim refers to a different competition, season, or a different definition of “goals,” it is outside the scope of the available data used here.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

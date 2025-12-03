@@ -1,0 +1,54 @@
+
+<userQuery>
+<query>
+in the year 2001 shane hall have dnf half his race
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “In the year 2001, Shane Hall had DNF in half his races.”
+
+Evidence from the authoritative data source (TabFact database):
+- Data table: public.shane_hall
+
+Query 1: Retrieve 2001 season stats and compute DNF ratio
+SQL Executed:
+SELECT year, races, dnf, (dnf::double precision / NULLIF(races, 0)) AS dnf_ratio FROM public.shane_hall WHERE year = 2001;
+Result:
+- Year: 2001
+- Races: 33
+- DNF: 6
+- DNF Ratio: 0.1818 (6 of 33)
+
+Query 2: Check if DNF share is exactly or at least half
+SQL Executed:
+SELECT
+  year,
+  races,
+  dnf,
+  (dnf::float / races) AS dnf_ratio,
+  (dnf::float / races) = 0.5 AS is_exactly_half,
+  (dnf::float / races) >= 0.5 AS at_least_half
+FROM
+  public.shane_hall
+WHERE
+  year = 2001;
+Result:
+- Year: 2001; Races: 33; DNF: 6
+- DNF Ratio: 0.1818
+- Is Exactly Half: False
+- At Least Half: False
+
+Assessment:
+- Half of 33 races would be 16.5 (nearest whole numbers 16–17). Shane Hall recorded 6 DNFs, which is about 18.18% of his races, far below half.
+
+Conclusion: The claim is contradicted by the data.
+
+Assumptions:
+- Interpreted “half his race” as the share of races resulting in DNF being equal to, or at least, half of all races Shane Hall ran in 2001 as recorded in the public.shane_hall table. No series breakdown was specified; the table is treated as the authoritative season summary for 2001.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

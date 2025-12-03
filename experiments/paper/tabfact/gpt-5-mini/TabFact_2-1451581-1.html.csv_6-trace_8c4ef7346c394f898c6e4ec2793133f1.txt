@@ -1,0 +1,60 @@
+
+<userQuery>
+<query>
+memphis international airport have the most cargo ship in and out
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Memphis International Airport has the most cargo in and out” = Memphis International Airport is the busiest airport by cargo traffic (global).
+
+Data sources explored
+- Database: TabFact (trusted per instructions)
+- Table: public.world_s_busiest_airports_by_cargo_traffic (columns: rank, airport, code (iata / icao), total cargo (metric tonnes), % change)
+
+Evidence
+1) Top-ranked airports by cargo traffic
+Executed SQL:
+SELECT "rank", airport, "code (iata / icao)", "total cargo (metric tonnes)" FROM public.world_s_busiest_airports_by_cargo_traffic ORDER BY "rank" ASC LIMIT 10;
+Results (rank | airport | code | total cargo):
+1 | hong kong international airport | hkg / vhhh | 4062261
+2 | memphis international airport | mem / kmem | 3916535
+3 | shanghai pudong international airport | pvg / zspd | 2939157
+4 | incheon international airport | icn / rksi | 2456724
+5 | ted stevens anchorage international airport | anc / panc | 2449551
+6 | dubai international airport | dxb / omdb | 2267365
+7 | louisville international airport | sdf / ksdf | 2187766
+8 | paris - charles de gaulle airport | cdg / lfpg | 2150950
+9 | frankfurt airport | fra / eddf | 2066432
+10 | narita international airport | nrt / rjaa | 2006173
+
+2) Row for Memphis International Airport
+Executed SQL:
+SELECT "rank", airport, "code (iata / icao)", "total cargo (metric tonnes)" 
+FROM public.world_s_busiest_airports_by_cargo_traffic
+WHERE airport ILIKE '%Memphis%';
+Result:
+- rank: 2 | airport: memphis international airport | code: mem / kmem | total cargo (metric tonnes): 3916535
+
+3) Busiest airport (rank = 1) for comparison
+Executed SQL:
+SELECT "rank", airport, "code (iata / icao)", "total cargo (metric tonnes)" 
+FROM public.world_s_busiest_airports_by_cargo_traffic
+WHERE "rank" = 1;
+Result:
+- rank: 1 | airport: hong kong international airport | code: hkg / vhhh | total cargo (metric tonnes): 4062261
+
+Assessment
+- The table ranks Hong Kong International Airport as #1 by cargo traffic and Memphis International Airport as #2. Therefore, Memphis does not have “the most” cargo traffic globally in this dataset.
+
+Conclusion
+- The claim is contradicted by the data in the available source.
+
+Assumptions and notes
+- “Most cargo in and out” was interpreted as the busiest airport by total cargo traffic (metric tonnes) worldwide. The table does not specify the year; conclusions are limited to the dataset provided. “Cargo ship” was understood to mean cargo air traffic at airports, not maritime shipping.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

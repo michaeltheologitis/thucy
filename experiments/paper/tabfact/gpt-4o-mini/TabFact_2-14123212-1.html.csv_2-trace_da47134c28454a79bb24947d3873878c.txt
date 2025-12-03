@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+all of the call sign for each translator include 3 digit number that begin with the number 2
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim assessed: "all of the call sign for each translator include 3 digit number that begin with the number 2"
+
+Data source overview
+- Explored the available PostgreSQL database and identified one table: public.whlp, with a column named "call sign" (text), among others.
+
+Evidence collected
+1) List of all call signs
+SQL:
+SELECT "call sign" FROM public.whlp;
+Result:
+- w221by
+- w264bf
+- w240bj
+- w276bm
+- w293al
+- w223au
+
+2) Pattern check: Do all call signs consist of a letter, followed by a 3-digit number beginning with 2, followed by two letters?
+SQL:
+SELECT COUNT(*) AS total_count FROM public.whlp;
+
+SELECT COUNT(*) AS matching_count FROM public.whlp WHERE "call sign" ~ '^[A-Za-z][2][0-9]{2}[A-Za-z]{2}$';
+
+SELECT "call sign" FROM public.whlp WHERE NOT ("call sign" ~ '^[A-Za-z][2][0-9]{2}[A-Za-z]{2}$');
+Results:
+- total_count = 6
+- matching_count = 6
+- non-matching call signs: none
+
+3) Extract the 3-digit portion and verify it begins with 2 for each call sign
+SQL:
+SELECT "call sign", SUBSTRING("call sign" FROM '([0-9]{3})') AS three_digit,
+       CASE WHEN SUBSTRING("call sign" FROM '([0-9]{3})') LIKE '2%' THEN 'Yes' ELSE 'No' END AS begins_with_2
+FROM public.whlp;
+Results:
+- w221by -> 221 -> Yes
+- w264bf -> 264 -> Yes
+- w240bj -> 240 -> Yes
+- w276bm -> 276 -> Yes
+- w293al -> 293 -> Yes
+- w223au -> 223 -> Yes
+
+Conclusion
+- All call signs present in public.whlp include a three-digit numeric portion, and in each case the three-digit number begins with 2. The evidence supports the claim for the dataset examined.
+
+Assumptions
+- Interpreted “each translator” as every row in public.whlp (given the call sign formats consistent with FM translator call signs). If the claim intended a broader universe beyond this dataset, the conclusion strictly applies to the records available here.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

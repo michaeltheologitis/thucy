@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+bell media 's call sign be chsu - fm on the frequency 99.9 fm
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The user asserts that Bell Media’s station with call sign CHSU-FM operates on the frequency 99.9 FM (and/or that CHSU-FM at 99.9 FM is owned by Bell Media).
+
+Data sources explored
+- Discovered data source: A PostgreSQL database (TabFact) via postgres_tabfact6.
+- Schema inspection identified a relevant table: public.media_in_kelowna with columns: frequency (text), call sign (text), branding (text), format (text), owner (text).
+
+Evidence from the database (with exact executed SQL and returned rows)
+1) Broad listing to locate the record:
+SQL:
+SELECT "frequency", "call sign", "owner"
+FROM public.media_in_kelowna
+ORDER BY "call sign";
+Returned rows (excerpt showing the relevant row):
+{"call sign":"chsu - fm","frequency":"00 99.9 fm","owner":"bell media"}
+
+2) Targeted match for the call sign (case/punctuation-insensitive) to retrieve frequency and owner:
+SQL:
+SELECT "frequency", "owner", "call sign"
+FROM public.media_in_kelowna
+WHERE regexp_replace(lower("call sign"), '[^a-z0-9]', '', 'g') = regexp_replace(lower('CHSU-FM'), '[^a-z0-9]', '', 'g');
+Returned row:
+{"call sign":"chsu - fm","frequency":"00 99.9 fm","owner":"bell media"}
+
+Analysis
+- The database explicitly lists a record with call sign stored as "chsu - fm" (lowercase with spaces around the hyphen). Normalizing punctuation/case equates this to CHSU-FM.
+- The frequency field is stored as "00 99.9 fm"; the substantive frequency value is 99.9 FM.
+- The owner field for this record is "bell media", i.e., Bell Media.
+- Therefore, the data supports that CHSU-FM operates at 99.9 FM and is owned by Bell Media, which aligns with the user’s claim.
+
+Conclusion
+- The claim is supported by the database record: CHSU-FM — 99.9 FM — Bell Media.
+
+Assumptions
+- Interpreted the user’s phrasing as asserting that CHSU-FM operates on 99.9 FM and is a Bell Media station.
+- Normalized the stored strings (lowercase, spacing, and the leading "00 ") to conventional forms (CHSU-FM, 99.9 FM, Bell Media).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

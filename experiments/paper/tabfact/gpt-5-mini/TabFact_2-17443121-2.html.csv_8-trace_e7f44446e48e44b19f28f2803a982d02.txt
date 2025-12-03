@@ -1,0 +1,95 @@
+
+<userQuery>
+<query>
+the title of every episode in season 1 mention both gary and allison
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the title of every episode in season 1 mention both gary and allison.”
+
+Data source discovery and schema grounding:
+- Available database: TabFact (postgres_tabfact33), schema: public.
+- Relevant table identified via schema inspection: public.gary_unmarried with columns: episode (text), air date (text), timeslot (text), 18 - 49 (text), viewers (double precision).
+
+Evidence from executed SQL queries:
+1) Inspect available rows (to view titles and timeframe)
+SQL:
+SELECT episode, "air date", timeslot, "18 - 49", viewers
+FROM public.gary_unmarried
+LIMIT 50;
+Result summary: 20 rows returned spanning air dates from September 2008 to May 2009. Episode titles include many starting with “gary …”; some include “allison” (e.g., “gary and allison ’s restaurant”, “gary and allison brooks”, “gary hooks up allison”, “gary fixes allison ’s garbage disposal”). No explicit season field exists; the 2008–2009 air dates and count of 20 episodes align with Season 1 of Gary Unmarried.
+
+2) Total number of episodes in the table
+SQL:
+SELECT COUNT(*) AS total_episodes FROM public.gary_unmarried;
+Result: total_episodes = 20
+
+3) Count titles that mention both “gary” and “allison” (case-insensitive)
+SQL:
+SELECT COUNT(*) AS both_gary_allison FROM public.gary_unmarried WHERE episode ILIKE '%gary%' AND episode ILIKE '%allison%';
+Result: both_gary_allison = 4
+
+4) List of titles that mention both “gary” and “allison”
+SQL:
+SELECT episode FROM public.gary_unmarried WHERE episode ILIKE '%gary%' AND episode ILIKE '%allison%';
+Results:
+- gary and allison 's restaurant
+- gary and allison brooks
+- gary hooks up allison
+- gary fixes allison 's garbage disposal
+
+5) Titles that do NOT mention both names (i.e., not containing both substrings “gary” AND “allison”, case-insensitive)
+SQL:
+SELECT episode FROM public.gary_unmarried WHERE NOT (episode ILIKE '%gary%' AND episode ILIKE '%allison%') ORDER BY episode;
+Results (16 titles):
+- gary 's ex - brother - in - law
+- gary and dennis' sister
+- gary and his half brother
+- gary and the trophy
+- gary breaks up his ex - wife and girlfriend
+- gary dates louise 's teacher
+- gary gets boundaries
+- gary gets his stuff back
+- gary gives thanks
+- gary goes first
+- gary marries off his ex
+- gary meets the gang
+- gary moves back in
+- gary toughens up tom
+- gary uses his veto
+- pilot
+
+6) Contextualizing timeframe (extract year from air date)
+- Verify extraction and counts per year
+SQL (sample with extraction):
+SELECT "air date", substring("air date" from '([0-9]{4})') AS year_extracted
+FROM gary_unmarried
+LIMIT 50;
+SQL (counts per year):
+SELECT substring("air date" from '([0-9]{4})') AS year, COUNT(*) AS episodes
+FROM gary_unmarried
+WHERE substring("air date" from '([0-9]{4})') IS NOT NULL
+GROUP BY year
+ORDER BY substring("air date" from '([0-9]{4})')::int;
+SQL (sanity check totals):
+SELECT COUNT(*) AS total_rows,
+       SUM(CASE WHEN substring("air date" from '([0-9]{4})') IS NULL THEN 1 ELSE 0 END) AS unknown_year_count
+FROM gary_unmarried;
+Results:
+- Years present: 2008 (11 episodes), 2009 (9 episodes)
+- Total rows: 20; unknown_year_count: 0
+Interpretation: This matches a 2008–2009 season (Season 1) run.
+
+Conclusion:
+- Out of 20 Season 1 episodes in the dataset, only 4 titles include both “gary” and “allison.” Therefore, it is not true that every episode title in Season 1 mentions both names.
+
+Assumptions made (due to ambiguity in the claim):
+- The claim pertains to the show represented in the available data (Gary Unmarried), and the table public.gary_unmarried corresponds to Season 1 episodes based on 2008–2009 air dates and a total of 20 episodes.
+- “Mention” is interpreted as the episode title containing the substrings “gary” and “allison” (case-insensitive) anywhere in the title.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

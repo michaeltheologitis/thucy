@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+the toronto blue jay win 2 of the last 3 game they play in may 1991
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "the toronto blue jay win 2 of the last 3 game they play in may 1991"
+
+Data discovery and schema
+- Available data source: Database TabFact, schema public, table public.t_1991_toronto_blue_jays_season (Toronto Blue Jays 1991 season)
+- Relevant columns: date (text, e.g., 'may 1'), opponent (text), score (text), loss (text; losing pitcher), attendance (bigint), record (text, e.g., '12 - 10' indicating team record after the game)
+
+Step 1: Retrieve all May 1991 games to identify the last three dates
+Executed SQL:
+SELECT date, opponent, score, loss, record, EXTRACT(DAY FROM TO_DATE(date, 'Month DD')) AS day_num
+FROM public.t_1991_toronto_blue_jays_season
+WHERE date LIKE 'may%'
+ORDER BY day_num ASC;
+
+Returned evidence (excerpt for end of month):
+- may 28 | athletics | 8 - 4 | acker (1 - 2) | 25 - 20
+- may 29 | athletics | 8 - 3 | slusarski (1 - 2) | 26 - 20
+- may 30 | athletics | 8 - 6 | ward (0 - 2) | 26 - 21
+- may 31 | angels | 5 - 1 | langston (6 - 2) | 27 - 21
+This shows the last three games in May are on May 29, May 30, and May 31.
+
+Step 2: Retrieve the last four days to show consecutive records and infer outcomes by record changes
+Executed SQL:
+SELECT date, opponent, score, loss, record 
+FROM public.t_1991_toronto_blue_jays_season 
+WHERE date IN ('may 28', 'may 29', 'may 30', 'may 31') 
+ORDER BY CAST(SUBSTRING(date FROM '\\d+') AS INTEGER);
+
+Returned rows:
+- May 28 | Athletics | 8 - 4 | acker (1 - 2) | 25 - 20
+- May 29 | Athletics | 8 - 3 | slusarski (1 - 2) | 26 - 20
+- May 30 | Athletics | 8 - 6 | ward (0 - 2) | 26 - 21
+- May 31 | Angels    | 5 - 1 | langston (6 - 2)  | 27 - 21
+
+Outcome inference using record deltas (wins-losses after each game):
+- May 29: Record moved from 25-20 (May 28) to 26-20 → win
+- May 30: Record moved from 26-20 (May 29) to 26-21 → loss
+- May 31: Record moved from 26-21 (May 30) to 27-21 → win
+
+Result: Among the last three games in May (29, 30, 31), the Blue Jays won exactly 2 (May 29 and May 31).
+
+Conclusion: The claim is supported by the data.
+
+Assumptions
+- The table public.t_1991_toronto_blue_jays_season exclusively covers the 1991 season; thus all 'may N' dates are in May 1991.
+- "Last 3 games in May" is interpreted as the games on the final three calendar dates present in May: May 29, May 30, and May 31.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

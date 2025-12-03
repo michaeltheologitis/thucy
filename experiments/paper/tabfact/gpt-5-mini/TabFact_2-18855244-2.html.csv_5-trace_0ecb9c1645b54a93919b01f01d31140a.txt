@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+michael phelps have less medal than larisa latyna
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “Michael Phelps has fewer medals than Larisa Latynina.”
+
+Data sources discovered:
+- PostgreSQL database (TabFact), schema: public
+- Relevant table: public.list_of_multiple_olympic_medalists (columns: "medal count", date, athlete, nation, sport, "record medal event")
+
+Evidence 1 — Maximum medal counts per athlete (Michael Phelps vs Larisa Latynina):
+Executed SQL:
+SELECT athlete, MAX("medal count") AS max_medal_count
+FROM public.list_of_multiple_olympic_medalists
+WHERE athlete ILIKE '%Phelps%' OR athlete ILIKE '%Latynin%'
+GROUP BY athlete
+ORDER BY athlete;
+
+Result:
+- michael phelps: 22
+- larisa latynina: 18
+
+Evidence 2 — All matching rows for context:
+Executed SQL:
+SELECT "medal count", date, athlete, nation, sport
+FROM public.list_of_multiple_olympic_medalists
+WHERE athlete ILIKE '%Phelps%' OR athlete ILIKE '%Latynin%'
+ORDER BY athlete ASC, "medal count" DESC;
+
+Key returned rows (top per athlete):
+- larisa latynina | 23 october 1964 | medal count: 18 | nation: soviet union | sport: gymnastics
+- michael phelps  | 4 august 2012   | medal count: 22 | nation: united states | sport: swimming
+
+Conclusion:
+- The authoritative data shows Michael Phelps’ maximum recorded medal count (22) is greater than Larisa Latynina’s (18). Therefore, the claim that “Michael Phelps has fewer medals than Larisa Latynina” is contradicted by the data.
+
+Assumptions:
+- “larisa latyna” refers to Larisa Latynina; athlete matching used case-insensitive substring search (ILIKE '%Phelps%' and '%Latynin%').
+- The table’s "medal count" represents total Olympic medals as of the listed date for each athlete entry.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

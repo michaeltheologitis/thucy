@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+2010 - 11 - 17 be the release date with a category of utilities , a developer of dino game , and a title of chord finder
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify:
+“2010-11-17 be the release date with a category of Utilities, a developer of Dino Game, and a title of Chord Finder.”
+
+Data source explored:
+- Database: postgres_tabfact27 (public schema)
+- Table: public.list_of_zune_applications (columns: title, developer, category, "release date", version)
+
+Step 1: Locate the app by title “Chord Finder”.
+Result:
+- title: chord finder
+- developer: microsoft
+- category: utilities
+- release date: 2010 - 11 - 17
+- version: 1.0
+
+Executed SQL:
+SELECT title, developer, category, "release date", version
+FROM public.list_of_zune_applications
+WHERE lower(title) = 'chord finder';
+
+Step 2: Check whether any app has developer exactly “dino game”, or developers containing “dino”.
+Results:
+- Exact developer = “dino game”: 0 apps
+- Developers containing “dino” (for context):
+  • title: drum machine hd | developer: dino games | category: utilities | release date: 2010 - 10 - 20
+  • title: metronome | developer: dino games | category: utilities | release date: 2010 - 09 - 09
+
+Executed SQL (substring and exact checks):
+SELECT title, developer, category, "release date"
+FROM public.list_of_zune_applications
+WHERE lower(developer) = 'dino game' OR lower(developer) LIKE '%dino%';
+
+SELECT count(*) AS exact_match_count
+FROM public.list_of_zune_applications
+WHERE lower(developer) = 'dino game';
+
+Assessment of each element in the claim:
+- Title = “Chord Finder”: Supported (found exactly, case-insensitive).
+- Release date = “2010-11-17”: Supported (stored as “2010 - 11 - 17”).
+- Category = “Utilities”: Supported.
+- Developer = “Dino Game”: Not supported (data shows developer is “microsoft”; no exact “dino game” developer exists in the table).
+
+Conclusion: The app “Chord Finder” exists with the stated title, category, and release date, but the developer is not “Dino Game”; it is “microsoft” in the data.
+
+Assumptions:
+- Title matching was done case-insensitively using lower(title) = 'chord finder'.
+- “Dino Game” was interpreted as an exact developer name; we also checked for any developer containing “dino” for completeness.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

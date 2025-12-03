@@ -1,0 +1,44 @@
+
+<userQuery>
+<query>
+there be a difference of 31521 crowd , from the lowest to the highest and lowest fan in attendance
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The difference between the highest and lowest fan attendance is 31,521.
+
+Data source discovery:
+- Connected database: postgres_tabfact22 (public schema)
+- Relevant table: public.t_2008_arizona_diamondbacks_season (columns: date text, opponent text, score text, loss text, attendance bigint, record text)
+
+Evidence and executed SQL:
+1) Compute minimum, maximum, and difference in attendance
+SQL:
+SELECT MIN(attendance) AS min_att, MAX(attendance) AS max_att, MAX(attendance)-MIN(attendance) AS difference FROM public.t_2008_arizona_diamondbacks_season;
+Result:
+- Minimum attendance: 22616
+- Maximum attendance: 54137
+- Difference (max - min): 31521
+
+2) Identify the specific games corresponding to those extremes
+SQL:
+SELECT date, opponent, attendance, CASE WHEN attendance = 22616 THEN 'min' WHEN attendance = 54137 THEN 'max' END AS label
+FROM public.t_2008_arizona_diamondbacks_season
+WHERE attendance IN (22616, 54137)
+ORDER BY label DESC, date;
+Results:
+- min: date = "september 17", opponent = "giants", attendance = 22616
+- max: date = "september 7", opponent = "dodgers", attendance = 54137
+
+Conclusion:
+- The computed difference between the highest and lowest attendance values is 31,521, which matches the claim.
+
+Assumptions:
+- The claim refers to the attendance figures in the available table public.t_2008_arizona_diamondbacks_season. Dates are stored as text and presented as-is from the dataset.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

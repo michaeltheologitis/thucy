@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+there be 2 zakspeed chassis make in the year 1987
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The user asserts that there were 2 Zakspeed chassis made/recorded for the year 1987.
+
+Data sources explored:
+- Available PostgreSQL database with a table: public.zakspeed
+- Table schema (from schema inspection): columns = year (bigint), chassis (text), "engine (s)" (text), tyres (text), points (bigint)
+
+Evidence and executed SQL:
+1) Count of distinct chassis strings for 1987
+- SQL:
+  SELECT COUNT(DISTINCT chassis) AS distinct_chassis_count
+  FROM public.zakspeed
+  WHERE year = 1987;
+- Result: 1 distinct chassis string
+
+2) The exact chassis string recorded for 1987
+- SQL:
+  SELECT DISTINCT chassis
+  FROM public.zakspeed
+  WHERE year = 1987;
+- Result: zakspeed 861 zakspeed 871
+
+3) Count occurrences of the substring 'zakspeed ' within the 1987 chassis string (to infer number of chassis listed)
+- SQL:
+  SELECT chassis, (LENGTH(chassis) - LENGTH(REPLACE(chassis, 'zakspeed ', ''))) / LENGTH('zakspeed ') AS occurrences
+  FROM public.zakspeed
+  WHERE year = 1987;
+- Result: occurrences = 2, chassis = 'zakspeed 861 zakspeed 871'
+
+4) Extract each chassis mention for 1987 via regex
+- SQL:
+  SELECT UNNEST(REGEXP_MATCHES(chassis, '(zakspeed\s+\d+)', 'g')) AS chassis_match
+  FROM public.zakspeed
+  WHERE year = 1987;
+- Result rows:
+  - zakspeed 861
+  - zakspeed 871
+
+Conclusion:
+- The 1987 entry explicitly lists two chassis: zakspeed 861 and zakspeed 871. Therefore, the claim that there were 2 Zakspeed chassis in 1987 is supported by the data.
+
+Assumptions:
+- The chassis field lists the chassis models associated with that year, and multiple mentions within the field indicate multiple chassis for that year. Counting repeated 'zakspeed ' tokens or extracting '(zakspeed\s+\d+)' matches is a valid way to determine the number of chassis recorded for 1987.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

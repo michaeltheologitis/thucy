@@ -1,0 +1,67 @@
+
+<userQuery>
+<query>
+steve scaini direct one more episode than mike clattenburg
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “steve scaini direct one more episode than mike clattenburg.”
+
+Data source discovery
+- Available database: TabFact (postgres_tabfact29)
+- Relevant table: public.list_of_republic_of_doyle_episodes (columns include: title, "directed by", etc.)
+
+Evidence 1 — Per-director episode counts (handles multiple directors per episode)
+Executed SQL:
+SELECT director_clean, COUNT(*) AS episodes_count
+FROM (
+  SELECT trim(both ' ' FROM regexp_replace(director, '\s*\(.*\)$', '')) AS director_clean
+  FROM (
+    SELECT regexp_split_to_table(regexp_replace(lower("directed by"), '\band\b', ',', 'g'), ',') AS director
+    FROM public.list_of_republic_of_doyle_episodes
+    WHERE "directed by" IS NOT NULL
+  ) t
+) s
+WHERE director_clean IN ('steve scaini', 'mike clattenburg')
+GROUP BY director_clean
+ORDER BY episodes_count DESC;
+
+Result:
+- mike clattenburg — 2 episodes
+- steve scaini — 1 episode
+
+Evidence 2 — Director tokens and associated episode titles
+Executed SQL:
+SELECT DISTINCT lower(trim(token)) AS director_token, title
+FROM public.list_of_republic_of_doyle_episodes,
+LATERAL regexp_split_to_table("directed by", '\s*(?:,|and)\s*') AS token
+WHERE token IS NOT NULL AND token <> ''
+  AND (lower(token) ILIKE '%clattenburg%' OR lower(token) ILIKE '%scaini%')
+ORDER BY director_token, title;
+
+Result:
+- mike clattenburg → “duchess of george”, “fathers and sons”
+- steve scaini → “a horse divided”
+
+Evidence 3 — Raw rows for transparency
+Executed SQL:
+SELECT title, "directed by" FROM public.list_of_republic_of_doyle_episodes
+WHERE "directed by" ILIKE '%Mike Clattenburg%' OR "directed by" ILIKE '%Steve Scaini%';
+
+Result:
+- fathers and sons — mike clattenburg
+- duchess of george — mike clattenburg
+- a horse divided — steve scaini
+
+Conclusion
+- In the available dataset (Republic of Doyle episodes), Mike Clattenburg directed 2 episodes and Steve Scaini directed 1 episode. Therefore, Steve Scaini did not direct one more episode than Mike Clattenburg; in fact, he directed one fewer.
+
+Assumptions
+- Verification is performed against the accessible, authoritative dataset of Republic of Doyle episodes. If the claim was intended to compare their entire careers across all shows, that broader data is not present in the available source; conclusions here pertain to this dataset specifically.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

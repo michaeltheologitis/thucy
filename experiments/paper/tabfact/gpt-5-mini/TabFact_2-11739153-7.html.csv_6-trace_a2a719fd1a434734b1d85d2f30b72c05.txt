@@ -1,0 +1,47 @@
+
+<userQuery>
+<query>
+during the 2007 - 08 minnesota wild season , the difference in the score on february 10 and february 24 be more than 2
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: During the 2007–08 Minnesota Wild season, the difference in the score on February 10 and February 24 was more than 2.
+
+What the data shows
+- February 10 game: Minnesota at St. Louis, final score 2 - 1 (Minnesota wins by 1 goal).
+- February 24 game: Calgary at Minnesota, final score 2 - 1 (Minnesota loses by 1 goal).
+- Goal differential on Feb 10 = +1; on Feb 24 = -1. Neither game had a goal differential > 2. If interpreting the claim as the difference between the two scorelines themselves, both were 2–1, so that difference is 0, not > 2.
+
+Executed SQL (evidence)
+1) Locate both dates and return core fields
+SQL:
+SELECT date, visitor, score, home FROM public.t_2007_08_minnesota_wild_season WHERE date ILIKE '%Feb%' AND (date ILIKE '%10%' OR date ILIKE '%24%') ORDER BY date;
+Result:
+[ {"date": "february 10", "visitor": "minnesota", "score": "2 - 1", "home": "st louis"}, {"date": "february 24", "visitor": "calgary", "score": "2 - 1", "home": "minnesota"} ]
+
+2) Parse scores and compute Minnesota’s goal differential on those dates
+SQL:
+SELECT date, visitor, home, score,
+CAST(trim(split_part(score,'-',1)) AS integer) AS visitor_goals,
+CAST(trim(split_part(score,'-',2)) AS integer) AS home_goals,
+CASE WHEN lower(visitor) = 'minnesota' THEN CAST(trim(split_part(score,'-',1)) AS integer) ELSE CAST(trim(split_part(score,'-',2)) AS integer) END AS minnesota_goals,
+CASE WHEN lower(visitor) = 'minnesota' THEN CAST(trim(split_part(score,'-',2)) AS integer) ELSE CAST(trim(split_part(score,'-',1)) AS integer) END AS opponent_goals,
+(CASE WHEN lower(visitor) = 'minnesota' THEN (CAST(trim(split_part(score,'-',1)) AS integer) - CAST(trim(split_part(score,'-',2)) AS integer)) ELSE (CAST(trim(split_part(score,'-',2)) AS integer) - CAST(trim(split_part(score,'-',1)) AS integer)) END) AS goal_diff
+FROM public.t_2007_08_minnesota_wild_season
+WHERE lower(date) IN ('february 10','february 24');
+Result:
+[ {"date":"february 10","visitor":"minnesota","score":"2 - 1","home":"st louis","visitor_goals":2,"home_goals":1,"minnesota_goals":2,"opponent_goals":1,"goal_diff":1}, {"date":"february 24","visitor":"calgary","score":"2 - 1","home":"minnesota","visitor_goals":2,"home_goals":1,"minnesota_goals":1,"opponent_goals":2,"goal_diff":-1} ]
+
+Conclusion
+- The evidence shows the goal differential on each date was 1 (in magnitude), not more than 2. Therefore, the claim is not supported by the data.
+
+Assumptions
+- Interpreted “difference in the score” primarily as the game’s goal differential on those dates. Even if interpreted as the difference between the two final scorelines across dates, both games ended 2–1, so the difference is 0, not > 2.
+- The table stores scores as visitor_goals - home_goals and dates as lowercase strings (e.g., 'february 10').
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,68 @@
+
+<userQuery>
+<query>
+the 10 li'l grifter job direct by marc roskin originally air july 3 , 2011
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “The 10 Li'l Grifters Job” was directed by Marc Roskin and originally aired on July 3, 2011.
+
+Data sources explored
+- Discovered data source: PostgreSQL database, public schema, with table list_of_leverage_episodes (episodes of the TV series Leverage).
+- Table structure (key columns): title (text), "directed by" (text), "original air date" (text), plus other metadata.
+
+Evidence and executed SQL
+1) Look up the episode by title
+SQL executed:
+SELECT title, season, series, "directed by", "original air date" 
+FROM list_of_leverage_episodes 
+WHERE title ILIKE 'The 10 Li''l Grifters Job';
+Result:
+- title: the 10 li'l grifters job
+- season: 2
+- series: 46
+- directed by: arvin brown
+- original air date: July 3, 2011
+
+2) Cross-check by air date
+SQL executed:
+SELECT title, season, series, "directed by", "written by"
+FROM list_of_leverage_episodes
+WHERE "original air date"::date = '2011-07-03';
+Result:
+- title: The 10 Li'l Grifters Job
+- season: 2
+- series: 46
+- directed by: Arvin Brown
+- written by: Geoffrey Thorne
+
+3) Context around adjacent episodes (to verify director attribution across nearby episodes)
+SQL executed:
+SELECT series, season, title, "directed by", "original air date" 
+FROM list_of_leverage_episodes 
+WHERE series BETWEEN 44 AND 48;
+Results (excerpt):
+- Series 45: The Long Way Down Job — Directed by Dean Devlin — Original Air Date: June 26, 2011
+- Series 46: The 10 Li'l Grifters Job — Directed by Arvin Brown — Original Air Date: July 3, 2011
+- Series 47: The 15 Minutes Job — Directed by Marc Roskin — Original Air Date: July 10, 2011
+- Series 48: The Van Gogh Job — Directed by John Rogers — Original Air Date: July 17, 2011
+
+Assessment
+- Original air date: Supported by the data — July 3, 2011 is correct for “The 10 Li'l Grifters Job”.
+- Director: Not supported — the dataset lists Arvin Brown as the director, not Marc Roskin. Marc Roskin directed the following week’s episode (“The 15 Minutes Job”), not “The 10 Li'l Grifters Job”.
+
+Conclusion
+- The claim contains one correct element (air date) and one incorrect element (director). Therefore, the claim is partly inaccurate.
+
+Assumptions
+- Interpreted the user’s message as a verification request for the Leverage episode titled “The 10 Li'l Grifters Job,” focusing on director and original air date.
+- Treated the table list_of_leverage_episodes as authoritative for episode metadata; parsed the text-form air date as a date for exact matching.
+- Did not rely on the “season” field semantics (as it appears to represent intra-season numbering rather than the production season number) since it is not essential to the claim.
+
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

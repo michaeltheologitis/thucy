@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+there be 24.8 point per game in the selection where rebound per game be 17
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "there be 24.8 point per game in the selection where rebound per game be 17"
+
+Data sources discovered:
+- Database: TabFact (postgres_tabfact24), schema: public
+- Table: list_of_career_achievements_by_dwight_howard
+  - Columns: selection (bigint), month (text), season (text), team record (text), points per game (text), field goal percentage (text), rebounds per game (text), blocks per game (double precision)
+
+Verification steps and evidence:
+1) Check if any row has rebounds per game = 17 (treating the text as a number)
+   - Executed SQL:
+     SELECT count(*) AS cnt
+     FROM public.list_of_career_achievements_by_dwight_howard
+     WHERE trim("rebounds per game") ~ '^[0-9]+(\.[0-9]+)?$'
+       AND ("rebounds per game")::numeric = 17;
+   - Result: cnt = 0 (no rows)
+
+2) Enumerate selections with points per game and rebounds per game to inspect values
+   - Executed SQL:
+     SELECT selection, season, "points per game", "rebounds per game"
+     FROM public.list_of_career_achievements_by_dwight_howard
+     ORDER BY selection ASC;
+   - Returned rows:
+     - selection: 1, season: 2005 - 06 (1 / 1), points per game: 18.1, rebounds per game: 14.0
+     - selection: 2, season: 2006 - 07 (1 / 1), points per game: 17.1, rebounds per game: 13.6
+     - selection: 3, season: 2007 - 08 (1 / 2), points per game: 23.8, rebounds per game: 15.0
+     - selection: 4, season: 2007 - 08 (2 / 2), points per game: 21.7, rebounds per game: 16.1
+     - selection: 5, season: 2010 - 11 (1 / 2), points per game: 21.8 (5th), rebounds per game: 12.1 (4th in league)
+   - Observation: No row has rebounds per game = 17, nor points per game = 24.8.
+
+3) Explicitly test for any row with points per game = 24.8
+   - Executed SQL (numeric comparison after cleaning text):
+     SELECT selection, season, "points per game", "rebounds per game"
+     FROM public.list_of_career_achievements_by_dwight_howard
+     WHERE NULLIF(regexp_replace("points per game", '[^0-9\.\-]', '', 'g'), '')::numeric = 24.8;
+   - Result: no rows
+   - Executed SQL (text contains '24.8'):
+     SELECT selection, season, "points per game", "rebounds per game"
+     FROM public.list_of_career_achievements_by_dwight_howard
+     WHERE "points per game" ILIKE '%24.8%';
+   - Result: no rows
+
+Conclusion:
+- The dataset contains no selection where rebounds per game equals 17, and no entry with points per game equal to 24.8. Therefore, the claim is not supported by the data.
+
+Assumptions made:
+- Interpreted "selection" as the selection column in the table list_of_career_achievements_by_dwight_howard.
+- Interpreted "rebound per game be 17" as a numeric value of 17.0 for the rebounds per game field, comparing numerically after validating and casting the text column.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

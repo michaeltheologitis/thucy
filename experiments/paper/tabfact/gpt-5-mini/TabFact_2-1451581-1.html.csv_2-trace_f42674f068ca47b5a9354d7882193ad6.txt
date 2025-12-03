@@ -1,0 +1,60 @@
+
+<userQuery>
+<query>
+shanghai pudong international airport rank 3rd in total cargo with 2939157 metric tonne
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "shanghai pudong international airport rank 3rd in total cargo with 2939157 metric tonne"
+
+Data sources explored
+- Discovered available database: postgres_tabfact32 (public schema). Identified table: world_s_busiest_airports_by_cargo_traffic.
+- Inspected table schema to understand columns and units.
+
+Schema details consulted
+- Tool: Schema inspection
+- Findings:
+  - Table: public.world_s_busiest_airports_by_cargo_traffic
+  - Columns: rank (bigint), airport (text), code (iata / icao) (text), total cargo (metric tonnes) (bigint), % change (text)
+  - Units: total cargo is measured in metric tonnes
+  - No year column is present (the dataset does not specify the year covered)
+
+Evidence 1: Direct lookup of Shanghai Pudong International Airport
+- Executed SQL:
+  SELECT "airport", "rank", "code (iata / icao)", "total cargo (metric tonnes)" FROM public.world_s_busiest_airports_by_cargo_traffic WHERE "airport" ILIKE '%Shanghai Pudong%';
+- Result:
+  - airport: shanghai pudong international airport
+  - rank: 3
+  - code: pvg / zspd
+  - total cargo (metric tonnes): 2939157
+
+Evidence 2: Contextual ranking (top 5 by rank)
+- Executed SQL (column confirmation):
+  SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='world_s_busiest_airports_by_cargo_traffic' ORDER BY ordinal_position;
+- Executed SQL (top 5 by rank):
+  SELECT "rank","airport","code (iata / icao)","total cargo (metric tonnes)"
+  FROM public.world_s_busiest_airports_by_cargo_traffic
+  ORDER BY CAST("rank" AS integer) ASC
+  LIMIT 5;
+- Result (top 5):
+  1) hong kong international airport — 4,062,261 metric tonnes
+  2) memphis international airport — 3,916,535 metric tonnes
+  3) shanghai pudong international airport — 2,939,157 metric tonnes
+  4) incheon international airport — 2,456,724 metric tonnes
+  5) ted stevens anchorage international airport — 2,449,551 metric tonnes
+
+Analysis
+- The table explicitly lists "shanghai pudong international airport" as rank 3 with total cargo of 2,939,157 metric tonnes. The ranking context confirms this position relative to other airports.
+
+Conclusion
+- The claim is supported by the data: Shanghai Pudong International Airport is ranked 3rd with 2,939,157 metric tonnes of total cargo in the dataset.
+
+Assumptions / Notes
+- The dataset does not specify the year of these cargo figures; verification pertains to the values as recorded in the available table. The difference between "metric tonne" (singular) and "metric tonnes" (plural) is treated as non-substantive wording.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+the production code for the episode that have 23.9 million us viewer be 467661
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim: “the production code for the episode that have 23.9 million us viewer be 467661.”
+- Finding: The episode with 23.9 million US viewers in the available dataset has production code 467659, not 467661.
+
+Data source discovery
+- Discovered data source: TabFact PostgreSQL instance with a public schema containing a table: friends_season_5.
+
+Schema inspection
+Executed SQL:
+SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'friends_season_5';
+
+Result (abridged):
+- Columns: "no in series" (bigint), "no in season" (bigint), "title" (text), "directed by" (text), "written by" (text), "original air date" (text), "production code" (bigint), "us viewers (millions)" (double precision)
+
+Evidence query 1: Exact match on 23.9 million
+Executed SQL:
+SELECT "title", "no in series", "no in season", "production code", "us viewers (millions)" 
+FROM friends_season_5
+WHERE "us viewers (millions)" = 23.9;
+
+Result:
+- title: the one with all the thanksgivings
+- no in series: 105
+- no in season: 8
+- production code: 467659
+- us viewers (millions): 23.9
+
+Evidence query 2: Range check around 23.9
+Executed SQL:
+SELECT "title", "no in season", "production code", "us viewers (millions)" 
+FROM friends_season_5 
+WHERE "us viewers (millions)" BETWEEN 23.85 AND 23.95;
+
+Result:
+- title: the one with all the thanksgivings; no in season: 8; production code: 467659; us viewers (millions): 23.9
+
+Conclusion
+- The dataset shows that the episode with 23.9 million US viewers has production code 467659. Therefore, the claim that it is 467661 is contradicted by the data.
+
+Assumptions
+- The claim was interpreted against the available data source (TabFact) which contains Friends Season 5 episode data. No other show/season datasets were available via the provided tools.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

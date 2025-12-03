@@ -1,0 +1,47 @@
+
+<userQuery>
+<query>
+there be 4 episode in region 4 on march 13 , 2008
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “there be 4 episode in region 4 on march 13 , 2008.”
+
+Summary conclusion: The data shows a record with Region 4 date “march 13 , 2008” and episodes = 4. The claim is supported by the evidence below.
+
+Data source discovery
+- Available data source: a PostgreSQL database with table public.my_info_table.
+
+Schema context
+- Table: public.my_info_table
+  - Columns: volume (bigint), discs (bigint), episodes (bigint), "region 1" (text), "region 2" (text), "region 4" (text)
+  - No primary/foreign keys
+
+Evidence and executed SQL
+1) Table size (context only)
+- SQL: SELECT COUNT(*) FROM public.my_info_table;
+- Result: 5 rows
+
+2) Region 4 values containing year 2008 (to identify relevant dates)
+- SQL: SELECT DISTINCT "region 4" FROM public.my_info_table WHERE "region 4" LIKE '%2008%' LIMIT 20;
+- Result examples: "june 19 , 2008"; "march 13 , 2008"
+
+3) Match Region 4 entries corresponding to March 13, 2008 and check episode count
+- SQL: SELECT volume, discs, episodes, "region 4" FROM public.my_info_table WHERE "region 4" ~* 'March[ ]*,?[ ]*13[ ]*,?[ ]*2008';
+- Result:
+  - volume: 3; discs: 1; episodes: 4; region 4: "march 13 , 2008"
+
+Assessment
+- The record matching Region 4 date “march 13 , 2008” has episodes = 4. This directly supports the claim that there are 4 episodes in Region 4 on that date.
+
+Assumptions
+- “region 4” in the claim refers to the "region 4" text column in public.my_info_table.
+- The phrase “on march 13 , 2008” refers to the date embedded in the "region 4" column’s text value.
+- “4 episode” means the episodes column equals 4 for the matching record.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

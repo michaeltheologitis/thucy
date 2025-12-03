@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+1416 be the second highest number of vote per candidate
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “1416 is the second-highest number of votes per candidate.” In the available dataset, the relevant field is “average votes per candidate” for Green Party of England and Wales election results by year.
+
+Data source discovered:
+- Database: TabFact (PostgreSQL), schema: public
+- Table: public.green_party_of_england_and_wales_election_results
+  Columns include: year (text), candidates (bigint), "total votes" (bigint), "average votes per candidate" (bigint), "% of total vote" (double precision), "average % of vote per candidate" (double precision), "saved deposits" (bigint), "number of mps" (bigint)
+
+Evidence and executed SQL:
+1) Distinct values of “average votes per candidate” with associated years, sorted descending
+SQL:
+SELECT "average votes per candidate", array_agg(year ORDER BY year) AS years
+FROM public.green_party_of_england_and_wales_election_results
+GROUP BY "average votes per candidate"
+ORDER BY "average votes per candidate" DESC;
+Result (average votes per candidate -> years):
+- 1416 -> ["2005"]
+- 1148 -> ["2001"]
+- 763  -> ["1974 - 02"]
+- 753  -> ["1979"]
+- 694  -> ["1997"]
+- 675  -> ["1987"]
+- 672  -> ["1992"]
+- 498  -> ["1983"]
+- 399  -> ["1974 - 10"]
+
+2) Top two distinct “average votes per candidate” values
+SQL:
+SELECT DISTINCT "average votes per candidate" FROM public.green_party_of_england_and_wales_election_results WHERE "average votes per candidate" IS NOT NULL ORDER BY "average votes per candidate" DESC LIMIT 2;
+Result:
+[{"average votes per candidate":1416},{"average votes per candidate":1148}]
+
+3) Year(s) for the second-highest distinct value (1148)
+SQL:
+SELECT year, candidates, "average votes per candidate" FROM public.green_party_of_england_and_wales_election_results WHERE "average votes per candidate" = 1148;
+Result:
+[{"average votes per candidate":1148,"candidates":145,"year":"2001"}]
+
+Conclusion:
+- The highest average votes per candidate is 1416 (year 2005).
+- The second-highest distinct average votes per candidate is 1148 (year 2001).
+- Therefore, the claim that “1416 is the second highest number of vote per candidate” is not supported by the data; 1416 is the highest, not the second highest.
+
+Assumptions made:
+- “number of vote per candidate” refers to the column “average votes per candidate”.
+- “second highest” is interpreted as the second-highest distinct value across years.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

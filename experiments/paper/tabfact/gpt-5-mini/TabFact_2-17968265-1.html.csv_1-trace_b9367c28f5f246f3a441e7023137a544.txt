@@ -1,0 +1,50 @@
+
+<userQuery>
+<query>
+114 be play when point be 107 and when 1987 - 88 be 31
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Interpreted claim: There exists a row where played = 114, points = 107, and the value for the 1987 - 88 season equals 31 (in the 1988–89 Argentine Primera División table).
+
+Data source inspected
+- Database: TabFact
+- Schema: public
+- Table: t_1988_89_argentine_primera_divisi_n
+  - Columns: team (text), average (double precision), points (bigint), played (bigint), "1986 - 87" (text), "1987 - 88" (text), "1988 - 89" (bigint)
+
+Evidence
+1) Check for an exact match on all three conditions
+SQL:
+SELECT COUNT(*) AS match_count FROM public.t_1988_89_argentine_primera_divisi_n WHERE played = 114 AND points = 107 AND "1987 - 88" = '31';
+Result:
+match_count = 0
+
+2) Inspect rows that match the first two conditions (played = 114, points = 107)
+SQL:
+SELECT * FROM public.t_1988_89_argentine_primera_divisi_n WHERE played = 114 AND points = 107;
+Result (one row):
+- team: ferro carril oeste
+- average: 0.939
+- points: 107
+- played: 114
+- "1986 - 87": 44
+- "1987 - 88": 33
+- "1988 - 89": 30
+
+Findings
+- No row satisfies all three conditions simultaneously (played = 114, points = 107, and 1987 - 88 = 31).
+- The closest row (ferro carril oeste) has 1987 - 88 = 33, not 31.
+
+Conclusion
+- The claim is contradicted by the data.
+
+Assumptions
+- Interpreted the statement as an assertion about a single row in the table with exact values: played = 114, points = 107, and the text field "1987 - 88" equal to '31'. If a numeric casting of the season column or a different comparison (e.g., >=, <=) was intended, the current evidence targets exact equality in the available dataset.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

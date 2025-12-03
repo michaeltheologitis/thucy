@@ -1,0 +1,63 @@
+
+<userQuery>
+<query>
+manchester unite have beat portsmouth 2 out of 2 time since 13 august 2005
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "manchester unite have beat portsmouth 2 out of 2 time since 13 august 2005"
+
+Data source discovery and schema understanding:
+- Available data source: PostgreSQL database TabFact (postgres_tabfact2), schema public.
+- Relevant table (as discovered): public.t_2005_06_manchester_united_f_c_season with columns: date (text), opponents (text), h / a (text), result f - a (text), attendance (bigint), league position (text). No related fixture/teams tables; all 2005–06 Manchester United matches are in this single table.
+
+Evidence from executed SQL queries:
+1) Locate all Manchester United matches versus Portsmouth in the 2005–06 season
+SQL executed:
+SELECT "date", "h / a", "opponents", "result f - a" 
+FROM public.t_2005_06_manchester_united_f_c_season
+WHERE "opponents" ILIKE '%Portsmouth%';
+
+Result (2 rows):
+- date: 3 december 2005 | h | opponents: portsmouth | result f - a: 3 - 0
+- date: 11 february 2006 | a | opponents: portsmouth | result f - a: 3 - 1
+
+2) Filter those matches to on/after 2005-08-13, parse dates/scores, and compute win flags; then aggregate totals
+SQL executed (detailed rows):
+SELECT "date", "h / a", "result f - a" AS result,
+       to_date("date", 'FMDD FMMonth YYYY') AS parsed_date,
+       split_part("result f - a", ' - ', 1)::int AS goals_for,
+       split_part("result f - a", ' - ', 2)::int AS goals_against,
+       CASE WHEN split_part("result f - a", ' - ', 1)::int > split_part("result f - a", ' - ', 2)::int THEN 1 ELSE 0 END AS is_win
+FROM public.t_2005_06_manchester_united_f_c_season
+WHERE opponents = 'portsmouth'
+  AND to_date("date", 'FMDD FMMonth YYYY') >= DATE '2005-08-13'
+ORDER BY parsed_date;
+
+Returned rows:
+- 2005-12-03 | h | 3 - 0 | win_flag = 1
+- 2006-02-11 | a | 3 - 1 | win_flag = 1
+
+SQL executed (aggregate totals):
+SELECT COUNT(*) AS total_matches, SUM(CASE WHEN split_part("result f - a", ' - ', 1)::int > split_part("result f - a", ' - ', 2)::int THEN 1 ELSE 0 END) AS total_wins
+FROM public.t_2005_06_manchester_united_f_c_season
+WHERE opponents = 'portsmouth'
+  AND to_date("date", 'FMDD FMMonth YYYY') >= DATE '2005-08-13';
+
+Aggregate result:
+- total_matches: 2
+- total_wins: 2
+
+Conclusion:
+- In the available dataset (Manchester United 2005–06 season), since 13 August 2005 they played Portsmouth twice and won both matches (2 out of 2). This supports the claim within the scope of the data accessible here.
+
+Assumptions and scope notes:
+- The accessible database contains only the 2005–06 Manchester United season. If the claim intended to include seasons after 2005–06, that is beyond the available data; the verdict reflects only what is verifiable from this dataset.
+- Interpreted "result f - a" as Manchester United goals first and opponent goals second, regardless of home/away, which aligns with the observed results.
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

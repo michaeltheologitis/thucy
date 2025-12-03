@@ -1,0 +1,42 @@
+
+<userQuery>
+<query>
+the production code for the episode direct by robert duncan mcneill be bcw403
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the production code for the episode directed by Robert Duncan McNeill is BCW403.”
+
+Data source discovery
+- Available source: postgres_tabfact29 (public schema). Identified table relevant to TV episodes: public.list_of_white_collar_episodes.
+
+Schema inspection
+- Table: public.list_of_white_collar_episodes
+  - Columns: "no in series" (bigint), "no in season" (bigint), "title" (text), "directed by" (text), "written by" (text), "us viewers (million)" (double precision), "original air date" (text), "production code" (text)
+
+Evidence 1: Which White Collar episode(s) were directed by Robert Duncan McNeill, and what are their production codes?
+- Result:
+  - title: parting shots; no in season: 4; no in series: 50; production code: bcw404; is_BCW403: false
+- Executed SQL:
+  SELECT "title", "no in season", "no in series", "production code", ("production code" = 'BCW403') AS is_BCW403
+  FROM public.list_of_white_collar_episodes
+  WHERE "directed by" ILIKE '%Robert Duncan McNeill%';
+
+Evidence 2: Which episode has production code BCW403, and who directed it?
+- Result:
+  - title: diminishing returns; no in season: 3; no in series: 49; directed by: stefan schwartz; production code: BCW403
+- Executed SQL:
+  SELECT "title", "no in season", "no in series", "directed by", "production code" FROM public.list_of_white_collar_episodes WHERE "production code" ILIKE 'BCW403';
+
+Conclusion
+- The White Collar episode directed by Robert Duncan McNeill is “parting shots” with production code bcw404. The production code BCW403 corresponds to “diminishing returns,” directed by Stefan Schwartz. Therefore, the claim that the episode directed by Robert Duncan McNeill has production code BCW403 is contradicted by the data.
+
+Assumptions
+- Interpreted the claim within the scope of the available authoritative dataset (White Collar episodes). Name matching for director used case-insensitive substring search (ILIKE).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

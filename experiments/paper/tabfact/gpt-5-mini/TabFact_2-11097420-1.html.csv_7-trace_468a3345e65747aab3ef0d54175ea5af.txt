@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+rankin county be home to multiple project that be propose and list
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: Rankin County is home to multiple proposed projects, and the user wants them listed. I interpret “projects” as Superfund cleanup sites with a non-empty Proposed (NPL) date in the Mississippi Superfund sites table.
+
+Data source discovered:
+- Database: TabFact (public schema)
+- Table: list_of_superfund_sites_in_mississippi
+- Relevant columns: name, cerclis id, county, proposed, listed, construction completed, partially deleted, deleted
+
+Evidence and results (Rankin County entries with a non-empty Proposed value):
+- flowood site (CERCLIS ID: msd980710941) — Proposed: 09 / 08 / 1983 — County: rankin
+- sonford products (CERCLIS ID: msd086556388) — Proposed: 09 / 27 / 2006 — County: rankin
+Total proposed sites in Rankin County: 2
+
+Executed SQL (evidence):
+1) Listing query
+SELECT "name", "cerclis id", "county", "proposed"
+FROM public.list_of_superfund_sites_in_mississippi
+WHERE lower(coalesce("county", '')) LIKE '%rankin%'
+  AND "proposed" IS NOT NULL
+  AND trim("proposed") <> ''
+ORDER BY "name";
+
+Rows returned:
+[ {"cerclis id":"msd980710941","county":"rankin","name":"flowood site","proposed":"09 / 08 / 1983"},
+  {"cerclis id":"msd086556388","county":"rankin","name":"sonford products","proposed":"09 / 27 / 2006"} ]
+
+2) Count query
+SELECT COUNT(*) AS cnt
+FROM public.list_of_superfund_sites_in_mississippi
+WHERE lower(coalesce("county", '')) LIKE '%rankin%'
+  AND "proposed" IS NOT NULL
+  AND trim("proposed") <> '';
+
+Count returned:
+[ {"cnt":2} ]
+
+Conclusion: The data show that Rankin County has multiple proposed Superfund sites (2). The claim that Rankin County is home to multiple proposed projects and to list them is supported by the table.
+
+Assumptions made:
+- “Projects” refers to Superfund sites in the available Mississippi Superfund table.
+- “Proposed” is interpreted as a non-empty Proposed (NPL) field, regardless of later status changes.
+- County matching is case-insensitive and uses substring matching for 'rankin'.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

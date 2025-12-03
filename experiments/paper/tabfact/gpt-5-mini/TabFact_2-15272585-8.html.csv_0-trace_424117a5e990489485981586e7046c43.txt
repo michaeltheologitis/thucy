@@ -1,0 +1,54 @@
+
+<userQuery>
+<query>
+galina voskoboeva play a total of 3 game on a hard tennis court
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim: “galina voskoboeva play a total of 3 game on a hard tennis court.”
+- Interpretation: Count of matches that Galina Voskoboeva played on hard surfaces (including indoor hard).
+- Result: The data shows 3 matches on hard surfaces.
+
+Data source exploration
+- Discovered data environment: TabFact PostgreSQL database (accessed as postgres_tabfact10), schema: public.
+- Relevant table: public.galina_voskoboeva (columns: outcome, date, tournament, surface, opponent, score).
+
+Evidence and executed SQL
+1) Distinct surfaces with counts
+SQL:
+SELECT surface, COUNT(*) AS count
+FROM public.galina_voskoboeva
+GROUP BY surface
+ORDER BY count DESC;
+Result:
+- surface = "hard (i)" → count = 2
+- surface = "clay" → count = 2
+- surface = "hard" → count = 1
+
+2) Identify surface values considered “hard” (case-insensitive substring match)
+SQL:
+SELECT DISTINCT surface FROM galina_voskoboeva WHERE surface ILIKE '%hard%';
+Result:
+- hard
+- hard (i)
+
+3) Count matches on any hard surface (including indoor hard)
+SQL:
+SELECT COUNT(*) AS hard_match_count FROM galina_voskoboeva WHERE surface ILIKE '%hard%';
+Result:
+- hard_match_count: 3
+
+Conclusion
+- The table lists 1 match on “hard” and 2 matches on “hard (i)” (indoor hard), totaling 3 matches on hard courts. This supports the claim.
+
+Assumptions
+- “game” is interpreted as “match.”
+- “hard tennis court” includes both outdoor and indoor hard surfaces (e.g., “hard (i)”).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

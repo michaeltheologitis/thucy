@@ -1,0 +1,121 @@
+
+<userQuery>
+<query>
+from 2007 - 2011 , olga govortsova 's wta year - end ranking have never go up
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: From 2007–2011, Olga Govortsova’s WTA year-end ranking never went up (i.e., never improved year-over-year).
+
+Finding: Supported by the data. Her year-end rankings were 49 (2007), 49 (2008), 52 (2009), 74 (2010), 114 (2011). There were no years with an improvement (a lower numerical rank than the prior year); one tie (2008 vs 2007) and then consecutive declines.
+
+Evidence and executed SQL
+
+1) Inspect the Olga Govortsova table
+- Executed SQL:
+SELECT * FROM public.olga_govortsova;
+- Key result rows (tournament | 2007 | 2008 | 2009 | 2010 | 2011):
+  year end ranking | 49 | 49 | 52 | 74 | 114
+
+2) Retrieve only the year-end ranking row
+- Executed SQL:
+SELECT tournament, "2007","2008","2009","2010","2011"
+FROM public.olga_govortsova
+WHERE lower(tournament) = 'year end ranking';
+- Result:
+[{"2007":"49","2008":"49","2009":"52","2010":"74","2011":"114","tournament":"year end ranking"}]
+
+3) Unpivot ranks by year (2007–2011)
+- Executed SQL:
+SELECT '2007' AS year, NULLIF("2007",'')::integer AS rank
+FROM public.olga_govortsova WHERE lower(tournament)='year end ranking'
+UNION ALL
+SELECT '2008' AS year, NULLIF("2008",'')::integer AS rank
+FROM public.olga_govortsova WHERE lower(tournament)='year end ranking'
+UNION ALL
+SELECT '2009' AS year, NULLIF("2009",'')::integer AS rank
+FROM public.olga_govortsova WHERE lower(tournament)='year end ranking'
+UNION ALL
+SELECT '2010' AS year, NULLIF("2010",'')::integer AS rank
+FROM public.olga_govortsova WHERE lower(tournament)='year end ranking'
+UNION ALL
+SELECT '2011' AS year, NULLIF("2011",'')::integer AS rank
+FROM public.olga_govortsova WHERE lower(tournament)='year end ranking'
+ORDER BY year;
+- Result:
+[{"rank":49,"year":"2007"},{"rank":49,"year":"2008"},{"rank":52,"year":"2009"},{"rank":74,"year":"2010"},{"rank":114,"year":"2011"}]
+
+4) Year-over-year change and improvement flag
+- Executed SQL:
+WITH ranks AS (
+  SELECT '2007' AS year, NULLIF("2007",'')::integer AS rank
+  FROM public.olga_govortsova WHERE lower(tournament)='year end ranking'
+  UNION ALL
+  SELECT '2008' AS year, NULLIF("2008",'')::integer AS rank
+  FROM public.olga_govortsova WHERE lower(tournament)='year end ranking'
+  UNION ALL
+  SELECT '2009' AS year, NULLIF("2009",'')::integer AS rank
+  FROM public.olga_govortsova WHERE lower(tournament)='year end ranking'
+  UNION ALL
+  SELECT '2010' AS year, NULLIF("2010",'')::integer AS rank
+  FROM public.olga_govortsova WHERE lower(tournament)='year end ranking'
+  UNION ALL
+  SELECT '2011' AS year, NULLIF("2011",'')::integer AS rank
+  FROM public.olga_govortsova WHERE lower(tournament)='year end ranking'
+)
+SELECT year,
+       rank,
+       LAG(rank) OVER (ORDER BY year::int) AS prev_rank,
+       (rank - LAG(rank) OVER (ORDER BY year::int)) AS change,
+       CASE
+         WHEN LAG(rank) OVER (ORDER BY year::int) IS NULL THEN NULL
+         WHEN rank < LAG(rank) OVER (ORDER BY year::int) THEN TRUE
+         ELSE FALSE
+       END AS improved
+FROM ranks
+ORDER BY year::int;
+- Result:
+[{"year":"2007","rank":49,"prev_rank":null,"change":null,"improved":null},
+ {"year":"2008","rank":49,"prev_rank":49,"change":0,"improved":false},
+ {"year":"2009","rank":52,"prev_rank":49,"change":3,"improved":false},
+ {"year":"2010","rank":74,"prev_rank":52,"change":22,"improved":false},
+ {"year":"2011","rank":114,"prev_rank":74,"change":40,"improved":false}]
+
+5) Count of improvement years
+- Executed SQL:
+WITH ranks AS (
+  SELECT '2007' AS year, NULLIF("2007",'')::integer AS rank
+  FROM public.olga_govortsova WHERE lower(tournament)='year end ranking'
+  UNION ALL
+  SELECT '2008' AS year, NULLIF("2008",'')::integer AS rank
+  FROM public.olga_govortsova WHERE lower(tournament)='year end ranking'
+  UNION ALL
+  SELECT '2009' AS year, NULLIF("2009",'')::integer AS rank
+  FROM public.olga_govortsova WHERE lower(tournament)='year end ranking'
+  UNION ALL
+  SELECT '2010' AS year, NULLIF("2010",'')::integer AS rank
+  FROM public.olga_govortsova WHERE lower(tournament)='year end ranking'
+  UNION ALL
+  SELECT '2011' AS year, NULLIF("2011",'')::integer AS rank
+  FROM public.olga_govortsova WHERE lower(tournament)='year end ranking'
+), diffs AS (
+  SELECT year, rank, LAG(rank) OVER (ORDER BY year::int) AS prev_rank
+  FROM ranks
+)
+SELECT COUNT(*) AS improvement_years
+FROM diffs
+WHERE prev_rank IS NOT NULL AND rank < prev_rank;
+- Result: [{"improvement_years":0}]
+
+Conclusion: The data show zero improvement years from 2007 to 2011; thus the statement that her year-end ranking “never went up” over that span is supported.
+
+Assumptions:
+- “Go up” is interpreted as improving to a higher standing, i.e., a lower numerical rank (closer to 1).
+- The “year end ranking” row represents Olga Govortsova’s official WTA year-end singles rankings for the given years.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

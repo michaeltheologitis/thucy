@@ -1,0 +1,47 @@
+
+<userQuery>
+<query>
+the vctp 20 mm (79in) rh - 202 autocannon do not have 75 km / h (47 mph) as the vcrt
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The user asserts that the VCTP variant (armed with a “20 mm (79in) rh - 202 autocannon”) does not have a 75 km/h (47 mph) top speed like the VCRT.
+
+Data source exploration
+- Discovered data sources: PostgreSQL database tabfact23 with schema public and table public.tam_tank.
+- Schema (from schema discovery): Table tam_tank has text columns: vctp, "vca 155", vctm, vcpc, vclc, vcrt.
+
+Evidence from the database
+1) Full table contents (shows speeds per variant)
+Executed SQL:
+SELECT * FROM public.tam_tank;
+Key relevant outputs (subset focusing on speed and identification rows):
+- Row with armament (VCTP): vctp = "20 mm (79in) rh - 202 autocannon" (confirms we are referencing the VCTP variant in question)
+- Row with speed: vctp = "75 km / h (47 mph)"; vcrt = "75 km / h (47 mph)"
+
+2) Targeted speed check for VCTP vs VCRT
+Executed SQL:
+SELECT vctp, vcrt FROM public.tam_tank WHERE vctp LIKE '%km / h%';
+Result:
+- VCTP: 75 km / h (47 mph)
+- VCRT: 75 km / h (47 mph)
+
+3) Targeted armament check to tie the VCTP entry to the 20 mm RH-202 autocannon
+Executed SQL:
+SELECT vctp FROM tam_tank WHERE vctp LIKE '%rh - 202%';
+Result:
+- VCTP: 20 mm (79in) rh - 202 autocannon
+
+Conclusion
+- The authoritative data show that both the VCTP and VCRT have a listed top speed of 75 km/h (47 mph). Therefore, the claim that the VCTP does not have 75 km/h like the VCRT is contradicted by the data.
+
+Assumptions made
+- Interpreted the claim as referring to top speed equivalence between VCTP and VCRT.
+- Interpreted the fifth row of the tam_tank table (entries containing "km / h") as the top speed attribute across variants.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

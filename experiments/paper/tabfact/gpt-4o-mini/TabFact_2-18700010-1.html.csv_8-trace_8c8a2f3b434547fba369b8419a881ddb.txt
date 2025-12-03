@@ -1,0 +1,95 @@
+
+<userQuery>
+<query>
+there be 2 player with the highest number of total goal ian robin and chris topping
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “there be 2 player with the highest number of total goal ian robin and chris topping”
+
+Summary of findings
+- The dataset available is a single table for Huddersfield Town’s 1979–80 season: public.t_1979_80_huddersfield_town_f_c_season. It contains player names and goals by competition, plus a total goals column.
+- The maximum total goals scored by any player in this dataset is 27, and only one player achieved this: Ian Robins. Chris Topping scored 0 total goals.
+- Therefore, there are not two joint top scorers; there is only one, and it is Ian Robins (not “Ian Robin”).
+
+Evidence and executed SQL
+1) Find the maximum total goals
+SQL:
+SELECT MAX("total goals") AS max_goals
+FROM t_1979_80_huddersfield_town_f_c_season;
+Result:
+- max_goals = 27
+
+2) List all players who have that maximum total goals
+SQL:
+SELECT name
+FROM t_1979_80_huddersfield_town_f_c_season
+WHERE "total goals" = (SELECT MAX("total goals") FROM t_1979_80_huddersfield_town_f_c_season);
+Result:
+- Ian Robins
+
+3) Count/list confirmation of players at the maximum
+SQL:
+SELECT name, "total goals"
+FROM t_1979_80_huddersfield_town_f_c_season
+WHERE "total goals" = (
+    SELECT MAX("total goals")
+    FROM t_1979_80_huddersfield_town_f_c_season
+);
+Result:
+- 1 row: Ian Robins — total goals 27
+
+4) Show all players and their total goals (independently computed from components) for context
+SQL:
+SELECT name, (COALESCE("league goals", 0) + COALESCE("fa cup goals", 0) + COALESCE("league cup goals", 0)) AS total_goals
+FROM t_1979_80_huddersfield_town_f_c_season
+ORDER BY total_goals DESC, name ASC;
+Excerpt of results (top to lower):
+- Ian Robins — 27
+- Peter Fletcher — 18
+- Steve Kindon — 14
+- David Cowling — 10
+- Brian Stanton — 9
+- Dave Sutton — 7
+- Peter Hart — 5
+- Ian Holmes — 4
+- Mick Laverick — 4
+- Malcolm Brown — 3
+- Keith Hanvey — 2
+- Fred Robinson — 1
+- Alan Starling — 0
+- Andy Rankin — 0
+- Bernard Purdie — 0
+- Chris Topping — 0
+- Jim Branagan — 0
+- Tommy Smith — 0
+
+5) Verify Chris Topping’s row directly (case/space-insensitive)
+SQL:
+SELECT name, "league goals", "fa cup goals", "league cup goals", "total goals"
+FROM public.t_1979_80_huddersfield_town_f_c_season
+WHERE TRIM(LOWER(name)) = TRIM(LOWER('Chris Topping'));
+Result:
+- name: chris topping; league goals: 0; fa cup goals: 0; league cup goals: 0; total goals: 0
+
+6) Verify Ian Robins’ row directly
+SQL:
+SELECT name, "league goals", "fa cup goals", "league cup goals", "total goals"
+FROM t_1979_80_huddersfield_town_f_c_season
+WHERE LOWER(name) = LOWER('Ian Robins');
+Result:
+- name: Ian Robins; league goals: 25; fa cup goals: 0; league cup goals: 2; total goals: 27
+
+Conclusion
+- The data shows only one top scorer by total goals (27): Ian Robins. Chris Topping scored 0. The claim that there are two joint top scorers, “ian robin and chris topping,” is contradicted by the data on hand.
+
+Assumptions made
+- “total goal” is interpreted as the “total goals” column in the 1979–80 Huddersfield Town FC season dataset (sum across all competitions in that season).
+- The names are matched to dataset entries: “ian robin” interpreted as “Ian Robins,” and “chris topping” as “Chris Topping.”
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

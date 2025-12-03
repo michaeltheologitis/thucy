@@ -1,0 +1,66 @@
+
+<userQuery>
+<query>
+the toronto blue jay play in 8 game with an attendance greater than 5000 in may of the 1991 season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "the toronto blue jay play in 8 game with an attendance greater than 5000 in may of the 1991 season"
+
+Data source discovery and schema inspection
+- Discovered data source: TabFact (public schema). A relevant table exists: t_1991_toronto_blue_jays_season with columns: date (text), opponent (text), score (text), loss (text), attendance (bigint), record (text). This table contains per-game data for the 1991 Toronto Blue Jays, including attendance.
+
+Step 1 — Inspect sample rows to understand date format and attendance values
+SQL executed:
+SELECT date, opponent, score, loss, attendance, record
+FROM t_1991_toronto_blue_jays_season
+LIMIT 10;
+Result excerpt (date and attendance shown):
+- may 1 | 33439
+- may 2 | 22896
+- may 3 | 20809
+- may 4 | 22628
+- may 5 | 22588
+- may 7 | 44622
+- may 8 | 43211
+- may 9 | 47236
+- may 10 | 50198
+- may 11 | 50206
+Observation: Dates are stored as lowercase month name plus day number (e.g., "may 1"); attendance values are well above 5,000 in these samples.
+
+Step 2 — List May rows to confirm matching and inspect attendance
+SQL executed:
+SELECT date, attendance FROM t_1991_toronto_blue_jays_season WHERE date ILIKE 'may%' ORDER BY date LIMIT 50;
+Result excerpt (date and attendance):
+may 1 (33439), may 2 (22896), may 3 (20809), may 4 (22628), may 5 (22588), may 7 (44622), may 8 (43211), may 9 (47236), may 10 (50198), may 11 (50206), may 12 (50108), may 13 (44275), may 14 (43357), may 15 (50113), may 17 (30095), may 18 (34861), may 19 (41015), may 20 (24631), may 21 (22738), may 22 (34028), may 24 (26408), may 25 (36732), may 26 (45307), may 28 (50299), may 29 (50262), may 30 (50271), may 31 (50252)
+Observation: All shown May attendances are > 5,000.
+
+Step 3 — Count total May games
+SQL executed:
+SELECT COUNT(*) AS total_may_games FROM t_1991_toronto_blue_jays_season WHERE date ILIKE 'may%';
+Result:
+- total_may_games: 27
+
+Step 4 — Count May games with attendance > 5000
+SQL executed:
+SELECT COUNT(*) AS may_games_att_gt_5000 FROM t_1991_toronto_blue_jays_season WHERE date ILIKE 'may%' AND attendance > 5000;
+Result:
+- may_games_att_gt_5000: 27
+
+Assessment
+- The claim states there were 8 games with attendance greater than 5,000 in May 1991.
+- The data shows there were 27 May games, and all 27 had attendance > 5,000.
+Conclusion: The claim is contradicted by the data.
+
+Assumptions
+- "May" games were identified by date ILIKE 'may%' because the date column stores month/day as text (e.g., "may 1").
+- "Greater than 5000" was interpreted strictly as attendance > 5000 (not >= 5000).
+- The table t_1991_toronto_blue_jays_season represents the full set of 1991 regular-season games for the Toronto Blue Jays, and the month without a year implies 1991 per the table’s scope.
+- "toronto blue jay" refers to the Toronto Blue Jays MLB team.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

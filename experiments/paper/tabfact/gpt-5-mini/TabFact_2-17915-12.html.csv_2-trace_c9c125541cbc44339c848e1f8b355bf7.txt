@@ -1,0 +1,71 @@
+
+<userQuery>
+<query>
+only the master series final in paris have a carpet surface
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "only the master series final in paris have a carpet surface"
+
+Data sources discovered
+- postgres_tabfact9 (TabFact) database, public schema
+- Single table: public.lleyton_hewitt (columns: outcome, year, championship, surface, opponent, score)
+
+What the data contains
+- Finals appearances of Lleyton Hewitt at various championships, including Masters Series events, with the surface specified per final.
+
+Evidence from queries
+1) Row count (to understand dataset size)
+SQL:
+SELECT COUNT(*) AS row_count FROM public.lleyton_hewitt;
+Result:
+row_count = 7
+
+2) Distinct (championship, surface) pairs
+SQL:
+SELECT championship, surface, COUNT(*) AS pair_count FROM public.lleyton_hewitt GROUP BY championship, surface ORDER BY pair_count DESC, championship, surface;
+Results (championship — surface — pair_count):
+- indian wells — hard — 2
+- cincinnati — hard — 1
+- cincinnati (2) — hard — 1
+- indian wells (2) — hard — 1
+- paris — carpet (i) — 1
+- stuttgart — hard (i) — 1
+
+3) All distinct surface values present
+SQL:
+SELECT DISTINCT surface FROM public.lleyton_hewitt ORDER BY surface;
+Results:
+- carpet (i)
+- hard
+- hard (i)
+
+4) Finals on carpet (which ones and how many)
+SQL:
+SELECT year, championship, opponent, outcome, surface, score FROM public.lleyton_hewitt WHERE surface ILIKE '%carpet%' ORDER BY year;
+Result:
+- 2002 — paris — marat safin — runner - up — carpet (i) — 6 - 7 (4 - 7) , 0 - 6 , 4 - 6
+
+5) Any carpet finals at championships other than Paris
+SQL:
+SELECT DISTINCT championship FROM public.lleyton_hewitt WHERE surface ILIKE '%carpet%' AND championship NOT ILIKE '%Paris%';
+Result:
+- no rows returned
+
+Assessment
+- Within the available data (finals featuring Lleyton Hewitt), there is exactly one final played on carpet, and it is the Paris final. No other final in this dataset is on carpet. This supports the claim in the context of these recorded Masters finals.
+
+Limitations
+- The dataset only covers Lleyton Hewitt’s finals and may not represent all Masters Series finals historically. The claim as written is universal; our evidence supports it only within the scope of this dataset.
+
+Assumptions
+- Each row in public.lleyton_hewitt represents a final of the named championship.
+- The term “master series final” refers to the finals listed in this table (which include Masters Series events like Indian Wells, Cincinnati, Paris, Stuttgart).
+
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

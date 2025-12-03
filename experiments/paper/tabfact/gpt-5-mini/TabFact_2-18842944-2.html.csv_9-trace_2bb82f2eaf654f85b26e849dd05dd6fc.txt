@@ -1,0 +1,51 @@
+
+<userQuery>
+<query>
+the buffalo bill lose 3 more game than they win
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “the buffalo bill lose 3 more game than they win.”
+
+What I checked
+- The available data source contains the 1976 Buffalo Bills season game-by-game results (table: public.t_1976_buffalo_bills_season). I verified the number of wins and losses in that season and compared the difference.
+
+Evidence from data (executed SQL shown exactly)
+1) Count wins
+SQL:
+SELECT COUNT(*) AS wins FROM public.t_1976_buffalo_bills_season WHERE result ILIKE 'W%';
+Result: wins = 2
+
+2) Count losses
+SQL:
+SELECT COUNT(*) AS losses FROM public.t_1976_buffalo_bills_season WHERE result ILIKE 'L%';
+Result: losses = 12
+
+3) Count ties
+SQL:
+SELECT COUNT(*) AS ties FROM public.t_1976_buffalo_bills_season WHERE result ILIKE 'T%';
+Result: ties = 0
+
+4) Total games (sanity check)
+SQL:
+SELECT COUNT(*) AS total_games FROM public.t_1976_buffalo_bills_season;
+Result: total_games = 14
+
+5) Direct computation of losses minus wins
+SQL:
+SELECT (SUM(CASE WHEN LEFT(UPPER(TRIM(result)),1) = 'L' THEN 1 ELSE 0 END) - SUM(CASE WHEN LEFT(UPPER(TRIM(result)),1) = 'W' THEN 1 ELSE 0 END)) AS losses_minus_wins FROM public.t_1976_buffalo_bills_season;
+Result: losses_minus_wins = 10
+
+Conclusion based on data
+- In the 1976 season captured by the available dataset, the Buffalo Bills lost 12 games and won 2, so they lost 10 more games than they won—not 3 more. Therefore, the claim is not supported by the available data.
+
+Assumptions
+- The only accessible dataset pertains to the 1976 season; I interpret the claim as referring to the team’s performance in the season represented by the available data.
+- Outcome is determined by the first character of the “result” field (W/L/T), normalized with TRIM/UPPER as needed.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

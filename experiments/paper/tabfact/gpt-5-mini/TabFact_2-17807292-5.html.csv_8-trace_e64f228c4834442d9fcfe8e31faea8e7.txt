@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+sergio garcía , pádraig harrington and charlie wi tie for third place with - 1 to par
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “sergio garcía , pádraig harrington and charlie wi tie for third place with - 1 to par.”
+
+Summary of findings (based on available data):
+- In the available 2008 PGA Championship leaderboard data, Sergio García, Pádraig Harrington, and Charlie Wi are all shown as tied for 4th place (t4), not tied for 3rd.
+- Their “to par” value is + 1, not − 1.
+- There are no entries indicating a third place (3 or t3) in this dataset, consistent with the presence of a tie for second that skips a standalone third position.
+
+Evidence and executed SQL:
+1) Retrieve rows for the three named players
+- SQL executed:
+  SELECT player, place, "to par" FROM public.t_2008_pga_championship WHERE player ILIKE '%Sergio%' OR player ILIKE '%Harrington%' OR player ILIKE '%Charlie Wi%';
+- Results:
+  - sergio garcía — place: t4, to par: + 1
+  - pádraig harrington — place: t4, to par: + 1
+  - charlie wi — place: t4, to par: + 1
+
+2) Show the top positions to contextualize places and to-par
+- SQL executed:
+  SELECT place, player, score, "to par", CAST(regexp_replace(place, '[^0-9]', '', 'g') AS integer) AS place_num
+  FROM public.t_2008_pga_championship
+  WHERE regexp_replace(place, '[^0-9]', '', 'g') <> ''
+    AND CAST(regexp_replace(place, '[^0-9]', '', 'g') AS integer) BETWEEN 1 AND 10
+  ORDER BY place_num ASC, place ASC, player ASC;
+- Excerpt of results (place — player — score — to par):
+  - 1 — ben curtis — 73 + 67 + 68 = 208 — - 2
+  - T2 — henrik stenson — 71 + 70 + 68 = 209 — - 1
+  - T2 — j b holmes — 71 + 68 + 70 = 209 — - 1
+  - T4 — charlie wi — 70 + 70 + 71 = 211 — + 1
+  - T4 — pádraig harrington — 71 + 74 + 66 = 211 — + 1
+  - T4 — sergio garcía — 69 + 73 + 69 = 211 — + 1
+
+3) Confirm whether any third-place entries exist
+- SQL executed:
+  SELECT COUNT(*) AS cnt FROM public.t_2008_pga_championship WHERE lower(trim(place)) IN ('3','t3');
+- Result:
+  - cnt = 0 (no third-place entries).
+
+Conclusion:
+- The claim is not supported by the available data. According to the 2008 PGA Championship leaderboard in this dataset, Sergio García, Pádraig Harrington, and Charlie Wi tied for 4th place at +1 to par, not tied for 3rd at −1 to par.
+
+Assumptions made:
+- Due to the data environment containing only the 2008 PGA Championship leaderboard, the claim was interpreted and verified against this dataset. If the claim intended a different tournament, that information is not present in the accessible data sources here.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

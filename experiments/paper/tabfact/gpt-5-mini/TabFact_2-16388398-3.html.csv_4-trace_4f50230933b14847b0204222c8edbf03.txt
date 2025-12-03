@@ -1,0 +1,58 @@
+
+<userQuery>
+<query>
+melbourne be the home team when the team meet at adelaide
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Melbourne be the home team when the team meet at Adelaide.”
+
+Summary conclusion: In the available data (2000 Ansett Australia Cup), when Melbourne played at an Adelaide venue, Melbourne were the away team, not the home team.
+
+Data source discovery:
+- Available database: TabFact (Postgres), public schema.
+- Relevant table: public.t_2000_ansett_australia_cup with columns: "home team", "home team score", "away team", "away team score", "ground", "crowd", "date".
+
+Evidence from executed SQL queries:
+1) Identify grounds used in Melbourne’s matches
+SQL:
+SELECT DISTINCT ground FROM public.t_2000_ansett_australia_cup WHERE "home team" ILIKE '%Melbourne%' OR "away team" ILIKE '%Melbourne%';
+Result:
+[{"ground":"football park"},{"ground":"waverley park"}]
+Interpretation: “Football Park” is an Adelaide venue.
+
+2) Retrieve the Adelaide-venue match involving Melbourne
+SQL:
+SELECT "home team", "away team", ground, date FROM public.t_2000_ansett_australia_cup WHERE ("home team" ILIKE '%Melbourne%' OR "away team" ILIKE '%Melbourne%') AND ground ILIKE '%football park%';
+Result:
+[{"home team":"adelaide","away team":"melbourne","ground":"football park","date":"sunday , 30 january"}]
+Interpretation: Adelaide was the home team; Melbourne was away at Football Park (Adelaide).
+
+3) Check if there are any instances of Melbourne as the home team at Adelaide venues
+SQL:
+SELECT COUNT(*) AS match_count FROM public.t_2000_ansett_australia_cup WHERE "home team" = 'Melbourne' AND ("ground" ILIKE '%adelaide%' OR "ground" ILIKE '%football park%' OR "ground" ILIKE '%adelaide oval%');
+Result:
+match_count = 0
+Interpretation: No matches where Melbourne is home at an Adelaide venue in this dataset.
+
+4) List all matches at Adelaide venues to confirm home designations
+SQL:
+SELECT "home team", "away team", "ground", "date" FROM public.t_2000_ansett_australia_cup WHERE lower("ground") IN ('football park', 'adelaide oval') ORDER BY "date";
+Results:
+1) adelaide — st kilda — football park — sunday , 13 february
+2) adelaide — melbourne — football park — sunday , 30 january
+3) adelaide — geelong — football park — sunday , 6 february
+Interpretation: In all Adelaide-venue matches present, the home team is Adelaide; Melbourne appears as away.
+
+Final assessment: The data contradicts the claim. When Melbourne met at an Adelaide venue (Football Park) in this dataset, they were the away team, not the home team.
+
+Assumptions made due to ambiguity:
+- Interpreted “meet at Adelaide” as matches played at Adelaide venues (Football Park or Adelaide Oval).
+- Scope is limited to the available dataset (2000 Ansett Australia Cup). Within this scope, the claim is false; we make no claims beyond the dataset provided.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

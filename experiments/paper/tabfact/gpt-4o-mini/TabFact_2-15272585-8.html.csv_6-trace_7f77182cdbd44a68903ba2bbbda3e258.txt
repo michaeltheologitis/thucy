@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+galina voskoboeva play 20% of her game on a clay top tennis court and 1% on hard
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Galina Voskoboeva plays 20% of her games on clay and 1% on hard.”
+
+Data source overview:
+- Database: TabFact
+- Schema: public
+- Table: galina_voskoboeva
+  - Columns: outcome (text), date (text), tournament (text), surface (text), opponent (text), score (text)
+
+Evidence gathered via executed SQL:
+1) Surface distribution with counts and percentages
+SQL:
+SELECT surface, COUNT(*) AS match_count, COUNT(*) * 100.0 / SUM(COUNT(*)) OVER () AS percentage_of_total
+FROM galina_voskoboeva
+GROUP BY surface;
+Results:
+- Surface: Hard (i) | Match Count: 2 | Percentage of Total: 40%
+- Surface: Hard     | Match Count: 1 | Percentage of Total: 20%
+- Surface: Clay     | Match Count: 2 | Percentage of Total: 40%
+
+2) Total matches
+SQL:
+SELECT COUNT(*) AS total_matches FROM galina_voskoboeva;
+Result:
+- Total matches: 5
+
+3) Surface counts (raw)
+SQL:
+SELECT surface, COUNT(*) AS match_count FROM galina_voskoboeva GROUP BY surface;
+Results:
+- Hard (i): 2
+- Hard: 1
+- Clay: 2
+
+Assessment:
+- Clay share: 2/5 = 40%, not 20%.
+- Hard share: if considering only rows labeled “Hard,” 1/5 = 20%; if combining all hard courts (Hard + Hard (i)), (1+2)/5 = 60%. In neither interpretation is the hard share close to 1%.
+
+Conclusion: The claim is contradicted by the data in the galina_voskoboeva table. She has approximately 40% of matches on clay and 20% on hard (or 60% if including “Hard (i)” as hard), not 20% clay and 1% hard.
+
+Assumptions:
+- The public.galina_voskoboeva table represents the authoritative set of matches considered for this verification.
+- “Hard (i)” indicates indoor hard and is either treated separately (as listed) or, when appropriate, combined with “Hard” under the broader hard-court category. The conclusion holds in both interpretations.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

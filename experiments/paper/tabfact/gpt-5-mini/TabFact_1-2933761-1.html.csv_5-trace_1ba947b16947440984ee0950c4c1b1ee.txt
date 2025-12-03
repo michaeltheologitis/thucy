@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+both female leave the cube alive
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+Claim: "both female leave the cube alive"
+Conclusion: The data shows there are two female characters and both are listed as dead. Only one character (male) is noted as alive after exiting the cube. Therefore, the claim is contradicted by the data.
+
+Data source discovery
+- Tool: Data source discovery
+- Finding: A PostgreSQL database (TabFact, schema public) containing a film-related table named cube_film_series.
+
+Schema inspection
+- Tool: Schema query
+- Database: TabFact (postgres_tabfact23), schema: public
+- Table: cube_film_series
+  - Columns: name (text), occupation (text), gender (text), prison connection (text), played by (text), status (text)
+
+Evidence from executed SQL
+1) List all characters with gender and status
+SQL:
+SELECT name, gender, status FROM public.cube_film_series ORDER BY name;
+Results (relevant rows):
+- dr helen holloway | female | dead
+- joan leaven       | female | dead
+- kazan             | male   | alive after exiting the cube
+- david worth       | male   | dead
+- quentin           | male   | dead
+- rennes            | male   | dead
+
+2) How many female characters and what are their outcomes?
+SQL:
+SELECT COUNT(*) AS female_count FROM public.cube_film_series WHERE LOWER(gender) = 'female';
+Result:
+- female_count: 2
+
+SQL:
+SELECT status, COUNT(*) AS count FROM public.cube_film_series WHERE LOWER(gender) = 'female' GROUP BY status ORDER BY count DESC, status;
+Result:
+- status: dead | count: 2
+
+Assessment of the claim against the data
+- There are exactly two female characters in the dataset (dr helen holloway and joan leaven).
+- Both are recorded with status = "dead".
+- The only character recorded as "alive after exiting the cube" is kazan, who is male.
+- Therefore, the statement "both female leave the cube alive" is not supported by the data and is contradicted by it.
+
+Assumptions
+- The claim refers to the film/series information represented by the table public.cube_film_series.
+- "both female" refers to the two female characters listed in this dataset.
+- "leave the cube alive" corresponds to the status value "alive after exiting the cube" in the table.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

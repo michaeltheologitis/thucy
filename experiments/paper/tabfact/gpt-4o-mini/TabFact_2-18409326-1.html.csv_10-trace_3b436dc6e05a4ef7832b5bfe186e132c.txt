@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+the call sign for astral media 's radio station be cjui - fm
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the call sign for Astral Media’s radio station is CJUI-FM.”
+
+Data sources explored
+- Discovered a PostgreSQL database with schema public containing a table: media_in_kelowna (frequency text, call sign text, branding text, format text, owner text).
+
+Key evidence from the data
+1) Ownership of CJUI-FM (formatted as “cjui - fm” in the dataset)
+- Result: Owner is Vista Broadcast Group, not Astral Media.
+- Executed SQL:
+  SELECT * FROM media_in_kelowna WHERE "call sign" = 'cjui - fm';
+- Returned row:
+  Frequency: 0 103.9 fm; Call Sign: cjui - fm; Branding: 103.9 the juice; Format: adult hits; Owner: vista broadcast group
+
+2) Stations owned by Astral Media in the dataset
+- Result: The station owned by Astral Media is CKFR (AM 1150), not CJUI-FM.
+- Executed SQL:
+  SELECT frequency, "call sign", branding, format, owner FROM media_in_kelowna WHERE owner ILIKE '%astral media%';
+- Returned row:
+  Frequency: 1150 am; Call Sign: ckfr; Branding: am 1150; Format: news / talk; Owner: astral media
+
+3) Full table scan for context (showing both cjui - fm and astral media entries together)
+- Executed SQL:
+  SELECT * FROM public.media_in_kelowna;
+- Relevant extracted rows from the result:
+  - 1150 am | ckfr     | am 1150           | news / talk | astral media
+  - 0 103.9 fm | cjui - fm | 103.9 the juice | adult hits   | vista broadcast group
+
+Conclusion
+- The data shows that CJUI-FM (cjui - fm) is owned by Vista Broadcast Group, not Astral Media. Astral Media’s station in this dataset is CKFR (AM 1150). Therefore, the claim that Astral Media’s radio station call sign is CJUI-FM is not supported by the evidence.
+
+Assumptions made
+- Scope is limited to the available “media_in_kelowna” dataset, which appears to catalog Kelowna-area stations.
+- “cjui - fm” in the dataset corresponds to CJUI-FM, matching the user’s formatting with spaces around the hyphen.
+- Ownership is assessed as recorded in the dataset at the time of data capture.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

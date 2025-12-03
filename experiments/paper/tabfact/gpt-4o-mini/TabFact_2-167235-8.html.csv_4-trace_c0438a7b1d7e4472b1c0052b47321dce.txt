@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+only 1 person have be a member of the party of labour of albania political party and be elect
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Only one person has been a member of the Party of Labour of Albania and been elected [Prime Minister].” I interpret “be elect” as “served as Prime Minister,” and “member” as reflected by the ‘political party’ field.
+
+Data source discovery
+- Available dataset: a PostgreSQL database with a public schema containing the table list_of_prime_ministers_of_albania (columns: name, born - died, term start, term end, political party).
+
+Evidence
+1) Identify whether the Party of Labour of Albania appears in the data and how many entries it has
+SQL executed:
+SELECT DISTINCT "political party", COUNT(*) AS count 
+FROM public.list_of_prime_ministers_of_albania 
+GROUP BY "political party";
+Result excerpt (relevant row):
+- Party of Labour of Albania: 1
+
+2) Count how many distinct prime ministers are associated with the Party of Labour of Albania
+SQL executed:
+SELECT COUNT(*) AS row_count, COUNT(DISTINCT name) AS distinct_names
+FROM public.list_of_prime_ministers_of_albania
+WHERE lower(trim("political party")) LIKE '%party of labour of albania%';
+Result:
+- row_count = 1
+- distinct_names = 1
+
+3) List the prime minister(s) associated with the Party of Labour of Albania
+SQL executed:
+SELECT name
+FROM public.list_of_prime_ministers_of_albania
+WHERE lower(trim("political party")) LIKE '%party of labour of albania%'
+ORDER BY name;
+Result:
+- Fatos Nano (1st time)
+
+Conclusion
+- The dataset shows exactly one prime minister associated with the Party of Labour of Albania. Therefore, the claim that “only 1 person … [was in the Party of Labour of Albania] and [was elected/served as PM]” is supported by the available data.
+
+Assumptions
+- “be elect” is taken to mean “served as Prime Minister.”
+- “member of the party” is inferred from the ‘political party’ field in the table.
+- Verification is limited to the available table; no external data was used.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

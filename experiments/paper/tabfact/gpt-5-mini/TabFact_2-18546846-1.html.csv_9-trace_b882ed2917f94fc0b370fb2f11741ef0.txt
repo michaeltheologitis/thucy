@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+the 49ers play the los angeles dones 1 time in the 1947 season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "the 49ers play the los angeles dones 1 time in the 1947 season"
+
+Data source consulted: TabFact (PostgreSQL), public schema, table: t_1947_san_francisco_49ers_season.
+
+Step 1 — Retrieve the full 1947 schedule for grounding
+Executed SQL:
+SELECT week, date, opponent, result, score, record
+FROM public.t_1947_san_francisco_49ers_season
+ORDER BY week;
+
+Result excerpt (relevant entries shown among full schedule):
+- Week 2 — date: september 7 , 1947 — opponent: los angeles dons — result: w — score: 17 - 14 — record: 2 - 0
+- Week 9 — date: november 2 , 1947 — opponent: los angeles dons — result: w — score: 26 - 16 — record: 6 - 2 - 1
+
+Step 2 — Count how many times the opponent is Los Angeles Dons
+Executed SQL:
+SELECT COUNT(*) AS count
+FROM public.t_1947_san_francisco_49ers_season
+WHERE opponent = 'los angeles dons';
+
+Result: count = 2
+
+Step 3 — List just the games vs. Los Angeles Dons for clarity
+Executed SQL:
+SELECT week, date, opponent, result, score FROM public.t_1947_san_francisco_49ers_season WHERE opponent ILIKE '%Dons%';
+
+Result:
+- Week 2 — September 7, 1947 — Result: W — Score: 17 - 14
+- Week 9 — November 2, 1947 — Result: W — Score: 26 - 16
+
+Conclusion: The data shows the San Francisco 49ers played the Los Angeles Dons twice in the 1947 season, not once.
+
+Assumptions:
+- Interpreted "los angeles dones" as a misspelling of "Los Angeles Dons" (AAFC team). The opponent field in the data is lowercase "los angeles dons"; queries included exact and case-insensitive matches to confirm counts and listings.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

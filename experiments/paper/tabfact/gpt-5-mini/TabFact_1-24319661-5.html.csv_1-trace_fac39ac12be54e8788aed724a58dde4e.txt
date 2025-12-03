@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+give sentence : the production code for the episode direct by robert duncan mcneill be bcw404
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “the production code for the episode directed by Robert Duncan McNeill is bcw404.”
+
+Data source discovery
+- Available source: TabFact PostgreSQL database. Found table public.list_of_white_collar_episodes.
+
+Schema grounding (public.list_of_white_collar_episodes)
+- Columns: "no in series" (bigint), "no in season" (bigint), title (text), "directed by" (text), "written by" (text), "us viewers (million)" (double), "original air date" (text), "production code" (text).
+
+Evidence
+1) Identify episodes directed by Robert Duncan McNeill and show their production codes
+- Executed SQL:
+  SELECT "no in season", "no in series", title, "production code" FROM public.list_of_white_collar_episodes WHERE "directed by" ILIKE '%Robert Duncan McNeill%';
+- Result:
+  { "no in season": 4, "no in series": 50, "title": "parting shots", "production code": "bcw404" }
+
+2) Retrieve full row to confirm exact director credit and production code
+- Executed SQL:
+  SELECT *
+  FROM public.list_of_white_collar_episodes
+  WHERE "directed by" ILIKE '%Robert Duncan McNeill%';
+- Result:
+  - no in series: 50
+  - no in season: 4
+  - title: parting shots
+  - directed by: robert duncan mcneill
+  - written by: alexandra mcnally
+  - us viewers (million): 2.82
+  - original air date: july 31 , 2012
+  - production code: bcw404
+
+Conclusion
+- The database shows the White Collar episode “parting shots” (season 4, episode 4) is directed by Robert Duncan McNeill and has production code bcw404. Therefore, the claim is supported by the data.
+
+Answer (as a sentence)
+- The production code for the episode directed by Robert Duncan McNeill is bcw404.
+
+Assumptions
+- “the episode” refers to the episode(s) in the available White Collar episodes table, which is the only discovered dataset relevant to this claim.
+- Name matching for the director used a case-insensitive search (ILIKE), which matches the stored value “robert duncan mcneill.”
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

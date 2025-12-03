@@ -1,0 +1,54 @@
+
+<userQuery>
+<query>
+shanghai pudong international airport rank 3rd with a total cargo load of 2939157 metric tonne
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "shanghai pudong international airport rank 3rd with a total cargo load of 2939157 metric tonne"
+
+Data sources explored:
+- Discovered database: TabFact (public schema), containing table: world_s_busiest_airports_by_cargo_traffic.
+
+Schema confirmation:
+Executed SQL:
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_schema='public' AND table_name='world_s_busiest_airports_by_cargo_traffic'
+ORDER BY ordinal_position;
+Result:
+- rank — bigint
+- airport — text
+- code (iata / icao) — text
+- total cargo (metric tonnes) — bigint
+- % change — text
+
+Evidence query 1 (targeted check of rank and cargo for Shanghai Pudong):
+Executed SQL:
+SELECT rank, "total cargo (metric tonnes)" FROM public.world_s_busiest_airports_by_cargo_traffic WHERE airport ILIKE '%Shanghai Pudong%';
+Result:
+- rank: 3
+- total cargo (metric tonnes): 2939157
+
+Evidence query 2 (full row for additional context):
+Executed SQL:
+SELECT *
+FROM public."world_s_busiest_airports_by_cargo_traffic"
+WHERE airport ILIKE '%Shanghai Pudong%';
+Result:
+{"rank": 3, "airport": "shanghai pudong international airport", "code (iata / icao)": "pvg / zspd", "total cargo (metric tonnes)": 2939157, "% change": "5.3%"}
+
+Assessment:
+- The table explicitly lists "shanghai pudong international airport" with rank = 3 and total cargo (metric tonnes) = 2,939,157. This directly matches the claim.
+
+Conclusion: The claim is supported by the data.
+
+Assumptions noted:
+- The claim refers to the same scope as the dataset "world_s_busiest_airports_by_cargo_traffic" (global busiest airports by cargo traffic). The dataset does not specify a year in the schema; verification is tied to this dataset’s snapshot. The phrase "metric tonne" is interpreted as the unit matching the column "total cargo (metric tonnes)".
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

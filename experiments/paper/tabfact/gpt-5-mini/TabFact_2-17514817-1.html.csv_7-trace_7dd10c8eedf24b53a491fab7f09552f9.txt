@@ -1,0 +1,67 @@
+
+<userQuery>
+<query>
+west berkshire brewery 's maggs magnificent mild have win a gold medal every single instance in which it win a prize between 1995 and 2009
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify
+“West Berkshire Brewery’s Maggs Magnificent Mild won a gold medal every single time it won a prize between 1995 and 2009.”
+
+Data sources explored
+- Discovered database: TabFact (Postgres), public schema.
+- Relevant table identified: public.west_berkshire_brewery (columns: year, “beer name”, prize, category, competition).
+
+Schema evidence
+- Tool: Schema inspection
+Answer: Table west_berkshire_brewery with columns year (bigint), “beer name” (text), prize (text), category (text), competition (text).
+
+Evidence queries and results
+1) Identify exact beer name variants present 1995–2009
+SQL:
+SELECT DISTINCT "beer name" FROM public.west_berkshire_brewery WHERE year BETWEEN 1995 AND 2009 AND lower("beer name") LIKE '%magg%' ORDER BY "beer name";
+Result:
+- maggs magnificent mild
+
+2) List all prize-winning records for the beer in 1995–2009
+SQL:
+SELECT year, competition, category, prize, "beer name" FROM public.west_berkshire_brewery WHERE "beer name" = 'maggs magnificent mild' AND year BETWEEN 1995 AND 2009 ORDER BY year;
+Results (year — competition — category — prize):
+- 2002 — siba south east region beer competition — mild and porter — gold medal
+- 2003 — siba national beer competition — mild and porter — gold medal
+- 2004 — bracknell blues and real ale festival — beer of the festival — overall winner
+- 2005 — camra reading branch beer festival — mild — gold medal
+- 2005 — camra reading branch beer festival — overall — third place
+- 2005 — siba south east region beer competition — mild — gold medal
+- 2005 — siba south east region beer competition — overall — bronze medal
+- 2006 — siba national beer competition — mild — silver medal
+- 2006 — camra reading branch beer festival — mild — silver medal
+- 2008 — camra reading branch beer festival — in category — silver medal
+
+3) Summarize prize outcomes (counts) for 1995–2009
+SQL:
+SELECT prize, COUNT(*) AS count FROM public.west_berkshire_brewery WHERE "beer name" ILIKE '%magg%' AND year BETWEEN 1995 AND 2009 GROUP BY prize ORDER BY count DESC, prize;
+Results:
+- gold medal: 4
+- silver medal: 3
+- bronze medal: 1
+- overall winner: 1
+- third place: 1
+
+Assessment
+- The beer did win multiple gold medals in the period. However, it also won silver medals (2006, 2008), a bronze medal (2005), and other non-gold awards (“overall winner” in 2004 and “third place” in 2005). Therefore, it is not true that every prize it won between 1995 and 2009 was a gold medal.
+
+Conclusion
+- The claim is contradicted by the data in the west_berkshire_brewery table.
+
+Assumptions
+- Year range interpreted as inclusive (1995–2009).
+- “Overall winner” and “third place” are treated as prize outcomes distinct from a “gold medal.”
+- The beer name stored in the database is “maggs magnificent mild” (no apostrophe); queries matched this exact form for the detailed listing and a case-insensitive pattern for counts.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

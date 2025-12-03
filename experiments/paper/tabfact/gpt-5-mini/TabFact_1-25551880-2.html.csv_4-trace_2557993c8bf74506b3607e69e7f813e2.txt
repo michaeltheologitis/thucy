@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+mark cavendish be the only person to win 2 consecutive stage
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Mark Cavendish [is] the only person to win 2 consecutive stages.” Given the available data, I evaluate this within the 2010 Vuelta a España (the only accessible race dataset).
+
+Data source discovery
+- Accessible database: postgres_tabfact12 (TabFact instance)
+- Public schema tables: t_2010_vuelta_a_espa_a (contains per-stage winners and classifications for the 2010 Vuelta a España)
+
+Evidence 1: Stage winners in order
+SQL executed:
+SELECT stage, winner FROM public.t_2010_vuelta_a_espa_a ORDER BY stage;
+Key results (excerpt):
+- Stage 12 — mark cavendish
+- Stage 13 — mark cavendish
+- Stage 18 — mark cavendish
+Other stage winners are all different from their immediately preceding stages. This shows Cavendish won both stage 12 and 13, i.e., two consecutive stages.
+
+Evidence 2: Identify consecutive-stage winner pairs
+SQL executed:
+SELECT a.stage AS start_stage, a.stage+1 AS next_stage, a.winner
+FROM public.t_2010_vuelta_a_espa_a a
+JOIN public.t_2010_vuelta_a_espa_a b ON b.stage = a.stage + 1 AND a.winner = b.winner
+ORDER BY a.stage;
+Result:
+- Starting stage: 12 (stages 12 and 13); Winner: mark cavendish
+Only one consecutive pair exists, and the winner is Mark Cavendish.
+
+Evidence 3: Count consecutive-stage pairs by winner
+SQL executed:
+SELECT t1.winner, COUNT(*) AS consecutive_count
+FROM public.t_2010_vuelta_a_espa_a t1
+JOIN public.t_2010_vuelta_a_espa_a t2
+  ON t1.stage + 1 = t2.stage
+  AND t1.winner = t2.winner
+GROUP BY t1.winner
+HAVING COUNT(*) > 0
+ORDER BY consecutive_count DESC, t1.winner;
+Result:
+- mark cavendish — consecutive_count = 1
+No other winner appears with a consecutive-stage pair.
+
+Conclusion
+Within the 2010 Vuelta a España dataset, Mark Cavendish is the only rider who won two consecutive stages (Stages 12 and 13). The data contains no other instances of back-to-back stage wins by any other person.
+
+Assumptions and scope
+- The claim is evaluated for the 2010 Vuelta a España because this is the only event covered by the available dataset.
+- “Consecutive stages” means adjacent stage numbers (N and N+1).
+- “Person” excludes the team time trial winner listed as “team htc - columbia” on Stage 1. This team does not form a consecutive winner pair in any case.
+- This verification does not generalize to other years or races (e.g., Tour de France, Giro) beyond the provided data.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

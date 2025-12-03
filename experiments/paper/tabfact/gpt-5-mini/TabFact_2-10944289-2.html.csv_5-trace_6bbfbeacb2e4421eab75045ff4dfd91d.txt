@@ -1,0 +1,79 @@
+
+<userQuery>
+<query>
+the dallas cowboy and the seattle seahawks play at the qwest field on december 31 , and the cowboy lead in a final score of 20 - 9
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “The Dallas Cowboys and the Seattle Seahawks play at Qwest Field on December 31, and the Cowboys lead in a final score of 20–9.”
+
+Summary of findings:
+- Teams and venue: Supported. Dallas Cowboys vs. Seattle Seahawks at Qwest Field is present in the data.
+- Date: Contradicted. The recorded game is on January 6 (no year provided), not December 31.
+- Final score and winner: Contradicted. The recorded final score is 20–21 (Seahawks over Cowboys), not 20–9 with the Cowboys leading.
+
+Evidence from the data (with executed SQL):
+1) Direct matchup search (Cowboys vs. Seahawks)
+SQL:
+SELECT "date", "visiting team", "host team", "final score", "stadium"
+FROM nbc_sunday_night_football_results_2006_present
+WHERE ("visiting team" ILIKE 'dallas cowboys' AND "host team" ILIKE 'seattle seahawks')
+   OR ("visiting team" ILIKE 'seattle seahawks' AND "host team" ILIKE 'dallas cowboys');
+Result row:
+- date: january 6
+- visiting team: dallas cowboys
+- host team: seattle seahawks
+- final score: 20 - 21
+- stadium: qwest field
+
+Supporting team-name check
+SQL:
+SELECT DISTINCT "visiting team" AS team
+FROM nbc_sunday_night_football_results_2006_present
+WHERE "visiting team" ILIKE '%cowboy%' OR "visiting team" ILIKE '%seahawk%'
+UNION
+SELECT DISTINCT "host team" AS team
+FROM nbc_sunday_night_football_results_2006_present
+WHERE "host team" ILIKE '%cowboy%' OR "host team" ILIKE '%seahawk%';
+Returned teams: dallas cowboys; seattle seahawks
+
+2) Date check for “December 31” in the dataset
+SQL:
+SELECT "date", "visiting team", "host team", "final score", "stadium"
+FROM nbc_sunday_night_football_results_2006_present
+WHERE "date" ILIKE '%december 31%';
+Result row:
+- date: december 31
+- visiting team: green bay packers
+- host team: chicago bears
+- final score: 26 - 7
+- stadium: soldier field
+(Confirms that the Dec 31 entry in this dataset is Packers vs. Bears, not Cowboys vs. Seahawks.)
+
+3) Venue check for “Qwest Field”
+SQL:
+SELECT "date", "visiting team", "host team", "final score", "stadium" 
+FROM nbc_sunday_night_football_results_2006_present
+WHERE lower("stadium") LIKE '%qwest field%';
+Result row:
+- date: january 6
+- visiting team: dallas cowboys
+- host team: seattle seahawks
+- final score: 20 - 21
+- stadium: qwest field
+(Confirms a single relevant SNF game at Qwest Field: Cowboys at Seahawks, final 21–20 Seahawks.)
+
+Conclusion:
+- The claim is partly accurate that the Cowboys and Seahawks played at Qwest Field. However, the date (December 31) and the stated result (Cowboys 20–9) are contradicted by the data, which shows the game listed as January 6 with a 21–20 Seahawks win.
+
+Assumptions:
+- The available dataset (nbc_sunday_night_football_results_2006_present) is authoritative for Sunday Night Football results from 2006 onward; dates are stored without year.
+- Team and stadium matching used case-insensitive comparisons to accommodate casing in the table.
+- The “final score” text “20 - 21” is interpreted in visitor-home order consistent with the visiting team/host team fields (Cowboys 20, Seahawks 21).
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

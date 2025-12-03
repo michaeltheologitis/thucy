@@ -1,0 +1,43 @@
+
+<userQuery>
+<query>
+the us open have the different result in the year 1990 and 1999
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The US Open result in 1990 and 1999 are different (within the available dataset). I interpret this as referring to the Katrina Adams tournament results table discovered in the data source.
+
+Data source explored:
+- Database: TabFact (PostgreSQL)
+- Relevant table: public.katrina_adams (columns include: tournament, 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999)
+
+Step 1 — Identify the exact tournament row name
+- SQL executed:
+  SELECT tournament FROM public.katrina_adams ORDER BY tournament;
+- Result (excerpt):
+  - australian open
+  - french open
+  - grand slam tournaments
+  - us open
+  - wimbledon
+- Finding: The tournament is listed exactly as "us open".
+
+Step 2 — Retrieve 1990 and 1999 results for "us open"
+- SQL executed:
+  SELECT tournament, "1990", "1999" FROM public.katrina_adams WHERE tournament ILIKE 'us open';
+- Returned row:
+  {"tournament":"us open", "1990":"3r", "1999":"1r"}
+- Finding: 1990 = 3r; 1999 = 1r. These values are different.
+
+Assessment:
+- The data shows different results for the US Open between 1990 and 1999 in this table (3rd round vs 1st round). The claim is supported by the evidence.
+
+Assumptions:
+- The claim refers to the "us open" row in the public.katrina_adams table (i.e., Katrina Adams' results by year).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

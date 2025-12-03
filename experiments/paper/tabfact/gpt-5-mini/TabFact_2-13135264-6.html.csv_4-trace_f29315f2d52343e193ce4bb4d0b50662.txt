@@ -1,0 +1,52 @@
+
+<userQuery>
+<query>
+the highest point gap be on january 5 , with a spread of 6 point
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+Claim: “the highest point gap be on january 5, with a spread of 6 point.”
+Conclusion: Supported by the season data for the 2003–04 Detroit Red Wings; the maximum goal differential is 6, occurring on January 5.
+
+Data source discovered
+- Database: TabFact7 (public schema)
+- Table: public.t_2003_04_detroit_red_wings_season
+  Columns: date (text), visitor (text), score (text), home (text), decision (text), attendance (bigint), record (text)
+
+Evidence and executed SQL
+1) Determine the maximum spread (absolute goal differential) from the score column:
+SQL:
+SELECT MAX(spread) AS max_spread
+FROM (
+  SELECT ABS(((regexp_matches(score, '(\d+)\s*-\s*(\d+)'))[1])::int - ((regexp_matches(score, '(\d+)\s*-\s*(\d+)'))[2])::int) AS spread
+  FROM public.t_2003_04_detroit_red_wings_season
+) AS sub;
+Result: {"max_spread": 6}
+
+2) Retrieve all games with that maximum spread:
+SQL:
+SELECT t.date, t.visitor, t.home, t.score, ABS(r.v - r.h) AS spread
+FROM public.t_2003_04_detroit_red_wings_season t,
+LATERAL (
+  SELECT (regexp_matches(t.score, '(\d+)\s*-\s*(\d+)'))[1]::int AS v,
+         (regexp_matches(t.score, '(\d+)\s*-\s*(\d+)'))[2]::int AS h
+) AS r
+WHERE ABS(r.v - r.h) = 6
+ORDER BY spread DESC, date;
+Result rows:
+- date: january 5, visitor: nashville, home: detroit, score: 0 - 6, spread: 6
+
+Interpretation
+- The largest goal differential recorded in the table is 6, and the sole game with that spread occurred on “january 5.” This matches the claim precisely: highest point gap on January 5, spread of 6 points.
+
+Assumptions
+- “Point gap”/“spread” is interpreted as the absolute goal differential between the two teams’ scores in the score column.
+- The date values are stored as lowercase text like “january 5”; year context is the 2003–04 season inferred from the table name.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

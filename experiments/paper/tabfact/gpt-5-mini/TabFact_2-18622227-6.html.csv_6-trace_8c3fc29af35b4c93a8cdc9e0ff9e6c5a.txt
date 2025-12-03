@@ -1,0 +1,46 @@
+
+<userQuery>
+<query>
+the us open have 1r in 1986 but have 3r in 1999
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+What I verified
+- Claim interpreted: The statement refers to the US Open results row in an available dataset (Katrina Adams’ Grand Slam results table), asserting that the US Open result was 1R in 1986 but 3R in 1999.
+
+Data source discovery
+- Available database: postgres_tabfact18 (public schema)
+- Relevant table: katrina_adams (columns: tournament, and year columns 1986–1999)
+
+Evidence and executed SQL
+1) Identify available tournament rows to match “US Open” correctly
+SQL:
+SELECT tournament FROM public.katrina_adams GROUP BY tournament ORDER BY tournament;
+Result:
+[ {"tournament":"australian open"}, {"tournament":"french open"}, {"tournament":"grand slam tournaments"}, {"tournament":"us open"}, {"tournament":"wimbledon"} ]
+
+2) Directly check the 1986 and 1999 values for the US Open row
+SQL:
+SELECT tournament, "1986", "1999" FROM public.katrina_adams WHERE lower(tournament) LIKE '%us open%';
+Result:
+- tournament: 'us open'; 1986: '1r'; 1999: '1r'
+
+3) Show the entire US Open row for full context
+SQL:
+SELECT * FROM public.katrina_adams WHERE tournament = 'us open';
+Result:
+{ "1986":"1r", "1988":"2r", "1989":"3r", "1990":"3r", "1991":"qf", "1992":"a", "1993":"3r", "1994":"qf", "1995":"3r", "1996":"2r", "1997":"3r", "1998":"2r", "1999":"1r", "tournament":"us open" }
+
+Assessment
+- The dataset shows for the US Open row: 1986 = 1R (matches the claim), but 1999 = 1R (contradicts the claim’s 3R). Therefore, the overall claim is not supported by the evidence.
+
+Assumptions
+- Because the only relevant structured data available is a table named “katrina_adams” with Grand Slam results by year, I interpret the claim as referring to Katrina Adams’ US Open results in 1986 and 1999.
+- Codes: 1r = first round, 3r = third round, qf = quarterfinal, a = absent/withdrew (as commonly used in tennis results tables).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,68 @@
+
+<userQuery>
+<query>
+chinatrust whale play against kao lung - wei
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Task interpretation: Determine whether the Chinatrust Whales played against (and specifically a game involving) the player Kao Lung-Wei, using available structured data, and document evidence with executed SQL.
+
+Data discovery
+- Source: PostgreSQL database "TabFact".
+- Available table: public.t_2007_uni_president_lions_season.
+- Schema (from inspection): columns: date (text), opponent (text), score (text), loss (text), save (text). No keys/relationships defined.
+
+Evidence and executed SQL
+1) Identify games vs. Chinatrust Whales
+SQL executed:
+SELECT date, opponent, score FROM public.t_2007_uni_president_lions_season WHERE opponent ILIKE '%Chinatrust Whale%';
+Results:
+- 3 / 22 — chinatrust whales — 7 - 9
+- 3 / 23 — chinatrust whales — 4 - 5
+
+2) Retrieve loss/save fields for those games (to see if "Kao Lung-Wei" appears)
+SQL executed:
+SELECT date, opponent, score, loss, save
+FROM t_2007_uni_president_lions_season
+WHERE opponent ILIKE '%Chinatrust Whales%';
+Results:
+- date: 3 / 22, opponent: chinatrust whales, score: 7 - 9, loss: kao lung - wei, save: ni fu - deh
+- date: 3 / 23, opponent: chinatrust whales, score: 4 - 5, loss: pan wei - lun, save: miguel saladin
+
+3) Explicit check for presence of the strings "Kao" and flexible variants of "Lung-Wei"
+SQL executed:
+SELECT date, opponent, score, loss, save,
+       (date ILIKE '%kao%' OR opponent ILIKE '%kao%' OR score ILIKE '%kao%' OR loss ILIKE '%kao%' OR save ILIKE '%kao%') AS contains_kao,
+       (
+         date ILIKE '%lung-wei%' OR date ILIKE '%lung%wei%' OR date ILIKE '%lung - wei%' OR
+         opponent ILIKE '%lung-wei%' OR opponent ILIKE '%lung%wei%' OR opponent ILIKE '%lung - wei%' OR
+         score ILIKE '%lung-wei%' OR score ILIKE '%lung%wei%' OR score ILIKE '%lung - wei%' OR
+         loss ILIKE '%lung-wei%' OR loss ILIKE '%lung%wei%' OR loss ILIKE '%lung - wei%' OR
+         save ILIKE '%lung-wei%' OR save ILIKE '%lung%wei%' OR save ILIKE '%lung - wei%'
+       ) AS contains_lung_wei
+FROM t_2007_uni_president_lions_season
+WHERE opponent ILIKE '%Chinatrust Whales%';
+Results (flags):
+- 3 / 22 row: contains_kao = true, contains_lung_wei = true
+- 3 / 23 row: contains_kao = false, contains_lung_wei = false
+
+Findings
+- The Uni-President Lions played the Chinatrust Whales on 3/22 and 3/23 (season context: 2007).
+- For the 3/22 game vs. Chinatrust Whales, the "loss" field lists "kao lung - wei", indicating that Kao Lung-Wei was the losing pitcher in that game. This directly evidences a game in which Kao Lung-Wei played against the Chinatrust Whales.
+
+Conclusion
+- The claim that Chinatrust Whales played against Kao Lung-Wei is supported: there is at least one documented game (3/22) where Kao Lung-Wei is explicitly listed in the game outcome against the Whales.
+
+Limitations
+- The available data only covers the 2007 Uni-President Lions season and does not enumerate all seasons. There may be additional games in other years not represented here.
+
+Assumptions
+- Interpreted the request as asking whether there exists a game where the Chinatrust Whales faced a team featuring player Kao Lung-Wei, and whether Kao Lung-Wei participated. The presence of his name in the "loss" column is taken to indicate participation as the losing pitcher for the Lions on 3/22/2007.
+- The string "kao lung - wei" corresponds to the player Kao Lung-Wei (name variants with hyphen/spacing).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,58 @@
+
+<userQuery>
+<query>
+kardinia park have less crowd than moorabbin oval
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Kardinia Park have less crowd than Moorabbin Oval.”
+
+Data source discovery
+- Available database: TabFact (schema: public)
+- Table: public.t_1975_vfl_season
+  - Columns: home team (text), home team score (text), away team (text), away team score (text), venue (text), crowd (bigint), date (text)
+
+Evidence from the data
+1) List all rows (to see venue-level crowds)
+- Executed SQL:
+  SELECT venue, crowd, "home team", "away team", date FROM public.t_1975_vfl_season;
+- Relevant results:
+  - Venue: Kardinia Park | Crowd: 13328 | Home Team: Geelong | Away Team: Melbourne | Date: 7 June 1975
+  - Venue: Moorabbin Oval | Crowd: 17811 | Home Team: St Kilda | Away Team: North Melbourne | Date: 7 June 1975
+  - (Other venues also listed but not relevant to this comparison.)
+
+2) Aggregate confirmation: total crowds by venue (including the two venues in question)
+- Executed SQL:
+  SELECT DISTINCT venue, SUM(crowd) AS crowd
+  FROM public.t_1975_vfl_season
+  GROUP BY venue
+  ORDER BY venue;
+- Relevant aggregated results:
+  - Kardinia Park: 13328
+  - Moorabbin Oval: 17811
+  - Difference (Moorabbin – Kardinia): 4483
+
+3) Direct totals per venue (as separate queries)
+- Executed SQL:
+  SELECT SUM(crowd) AS total_crowd_kardinia FROM t_1975_vfl_season WHERE venue ILIKE '%Kardinia Park%';
+  Result: 13328
+- Executed SQL:
+  SELECT SUM(crowd) AS total_crowd_moorabbin FROM t_1975_vfl_season WHERE venue ILIKE '%Moorabbin Oval%';
+  Result: 17811
+
+Analysis
+- In the available 1975 VFL match data, Kardinia Park’s recorded crowd (13,328) is lower than Moorabbin Oval’s (17,811). The difference is 4,483 spectators. Therefore, within this dataset, the claim is supported.
+
+Conclusion
+- The data shows Kardinia Park had fewer spectators than Moorabbin Oval for the recorded matches in this table.
+
+Assumptions made
+- “Crowd” is interpreted as the recorded spectator attendance in the table.
+- The comparison is made strictly using the available data (1975 VFL entries in public.t_1975_vfl_season), which contains one game per venue on 7 June 1975. No broader historical inference beyond these records is implied.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

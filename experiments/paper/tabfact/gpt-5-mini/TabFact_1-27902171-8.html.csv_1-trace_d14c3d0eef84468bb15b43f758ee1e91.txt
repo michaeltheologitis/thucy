@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+the game on march 19 have a score of 112 - 91
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “the game on march 19 have a score of 112 - 91.”
+
+Data source discovery:
+- Available database: TabFact (PostgreSQL)
+- Accessible table: public.t_1991_92_seattle_supersonics_season
+  - Relevant columns: date (text), score (text), team (text), game (bigint), record (text)
+
+What I checked:
+1) Searched for any game dated March 19 in the available season table and inspected its recorded score.
+2) Cross-checked for any row whose score string contains “112 - 91”.
+
+Evidence and executed SQL:
+- Query 1 (find games on March 19):
+  SQL:
+  SELECT game, date, team, score, record
+  FROM public.t_1991_92_seattle_supersonics_season
+  WHERE date ILIKE '%Mar 19%' OR date ILIKE '%March 19%';
+  Result:
+  - game: 67; date: march 19; team: houston rockets; score: w 112 - 91; record: 37 - 30
+
+- Query 2 (find scores showing 112 - 91):
+  SQL:
+  SELECT game, date, team, score
+  FROM public.t_1991_92_seattle_supersonics_season
+  WHERE score LIKE '%112 - 91%'
+     OR score LIKE '%112-91%'
+     OR score LIKE '%112 – 91%'
+     OR score LIKE '%112—91%'
+     OR score LIKE '%112 –91%'
+     OR score LIKE '%112— 91%';
+  Result:
+  - game: 67; date: march 19; team: houston rockets; score: w 112 - 91
+
+Conclusion:
+- The available dataset records a game on “march 19” with the score “W 112 - 91.” This supports the claim that the game on March 19 had a score of 112 - 91.
+
+Assumptions:
+- Interpreted “the game on march 19” as referring to the March 19 entry in the only accessible dataset (1991–92 Seattle SuperSonics season log), where “team” indicates the opponent (Houston Rockets) and the score format “W 112 - 91” lists points as 112–91 in favor of Seattle.
+- Date column is text and may not include a year; matching used case-insensitive patterns for “March 19.”
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

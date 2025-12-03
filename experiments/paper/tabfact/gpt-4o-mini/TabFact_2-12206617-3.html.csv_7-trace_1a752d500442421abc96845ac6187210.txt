@@ -1,0 +1,131 @@
+
+<userQuery>
+<query>
+the toronto blue jays lose 2 of the last 3 game they play in may 1991
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the toronto blue jays lose 2 of the last 3 game they play in may 1991.”
+
+Summary conclusion: The data shows the Blue Jays lost 1 of their last 3 May 1991 games, not 2. Therefore, the claim is false.
+
+Evidence from database queries
+
+1) Retrieve all May games (to confirm end-of-month games)
+Executed SQL:
+SELECT date, opponent, score, loss, record 
+FROM public.t_1991_toronto_blue_jays_season 
+WHERE date ILIKE '%May%' 
+ORDER BY date ASC;
+
+Key relevant rows at month-end returned by the query:
+- may 29 | athletics | 8 - 3 | loss slusarski (1 - 2) | record 26 - 20
+- may 30 | athletics | 8 - 6 | loss ward (0 - 2)      | record 26 - 21
+- may 31 | angels    | 5 - 1 | loss langston (6 - 2)  | record 27 - 21
+
+2) Classify last 3 May games as win/loss using record deltas
+Executed SQL:
+WITH may AS (
+  SELECT
+    date,
+    opponent,
+    score,
+    loss,
+    record,
+    CAST(split_part(record, ' - ', 1) AS int) AS wins,
+    CAST(split_part(record, ' - ', 2) AS int) AS losses,
+    CAST(regexp_replace(date, '[^0-9]', '', 'g') AS int) AS day
+  FROM public.t_1991_toronto_blue_jays_season
+  WHERE lower(date) LIKE 'may %'
+),
+ordered AS (
+  SELECT *,
+         LAG(wins) OVER (ORDER BY day) AS prev_wins,
+         LAG(losses) OVER (ORDER BY day) AS prev_losses
+  FROM may
+),
+classified AS (
+  SELECT
+    date,
+    opponent,
+    score,
+    record,
+    day,
+    CASE
+      WHEN prev_wins IS NULL THEN NULL
+      WHEN wins = prev_wins + 1 THEN 'W'
+      WHEN losses = prev_losses + 1 THEN 'L'
+      ELSE NULL
+    END AS result
+  FROM ordered
+)
+SELECT date, opponent, score, record, result
+FROM classified
+ORDER BY day DESC
+LIMIT 3;
+
+Result returned:
+- May 31 | Angels    | 5 - 1 | 27 - 21 | W
+- May 30 | Athletics | 8 - 6 | 26 - 21 | L
+- May 29 | Athletics | 8 - 3 | 26 - 20 | W
+
+3) Count losses among the last three May games
+Executed SQL:
+WITH may AS (
+  SELECT
+    date,
+    opponent,
+    score,
+    loss,
+    record,
+    CAST(split_part(record, ' - ', 1) AS int) AS wins,
+    CAST(split_part(record, ' - ', 2) AS int) AS losses,
+    CAST(regexp_replace(date, '[^0-9]', '', 'g') AS int) AS day
+  FROM public.t_1991_toronto_blue_jays_season
+  WHERE lower(date) LIKE 'may %'
+),
+ordered AS (
+  SELECT *,
+         LAG(wins) OVER (ORDER BY day) AS prev_wins,
+         LAG(losses) OVER (ORDER BY day) AS prev_losses
+  FROM may
+),
+classified AS (
+  SELECT
+    date,
+    opponent,
+    score,
+    loss,
+    record,
+    day,
+    CASE
+      WHEN prev_wins IS NULL THEN NULL
+      WHEN wins = prev_wins + 1 THEN 'W'
+      WHEN losses = prev_losses + 1 THEN 'L'
+      ELSE NULL
+    END AS result
+  FROM ordered
+),
+last_three AS (
+  SELECT *
+  FROM classified
+  ORDER BY day DESC
+  LIMIT 3
+)
+SELECT COUNT(*) FILTER (WHERE result = 'L') AS losses_in_last_three
+FROM last_three;
+
+Result returned: losses_in_last_three = 1
+
+Conclusion: The Toronto Blue Jays lost 1 of their last 3 games in May 1991, not 2.
+
+Assumptions:
+- The table public.t_1991_toronto_blue_jays_season contains the Blue Jays’ 1991 game log and the “record” column reflects the team’s cumulative record immediately after each game.
+- “Last three games in May 1991” are those dated May 29, May 30, and May 31 within that table.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

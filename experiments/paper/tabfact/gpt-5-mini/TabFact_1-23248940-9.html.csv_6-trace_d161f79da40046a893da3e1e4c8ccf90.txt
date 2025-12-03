@@ -1,0 +1,68 @@
+
+<userQuery>
+<query>
+stephen jackson lead the team in point for less than half the game
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: Stephen Jackson led the team in points for less than half of the games.
+
+Data source discovery
+- Available database: TabFact (postgres_tabfact13), schema public.
+- Relevant table: t_2009_10_charlotte_bobcats_season, with columns including “high points,” which indicates the team’s points leader for each game.
+
+Schema details (from schema inspection)
+- Table: t_2009_10_charlotte_bobcats_season
+  Columns: game (bigint), date (text), team (text), score (text), high points (text), high rebounds (text), high assists (text), location attendance (text), record (text)
+
+Evidence and executed SQL
+1) Total number of games (rows)
+SQL executed:
+SELECT COUNT(*) AS total_games FROM public.t_2009_10_charlotte_bobcats_season;
+Result: total_games = 10
+
+2) Number of games where the “high points” field indicates Jackson (case-insensitive)
+SQL executed:
+SELECT COUNT(*) AS jackson_games FROM public.t_2009_10_charlotte_bobcats_season WHERE lower("high points") LIKE '%jackson%';
+Result: jackson_games = 6
+
+3) Combined check: Is Jackson-leading count less than half of total?
+SQL executed:
+SELECT COUNT(*) AS total_games, SUM(CASE WHEN lower("high points") LIKE '%jackson%' THEN 1 ELSE 0 END) AS jackson_games, SUM(CASE WHEN lower("high points") LIKE '%jackson%' THEN 1 ELSE 0 END) < COUNT(*)/2.0 AS jackson_less_than_half FROM public.t_2009_10_charlotte_bobcats_season;
+Result: total_games = 10, jackson_games = 6, jackson_less_than_half = false
+
+4) Listing games for transparency
+Games where the “high points” field includes Jackson
+SQL executed:
+SELECT game, date, score, "high points" FROM public.t_2009_10_charlotte_bobcats_season WHERE "high points" ILIKE '%jackson%' ORDER BY game;
+Results:
+- Game 48 — february 3 — l 97 - 99 (ot) — stephen jackson (30)
+- Game 49 — february 6 — l 99 - 104 (ot) — stephen jackson (26)
+- Game 50 — february 9 — w 94 - 92 (ot) — stephen jackson (22)
+- Game 51 — february 10 — w 93 - 92 (ot) — stephen jackson (33)
+- Game 53 — february 19 — w 110 - 93 (ot) — stephen jackson (29)
+- Game 54 — february 20 — l 88 - 93 (ot) — stephen jackson (35)
+
+Games where the “high points” field does NOT include Jackson
+SQL executed:
+SELECT game, date, score, "high points" FROM public.t_2009_10_charlotte_bobcats_season WHERE NOT ("high points" ILIKE '%jackson%') ORDER BY game;
+Results:
+- Game 47 — february 1 — l 79 - 98 (ot) — raymond felton (23)
+- Game 52 — february 16 — l 94 - 103 (ot) — gerald wallace (21)
+- Game 55 — february 22 — l 94 - 98 (ot) — gerald wallace (32)
+- Game 56 — february 24 — l 93 - 102 (ot) — gerald wallace (27)
+
+Conclusion
+- Stephen Jackson led the team in points in 6 out of 10 games in this dataset, which is more than half. Therefore, the claim that he led the team in points for less than half the games is contradicted by the data.
+
+Assumptions
+- The claim refers to the games represented in the table t_2009_10_charlotte_bobcats_season.
+- “Led the team in points” is proxied by the “high points” field in the table.
+- Stephen Jackson matches are identified via case-insensitive substring search for “jackson” within “high points.”
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

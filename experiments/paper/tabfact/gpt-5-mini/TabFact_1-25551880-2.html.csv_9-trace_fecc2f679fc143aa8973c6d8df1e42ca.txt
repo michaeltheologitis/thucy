@@ -1,0 +1,123 @@
+
+<userQuery>
+<query>
+mar cavendish consecutively win 5 stage
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "Mark Cavendish consecutively win 5 stage" (interpreted as: Did Mark Cavendish win 5 consecutive stages in a race edition?).
+
+Data source discovery
+- Used the available database discovery and schema tools.
+- Result: Only one relevant cycling table is available in the accessible TabFact database: public.t_2010_vuelta_a_espa_a.
+
+Schema evidence
+- Tool: Schema inspection
+- Output:
+  Database: TabFact; Schema: public; Tables:
+  - t_2010_vuelta_a_espa_a — (no further description in schema)
+
+Evidence from data
+1) List all stages and winners in the 2010 Vuelta a España
+- SQL executed:
+  SELECT stage, winner
+  FROM public.t_2010_vuelta_a_espa_a
+  ORDER BY stage;
+- Result (stage — winner):
+  1 — team htc - columbia
+  2 — yauheni hutarovich
+  3 — philippe gilbert
+  4 — igor antón
+  5 — tyler farrar
+  6 — thor hushovd
+  7 — alessandro petacchi
+  8 — david moncoutié
+  9 — david lópez
+  10 — imanol erviti
+  11 — igor antón
+  12 — mark cavendish
+  13 — mark cavendish
+  14 — joaquim rodríguez
+  15 — carlos barredo
+  16 — mikel nieve
+  17 — peter velits
+  18 — mark cavendish
+  19 — philippe gilbert
+  20 — ezequiel mosquera 2
+  21 — tyler farrar
+
+2) Compute sequences of consecutive stages won by the same rider; identify any such sequence for Mark Cavendish of length ≥ 5
+- SQL executed:
+  WITH ordered AS (
+   SELECT stage, winner,
+    CASE WHEN winner = lag(winner) OVER (ORDER BY stage) THEN 0 ELSE 1 END AS is_new
+   FROM public.t_2010_vuelta_a_espa_a
+  ),
+  groups AS (
+   SELECT stage, winner,
+    sum(is_new) OVER (ORDER BY stage) AS grp
+   FROM ordered
+  )
+  SELECT grp, min(stage) AS start_stage, max(stage) AS end_stage, (max(stage)-min(stage)+1) AS length, winner,
+         string_agg(stage::text, ',' ORDER BY stage) AS stages
+  FROM groups
+  GROUP BY grp, winner
+  ORDER BY start_stage;
+- Result (grp, start_stage, end_stage, length, winner, stages):
+  1, 1, 1, 1, team htc - columbia, 1
+  2, 2, 2, 1, yauheni hutarovich, 2
+  3, 3, 3, 1, philippe gilbert, 3
+  4, 4, 4, 1, igor antón, 4
+  5, 5, 5, 1, tyler farrar, 5
+  6, 6, 6, 1, thor hushovd, 6
+  7, 7, 7, 1, alessandro petacchi, 7
+  8, 8, 8, 1, david moncoutié, 8
+  9, 9, 9, 1, david lópez, 9
+  10, 10, 10, 1, imanol erviti, 10
+  11, 11, 11, 1, igor antón, 11
+  12, 12, 13, 2, mark cavendish, 12,13
+  13, 14, 14, 1, joaquim rodríguez, 14
+  14, 15, 15, 1, carlos barredo, 15
+  15, 16, 16, 1, mikel nieve, 16
+  16, 17, 17, 1, peter velits, 17
+  17, 18, 18, 1, mark cavendish, 18
+  18, 19, 19, 1, philippe gilbert, 19
+  19, 20, 20, 1, ezequiel mosquera 2, 20
+  20, 21, 21, 1, tyler farrar, 21
+- Interpretation: In this dataset (2010 Vuelta), Mark Cavendish has a maximum streak of 2 consecutive stage wins (stages 12–13). No longer streaks exist for any rider.
+
+3) Explicit check for a Cavendish streak ≥ 5
+- SQL executed:
+  WITH ordered AS (
+   SELECT stage, winner,
+    CASE WHEN winner = lag(winner) OVER (ORDER BY stage) THEN 0 ELSE 1 END AS is_new
+   FROM public.t_2010_vuelta_a_espa_a
+  ),
+  groups AS (
+   SELECT stage, winner,
+    sum(is_new) OVER (ORDER BY stage) AS grp
+   FROM ordered
+  ),
+  seqs AS (
+   SELECT grp, min(stage) AS start_stage, max(stage) AS end_stage, (max(stage)-min(stage)+1) AS length, winner,
+         string_agg(stage::text, ',' ORDER BY stage) AS stages
+   FROM groups
+   GROUP BY grp, winner
+  )
+  SELECT * FROM seqs
+  WHERE winner = 'mark cavendish' AND length >= 5
+  ORDER BY start_stage;
+- Result: no rows returned.
+
+Conclusion
+- Based on the only accessible cycling data (2010 Vuelta a España), Mark Cavendish did not win 5 consecutive stages; his longest consecutive streak in this dataset is 2 stages (12–13). Therefore, the claim is not supported by the available evidence.
+
+Assumptions and scope
+- The available database exposes only the 2010 Vuelta a España stage-winner table. If the claim refers to a different race or year, it cannot be verified here. My conclusion is strictly limited to the accessible data and does not generalize beyond it.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

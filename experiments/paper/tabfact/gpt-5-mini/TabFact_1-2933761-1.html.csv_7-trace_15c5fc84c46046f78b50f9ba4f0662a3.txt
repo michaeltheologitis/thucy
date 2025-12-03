@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+both female have a prison connection in the uk
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "both female have a prison connection in the uk"
+
+Step 1: Discover available data sources
+- Data source discovered: PostgreSQL database (connection: postgres_tabfact0), public schema.
+
+Step 2: Inspect schema
+- Table: cube_film_series
+  - Columns: name (text), occupation (text), gender (text), prison connection (text), played by (text), status (text)
+
+Step 3: Collect evidence
+A) Retrieve all records where gender is female and show their prison connection
+- Executed SQL:
+  SELECT name, "prison connection" FROM cube_film_series WHERE lower(gender) = 'female';
+- Results:
+  - name: joan leaven; prison connection: leavenworth prison (usa)
+  - name: dr helen holloway; prison connection: holloway women 's prison (uk)
+
+B) Count female records to confirm "both"
+- Executed SQL:
+  SELECT COUNT(*) AS female_count FROM cube_film_series WHERE lower(gender) = 'female';
+- Result: female_count = 2
+
+Findings
+- There are exactly two records with gender = female.
+- Of these two, one has a prison connection in the UK ("holloway women 's prison (uk)").
+- The other has a prison connection in the USA ("leavenworth prison (usa)"), not the UK.
+
+Conclusion
+- The claim that both female have a prison connection in the UK is contradicted by the data. Only one of the two female records has a UK prison connection; the other is in the USA.
+
+Assumptions
+- Interpreted "both female" to refer to all records in the dataset with gender marked as female.
+- Gender matching performed case-insensitively using lower(gender) = 'female'.
+- Interpreted "prison connection in the uk" as the prison connection field indicating a UK location (explicitly marked as "(uk)").
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

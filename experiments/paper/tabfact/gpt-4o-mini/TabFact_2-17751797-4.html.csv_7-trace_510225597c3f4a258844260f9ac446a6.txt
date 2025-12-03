@@ -1,0 +1,60 @@
+
+<userQuery>
+<query>
+1 - 0 be the score the home team be bolton wanderer
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of what was checked
+- Interpreted the claim as: “The score was 1–0 and the home team was Bolton Wanderers.”
+- Explored the only available dataset (FA Cup 1990–1991) and searched for any matches involving Bolton Wanderers, especially with them as the home team and a 1–0 score.
+
+Data source discovery
+- Available schemas: information_schema, pg_catalog, pg_toast, public
+- Relevant table: public.t_1990_91_fa_cup
+
+Executed SQL (evidence)
+1) List schemas
+SELECT schemata.schema_name
+FROM information_schema.schemata;
+
+2) List tables in public schema with comments
+SELECT table_schema, table_name, obj_description( (table_schema || '.' || table_name)::regclass ) AS table_comment
+FROM information_schema.tables
+WHERE table_schema = 'public';
+
+3) Describe columns for public.t_1990_91_fa_cup
+SELECT column_name, data_type, is_nullable, column_default
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 't_1990_91_fa_cup';
+
+4) Attempt to find Bolton Wanderers as home team (no rows returned)
+SELECT "tie no", "date", "home team", "score", "away team" 
+FROM public.t_1990_91_fa_cup 
+WHERE LOWER("home team") = LOWER('Bolton Wanderers');
+
+5) Find any rows where home or away contains 'Bolton'
+SELECT "tie no", "date", "home team", "score", "away team" 
+FROM public.t_1990_91_fa_cup 
+WHERE LOWER("home team") LIKE '%bolton%' OR LOWER("away team") LIKE '%bolton%' ;
+
+Result from (5)
+- Tie No: 11 | Date: 26 / 01 / 1991 | Home Team: Manchester United | Score: 1 - 0 | Away Team: Bolton Wanderers
+
+Findings
+- The dataset contains one match involving Bolton Wanderers in the 1990–91 FA Cup: Manchester United 1–0 Bolton Wanderers, with Bolton Wanderers as the away team.
+- No evidence in this dataset shows a 1–0 match with Bolton Wanderers as the home team.
+
+Conclusion
+- The “1–0” score aligns with a match involving Bolton Wanderers, but the home team was Manchester United, not Bolton Wanderers. Therefore, the claim is partly incorrect within the scope of the available data.
+
+Assumptions
+- “Bolton wanderer” was interpreted as “Bolton Wanderers.”
+- Verification was constrained to the FA Cup 1990–1991 dataset, which is the only accessible data source. No claims are made about other seasons or competitions.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

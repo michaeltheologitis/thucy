@@ -1,0 +1,75 @@
+
+<userQuery>
+<query>
+w gymnastics be the sport with the earliest date in 2007
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Women’s gymnastics (w gymnastics) is the sport with the earliest date in 2007.”
+
+Data source checked: TabFact database, table public.iowa_corn_cy_hawk_series (columns: date [text], site [text], sport [text], winning team [text], series [text]).
+
+What the data shows
+- The earliest dated event in 2007 is 2007-09-04, and its sport is m golf (men’s golf), not women’s gymnastics.
+- A full per-sport earliest-date list for 2007 confirms m golf is first; women’s gymnastics does not appear among 2007 entries.
+
+Executed SQL and evidence
+1) Identify 2007 date strings and their formats
+SQL:
+SELECT DISTINCT date FROM iowa_corn_cy_hawk_series WHERE date LIKE '%2007%' ORDER BY date LIMIT 100;
+Returned rows (sample):
+- "december 5 , 2007"
+- "december 7 , 2007"
+- "december 8 , 2007"
+- "december 9 , 2007"
+- "november 10 , 2007"
+- "september 15 , 2007"
+- "september 4 , 2007"
+- "september 8 , 2007"
+- "september 9 , 2007"
+
+2) Compute earliest date in 2007
+SQL:
+SELECT MIN(to_date(date, 'FMMonth FMDD , YYYY')) AS earliest_date FROM iowa_corn_cy_hawk_series WHERE date LIKE '%2007%';
+Result:
+- earliest_date: 2007-09-04
+
+3) Sport(s) on the earliest 2007 date
+SQL:
+SELECT DISTINCT sport FROM iowa_corn_cy_hawk_series WHERE to_date(date, 'FMMonth FMDD , YYYY') = DATE '2007-09-04';
+Result:
+- sport: m golf
+
+4) Earliest date per sport in 2007 (ordered)
+SQL:
+SELECT sport, MIN(to_date(replace(date,' , ',' '),'FMMonth FMDD YYYY'))::date AS earliest_date
+FROM iowa_corn_cy_hawk_series
+WHERE date LIKE '%2007%'
+GROUP BY sport
+ORDER BY earliest_date ASC;
+Returned rows:
+1. m golf — 2007-09-04
+2. volleyball — 2007-09-08
+3. w soccer — 2007-09-09
+4. football — 2007-09-15
+5. w cross country — 2007-11-10
+6. m cross country — 2007-11-10
+7. w basketball — 2007-12-05
+8. w swimming — 2007-12-07
+9. m basketball — 2007-12-08
+10. wrestling — 2007-12-09
+
+Conclusion
+- Women’s gymnastics is not the earliest sport dated in 2007 in this dataset; the earliest is men’s golf on 2007-09-04.
+
+Assumptions
+- “w gymnastics” refers to women’s gymnastics.
+- “Earliest date in 2007” means the chronologically first event in rows where the date text contains “2007”.
+- The date strings are parsed using to_date with the observed textual format (month name, day, comma, year).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

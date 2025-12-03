@@ -1,0 +1,63 @@
+
+<userQuery>
+<query>
+8 of the viral disease be non - envelop
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Interpreted claim: The dataset indicates that 8 viral entries are non-enveloped.
+- Data source discovered: PostgreSQL database “TabFact” (schema public) containing the table public.viral_disease.
+
+Schema inspection
+- Table: public.viral_disease
+  - Columns: family (text), baltimore group (text), envelopment (text), virion shape (text), replication site (text)
+  - The envelopment column records whether viruses are enveloped or non-enveloped.
+
+Evidence
+1) Distinct envelopment values and counts
+Executed SQL:
+SELECT envelopment, COUNT(*) AS cnt
+FROM public.viral_disease
+GROUP BY envelopment
+ORDER BY cnt DESC NULLS LAST;
+Result:
+- envelopment = "enveloped": 15 rows
+- envelopment = "non - enveloped": 8 rows
+
+2) Total rows for context
+Executed SQL:
+SELECT COUNT(*) AS total_rows FROM public.viral_disease;
+Result:
+- total_rows = 23
+
+3) Listing the non-enveloped families (to validate the count and categories)
+Executed SQL:
+SELECT family, envelopment FROM public.viral_disease WHERE lower(envelopment) LIKE '%non%envel%' OR lower(envelopment) LIKE '%naked%' ORDER BY family;
+Result (8 rows):
+- adenoviridae — non - enveloped
+- astroviridae — non - enveloped
+- caliciviridae — non - enveloped
+- papillomaviridae — non - enveloped
+- parvoviridae — non - enveloped
+- picornaviridae — non - enveloped
+- polyomaviridae — non - enveloped
+- reoviridae — non - enveloped
+
+Analysis
+- The envelopment field explicitly categorizes entries. The grouped counts show exactly 8 rows labeled “non - enveloped.”
+- The detailed listing confirms exactly 8 families are marked non-enveloped.
+
+Conclusion
+- The claim that 8 of the viral entries are non-enveloped aligns with the database evidence.
+
+Assumptions
+- I interpret “viral disease” in the claim as referring to the records in public.viral_disease, where each row represents a virus family with associated properties, including envelope status.
+- I treated the envelopment value "non - enveloped" as definitive for non-enveloped status.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+the detroit piston win by over 10 point in 3 game during this period of their 2010 - 2011 season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Data source discovered: postgres_tabfact14 (TabFact), schema public. Relevant table: public.t_2010_11_detroit_pistons_season. This table contains 12 consecutive games (game numbers 62–73), corresponding to a March 2011 stretch of the Detroit Pistons’ 2010–2011 season.
+- Claim to verify (interpreted): During this period (the 12-game stretch represented in this table), the Detroit Pistons won by more than 10 points in 3 games.
+
+What the data shows
+1) Period coverage (to characterize the dataset scope)
+SQL:
+SELECT COUNT(*) AS total_rows, MIN(game) AS min_game, MAX(game) AS max_game
+FROM public.t_2010_11_detroit_pistons_season;
+Result:
+- total_rows: 12, min_game: 62, max_game: 73
+
+2) List of wins by more than 10 points (parse score, compute margin, filter to wins with margin > 10)
+SQL:
+SELECT date, team AS opponent, score,
+ (regexp_replace(score, '^[wl]\s*(\d+)\s*-\s*(\d+).*$', '\\1'))::int AS det_points,
+ (regexp_replace(score, '^[wl]\s*(\d+)\s*-\s*(\d+).*$', '\\2'))::int AS opp_points,
+ ((regexp_replace(score, '^[wl]\s*(\d+)\s*-\s*(\d+).*$', '\\1'))::int - (regexp_replace(score, '^[wl]\s*(\d+)\s*-\s*(\d+).*$', '\\2'))::int) AS margin
+FROM public.t_2010_11_detroit_pistons_season
+WHERE substring(score FROM '^[wl]') = 'w'
+AND ((regexp_replace(score, '^[wl]\s*(\d+)\s*-\s*(\d+).*$', '\\1'))::int - (regexp_replace(score, '^[wl]\s*(\d+)\s*-\s*(\d+).*$', '\\2'))::int) > 10
+ORDER BY date;
+Returned rows:
+- Washington — march 6 — w 113 - 102 (ot) — margin 11
+- Toronto — march 16 — w 107 - 93 (ot) — margin 14
+- Indiana — march 26 — w 100 - 88 (ot) — margin 12
+
+3) Count of such games
+SQL:
+SELECT COUNT(*) AS wins_by_more_than_10
+FROM public.t_2010_11_detroit_pistons_season
+WHERE substring(score FROM '^[wl]') = 'w'
+AND ((regexp_replace(score, '^[wl]\s*(\d+)\s*-\s*(\d+).*$', '\\1'))::int - (regexp_replace(score, '^[wl]\s*(\d+)\s*-\s*(\d+).*$', '\\2'))::int) > 10;
+Result:
+- wins_by_more_than_10: 3
+
+Conclusion
+- The data shows exactly 3 wins by more than 10 points within this period (games 62–73). Therefore, the claim is supported by the data in the available table.
+
+Assumptions
+- “This period of their 2010–2011 season” is interpreted as the 12-game stretch captured in public.t_2010_11_detroit_pistons_season (games 62–73, March 2011).
+- “Over 10 point” means strictly greater than 10 (i.e., margin ≥ 11).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

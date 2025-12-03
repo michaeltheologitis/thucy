@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+fukusyū no puropōzu have 3.2% higher rating than the title with the most recent broadcast date
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “fukusyū no puropōzu have 3.2% higher rating than the title with the most recent broadcast date.”
+
+Data source overview
+- Connected database: Postgres
+- Schema: public
+- Table: tsuki_no_koibito
+- Relevant columns: episode title (text), romanized title (text), translation of title (text), broadcast date (text), ratings (text)
+
+Evidence and SQL
+1) Locate the episode “fukusyū no puropōzu” and its rating
+- Result: episode title = 復讐のプロポーズ; romanized title = fukusyū no puropōzu; broadcast date = May 24, 2010; ratings = 15.6%
+- Executed SQL:
+SELECT "episode title", "romanized title", "translation of title", "broadcast date", "ratings"
+FROM public.tsuki_no_koibito
+WHERE LOWER("romanized title") = LOWER('fukusyū no puropōzu'::text)
+   OR LOWER("romanized title") LIKE '%fuku%'
+   OR LOWER("romanized title") LIKE '%fukush%'
+   OR LOWER("romanized title") LIKE '%purop%'
+   OR "episode title" LIKE '%復讐%'
+   OR "episode title" LIKE '%プロポーズ%';
+
+2) Identify the most recent broadcast date and its rating (correctly parsing dates)
+- Result: most recent episode = 最終章序幕・別れ; romanized title = saishūshōjomakuwakare; broadcast date = June 14, 2010; ratings = 13.4%
+- Executed SQL:
+SELECT "episode title", "romanized title", "broadcast date", "ratings"
+FROM public.tsuki_no_koibito
+ORDER BY TO_DATE("broadcast date", 'Month DD, YYYY') DESC
+LIMIT 1;
+
+3) Compute rating differences
+- Absolute difference (percentage points): 15.6 − 13.4 = 2.2
+- Relative difference vs the most recent title: ((15.6 − 13.4) / 13.4) × 100 ≈ 16.42%
+- Executed SQL (arithmetic verification):
+SELECT 15.6 - 13.4 AS absolute_difference;
+SELECT ((15.6 - 13.4) / 13.4) * 100 AS relative_difference;
+
+Assessment
+- The data shows “fukusyū no puropōzu” has a 15.6% rating, while the most recent episode has a 13.4% rating.
+- The difference is 2.2 percentage points (absolute) or about 16.42% higher relative to the most recent episode’s rating.
+- The claim of “3.2% higher” is not supported by the data.
+
+Conclusion: The claim is inaccurate. The correct figure is 2.2 percentage points higher (about 16.42% higher relative to the most recent episode’s rating).
+
+Assumptions
+- “Higher rating” is interpreted as a relative percentage difference over the most recent episode’s rating; absolute difference also reported for clarity.
+- Ratings strings (e.g., “15.6%”) were converted to numeric values by removing the percent sign.
+- Recency is determined by converting the broadcast date text to a date using TO_DATE('Month DD, YYYY').
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,51 @@
+
+<userQuery>
+<query>
+the most rebound by a bobcat player in 1 game be 20
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the most rebound by a Bobcat player in 1 game be 20.”
+
+Data sources discovered and used:
+- Database: TabFact (postgres_tabfact9), schema: public
+- Table: t_2009_10_charlotte_bobcats_season — game-by-game log for the 2009–10 Charlotte Bobcats season, including leading individual stats for each game (high points, high rebounds, high assists).
+
+Verification steps and evidence:
+1) Find the maximum single-game rebounds (“high rebounds”) recorded in the available season log
+- Executed SQL:
+  SELECT MAX(NULLIF(regexp_replace("high rebounds", '[^0-9]+', '', 'g'), '')::int) AS max_high_rebounds FROM public.t_2009_10_charlotte_bobcats_season;
+- Result: 20
+
+2) Retrieve the game(s) where this maximum occurred
+- Executed SQL:
+  SELECT game, date, team, score, "high points", "high rebounds", "high assists", "location attendance", record
+  FROM public.t_2009_10_charlotte_bobcats_season
+  WHERE NULLIF(regexp_replace("high rebounds", '[^0-9]+', '', 'g'), '')::int = 20
+  ORDER BY date;
+- Result (one row):
+  {"game": 51,
+   "date": "february 10",
+   "team": "minnesota",
+   "score": "w 93 - 92 (ot)",
+   "high points": "stephen jackson (33)",
+   "high rebounds": "nazr mohammed (20)",
+   "high assists": "dj augustin (7)",
+   "location attendance": "target center 13352",
+   "record": "26 - 25"}
+
+Conclusion:
+- Within the scope of the available data (the 2009–10 Charlotte Bobcats season), the highest single-game rebound total by a Bobcats player is 20 (Nazr Mohammed on February 10 at Minnesota, OT). This supports the claim for that season.
+- However, we do not have data for other seasons, so we cannot confirm that 20 is the all-time Bobcats franchise single-game record across all years.
+
+Assumptions made:
+- “Bobcat player” refers to a Charlotte Bobcats player (NBA franchise active as Bobcats during 2004–2014).
+- “Most rebound … in 1 game” is interpreted as the maximum single-game rebounds by any Bobcats player in the dataset at hand.
+- The “high rebounds” field combines player name and count; the numeric value was extracted for computation, as shown in the SQL.
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

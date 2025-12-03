@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+the score on 21 / 07 / 07 be 14 to 10 and the home team be bradford
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "the score on 21 / 07 / 07 be 14 to 10 and the home team be bradford"
+
+Data source discovery
+- Available source: PostgreSQL TabFact instance
+- Relevant table: public.t_2007_bradford_bulls_season (columns: date [text], home team [text], score [text], away team [text], goals [text], attendance [bigint], competition [text])
+
+Step 1 — Inspect sample rows to understand formats
+Executed SQL:
+SELECT date, "home team", score, "away team", goals, attendance, competition
+FROM public.t_2007_bradford_bulls_season
+LIMIT 20;
+Key observation: Dates are text with slashes and spaces (e.g., "18 / 02 / 07"), and scores are stored as text in the form "<home> - <away>".
+
+Step 2 — Find the match for 21 July 2007
+Executed SQL:
+SELECT date, "home team", score, "away team", competition
+FROM public.t_2007_bradford_bulls_season
+WHERE date ~ '\m21[\s/\.\-]*0?7[\s/\.\-]*(?:07|2007)\M';
+Result returned:
+- date: 21 / 07 / 07
+  home team: salford city reds
+  score: 14 - 10
+  away team: bradford
+  competition: super league xii
+
+Assessment against the claim
+- Score: 14 - 10 — Supported by the data.
+- Home team: Claim says "bradford"; data shows the home team was "salford city reds" and Bradford were the away team — Contradicted by the data.
+
+Conclusion: The score is correct, but the home team identification is wrong.
+
+Assumptions made
+- Interpreted the date "21 / 07 / 07" as 21 July 2007 and searched in the 2007 Bradford Bulls season table.
+- Interpreted "14 to 10" as the dataset’s "14 - 10" score format.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

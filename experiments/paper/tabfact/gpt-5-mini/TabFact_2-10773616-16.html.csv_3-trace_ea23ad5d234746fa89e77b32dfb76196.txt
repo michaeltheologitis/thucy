@@ -1,0 +1,68 @@
+
+<userQuery>
+<query>
+collingwood have a home team score 2.00 point higher than that of carlton
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Collingwood have a home team score 2.00 point higher than that of Carlton.”
+
+Data source explored
+- Database: TabFact (PostgreSQL)
+- Schema: public
+- Table: t_1954_vfl_season
+  Columns: "home team" (text), "home team score" (text), "away team" (text), "away team score" (text), "venue" (text), "crowd" (bigint), "date" (text)
+
+What I checked and found
+1) Confirm teams present and number of home games
+- Executed SQL:
+  SELECT "home team", COUNT(*) AS home_games
+  FROM t_1954_vfl_season
+  WHERE "home team" IS NOT NULL AND trim("home team") <> ''
+  GROUP BY "home team"
+  ORDER BY "home team";
+- Result (excerpt):
+  - carlton — 1
+  - collingwood — 1
+  (Each appears once as a home team in this dataset.)
+
+2) Verify the raw stored scores for those games
+- Executed SQL:
+  SELECT "home team", "home team score", "away team", "away team score", "date"
+  FROM t_1954_vfl_season
+  WHERE "home team" IN ('collingwood','carlton')
+  ORDER BY "date";
+- Result:
+  - home team: collingwood | home team score: 12.16 (88) | away team: south melbourne | away team score: 13.12 (90) | date: 14 august 1954
+  - home team: carlton | home team score: 10.16 (76) | away team: essendon | away team score: 11.14 (80) | date: 14 august 1954
+
+3) Compute home-team total points (using the numeric total in parentheses) and compare averages
+- Executed SQL:
+  SELECT
+    to_char(AVG( CASE WHEN lower("home team")='collingwood' THEN (substring("home team score" from '\\((\\d+)\\)'))::numeric END), 'FM99999990.00') AS coll_avg,
+    to_char(AVG( CASE WHEN lower("home team")='carlton' THEN (substring("home team score" from '\\((\\d+)\\)'))::numeric END), 'FM99999990.00') AS carlton_avg,
+    to_char(
+      (AVG( CASE WHEN lower("home team")='collingwood' THEN (substring("home team score" from '\\((\\d+)\\)'))::numeric END)
+       - AVG( CASE WHEN lower("home team")='carlton' THEN (substring("home team score" from '\\((\\d+)\\)'))::numeric END)
+      ),
+      'FM99999990.00') AS diff
+  FROM public.t_1954_vfl_season;
+- Result:
+  - Collingwood average home-team total points: 88.00
+  - Carlton average home-team total points: 76.00
+  - Difference (Collingwood minus Carlton): 12.00
+
+Conclusion
+- The data show Collingwood’s home team score exceeds Carlton’s by 12.00 points in this dataset, not 2.00 points. Therefore, the claim is contradicted by the evidence.
+
+Assumptions made
+- Interpreted “home team score” as the total points (the number in parentheses) in the VFL/AFL score format (e.g., goals.behinds (total)).
+- Interpreted the claim as comparing the teams’ home-team total points as present in the available 1954 VFL season table. Since each team appears once at home in this table, the “average” equals that single game’s total.
+- Team names are stored in lowercase in this dataset; matching used lowercase comparisons accordingly.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

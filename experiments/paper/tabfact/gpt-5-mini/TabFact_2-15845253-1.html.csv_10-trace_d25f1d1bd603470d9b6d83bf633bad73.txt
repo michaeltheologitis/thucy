@@ -1,0 +1,73 @@
+
+<userQuery>
+<query>
+9 viral family have a replication site in the cytoplasm
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “9 viral family have a replication site in the cytoplasm.”
+
+Data source discovery
+- Accessible source: PostgreSQL instance (TabFact, schema: public). No other sources were available via the provided tools.
+
+Relevant schema identified
+- Table: public.viral_disease
+  - Columns: family (text), baltimore group (text), envelopment (text), virion shape (text), replication site (text)
+
+Verification approach
+- Determine the distinct values present in replication site.
+- Count distinct virus families whose replication site is cytoplasm.
+- List the families for transparency.
+
+Executed queries and results
+1) Identify replication site values
+SQL:
+SELECT DISTINCT "replication site" FROM public.viral_disease ORDER BY "replication site";
+Result:
+- cytoplasm
+- nucleus
+
+2) Count distinct families with cytoplasmic replication
+SQL:
+SELECT COUNT(DISTINCT family) AS cytoplasm_family_count FROM public.viral_disease WHERE "replication site" = 'cytoplasm';
+Result:
+- cytoplasm_family_count: 14
+
+3) List the distinct families with cytoplasmic replication
+SQL:
+SELECT DISTINCT family FROM public.viral_disease WHERE "replication site" = 'cytoplasm' ORDER BY family;
+Result (families):
+- arenaviridae
+- astroviridae
+- bunyaviridae
+- caliciviridae
+- coronaviridae
+- filoviridae
+- flaviviridae
+- hepeviridae
+- paramyxoviridae
+- picornaviridae
+- poxviridae
+- reoviridae
+- rhabdoviridae
+- togaviridae
+
+Cross-check using case-insensitive substring match (produced the same count)
+SQL (count):
+SELECT COUNT(DISTINCT "family") AS family_count FROM public.viral_disease WHERE "replication site" ILIKE '%cytoplasm%';
+Result:
+- family_count: 14
+
+Conclusion
+- The data show 14 distinct virus families with replication in the cytoplasm, not 9. Therefore, the claim is contradicted by the evidence.
+
+Assumptions
+- “Viral family” refers to the distinct values in the family column of public.viral_disease.
+- Replication site classification is taken as stored in the dataset (values observed: cytoplasm, nucleus).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

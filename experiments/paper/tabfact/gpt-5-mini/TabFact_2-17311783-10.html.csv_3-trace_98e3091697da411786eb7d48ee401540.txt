@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+when michael beade be the highest scorer , the score be w 97 - 92 (ot)
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “when michael beade be the highest scorer, the score be w 97 - 92 (ot)”
+
+Data source explored: TabFact PostgreSQL (public.t_2008_09_miami_heat_season)
+
+Step 1 — Inspect table format (evidence):
+Executed SQL:
+SELECT game, date, team, score, "high points" FROM public.t_2008_09_miami_heat_season LIMIT 10;
+Returned sample includes:
+- game 76 | date: april 3 | opponent: charlotte | score: w 97 - 92 (ot) | high points: dwyane wade (27)
+- game 81 | date: april 14 | opponent: atlanta | score: l 79 - 81 (ot) | high points: michael beasley (23)
+
+Step 2 — Find all games where Michael Beasley was the high scorer (evidence):
+Executed SQL:
+SELECT date, team AS opponent, score, "high points" FROM public.t_2008_09_miami_heat_season WHERE "high points" ILIKE '%Michael Beasley%';
+Result:
+- date: april 14 | opponent: atlanta | score: l 79 - 81 (ot) | high points: michael beasley (23)
+Interpretation: In this table, Michael Beasley is listed as the high scorer in one game, which was a 79–81 overtime loss, not a 97–92 OT win.
+
+Step 3 — Locate the game with score exactly “w 97 - 92 (ot)” (evidence):
+Executed SQL:
+SELECT date, team AS opponent, score, "high points" FROM public.t_2008_09_miami_heat_season WHERE score = 'w 97 - 92 (ot)';
+Result:
+- date: april 3 | opponent: charlotte | score: w 97 - 92 (ot) | high points: dwyane wade (27)
+Interpretation: The 97–92 OT win lists Dwyane Wade, not Michael Beasley, as the high scorer.
+
+Conclusion:
+- The OT win 97–92 had Dwyane Wade as the high scorer, not Michael Beasley.
+- When Michael Beasley was the high scorer (april 14 vs. Atlanta), the score was a 79–81 OT loss.
+Therefore, the claim is contradicted by the data in the available source.
+
+Assumptions made:
+- “michael beade” refers to “Michael Beasley.”
+- “highest scorer” corresponds to the table’s “high points” field (player name with points).
+- The “score” text is interpreted literally as stored (e.g., “w 97 - 92 (ot)”).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

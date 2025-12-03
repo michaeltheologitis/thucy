@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+the episode summary for episode 5 premier on june 29 , 2012 be that rita is made into an actress
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the episode summary for episode 5 premier on june 29 , 2012 be that rita is made into an actress.”
+
+What I checked
+- Identified the available TV-series dataset (public.made_tv_series) and examined entries around June 29, 2012 and episode 5 in 2012.
+
+Evidence from data (with exact executed SQL)
+1) Check how dates are stored and whether June 29, 2012 exists in the table
+- SQL:
+  SELECT DISTINCT "premier date" 
+  FROM public.made_tv_series
+  WHERE "premier date" LIKE '%2012%';
+- Returned (excerpt):
+  - june 18 , 2012
+  - june 19 , 2012
+  - june 20 , 2012
+  - june 22 , 2012
+  - june 25 , 2012
+  - june 26 , 2012
+  - june 29 , 2012
+  (and others)
+
+2) Retrieve the row for the June 29, 2012 premiere
+- SQL:
+  SELECT season, episode, "premier date", "episode summary"
+  FROM public.made_tv_series
+  WHERE lower("premier date") LIKE '%june 29%';
+- Result:
+  - season: 13
+  - episode: 8
+  - premier date: june 29 , 2012
+  - episode summary: amber is made into a recording artist
+
+3) Retrieve the row for episode 5 in 2012
+- SQL:
+  SELECT season, episode, "premier date", "episode summary" FROM public.made_tv_series WHERE episode = 5 AND "premier date" LIKE '%2012%';
+- Result:
+  - season: 13
+  - episode: 5
+  - premier date: june 25 , 2012
+  - episode summary: rita is made into an actress
+
+Assessment of the claim
+- “episode 5 … rita is made into an actress” — Supported. The episode 5 entry shows that summary.
+- “premier on june 29 , 2012” — Not supported for episode 5. Episode 5 premiered on June 25, 2012. June 29, 2012 corresponds to episode 8 with a different summary (“amber is made into a recording artist”).
+
+Conclusion
+- The summary content for episode 5 is correct, but the premiere date given in the claim is incorrect. Therefore, the overall claim is only partially supported by the data.
+
+Assumptions
+- Premier dates are stored as text; I used case-insensitive matching to align with the stored format (e.g., “june 29 , 2012”).
+- The public.made_tv_series table is treated as authoritative for episode numbers, dates, and summaries.
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

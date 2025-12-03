@@ -1,0 +1,51 @@
+
+<userQuery>
+<query>
+aldershot town be the opponent when bradford city score their highest point total
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Aldershot Town were the opponent when Bradford City scored their highest point total.”
+
+Data sources discovered
+- Database: TabFact
+- Table: public.t_2008_09_bradford_city_a_f_c_season (columns: game, date, opponent, venue, result, attendance). The result field is a scoreline formatted like “X - Y”, where X is Bradford City’s goals and Y is the opponent’s goals.
+
+Method
+1) Determine Bradford City’s maximum goals scored in any single match in the available season data.
+2) List the match(es) where that maximum occurred and identify the opponent(s).
+
+Findings
+- Maximum goals scored by Bradford City in a single match (in this dataset): 5.
+- Match where 5 goals were scored:
+  - Game 35, Date: 7 March 2009, Opponent: Aldershot Town, Venue: Home, Result: 5 - 0.
+- No other matches in the dataset show Bradford City scoring more than 5 goals or equaling 5 goals against any other opponent.
+
+Executed SQL and returned evidence
+1) Find the maximum goals scored in a single match:
+SELECT MAX(CAST(SPLIT_PART(result, ' ', 1) AS INTEGER)) AS max_goals
+FROM public.t_2008_09_bradford_city_a_f_c_season;
+
+Result: max_goals = 5
+
+2) List all matches where Bradford City scored that many goals:
+SELECT game, date, opponent, venue, result 
+FROM public.t_2008_09_bradford_city_a_f_c_season 
+WHERE CAST(SPLIT_PART(result, ' ', 1) AS INTEGER) = 5;
+
+Result:
+- game: 35 | date: 7 March 2009 | opponent: Aldershot Town | venue: Home | result: 5 - 0
+
+Conclusion
+Within the available 2008–09 Bradford City A.F.C. season data, Aldershot Town were indeed the opponent when Bradford City recorded their highest goals scored in a single match (5-0). This supports the essence of the claim as interpreted.
+
+Assumptions and scope
+- Interpreted “highest point total” to mean “most goals scored in a single match,” as football points per match are fixed (3/1/0) and the dataset records scorelines, not cumulative league points.
+- Verification is limited to the 2008–09 season due to the scope of available data.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

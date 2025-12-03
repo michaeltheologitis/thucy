@@ -1,0 +1,70 @@
+
+<userQuery>
+<query>
+fukusyū no puropōzu have the 2nd most recent broadcast date
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “fukusyū no puropōzu have the 2nd most recent broadcast date.”
+
+Summary conclusion based on the data: The episode “fukusyū no puropōzu” has the 4th most recent broadcast date (2010-05-24) in the dataset, not the 2nd. The 2nd most recent broadcast date belongs to “suki to ietara iinoni” (2010-06-07).
+
+Data source
+- PostgreSQL instance postgres_tabfact12, schema public, table: public.tsuki_no_koibito
+  Columns: "Unnamed: 0" (text), "episode title" (text), "romanized title" (text), "translation of title" (text), "broadcast date" (text), "ratings" (text)
+
+Evidence and executed SQL
+1) Order all episodes by broadcast date (most recent first) and show ranks
+- SQL:
+SELECT "romanized title", "broadcast date",
+       to_date(initcap(regexp_replace("broadcast date", '\\s+,', ',' , 'g')), 'Month DD, YYYY') AS parsed_date,
+       row_number() OVER (ORDER BY to_date(initcap(regexp_replace("broadcast date", '\\s+,', ',' , 'g')), 'Month DD, YYYY') DESC) AS rank
+FROM public.tsuki_no_koibito
+ORDER BY rank;
+- Result (romanized title | broadcast date | parsed_date | rank):
+  1) saishūshōjomakuwakare | june 14 , 2010 | 2010-06-14 | 1
+  2) suki to ietara iinoni | june 7 , 2010 | 2010-06-07 | 2
+  3) konna ni suki dattanda… | may 31 , 2010 | 2010-05-31 | 3
+  4) fukusyū no puropōzu | may 24 , 2010 | 2010-05-24 | 4
+  5) arienai kisu | may 17 , 2010 | 2010-05-17 | 5
+  6) omae ga hosii | may 10 , 2010 | 2010-05-10 | 6
+
+2) Directly identify the 2nd most recent broadcast
+- SQL:
+SELECT "romanized title", "broadcast date", to_date("broadcast date", 'FMMonth DD , YYYY') AS parsed_date
+FROM tsuki_no_koibito
+ORDER BY parsed_date DESC NULLS LAST
+LIMIT 5;
+- Observation from the top rows returned:
+  - 1st most recent: saishūshōjomakuwakare — june 14 , 2010 (2010-06-14)
+  - 2nd most recent: suki to ietara iinoni — june 7 , 2010 (2010-06-07)
+
+3) Compute the correct rank for the specific episode “fukusyū no puropōzu” (ranking done over all rows before filtering)
+- SQL:
+WITH ranked AS (
+  SELECT "Unnamed: 0","episode title","romanized title","broadcast date",
+    to_date(regexp_replace(initcap("broadcast date"),'\\s*,\\s*',', '),'Month DD, YYYY') AS bcast_parsed,
+    rank() OVER (ORDER BY to_date(regexp_replace(initcap("broadcast date"),'\\s*,\\s*',', '),'Month DD, YYYY') DESC) AS rank_all
+  FROM public.tsuki_no_koibito
+)
+SELECT * FROM ranked WHERE "romanized title" = 'fukusyū no puropōzu';
+- Result:
+  - romanized title: fukusyū no puropōzu
+  - broadcast date: may 24 , 2010
+  - bcast_parsed: 2010-05-24
+  - rank_all: 4
+
+Conclusion
+- The data shows “fukusyū no puropōzu” ranks 4th by broadcast date (most recent first). Therefore, it does not have the 2nd most recent broadcast date.
+
+Assumptions
+- “2nd most recent” is interpreted as the second latest calendar date when ordering all rows by their broadcast dates descending.
+- The broadcast date text format is consistently like “monthname day , year” (e.g., “may 24 , 2010”); normalization (initcap and removing extra spaces around commas) was applied before parsing with to_date.
+- All evidence was drawn exclusively from public.tsuki_no_koibito in the postgres_tabfact12 data source.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

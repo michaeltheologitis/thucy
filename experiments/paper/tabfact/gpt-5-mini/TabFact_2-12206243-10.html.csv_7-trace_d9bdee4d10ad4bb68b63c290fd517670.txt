@@ -1,0 +1,86 @@
+
+<userQuery>
+<query>
+the blue jay score 12 run 1 time during the month
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the blue jay score 12 run 1 time during the month.”
+
+Data source explored
+- Available database: TabFact (public schema)
+- Relevant table: public.t_1997_toronto_blue_jays_season (game-by-game data for the 1997 Toronto Blue Jays)
+
+What I checked
+- Parsed each game’s date into a real 1997 calendar date for ordering and month grouping.
+- Inferred the Blue Jays’ game result by comparing the cumulative wins in the “record” field to the previous game (ordered by date). This determines whether the first or second number in the “score” string is the Blue Jays’ runs (score is formatted as “winning team runs - losing team runs”).
+- Counted, by month, how many games had Blue Jays runs = 12.
+
+Result
+- The Blue Jays scored exactly 12 runs in 1997 only in September, and they did so 2 times (not 1). No other month had a 12-run game.
+
+Supporting evidence (exact executed SQL and results)
+1) Monthly counts where Blue Jays runs = 12
+Executed SQL:
+SELECT to_char(to_date(initcap(date)||' 1997','Month DD YYYY'),'FMMonth') AS month,
+       COUNT(*) AS count_12_runs
+FROM (
+  SELECT date,
+         score,
+         record,
+         to_date(initcap(date)||' 1997','Month DD YYYY') AS date_parsed,
+         date_part('month', to_date(initcap(date)||' 1997','Month DD YYYY'))::int AS month_num,
+         split_part(record,' - ',1)::int AS wins,
+         lag(split_part(record,' - ',1)::int) OVER (ORDER BY to_date(initcap(date)||' 1997','Month DD YYYY')) AS prev_wins,
+         regexp_replace(split_part(score,' - ',1),'[^0-9]','','g')::int AS first_runs,
+         regexp_replace(split_part(score,' - ',2),'[^0-9]','', 'g')::int AS second_runs,
+         CASE WHEN split_part(record,' - ',1)::int = lag(split_part(record,' - ',1)::int) OVER (ORDER BY to_date(initcap(date)||' 1997','Month DD YYYY')) + 1
+              THEN regexp_replace(split_part(score,' - ',1),'[^0-9]','', 'g')::int
+              ELSE regexp_replace(split_part(score,' - ',2),'[^0-9]','', 'g')::int END AS blue_jays_runs
+  FROM public.t_1997_toronto_blue_jays_season
+) t
+WHERE blue_jays_runs = 12
+GROUP BY month, month_num
+ORDER BY month_num;
+
+Result:
+[{"month":"September","count_12_runs":2}]
+
+2) The specific games where Blue Jays runs = 12
+Executed SQL:
+WITH t AS (
+  SELECT to_date(initcap(date)||' 1997','Month DD YYYY') AS date_parsed,
+         to_char(to_date(initcap(date)||' 1997','Month DD YYYY'),'FMMonth') AS month,
+         date AS date_text,
+         score,
+         record,
+         CASE WHEN split_part(record,' - ',1)::int = lag(split_part(record,' - ',1)::int) OVER (ORDER BY to_date(initcap(date)||' 1997','Month DD YYYY')) + 1 THEN true ELSE false END AS is_win,
+         CASE WHEN split_part(record,' - ',1)::int = lag(split_part(record,' - ',1)::int) OVER (ORDER BY to_date(initcap(date)||' 1997','Month DD YYYY')) + 1
+              THEN regexp_replace(split_part(score,' - ',1),'[^0-9]','', 'g')::int
+              ELSE regexp_replace(split_part(score,' - ',2),'[^0-9]','', 'g')::int END AS blue_jays_runs
+  FROM public.t_1997_toronto_blue_jays_season
+)
+SELECT date_parsed, month, date_text, score, record, is_win, blue_jays_runs
+FROM t
+WHERE blue_jays_runs = 12
+ORDER BY date_parsed;
+
+Result:
+[
+ {"date_parsed":"1997-09-08T00:00:00Z","date_text":"september 8","month":"September","score":"12 - 10","record":"69 - 74","is_win":true,"blue_jays_runs":12},
+ {"date_parsed":"1997-09-27T00:00:00Z","date_text":"september 27","month":"September","score":"12 - 5","record":"75 - 86","is_win":true,"blue_jays_runs":12}
+]
+
+Conclusion
+- The evidence shows the Blue Jays scored 12 runs twice in September 1997 and zero times in any other month. Therefore, the claim that they scored 12 runs “1 time during the month” is not supported by the data.
+
+Assumptions
+- Interpreted “blue jay” as the MLB team Toronto Blue Jays.
+- Interpreted “during the month” as within any month of the 1997 season (the only Blue Jays season data available in the connected data source).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

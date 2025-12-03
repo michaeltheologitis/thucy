@@ -1,0 +1,73 @@
+
+<userQuery>
+<query>
+during the 2007 - 08 minnesota wild season , minnesota lose by more than 2 on february 27 and february 29
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: During the 2007–08 Minnesota Wild season, Minnesota lost by more than 2 goals on February 27 and February 29.
+
+Data source discovered
+- Database: TabFact (PostgreSQL), schema: public
+- Relevant table: public.t_2007_08_minnesota_wild_season
+  - Columns: date (text), visitor (text), score (text), home (text), decision (text), attendance (bigint), record (text)
+
+Evidence 1: Retrieve the games on February 27 and February 29
+Executed SQL:
+SELECT date, visitor, score, home, decision
+FROM public.t_2007_08_minnesota_wild_season
+WHERE date ILIKE '%February 27%'
+   OR date ILIKE '%February 29%';
+
+Result rows:
+1) date: february 27 | visitor: minnesota | score: 3 - 2 | home: tampa bay | decision: backstrom
+2) date: february 29 | visitor: minnesota | score: 3 - 2 | home: florida   | decision: backstrom
+
+Interpretation: On both dates, Minnesota is listed as the visitor and the score is 3 - 2, which (visitor-home ordering) indicates Minnesota scored 3 and the opponent 2. That implies Minnesota won each game by 1 goal.
+
+Evidence 2: Parse scores and compute Minnesota’s goal differential and whether they lost by more than 2
+Executed SQL:
+SELECT date, visitor, home, score,
+       CAST(split_part(score, ' - ', 1) AS integer) AS visitor_goals,
+       CAST(split_part(score, ' - ', 2) AS integer) AS home_goals,
+       CASE WHEN visitor = 'minnesota' THEN CAST(split_part(score, ' - ', 1) AS integer)
+            WHEN home = 'minnesota' THEN CAST(split_part(score, ' - ', 2) AS integer)
+            ELSE NULL END AS minnesota_goals,
+       CASE WHEN visitor = 'minnesota' THEN CAST(split_part(score, ' - ', 2) AS integer)
+            WHEN home = 'minnesota' THEN CAST(split_part(score, ' - ', 1) AS integer)
+            ELSE NULL END AS opponent_goals,
+       (CASE WHEN visitor = 'minnesota' THEN CAST(split_part(score, ' - ', 1) AS integer)
+             WHEN home = 'minnesota' THEN CAST(split_part(score, ' - ', 2) AS integer)
+             ELSE NULL END)
+       -
+       (CASE WHEN visitor = 'minnesota' THEN CAST(split_part(score, ' - ', 2) AS integer)
+             WHEN home = 'minnesota' THEN CAST(split_part(score, ' - ', 1) AS integer)
+             ELSE NULL END) AS goal_differential,
+       ((CASE WHEN visitor = 'minnesota' THEN CAST(split_part(score, ' - ', 1) AS integer)
+             WHEN home = 'minnesota' THEN CAST(split_part(score, ' - ', 2) AS integer)
+             ELSE NULL END)
+       -
+       (CASE WHEN visitor = 'minnesota' THEN CAST(split_part(score, ' - ', 2) AS integer)
+             WHEN home = 'minnesota' THEN CAST(split_part(score, ' - ', 1) AS integer)
+             ELSE NULL END)) < -2 AS minnesota_lost_by_more_than_2
+FROM public.t_2007_08_minnesota_wild_season
+WHERE date IN ('february 27', 'february 29')
+ORDER BY date;
+
+Computed results summary:
+- February 27: visitor_goals = 3, home_goals = 2; Minnesota goals = 3; opponent goals = 2; goal_differential = +1; lost by more than 2? false
+- February 29: visitor_goals = 3, home_goals = 2; Minnesota goals = 3; opponent goals = 2; goal_differential = +1; lost by more than 2? false
+
+Conclusion
+- The data show Minnesota won 3–2 on both February 27 and February 29 during the 2007–08 season and therefore did not lose, let alone by more than 2 goals. The claim is contradicted by the season game results.
+
+Assumptions
+- The score field uses visitor-home ordering (common in schedules). This is consistent with Minnesota listed as visitor and the “decision: backstrom” (Minnesota’s goaltender) indicating wins.
+- Date strings in the table are lowercase (e.g., 'february 27', 'february 29').
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

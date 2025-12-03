@@ -1,0 +1,64 @@
+
+<userQuery>
+<query>
+the term end for aleksandër meksi be after the term end for ylli bufi
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “the term end for aleksandër meksi be after the term end for ylli bufi.”
+
+Data source discovery and schema grounding:
+- Available database: TabFact (PostgreSQL), schema: public.
+- Relevant table: public.list_of_prime_ministers_of_albania
+  Columns:
+  - name (text)
+  - born - died (text)
+  - term start (text)
+  - term end (text)
+  - political party (text)
+
+Evidence and executed SQL:
+1) Retrieve stored term-end values (both individuals):
+SQL Query:
+SELECT name, "term end" FROM public.list_of_prime_ministers_of_albania WHERE name ILIKE '%Meksi%' OR name ILIKE '%Bufi%';
+Result:
+- name: "ylli bufi", term end: "10 december 1991"
+- name: "aleksandër meksi", term end: "11 march 1997"
+
+2) Parse the term-end text into dates for reliable comparison:
+SQL Query:
+SELECT name, "term end", to_date("term end", 'DD FMMonth YYYY') AS term_end_date FROM public.list_of_prime_ministers_of_albania WHERE name ILIKE '%Meksi%' OR name ILIKE '%Bufi%';
+Result:
+- name: "ylli bufi", term end: "10 december 1991", term_end_date: 1991-12-10
+- name: "aleksandër meksi", term end: "11 march 1997", term_end_date: 1997-03-11
+
+3) Direct boolean comparison of parsed dates:
+SQL Query:
+WITH pm AS (
+  SELECT name, to_date("term end", 'DD FMMonth YYYY') AS term_end_date
+  FROM public.list_of_prime_ministers_of_albania
+  WHERE name ILIKE '%Meksi%' OR name ILIKE '%Bufi%'
+)
+SELECT
+  (SELECT term_end_date FROM pm WHERE name ILIKE '%Meksi%') >
+  (SELECT term_end_date FROM pm WHERE name ILIKE '%Bufi%') AS meksi_after_bufi,
+  (SELECT term_end_date FROM pm WHERE name ILIKE '%Meksi%') AS meksi_end,
+  (SELECT term_end_date FROM pm WHERE name ILIKE '%Bufi%') AS bufi_end;
+Result:
+- meksi_after_bufi: true
+- meksi_end: 1997-03-11
+- bufi_end: 1991-12-10
+
+Conclusion:
+- Aleksandër Meksi’s term ended on 1997-03-11, which is after Ylli Bufi’s term end on 1991-12-10. The claim is supported by the data.
+
+Assumptions:
+- “term end” refers to the end date of their tenure as Prime Minister of Albania as listed in the table.
+- Name matching used ILIKE with '%Meksi%' and '%Bufi%' to account for casing/diacritics; the results show the intended individuals uniquely.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

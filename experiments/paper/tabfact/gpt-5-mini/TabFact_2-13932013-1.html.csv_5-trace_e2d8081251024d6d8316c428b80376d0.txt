@@ -1,0 +1,43 @@
+
+<userQuery>
+<query>
+brian sipe start 8 more game than bernie kosar
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “Brian Sipe started 8 more games than Bernie Kosar.”
+
+Data source explored
+- Database: TabFact (postgres_tabfact24), public schema
+- Table: public.list_of_cleveland_browns_starting_quarterbacks
+  - Relevant columns: quarterback (text), "games started" (bigint)
+
+Evidence
+1) Retrieve games started for Brian Sipe and Bernie Kosar
+SQL:
+SELECT quarterback, "games started" FROM public.list_of_cleveland_browns_starting_quarterbacks WHERE quarterback ILIKE '%Sipe%' OR quarterback ILIKE '%Kosar%';
+Results:
+- sipe , brian — games started: 112
+- kosar , bernie — games started: 105
+
+2) Compute the difference (Sipe minus Kosar)
+SQL:
+SELECT
+  (SELECT "games started" FROM public.list_of_cleveland_browns_starting_quarterbacks WHERE quarterback ILIKE '%sipe%') -
+  (SELECT "games started" FROM public.list_of_cleveland_browns_starting_quarterbacks WHERE quarterback ILIKE '%kosar%') AS difference;
+Result:
+- difference: 7
+
+Conclusion
+- According to the Cleveland Browns starting-quarterbacks dataset, Brian Sipe started 112 games and Bernie Kosar started 105 games. Sipe started 7 more games than Kosar, not 8.
+
+Assumptions
+- Interpreted the claim as referring to starts specifically for the Cleveland Browns, consistent with the dataset’s scope.
+- Name matching used case-insensitive search (ILIKE) to match entries stored as “sipe , brian” and “kosar , bernie.”
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

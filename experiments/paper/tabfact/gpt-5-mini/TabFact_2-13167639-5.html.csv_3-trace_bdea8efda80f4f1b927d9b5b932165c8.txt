@@ -1,0 +1,44 @@
+
+<userQuery>
+<query>
+the match play on 7 january record a attendance grater than 70000
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim assessed: “the match play on 7 january record a attendance greater than 70000.”
+
+Data source explored: TabFact database, public schema, table t_2002_03_manchester_united_f_c_season (columns: date [text], round [text], opponents [text], result f - a [text], attendance [bigint]).
+
+Evidence queries and results:
+1) Query to find matches on 7 January
+SQL executed:
+SELECT date, opponents, "result f - a" AS result, attendance, (attendance > 70000) AS attendance_gt_70000
+FROM public.t_2002_03_manchester_united_f_c_season
+WHERE date ILIKE '%7 January%';
+
+Result:
+- Date: 7 january 2003 | Opponents: blackburn rovers | Result: 1 - 1 | Attendance: 62740 | Attendance > 70000: false
+
+2) Cross-check: list all January matches to ensure coverage
+SQL executed:
+SELECT date, opponents, "result f - a", attendance
+FROM public.t_2002_03_manchester_united_f_c_season
+WHERE date ILIKE '%jan%' OR date ILIKE '%january%'
+ORDER BY date;
+
+Results:
+- 7 january 2003 | blackburn rovers | 1 - 1 | 62740
+- 22 january 2003 | blackburn rovers | 3 - 1 | 29048
+
+Conclusion:
+- The only match on 7 January in this dataset is on 7 January 2003 with attendance 62,740, which is not greater than 70,000. Therefore, the claim is contradicted by the data.
+
+Assumptions made:
+- “the match play on 7 january” refers to the match dated 7 January in the available 2002–03 Manchester United season table. The date column is text; matching was done case-insensitively using ILIKE.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

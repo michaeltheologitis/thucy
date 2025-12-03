@@ -1,0 +1,60 @@
+
+<userQuery>
+<query>
+there be more than 2 game that have a score higher than 10 point
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “there be more than 2 game that have a score higher than 10 point.”
+
+Data source discovery
+- Available database: TabFact
+- Available table: public.t_2008_arizona_diamondbacks_season (columns: date text, opponent text, score text, loss text, attendance bigint, record text)
+
+Understanding the score field
+- Sample rows to inspect formatting:
+  SQL executed:
+  SELECT date, opponent, score, loss FROM public.t_2008_arizona_diamondbacks_season LIMIT 10;
+  Result excerpt shows scores like “8 - 6”, “7 - 0”, indicating a two-number format separated by a hyphen. We interpret the first number as the Diamondbacks’ runs.
+
+Primary verification (Diamondbacks’ score > 10 runs)
+- Count games where the Diamondbacks (first number in score) scored more than 10 runs:
+  SQL executed:
+  SELECT COUNT(*) AS game_count
+  FROM public.t_2008_arizona_diamondbacks_season
+  WHERE CAST(split_part(score, '-', 1) AS INTEGER) > 10;
+  Result: 2 games
+
+- List those games for transparency:
+  SQL executed:
+  SELECT date, opponent, score 
+  FROM public.t_2008_arizona_diamondbacks_season 
+  WHERE CAST(split_part(score, '-', 1) AS INTEGER) > 10;
+  Result:
+  1) Date: September 21, Opponent: Rockies, Score: 13 - 4
+  2) Date: September 25, Opponent: Cardinals, Score: 12 - 3
+
+Conclusion under primary interpretation
+- The data shows exactly 2 games with the Diamondbacks scoring more than 10 runs. This does not satisfy “more than 2.” Therefore, the claim is not supported.
+
+Additional check (alternate interpretation: combined score > 10 total runs)
+- Count games where Diamondbacks’ runs + opponent’s runs > 10:
+  SQL executed:
+  SELECT COUNT(*) AS games_above_10 FROM t_2008_arizona_diamondbacks_season WHERE (CAST(SUBSTRING(score FROM '([0-9]+)') AS INTEGER) + CAST(SUBSTRING(score FROM '\s+(\d+)$') AS INTEGER)) > 10;
+  Result: 5 games
+- Under this alternate interpretation, the statement “more than 2” would be true; however, our primary reading focuses on the Diamondbacks’ own score.
+
+Answer
+- Based on the primary interpretation (a team’s score > 10, specifically the Diamondbacks’ score in this dataset), the claim is false: there are 2 such games, not more than 2.
+
+Assumptions
+- The field score is of the form “D-backs runs - opponent runs,” and the first number reflects the Diamondbacks’ score.
+- “Score higher than 10 point” refers to a team’s score (the Diamondbacks) rather than combined total. The alternate combined-total result is reported above for completeness.
+- Verification is constrained to the available dataset (Arizona Diamondbacks 2008 season).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

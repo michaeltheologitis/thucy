@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+the incorporate in netherlands have a group 's equity shareholding of 99% and a principal activities of flight academy
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “The [entity] incorporated in Netherlands has a group’s equity shareholding of 99% and principal activities of flight academy.”
+
+Step 1 — Discover available data sources
+- Tool used: Data source discovery
+- Result: One accessible PostgreSQL database: TabFact (schema: public)
+
+Step 2 — Understand the relevant schema
+- Tool used: Schema inspection
+- Finding: Table public.klm with relevant columns (all text):
+  - company
+  - type
+  - principal activities
+  - incorporated in
+  - group 's equity shareholding
+- No primary keys or relationships defined.
+
+Step 3 — Query the data for evidence
+A) Identify entities incorporated in Netherlands with principal activities mentioning “flight academy”
+Executed SQL:
+SELECT company, "incorporated in", "principal activities", "group \'s equity shareholding" 
+FROM public.klm
+WHERE lower("incorporated in") = 'netherlands'
+  AND lower("principal activities") LIKE '%flight academy%';
+
+Result:
+- company: klm flight academy
+- incorporated in: netherlands
+- principal activities: flight academy
+- group 's equity shareholding: 100%
+
+B) Check specifically for a 99% group’s equity shareholding under the same conditions
+Executed SQL:
+SELECT COUNT(*) AS match_count
+FROM public.klm
+WHERE "incorporated in" = 'Netherlands'
+  AND "principal activities" ILIKE '%flight academy%'
+  AND "group \'s equity shareholding" = '99%';
+
+Result:
+- match_count = 0 (no such records)
+
+Conclusion based on data
+- True: There exists an entity incorporated in the Netherlands with principal activities of “flight academy” (klm flight academy).
+- False: The group’s equity shareholding is not 99%; the database shows 100%.
+
+Therefore, the claim is not fully supported by the data: the incorporation country and activity match, but the stated shareholding percentage does not.
+
+Assumptions made
+- “the incorporate in netherlands” was interpreted as records where the column “incorporated in” equals “Netherlands” (case-insensitive).
+- “principal activities of flight academy” was interpreted as records where “principal activities” contains the phrase “flight academy” (case-insensitive).
+- “group’s equity shareholding of 99%” was matched to the literal text value '99%' in the column “group 's equity shareholding.”
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

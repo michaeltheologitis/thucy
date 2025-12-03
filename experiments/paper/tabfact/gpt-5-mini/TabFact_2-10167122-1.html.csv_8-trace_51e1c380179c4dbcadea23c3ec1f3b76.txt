@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+brian watt not the top 25 at the master tournament 1 time
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Brian Watt [was] not in the top 25 at the Masters Tournament 1 time.” This could mean either (a) he had exactly one non–top-25 finish at the Masters, or (b) he had exactly one top-25 finish at the Masters. I verify against the available data.
+
+Evidence from data
+- Data source discovered: TabFact (PostgreSQL, public schema). Relevant table: public.brian_watts with columns: tournament, wins, top - 5, top - 25, events, cuts made.
+
+Executed SQL and results
+1) Retrieve all rows for context:
+SQL:
+SELECT * FROM public.brian_watts;
+Result excerpt for Masters:
+- tournament: masters tournament
+- top - 25: 0
+- events: 2
+- cuts made: 1
+
+2) Confirm exact tournament name and compute non–top-25 finishes:
+SQL:
+SELECT DISTINCT tournament FROM public.brian_watts WHERE tournament ILIKE '%masters%';
+Result:
+- masters tournament
+
+SQL:
+SELECT tournament, events, "top - 25", (events - "top - 25") AS not_top_25_count
+FROM public.brian_watts
+WHERE tournament = 'masters tournament';
+Result:
+- tournament: masters tournament
+- events: 2
+- top - 25: 0
+- not_top_25_count: 2
+
+Assessment
+- Top-25 finishes at the Masters: 0 (not 1).
+- Non–top-25 finishes at the Masters: 2 (not 1).
+Therefore, regardless of interpretation, the claim that this happened “1 time” is not supported by the data.
+
+Conclusion: The claim is inaccurate per the available database table for Brian Watts.
+
+Assumptions
+- “Master tournament” refers to the Masters Tournament (men’s golf major). The table uses the label “masters tournament,” which I matched via ILIKE.
+- The name in the table is “brian_watts,” which I interpret as the professional golfer Brian Watts. The table appears to summarize his major championship results by tournament.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,75 @@
+
+<userQuery>
+<query>
+3 of west berkshire brewery 's beer each win a single award between 1995 and 2009
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “3 of West Berkshire Brewery’s beers each win a single award between 1995 and 2009.”
+
+Data sources discovered:
+- PostgreSQL instance (TabFact). Relevant table: public.west_berkshire_brewery
+  - Columns: year (bigint), "beer name" (text), prize (text), category (text), competition (text)
+
+Evidence 1: Data coverage (years present)
+- SQL executed:
+  SELECT COUNT(*) AS total_rows, MIN(year) AS min_year, MAX(year) AS max_year FROM public.west_berkshire_brewery;
+- Result: total_rows = 28, min_year = 1995, max_year = 2009
+- Interpretation: The table’s entries span 1995–2009 inclusive, matching the period in the claim.
+
+Evidence 2: Count awards per beer (1995–2009 inclusive)
+- SQL executed:
+  SELECT "beer name", COUNT(*) AS award_count
+  FROM public.west_berkshire_brewery
+  WHERE year BETWEEN 1995 AND 2009
+  GROUP BY "beer name"
+  ORDER BY award_count DESC, "beer name" ASC;
+- Result (beer — award_count):
+  - maggs magnificent mild — 10
+  - dr hexter 's healer — 5
+  - good old boy — 5
+  - full circle — 2
+  - mr chubb 's lunchtime bitter — 2
+  - dr hexter 's wedding ale — 1
+  - mash tun — 1
+  - old father thames — 1
+  - skiff — 1
+- Observation: Four beers have exactly one award in this period (dr hexter's wedding ale, mash tun, old father thames, skiff), not three.
+
+Evidence 3: Details of beers with exactly one award in the period
+- SQL executed:
+  WITH filtered AS (
+    SELECT *
+    FROM public.west_berkshire_brewery
+    WHERE "year" BETWEEN 1995 AND 2009
+  ),
+  single AS (
+    SELECT "beer name"
+    FROM filtered
+    GROUP BY "beer name"
+    HAVING COUNT(*) = 1
+  )
+  SELECT f."year", f."beer name", f.prize, f.category, f.competition
+  FROM filtered f
+  JOIN single s USING ("beer name")
+  ORDER BY f."beer name", f."year";
+- Result (year, beer name, prize, category, competition):
+  - 2005, dr hexter 's wedding ale, third place, best bitter, norwich beer festival
+  - 2007, mash tun, bronze medal, best bitter, camra reading branch beer festival
+  - 2006, old father thames, bronze medal, light bitters, siba south east region beer competition
+  - 2007, skiff, gold medal, standard bitter, camra reading branch beer festival
+
+Conclusion:
+- The data shows four distinct beers from West Berkshire Brewery each won exactly one award between 1995 and 2009. Therefore, the claim that only three did so is contradicted by the data.
+
+Assumptions:
+- “Between 1995 and 2009” is treated as inclusive of both years.
+- Each row in public.west_berkshire_brewery represents a distinct award instance.
+- “Beer” refers to distinct values in the "beer name" column of this table.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

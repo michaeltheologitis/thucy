@@ -1,0 +1,71 @@
+
+<userQuery>
+<query>
+alex bogdanovic have never play against wesley moodie yet
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “alex bogdanovic have never play against wesley moodie yet.”
+
+Data source discovery
+- Available source: TabFact (PostgreSQL via postgres_tabfact14). Only the public schema was discoverable.
+
+Schema review
+- Table: public.alex_bogdanovic
+  - Columns: date (text), tournament (text), surface (text), opponent in the final (text), score (text)
+
+Evidence via executed SQL
+1) Initial exact, case-sensitive equality check (no matches due to case sensitivity)
+SQL:
+SELECT * FROM alex_bogdanovic WHERE "opponent in the final" = 'Wesley Moodie';
+Result: No rows returned
+
+SQL (count):
+SELECT COUNT(*) FROM alex_bogdanovic WHERE "opponent in the final" = 'Wesley Moodie';
+Result:
+count
+-----
+0
+
+2) Case-insensitive searches (matches found)
+2a) Substring, case-insensitive
+SQL:
+SELECT * FROM public.alex_bogdanovic WHERE "opponent in the final" ILIKE '%moodie%';
+Result (1 row):
+- date: 2 june 2003
+  tournament: surbiton , great britain
+  surface: grass
+  opponent in the final: wesley moodie
+  score: 4 - 6 , 7 - 6 (2) , 1 - 6
+
+SQL (count):
+SELECT COUNT(*) AS count FROM public.alex_bogdanovic WHERE "opponent in the final" ILIKE '%moodie%';
+Result: count = 1
+
+2b) Case-insensitive equality
+SQL:
+SELECT * FROM public.alex_bogdanovic WHERE lower("opponent in the final") = lower('Wesley Moodie');
+Result (1 row):
+- date: 2 june 2003
+  tournament: surbiton , great britain
+  surface: grass
+  opponent in the final: wesley moodie
+  score: 4 - 6 , 7 - 6 (2) , 1 - 6
+
+SQL (count):
+SELECT COUNT(*) AS count FROM public.alex_bogdanovic WHERE lower("opponent in the final") = lower('Wesley Moodie');
+Result: count = 1
+
+Conclusion
+- The dataset shows that Alex Bogdanovic played a final against Wesley Moodie on 2 June 2003 at Surbiton (grass), with the recorded score 4-6, 7-6(2), 1-6. Therefore, the claim that Bogdanovic has never played against Wesley Moodie is contradicted by the evidence.
+
+Assumptions and scope notes
+- The available table public.alex_bogdanovic appears to list finals only (given the column “opponent in the final”). Within this scope, we conclusively see at least one match vs. Wesley Moodie. The broader statement “never played” is thus false given even a single recorded final against him.
+- The initial equality check returned no rows due to case sensitivity; case-insensitive searches are more appropriate for name matching in free-text columns.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

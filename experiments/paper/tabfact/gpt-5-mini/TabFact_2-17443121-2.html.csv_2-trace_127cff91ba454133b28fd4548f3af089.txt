@@ -1,0 +1,99 @@
+
+<userQuery>
+<query>
+all new episode of gary unmarried season 1 air on wednesday at 8:30 pm
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “All new episodes of Gary Unmarried season 1 air on Wednesday at 8:30 pm.”
+
+Data sources explored
+- Discovered a PostgreSQL instance for the TabFact dataset with a public schema. Identified a relevant table: public.gary_unmarried containing episode-level data (episode, air date, timeslot, ratings, viewers).
+
+Relevant table and columns
+- public.gary_unmarried
+  - episode (text)
+  - air date (text)
+  - timeslot (text)
+  - 18 - 49 (text)
+  - viewers (double precision)
+
+What I checked
+1) Whether all listed episodes share the same timeslot and what it is.
+2) Whether any row deviates from “Wednesday 8:30 pm.”
+3) Whether the parsed air dates actually fall on a Wednesday.
+4) The total number of episodes represented (to align with a complete season).
+
+Evidence and results (with executed SQL)
+A) Inspect rows and ordering by air date
+- SQL executed (sample inspection):
+  SELECT "episode", "air date", "timeslot" FROM public.gary_unmarried LIMIT 20;
+  Result (sample rows): all showed timeslot “wednesday 8:30 pm”; dates ranged Sep 24, 2008 – May 20, 2009.
+
+- SQL executed (full list ordered by parsed air date):
+  SELECT "episode", "air date", "timeslot"
+  FROM public.gary_unmarried
+  ORDER BY TO_DATE(REPLACE("air date",' ,',','),'FMMonth FMDD, YYYY') ASC;
+  Result: All 20 rows display timeslot “wednesday 8:30 pm,” with air dates from 2008-09-24 through 2009-05-20.
+
+B) Count rows and distinct timeslot values
+- SQL executed (row count):
+  SELECT COUNT(*) AS total_rows FROM public.gary_unmarried;
+  Result: total_rows = 20
+
+- SQL executed (distinct timeslot values):
+  SELECT DISTINCT timeslot FROM public.gary_unmarried ORDER BY timeslot;
+  Result: one distinct value: 'wednesday 8:30 pm'
+
+- SQL executed (non-matching timeslots, case-insensitive):
+  SELECT COUNT(*) AS non_matching_count FROM public.gary_unmarried WHERE NOT (timeslot ILIKE 'wednesday 8:30 pm');
+  Result: non_matching_count = 0
+
+- SQL executed (treat NULLs as non-matching):
+  SELECT COUNT(*) AS non_matching_including_nulls FROM public.gary_unmarried WHERE timeslot IS NULL OR NOT (timeslot ILIKE 'wednesday 8:30 pm');
+  Result: non_matching_including_nulls = 0
+
+- SQL executed (list distinct non-matching timeslots):
+  SELECT DISTINCT timeslot FROM public.gary_unmarried WHERE timeslot IS NULL OR NOT (timeslot ILIKE 'wednesday 8:30 pm') ORDER BY timeslot NULLS FIRST;
+  Result: no rows returned
+
+C) Verify the weekday from the air dates themselves
+- SQL executed (inspect raw air date format):
+  SELECT "air date" FROM public.gary_unmarried LIMIT 50;
+
+- SQL executed (parse air date and compute weekday per row):
+  SELECT episode,
+         "air date",
+         to_date(initcap(regexp_replace("air date", '\\s*,\\s*', ', ')), 'FMMonth DD, YYYY') AS air_date_parsed,
+         to_char(to_date(initcap(regexp_replace("air date", '\\s*,\\s*', ', ')), 'FMMonth DD, YYYY'), 'FMDay') AS weekday
+  FROM public.gary_unmarried
+  ORDER BY air_date_parsed;
+
+- SQL executed (aggregate weekday check):
+  SELECT COUNT(*) AS total_rows,
+         SUM(CASE WHEN to_char(to_date(initcap(regexp_replace("air date", '\\s*,\\s*', ', ')), 'FMMonth DD, YYYY'), 'FMDay') = 'Wednesday' THEN 1 ELSE 0 END) AS wednesday_count
+  FROM public.gary_unmarried;
+  Result: total_rows = 20; wednesday_count = 20
+
+- SQL executed (list any rows not on Wednesday):
+  SELECT episode,
+         "air date",
+         to_date(initcap(regexp_replace("air date", '\\s*,\\s*', ', ')), 'FMMonth DD, YYYY') AS air_date_parsed,
+         to_char(to_date(initcap(regexp_replace("air date", '\\s*,\\s*', ', ')), 'FMMonth DD, YYYY'), 'FMDay') AS weekday
+  FROM public.gary_unmarried
+  WHERE to_char(to_date(initcap(regexp_replace("air date", '\\s*,\\s*', ', ')), 'FMMonth DD, YYYY'), 'FMDay') <> 'Wednesday'
+  ORDER BY air_date_parsed;
+  Result: no rows returned
+
+Conclusion
+- The dataset contains 20 episodes with air dates spanning Sep 24, 2008 to May 20, 2009 (consistent with a single TV season). Every episode’s timeslot is “wednesday 8:30 pm,” and independent parsing of the air dates confirms each date is a Wednesday. Therefore, the claim that all new episodes of Gary Unmarried Season 1 aired on Wednesday at 8:30 pm is supported by the available data.
+
+Assumptions
+- The table public.gary_unmarried corresponds to Season 1 of Gary Unmarried (the count of 20 episodes and the 2008–2009 broadcast window align with Season 1). No explicit season column exists in the table, so season identification is inferred from dates and episode count.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

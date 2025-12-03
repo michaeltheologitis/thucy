@@ -1,0 +1,68 @@
+
+<userQuery>
+<query>
+1 / 3 of the away team have a score greater than 10
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “1/3 of the away team have a score greater than 10.”
+
+Data discovery
+- Available source: PostgreSQL database TabFact (postgres_tabfact5), schema public.
+- Relevant table found: public.t_1972_vfl_season with columns: "home team" (text), "home team score" (text), "away team" (text), "away team score" (text), venue (text), crowd (bigint), date (text).
+- No player-level tables exist; scoring is recorded per team per match.
+
+Schema/context check
+- Scores are stored as text in Australian rules football format: goals.behinds (total points), e.g., 9.11 (65).
+
+Evidence and executed SQL
+1) Total number of matches
+SQL:
+SELECT COUNT(*) AS total_matches FROM public.t_1972_vfl_season;
+Result:
+- total_matches = 6
+
+2) Inspect score format (to confirm parsing approach)
+SQL:
+SELECT DISTINCT "away team score" FROM public.t_1972_vfl_season LIMIT 50;
+Sample results:
+- "8.15 (63)", "9.11 (65)", "17.9 (111)" (and others of the same form)
+
+3) Fraction using total points (number in parentheses) > 10
+SQL:
+SELECT COUNT(*) AS away_total_gt_10 FROM public.t_1972_vfl_season WHERE CAST(substring("away team score" FROM position('(' in "away team score")+1 FOR position(')' in "away team score") - position('(' in "away team score") -1) AS integer) > 10;
+Results:
+- away_total_gt_10 = 6
+- Ratio = 6/6 = 1.0 (not 1/3)
+
+4) Fraction using goals component (integer before the dot) > 10
+SQL:
+SELECT COUNT(*) AS away_goals_gt_10 FROM public.t_1972_vfl_season WHERE CAST(substring("away team score" FROM 1 FOR position('.' IN "away team score")-1) AS integer) > 10;
+Results:
+- away_goals_gt_10 = 2
+- Ratio = 2/6 = 1/3 (equals 1/3)
+
+5) Row-level verification of parsing and thresholds
+SQL:
+SELECT "away team", "away team score", CAST(split_part("away team score", '.', 1) AS INTEGER) AS away_goals, (CAST(split_part("away team score", '.', 1) AS INTEGER)*6 + CAST(split_part(split_part("away team score", ' ', 1), '.', 2) AS INTEGER)) AS away_total_points, (CAST(split_part("away team score", '.', 1) AS INTEGER) > 10) AS goals_gt_10, ((CAST(split_part("away team score", '.', 1) AS INTEGER)*6 + CAST(split_part(split_part("away team score", ' ', 1), '.', 2) AS INTEGER)) > 10) AS total_points_gt_10 FROM public.t_1972_vfl_season;
+Results (summarized):
+- All 6 away teams have total_points_gt_10 = true.
+- Exactly 2 of 6 away teams have goals_gt_10 = true.
+
+Conclusion
+- Under the standard interpretation of “score” as total points, the fraction of away teams with a score > 10 is 6/6 = 1, not 1/3. This contradicts the claim.
+- If “score” is interpreted specifically as the goals component, then 2/6 = 1/3 of away teams have goals > 10, which matches the claim.
+
+Final assessment
+- The primary (points-based) reading is not supported, while an alternative (goals-based) reading matches. Given this mixed outcome and the ambiguity, the claim is not reliably supported as stated.
+
+Assumptions noted
+- Because the claim is ambiguous, I evaluated two reasonable interpretations using the available team-level data: (a) total points and (b) goals. No player-level data was available to assess proportions of players with scores > 10.
+
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+funhouse be direct by al katz and write by gilbert adler
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim being checked: “Funhouse be directed by Al Katz and written by Gilbert Adler.”
+
+Data sources explored
+- Discovered data source: PostgreSQL database (TabFact, schema: public)
+- Relevant table identified: public.list_of_freddy_s_nightmares_episodes (episodes of “Freddy’s Nightmares” with title, director(s), writer(s), airdate)
+
+Evidence gathered
+1) Attempt exact, case-sensitive title match
+Executed SQL:
+SELECT season, series, title, "director (s)", "writer (s)" FROM public.list_of_freddy_s_nightmares_episodes WHERE title = 'Funhouse';
+Result: No rows returned.
+
+2) Attempt case-insensitive search for titles containing “funhouse”
+Executed SQL:
+SELECT season, series, title, "director (s)", "writer (s)" FROM public.list_of_freddy_s_nightmares_episodes WHERE title ILIKE '%funhouse%';
+Result (single row):
+- season: 17
+- series: 39
+- title: funhouse
+- director (s): gilbert adler
+- writer (s): al katz and gilbert adler
+
+Findings
+- The only matching entry titled “funhouse” lists Gilbert Adler as the director and credits both Al Katz and Gilbert Adler as writers.
+- Therefore:
+  - “Directed by Al Katz” is contradicted by the data (director is Gilbert Adler).
+  - “Written by Gilbert Adler” is partially correct but incomplete; writing credit is shared with Al Katz.
+
+Conclusion
+- The claim mixes one false element (director) with a partial truth (writer credit incomplete). This results in a partly inaccurate overall statement.
+
+Assumptions
+- Interpreted “Funhouse” as the title of an entry in the available dataset and applied a case-insensitive match since exact case-sensitive match returned no rows.
+- Treated the “director (s)” and “writer (s)” fields as authoritative credit information for the episode.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

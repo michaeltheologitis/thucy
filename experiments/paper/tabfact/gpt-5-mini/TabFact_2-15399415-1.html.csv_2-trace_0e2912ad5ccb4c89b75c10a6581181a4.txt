@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+the note record on new york city marathon hold in the year 1986 be 2:15:20
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Conclusion: The claim is not supported by the available data. In the orlando_pizzolato results table, there is no 1986 entry for the New York City Marathon, and the time 2:15:20 appears for the 1988 Olympic Games, not for the New York City Marathon.
+
+Evidence and executed SQL:
+
+1) Inspect all available rows to see marathon entries and times
+SQL:
+SELECT year, competition, venue, position, notes FROM public.orlando_pizzolato ORDER BY year ASC LIMIT 200;
+Result (excerpt):
+- 1984 | competition: new york city marathon | venue: new york , united states | position: 1st | notes: 2:14:53
+- 1985 | competition: new york city marathon | venue: new york , united states | position: 1st | notes: 2:11:34
+- 1986 | competition: european championships | venue: stuttgart , west germany | position: 2nd | notes: 2:10:57
+- 1988 | competition: olympic games | venue: seoul , south korea | position: 16th | notes: 2:15:20
+- 1988 | competition: venice marathon | venue: venice , italy | position: 1st | notes: 2:15:24
+
+2) Check explicitly for a 1986 New York City Marathon row
+SQL:
+SELECT COUNT(*)
+FROM public.orlando_pizzolato
+WHERE year = 1986
+  AND competition ILIKE '%new york city marathon%';
+Result: count = 0 (no such row)
+
+3) List all 1986 entries to see what exists for that year
+SQL:
+SELECT year, competition, venue, position, notes FROM public.orlando_pizzolato WHERE year = 1986;
+Result:
+- 1986 | european championships | stuttgart , west germany | 2nd | 2:10:57
+
+4) Verify where the time 2:15:20 appears
+SQL:
+SELECT year, competition, venue, position, notes FROM public.orlando_pizzolato WHERE notes = '2:15:20';
+Result:
+- 1988 | olympic games | seoul , south korea | 16th | 2:15:20
+
+5) Show all New York City Marathon rows for context
+SQL:
+SELECT year, competition, venue, position, notes
+FROM public.orlando_pizzolato
+WHERE competition ILIKE '%new york city marathon%'
+ORDER BY year;
+Results:
+- 1984 | new york city marathon | new york , united states | 1st | 2:14:53
+- 1985 | new york city marathon | new york , united states | 1st | 2:11:34
+
+Assessment:
+- No 1986 New York City Marathon entry exists in the dataset for this athlete.
+- The time 2:15:20 is associated with the 1988 Olympic Games, not the NYC Marathon.
+Therefore, the claim that the notes record for the 1986 New York City Marathon is 2:15:20 is contradicted by the data.
+
+Assumptions:
+- Interpreted the claim as referring to the 'notes' field for Orlando Pizzolato’s record of the New York City Marathon in 1986 within the available TabFact (public.orlando_pizzolato) dataset.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

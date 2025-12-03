@@ -1,0 +1,51 @@
+
+<userQuery>
+<query>
+the game with the lowest attendance in may of the 1991 toronto blue jay season be play against the athletics
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: The game with the lowest attendance in May of the 1991 Toronto Blue Jays season was played against the Athletics.
+
+Conclusion: The lowest-attendance May game was NOT against the Athletics; it was against the Royals on May 3, with 20,809 attendees.
+
+Evidence from database queries:
+1) Find the minimum May attendance
+SQL executed:
+SELECT MIN(attendance) AS min_attendance FROM public.t_1991_toronto_blue_jays_season WHERE date LIKE 'may %';
+Result:
+min_attendance = 20809
+
+2) Identify the May game(s) with that minimum attendance
+SQL executed:
+SELECT date, opponent, attendance FROM public.t_1991_toronto_blue_jays_season WHERE date LIKE 'may %' AND attendance = (SELECT MIN(attendance) FROM public.t_1991_toronto_blue_jays_season WHERE date LIKE 'may %') ORDER BY date;
+Result:
+- date: may 3, opponent: royals, attendance: 20809
+
+3) Cross-check: list all May games ordered by attendance ascending
+SQL executed:
+SELECT date, opponent, attendance
+FROM public.t_1991_toronto_blue_jays_season
+WHERE date LIKE 'may %'
+ORDER BY attendance ASC;
+Results excerpt (lowest to higher):
+- may 3 — royals — 20809
+- may 5 — royals — 22588
+- may 4 — royals — 22628
+- may 21 — athletics — 22738
+- may 2 — royals — 22896
+(...additional rows omitted for brevity...)
+
+Assessment of the claim:
+- Opponent for the lowest-attendance May game: Royals (not Athletics). This contradicts the claim.
+- Athletics games in May appear with higher attendance values (e.g., 22,738; 24,631; 34,028; and several 50k+), none equal to the minimum.
+
+Assumptions made:
+- The table public.t_1991_toronto_blue_jays_season represents the 1991 season and stores dates as lowercase month names followed by the day number (e.g., 'may 3'). Filtering used date LIKE 'may %', which matches the observed format.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

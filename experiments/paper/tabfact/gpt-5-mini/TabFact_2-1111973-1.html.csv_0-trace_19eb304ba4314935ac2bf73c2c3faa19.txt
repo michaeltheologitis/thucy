@@ -1,0 +1,57 @@
+
+<userQuery>
+<query>
+the vctp 20 mm (79in) rh - 202 autocannon do not have 75 km / h (47 mph) as the vcrt
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The user asserts that the VCTP armed with a 20 mm RH-202 autocannon does not have the same top speed of 75 km/h (47 mph) as the VCRT.
+
+Data source discovery
+- Used the available database discovery and schema tools. Only one accessible database (TabFact, public schema) was found, with a single relevant table: public.tam_tank containing columns for multiple TAM-family variants including vctp and vcrt.
+
+Schema overview
+- Table: public.tam_tank (all columns are text)
+  - vctp, "vca 155", vctm, vcpc, vclc, vcrt
+
+Evidence from the data (with executed SQL)
+1) Full table contents
+SQL:
+SELECT * FROM public.tam_tank;
+Key returned rows (vctp and vcrt columns shown here):
+- Row 2: vctp="20 mm (79in) rh - 202 autocannon", vcrt="7.62 mm (0.3in) fn mag 60 - 20 machine gun"
+- Row 5: vctp="75 km / h (47 mph)", vcrt="75 km / h (47 mph)"
+
+2) Targeted search for speed mentions
+SQL:
+SELECT row_number() OVER () AS rowid, vctp, vcrt FROM public.tam_tank WHERE vctp ILIKE '%km%' OR vctp ILIKE '%mph%' OR vcrt ILIKE '%km%' OR vcrt ILIKE '%mph%';
+Result rows include:
+- vctp="km (mi)", vcrt="km (mi)"
+- vctp="75 km / h (47 mph)", vcrt="75 km / h (47 mph)"
+Interpretation: The table contains a concrete entry showing both VCTP and VCRT with top speed 75 km/h (47 mph).
+
+3) Exact match for 75 km/h (47 mph)
+SQL:
+SELECT vctp, vcrt FROM public.tam_tank WHERE vctp = '75 km / h (47 mph)' OR vcrt = '75 km / h (47 mph)';
+Result:
+- vctp: 75 km / h (47 mph)
+- vcrt: 75 km / h (47 mph)
+Interpretation: The dataset explicitly lists the same top speed value for both VCTP and VCRT.
+
+Assessment
+- The accessible authoritative dataset shows that both the VCTP and the VCRT have a top speed of 75 km/h (47 mph).
+- Therefore, the claim that the VCTP “do not have 75 km/h (47 mph) as the VCRT” is contradicted by the data.
+
+Conclusion
+- Based on the queried data, the VCTP is recorded with a top speed of 75 km/h (47 mph), matching the VCRT.
+
+Assumptions
+- I interpreted the claim as concerning the top road speed specification for the VCTP versus the VCRT. The mention of the VCTP’s “20 mm (79in) RH-202 autocannon” was treated as identifying the VCTP variant, not as implying a different speed metric for the weapon itself.
+- All conclusions are grounded solely in the data available in the TabFact.public.tam_tank table returned by the tools.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

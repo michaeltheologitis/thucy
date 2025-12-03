@@ -1,0 +1,46 @@
+
+<userQuery>
+<query>
+the cleveland brown have tie a total of 12 game
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “the cleveland brown have tie a total of 12 game.” Interpreted as: The Cleveland Browns have 12 tied games in total.
+
+Data source discovery:
+- Available database: postgres_tabfact26 (schema: public)
+- Relevant table: list_of_cleveland_browns_starting_quarterbacks (columns: quarterback, uniform no (s), games started, wins, losses, ties, winning pct)
+
+Schema check confirms a per-quarterback “ties” column suitable for aggregating the franchise’s tied games (each game has exactly one starting QB, so summing ties over all starting QBs yields total team ties).
+
+Evidence 1: Sum of all tied games
+- SQL executed:
+  SELECT SUM(ties) AS total_ties FROM public.list_of_cleveland_browns_starting_quarterbacks;
+- Result:
+  total_ties = 10
+
+Evidence 2: Breakdown of QBs with at least one tie (cross-check)
+- SQL executed:
+  SELECT "quarterback", "ties" FROM public.list_of_cleveland_browns_starting_quarterbacks WHERE "ties" > 0 ORDER BY "ties" DESC, "quarterback";
+- Result rows:
+  - phipps , mike — 2
+  - plum , milt — 2
+  - ryan , frank — 2
+  - graham , otto — 1
+  - kosar , bernie — 1
+  - nelsen , bill — 1
+  - o'connell , tommy — 1
+- Cross-check sum: 2 + 2 + 2 + 1 + 1 + 1 + 1 = 10
+
+Conclusion: The accessible, authoritative data shows the Cleveland Browns have 10 tied games in total (as measured by ties attributed to starting quarterbacks), not 12. Therefore, the claim is contradicted by the evidence.
+
+Assumptions made:
+- The claim refers to the franchise’s total number of tied regular-season games as captured by the provided table.
+- Each tied game is counted once via the starting quarterback, making the sum over all QBs equivalent to total team ties.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

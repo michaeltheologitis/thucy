@@ -1,0 +1,60 @@
+
+<userQuery>
+<query>
+the grace city bridge be a concrete deck girder bridge in stanley
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “the grace city bridge be a concrete deck girder bridge in stanley.”
+
+Data sources explored
+- Discovered one accessible PostgreSQL data source (postgres_tabfact9), public schema, containing a single table: public.my_info_table with columns: name, listed, location, county, type.
+
+Evidence
+1) Identify the record for Grace City Bridge
+Executed SQL:
+SELECT * FROM public.my_info_table WHERE name ILIKE '%Grace City Bridge%';
+Result:
+- name: grace city bridge
+- listed: 1997 - 02 - 27
+- location: grace city
+- county: foster
+- type: pratt through truss
+
+2) Check for bridges associated with “Stanley”
+Executed SQL:
+SELECT name, location, county, type FROM public.my_info_table WHERE name ILIKE '%stanley%' OR location ILIKE '%stanley%' OR county ILIKE '%stanley%';
+Result:
+- name: great northern railway underpass
+  location: stanley
+  county: mountrail
+  type: concrete deck girder bridge
+
+3) Cross-check entries for Grace City
+Executed SQL:
+SELECT name, location, county, type FROM public.my_info_table WHERE location ILIKE 'grace city' OR name ILIKE '%grace city%';
+Result:
+- name: grace city bridge
+  location: grace city
+  county: foster
+  type: pratt through truss
+
+Analysis
+- The Grace City Bridge is listed as a “pratt through truss,” not a “concrete deck girder bridge.”
+- Its county is “foster,” and location is “grace city,” not “Stanley.”
+- The dataset does include a “concrete deck girder bridge” in Stanley, but it is the “great northern railway underpass” in Stanley (Mountrail County), not the Grace City Bridge.
+
+Conclusion
+- The claim is contradicted by the data: Grace City Bridge is not a concrete deck girder bridge and is not in Stanley.
+
+Assumptions
+- Treated public.my_info_table as the authoritative source for these bridge records.
+- Interpreted “Stanley” as either a location or county name and searched both fields (plus name) for substring matches.
+- Interpreted the claim as referring to the record named “grace city bridge” in this dataset.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

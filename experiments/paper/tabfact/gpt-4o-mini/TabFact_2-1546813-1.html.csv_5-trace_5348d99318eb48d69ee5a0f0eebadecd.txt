@@ -1,0 +1,83 @@
+
+<userQuery>
+<query>
+the solheim cup be host outside the us on 7 occasion from 1990 - 2013
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim evaluated: “the solheim cup be host outside the us on 7 occasion from 1990 - 2013.”
+
+Data source discovery
+- Identified a PostgreSQL database with a single table: solheim_cup (year, venue, winning team, score, usa captain, europe captain).
+
+Schema details used
+- Table: solheim_cup
+  - year (bigint)
+  - venue (text)
+  - winning team (text)
+  - score (text)
+  - usa captain (text)
+  - europe captain (text)
+
+Evidence from data
+1) List of all events and venues, 1990–2013
+SQL executed:
+SELECT year, venue FROM solheim_cup WHERE year BETWEEN 1990 AND 2013 ORDER BY year ASC;
+Results:
+- 1990 — Lake Nona Golf & Country Club, Florida, USA
+- 1992 — Dalmahoy Country Club, Scotland
+- 1994 — The Greenbrier, West Virginia, USA
+- 1996 — St Pierre Golf & Country Club, Wales
+- 1998 — Muirfield Village, Ohio, USA
+- 2000 — Loch Lomond Golf Club, Scotland
+- 2002 — Interlachen Country Club, Minnesota, USA
+- 2003 — Barsebäck Golf & Country Club, Sweden
+- 2005 — Crooked Stick Golf Club, Indiana, USA
+- 2007 — Halmstad GK, Sweden
+- 2009 — Rich Harvest Farms, Illinois, USA
+- 2011 — Killeen Castle Golf Resort, Ireland
+- 2013 — Colorado Golf Club, Colorado, USA
+
+2) USA vs Non-USA classification and counts, 1990–2013
+SQL executed:
+SELECT year, venue,
+  CASE WHEN venue ILIKE '%USA%' THEN 'USA' ELSE 'Non-USA' END AS is_usa
+FROM solheim_cup
+WHERE year BETWEEN 1990 AND 2013;
+
+SQL executed (summary counts):
+SELECT CASE WHEN venue ILIKE '%USA%' THEN 'USA' ELSE 'Non-USA' END AS is_usa,
+       COUNT(*) AS count
+FROM solheim_cup
+WHERE year BETWEEN 1990 AND 2013
+GROUP BY is_usa;
+Summary result:
+- USA: 7
+- Non-USA: 6
+
+3) Direct list of non-USA events, 1990–2013
+SQL executed:
+SELECT year, venue FROM solheim_cup
+WHERE year BETWEEN 1990 AND 2013 AND venue NOT ILIKE '%USA%'
+ORDER BY year ASC;
+Results (6 occasions):
+- 1992 — Dalmahoy Country Club, Scotland
+- 1996 — St Pierre Golf & Country Club, Wales
+- 2000 — Loch Lomond Golf Club, Scotland
+- 2003 — Barsebäck Golf & Country Club, Sweden
+- 2007 — Halmstad GK, Sweden
+- 2011 — Killeen Castle Golf Resort, Ireland
+
+Conclusion
+- The data show 6 Solheim Cup editions hosted outside the USA between 1990 and 2013 (inclusive), not 7. Therefore, the claim is not supported by the database.
+
+Assumptions
+- The period “1990 - 2013” is interpreted inclusively.
+- “Outside the US” is determined by venue not containing the substring “USA” in the venue field, which aligns with the country labels present in the data.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

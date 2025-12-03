@@ -1,0 +1,40 @@
+
+<userQuery>
+<query>
+the pga championship have 3 more cut made than the us open
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “the pga championship have 3 more cut made than the us open.” Interpreted as: For golfer Brian Watts, his ‘cuts made’ in the PGA Championship exceed his ‘cuts made’ in the U.S. Open by 3.
+
+Data source inspected: Database TabFact, schema public, table public.brian_watts with columns: tournament (text), wins (bigint), top - 5 (bigint), top - 25 (bigint), events (bigint), cuts made (bigint).
+
+Evidence from data:
+1) Retrieve all tournaments and cuts made
+SQL executed:
+SELECT tournament, "cuts made" FROM public.brian_watts;
+Result snapshot (relevant rows):
+- us open — 1
+- pga championship — 4
+
+2) Compute the precise difference via conditional aggregation
+SQL executed:
+SELECT 
+    SUM(CASE WHEN LOWER(tournament) = 'pga championship' THEN "cuts made" ELSE 0 END) 
+    - SUM(CASE WHEN LOWER(tournament) IN ('us open', 'u.s. open') THEN "cuts made" ELSE 0 END) AS cuts_difference 
+FROM public.brian_watts;
+Result: cuts_difference = 3
+
+Conclusion: Brian Watts has 4 cuts made in the PGA Championship and 1 in the U.S. Open, a difference of 3 in favor of the PGA Championship. This matches the claim.
+
+Assumptions made:
+- The claim refers to Brian Watts (the sole available dataset is public.brian_watts).
+- “cut made” is interpreted as the ‘cuts made’ metric in the table.
+- Tournament naming differences (‘US Open’ vs. ‘U.S. Open’) are treated equivalently and matched case-insensitively.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

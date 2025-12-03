@@ -1,0 +1,57 @@
+
+<userQuery>
+<query>
+the final score on september 17 at soldier field be 10 - 27
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim: “the final score on september 17 at soldier field be 10 - 27.”
+- Scope of data: NBC Sunday Night Football results (2006–present) from the TabFact PostgreSQL database. This dataset includes date, host/visiting teams, stadium, and final score.
+- Finding: No Sunday Night Football game at Soldier Field on September 17 exists in this dataset. A 10–27 game on September 17 does exist, but it was at Texas Stadium (not Soldier Field).
+
+Data source discovery
+- Available source discovered: TabFact database with a public schema. Relevant table found: public.nbc_sunday_night_football_results_2006_present.
+
+Schema used
+- public.nbc_sunday_night_football_results_2006_present
+  - date (text)
+  - visiting team (text)
+  - final score (text)
+  - host team (text)
+  - stadium (text)
+
+Executed queries and evidence
+1) List all Soldier Field games in the dataset
+SQL:
+SELECT date, stadium, "host team", "visiting team", "final score" FROM public.nbc_sunday_night_football_results_2006_present WHERE stadium ILIKE 'Soldier Field';
+Result rows:
+- {date: "october 1", stadium: "soldier field", host team: "chicago bears", visiting team: "seattle seahawks", final score: "6 - 37"}
+- {date: "december 31", stadium: "soldier field", host team: "chicago bears", visiting team: "green bay packers", final score: "26 - 7"}
+Interpretation: The only Soldier Field entries in this table are October 1 and December 31; there is no September 17 Soldier Field entry.
+
+2) Direct search for Soldier Field games on September 17
+SQL:
+SELECT date, stadium, "host team", "visiting team", "final score" FROM public.nbc_sunday_night_football_results_2006_present WHERE stadium ILIKE 'Soldier Field' AND date ILIKE '%september 17%';
+Result: 0 rows returned
+Interpretation: No Soldier Field game on September 17 appears in this dataset.
+
+3) Search for any September 17 entries and check score/location
+SQL:
+SELECT date, stadium, "host team", "visiting team", "final score" FROM public.nbc_sunday_night_football_results_2006_present WHERE (date ILIKE '%september 17%' OR date ILIKE '%sept%17%' OR date ILIKE '%sep%17%' OR date ILIKE '%9/17%' OR date ILIKE '%09/17%' OR date ILIKE '%17%september%');
+Result rows:
+- {date: "september 17", stadium: "texas stadium", host team: "dallas cowboys", visiting team: "washington redskins", final score: "10 - 27"}
+Interpretation: There is a 10–27 result on September 17, but at Texas Stadium (Dallas Cowboys vs. Washington), not at Soldier Field.
+
+Conclusion
+- The dataset shows no Sunday Night Football game at Soldier Field on September 17, and thus no such game with a 10–27 final score at that venue/date. The claim is not supported by the available evidence.
+
+Assumptions
+- The verification is grounded in the available TabFact table of NBC Sunday Night Football results (2006–present). If the claim refers to a non-Sunday-night event (e.g., a daytime NFL game, college football, soccer, or a different league), that would lie outside this dataset. Within this authoritative dataset’s scope, the claim is contradicted.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

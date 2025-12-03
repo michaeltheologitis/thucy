@@ -1,0 +1,63 @@
+
+<userQuery>
+<query>
+for each candidate with a 3.29% average , the number of vote per candidate be 1416.0
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary conclusion
+- The claim is supported by the data: when the average % of vote per candidate is 3.29, the average votes per candidate is 1416 (which corresponds to 1416.0 when expressed as a decimal).
+
+Data source discovery
+- Available database: TabFact (PostgreSQL)
+- Relevant table: public.green_party_of_england_and_wales_election_results
+- Key columns used: 
+  - average % of vote per candidate (double precision)
+  - average votes per candidate (bigint)
+  - year (text)
+  - % of total vote (double precision)
+
+Schema context
+- Table columns:
+  - year — text
+  - candidates — bigint
+  - total votes — bigint
+  - average votes per candidate — bigint
+  - % of total vote — double precision
+  - average % of vote per candidate — double precision
+  - saved deposits — bigint
+  - number of mps — bigint
+
+Evidence (executed SQL and results)
+1) Exact equality search for 3.29 average % of vote per candidate
+SQL:
+SELECT "year", "average votes per candidate", "% of total vote", "average % of vote per candidate" FROM public.green_party_of_england_and_wales_election_results WHERE "average % of vote per candidate" = 3.29;
+Result:
+- year: 2005, average votes per candidate: 1416, % of total vote: 1.04, average % of vote per candidate: 3.29
+
+2) Nearby range to account for rounding (3.285 to 3.295)
+SQL:
+SELECT "year", "average votes per candidate", "% of total vote", "average % of vote per candidate" FROM public.green_party_of_england_and_wales_election_results WHERE "average % of vote per candidate" BETWEEN 3.285 AND 3.295 ORDER BY "average % of vote per candidate";
+Result:
+- year: 2005, average votes per candidate: 1416, % of total vote: 1.04, average % of vote per candidate: 3.29
+
+3) Rounding check to two decimals
+SQL:
+SELECT "year", "average votes per candidate", "% of total vote", "average % of vote per candidate", ROUND("average % of vote per candidate"::numeric,2) AS rounded_2 FROM public.green_party_of_england_and_wales_election_results WHERE ROUND("average % of vote per candidate"::numeric,2) = 3.29 ORDER BY "average % of vote per candidate";
+Result:
+- year: 2005, average votes per candidate: 1416, % of total vote: 1.04, average % of vote per candidate: 3.29, rounded_2: 3.29
+
+Assessment
+- The dataset contains one row where the average % of vote per candidate is exactly 3.29 (year 2005). In that row, the average votes per candidate is 1416. This aligns with the claim that for a 3.29% average, the number of votes per candidate is 1416.0.
+
+Assumptions
+- “3.29% average” refers to the column “average % of vote per candidate.”
+- “number of vote per candidate” refers to “average votes per candidate.”
+- The decimal “.0” is treated as a formatting/precision representation of the integer value 1416.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

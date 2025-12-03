@@ -1,0 +1,69 @@
+
+<userQuery>
+<query>
+lleyton hewitt never face the same opponent in more than 1 master series final
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Lleyton Hewitt never faced the same opponent in more than one Masters Series final.”
+
+Data source discovery:
+- Available database: TabFact (postgres_tabfact11), public schema.
+- Relevant table: public.lleyton_hewitt with columns (outcome, year, championship, surface, opponent, score).
+
+Schema context:
+- The table lists Lleyton Hewitt’s finals results with the tournament name (championship), year, opponent, result (winner/runner-up), surface, and score. Championship names present correspond to ATP Masters Series/ATP Masters 1000 events (Indian Wells, Cincinnati, Paris, Stuttgart [Masters in 2000]).
+
+Evidence from executed SQL queries:
+1) Identify which championships are present in the dataset
+SQL executed:
+SELECT DISTINCT championship FROM public.lleyton_hewitt ORDER BY championship ASC;
+Results:
+- cincinnati
+- cincinnati (2)
+- indian wells
+- indian wells (2)
+- paris
+- stuttgart
+
+2) List Hewitt’s finals by year with opponent
+SQL executed:
+SELECT year, championship, opponent
+FROM public.lleyton_hewitt
+ORDER BY year;
+Results:
+- 2000 — stuttgart — wayne ferreira
+- 2002 — indian wells — tim henman
+- 2002 — cincinnati — carlos moyá
+- 2002 — paris — marat safin
+- 2003 — indian wells (2) — gustavo kuerten
+- 2004 — cincinnati (2) — andre agassi
+- 2005 — indian wells — roger federer
+
+3) Count how many times each opponent appears across these finals
+SQL executed:
+SELECT opponent, COUNT(*) AS appearances
+FROM public.lleyton_hewitt
+GROUP BY opponent
+ORDER BY appearances DESC, opponent;
+Results (opponent — appearances):
+- andre agassi — 1
+- carlos moyá — 1
+- gustavo kuerten — 1
+- marat safin — 1
+- roger federer — 1
+- tim henman — 1
+- wayne ferreira — 1
+
+Conclusion: Based on the dataset of Lleyton Hewitt’s Masters Series finals, each opponent appears exactly once. Therefore, Hewitt did not face the same opponent in more than one Masters Series final.
+
+Assumptions made:
+- “Masters Series final” refers to ATP Masters Series/ATP Masters 1000 finals. The championships listed (Indian Wells, Cincinnati, Paris, and Stuttgart in 2000) are treated as Masters events within this dataset.
+- The public.lleyton_hewitt table is complete for Hewitt’s Masters Series finals; accessible data sources are considered authoritative per instructions.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,71 @@
+
+<userQuery>
+<query>
+the yugoslavian national team lose the balkan cup against romania with a aggregate score of 3:4
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Conclusion: Verified. The Yugoslavia national team lost a Balkan Cup tie against Romania with a 3–4 aggregate.
+
+What I checked in the data
+- I searched the Yugoslavia national team match results for Balkan Cup matches against Romania.
+- I listed the relevant matches and computed the aggregate goals from the recorded scores.
+
+Supporting evidence
+1) Listing the Balkan Cup matches vs Romania
+Executed SQL:
+SELECT date, city, opponent, results, "type of game"
+FROM yugoslavia_national_football_team_results
+WHERE "type of game" ILIKE '%Balkan%' AND opponent ILIKE '%Romania%'
+ORDER BY date;
+
+Returned rows:
+- date: august 27 | city: bucharest , romania | opponent: romania | results: 1:4 | type of game: balkan cup
+- date: march 30 | city: belgrade | opponent: romania | results: 2:0 | type of game: balkan cup
+
+2) Parsing and totaling the aggregate (YugoslaviaGoals:OpponentGoals)
+Executed SQL:
+SELECT date, city, opponent, "type of game", results,
+       CAST(trim(split_part(regexp_replace(results, '-', ':', 'g'), ':', 1)) AS INTEGER) AS yugoslavia_goals,
+       CAST(trim(split_part(regexp_replace(results, '-', ':', 'g'), ':', 2)) AS INTEGER) AS opponent_goals
+FROM yugoslavia_national_football_team_results
+WHERE "type of game" ILIKE '%balkan%'
+  AND opponent ILIKE '%romania%'
+  AND regexp_replace(results, '-', ':', 'g') ~ '^\s*\d+\s*:\s*\d+';
+
+Returned rows with parsed scores:
+- march 30, Belgrade: results 2:0 → YugoslaviaGoals=2, OpponentGoals=0
+- august 27, Bucharest: results 1:4 → YugoslaviaGoals=1, OpponentGoals=4
+
+3) Aggregate totals
+Executed SQL:
+SELECT SUM(yugoslavia_goals) AS total_yugoslavia_goals,
+       SUM(opponent_goals) AS total_opponent_goals
+FROM (
+  SELECT CAST(trim(split_part(regexp_replace(results, '-', ':', 'g'), ':', 1)) AS INTEGER) AS yugoslavia_goals,
+         CAST(trim(split_part(regexp_replace(results, '-', ':', 'g'), ':', 2)) AS INTEGER) AS opponent_goals
+  FROM yugoslavia_national_football_team_results
+  WHERE "type of game" ILIKE '%balkan%'
+    AND opponent ILIKE '%romania%'
+    AND regexp_replace(results, '-', ':', 'g') ~ '^\s*\d+\s*:\s*\d+'
+) t;
+
+Returned totals:
+- total_yugoslavia_goals = 3
+- total_romania_goals = 4
+
+Assessment of each part of the claim
+- "Yugoslavian national team": Yes — the data source is specifically the Yugoslavia national team match results table.
+- "lose the Balkan Cup against Romania": The two recorded Balkan Cup matches vs Romania produce an aggregate where Romania outscored Yugoslavia.
+- "aggregate score of 3:4": Totals computed from the scores 2:0 and 1:4 yield 3 (Yugoslavia) to 4 (Romania). This matches the claim exactly.
+
+Assumptions
+- The results column is from Yugoslavia’s perspective (first number = Yugoslavia goals). This is consistent with the home/away context and the aggregate computed.
+- The two listed Balkan Cup fixtures vs Romania constitute the deciding tie of that Balkan Cup edition. The table does not annotate round/final explicitly, but the aggregate determines the outcome between the two teams.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

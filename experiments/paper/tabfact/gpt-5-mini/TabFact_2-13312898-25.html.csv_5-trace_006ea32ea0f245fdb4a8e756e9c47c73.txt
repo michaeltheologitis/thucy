@@ -1,0 +1,58 @@
+
+<userQuery>
+<query>
+round 9 involve the player name glen capriola who play college at the citadel
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “round 9 involve the player name glen capriola who play college at the citadel.”
+
+Conclusion: The data shows that Glenn Capriola was indeed a Round 9 draft pick in the Colts’ draft history, but his listed college is Boston College, not The Citadel. Separately, a Colts draftee from The Citadel (Brian Ruff) appears in Round 11, not Round 9.
+
+Evidence from data (with executed SQL):
+
+1) Search for any Colts draft pick with last name “Capriola” and show round and college
+- SQL executed:
+  SELECT name, round, college FROM public.indianapolis_colts_draft_history WHERE name ILIKE '%Capriola%';
+- Result:
+  {"name": "glenn capriola", "round": 9, "college": "boston college"}
+- Interpretation: Glenn Capriola appears in Round 9, but his college is Boston College.
+
+2) Search for any Colts draft pick from The Citadel
+- SQL executed:
+  SELECT name, round, college FROM public.indianapolis_colts_draft_history WHERE college ILIKE '%Citadel%';
+- Result:
+  {"name": "brian ruff", "round": 11, "college": "the citadel"}
+- Interpretation: The Citadel shows up for Brian Ruff in Round 11, not for Glenn Capriola.
+
+3) Directly check for any Round 9 Colts picks from The Citadel
+- SQL executed:
+  SELECT round, pick, overall, name, position, college
+  FROM public.indianapolis_colts_draft_history
+  WHERE round = 9
+  ORDER BY overall;
+- Result:
+  [{"college":"boston college","name":"glenn capriola","overall":247,"pick":24,"position":"running back","round":9}]
+
+- SQL executed:
+  SELECT COUNT(*) AS citadel_count
+  FROM public.indianapolis_colts_draft_history
+  WHERE round = 9 AND college ILIKE '%Citadel%';
+- Result:
+  [{"citadel_count":0}]
+- Interpretation: No Round 9 Colts draft picks are from The Citadel; the sole Round 9 entry is Glenn Capriola from Boston College.
+
+Assessment of the claim components:
+- “round 9 involve the player name glen(n) capriola” — Supported by data (name appears as “glenn capriola”).
+- “who play college at the citadel” — Contradicted by data (listed college is Boston College). 
+
+Assumptions:
+- Context interpreted as the Indianapolis Colts draft history (the available verified dataset).
+- Name matching is case-insensitive and tolerant to the single/double “n” spelling (glen vs. glenn).
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

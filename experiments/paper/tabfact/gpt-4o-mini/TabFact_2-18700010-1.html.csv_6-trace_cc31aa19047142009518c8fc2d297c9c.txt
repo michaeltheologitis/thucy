@@ -1,0 +1,84 @@
+
+<userQuery>
+<query>
+chris topping and dave sutton have the highest league apps
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim assessed: "chris topping and dave sutton have the highest league apps"
+
+Data source explored: public.t_1979_80_huddersfield_town_f_c_season (Huddersfield Town F.C. 1979–80 season)
+
+1) Identify available tables
+Executed SQL:
+SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';
+Result excerpt: t_1979_80_huddersfield_town_f_c_season
+
+2) Inspect table columns
+Executed SQL:
+SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 't_1979_80_huddersfield_town_f_c_season';
+Result excerpt:
+- name (text)
+- league apps (text)
+- total goals (bigint)
+- league goals (bigint)
+- fa cup apps (bigint)
+- fa cup goals (bigint)
+- league cup goals (bigint)
+- total apps (text)
+- position (text)
+- league cup apps (text)
+
+3) Retrieve players and league apps
+Executed SQL:
+SELECT name, "league apps" FROM public.t_1979_80_huddersfield_town_f_c_season;
+Key results:
+- dave sutton | 46
+- malcolm brown | 46
+- peter hart | 46
+- chris topping | 13
+- others include: david cowling 39 (1), peter fletcher 30 (8), ian robins 45, mick laverick 45, etc.
+
+4) Parse total league apps (number before parentheses) and subs (inside parentheses), then rank
+Executed SQL:
+SELECT name,
+       CAST(SPLIT_PART("league apps", ' ', 1) AS INTEGER) AS total_league_apps,
+       COALESCE(NULLIF(SPLIT_PART(SPLIT_PART("league apps", '(', 2), ')', 1), ''), '0')::INTEGER AS subs
+FROM public.t_1979_80_huddersfield_town_f_c_season
+ORDER BY total_league_apps DESC;
+Top results:
+- Peter Hart: total 46, subs 0
+- Malcolm Brown: total 46, subs 0
+- Dave Sutton: total 46, subs 0
+- Ian Robins: total 45, subs 0
+- Mick Laverick: total 45, subs 0
+...
+- Chris Topping: total 13, subs 0
+
+5) Confirm maximum and who holds it
+Executed SQL (max):
+SELECT MAX(CAST(SUBSTRING("league apps" FROM '^[0-9]+') AS INTEGER)) AS max_apps
+FROM public.t_1979_80_huddersfield_town_f_c_season;
+Result: 46
+
+Executed SQL (who has max):
+SELECT name
+FROM public.t_1979_80_huddersfield_town_f_c_season
+WHERE CAST(SUBSTRING("league apps" FROM '^[0-9]+') AS INTEGER) = 46;
+Result: Malcolm Brown; Peter Hart; Dave Sutton
+
+Conclusion based on evidence:
+- Dave Sutton does have the joint-highest league appearances (46) in this dataset.
+- Chris Topping does not; he has 13 league appearances.
+- The highest total league apps (46) are shared by Malcolm Brown, Peter Hart, and Dave Sutton.
+
+Assumptions made:
+- The claim refers to the 1979–80 Huddersfield Town league appearances captured in the available dataset.
+- "league apps" is interpreted in the common football format "Apps (as sub)", where the number before parentheses is total league appearances and the number in parentheses (if present) is appearances as a substitute. The ranking used the total appearances figure before parentheses.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

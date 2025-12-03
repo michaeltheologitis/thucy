@@ -1,0 +1,68 @@
+
+<userQuery>
+<query>
+the most highly attended game be against minnesota at the prudential center
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim being checked: "the most highly attended game be against minnesota at the prudential center"
+
+Summary of finding: The data shows the highest-attended game (overall and specifically at Prudential Center) was against Miami, not Minnesota. The Minnesota game at Prudential Center had 13,461 attendance, which was below the top Prudential Center attendances (Miami at 18,711 and New York at 18,023).
+
+Data source explored
+- Database: postgres_tabfact15 (TabFact)
+- Table: t_2010_11_new_jersey_nets_season
+- Relevant columns: game, date, team, location attendance (contains venue text and attendance number)
+
+Evidence with executed SQL
+1) Quick inspection to understand the location/attendance field
+SQL:
+SELECT game, date, team, "location attendance" FROM t_2010_11_new_jersey_nets_season LIMIT 50;
+Returned (excerpt):
+- {game:75, date:april 1, team:philadelphia, location attendance:wells fargo center 16695}
+- {game:76, date:april 3, team:miami, location attendance:prudential center 18711}
+- {game:77, date:april 5, team:minnesota, location attendance:prudential center 13461}
+- {game:79, date:april 8, team:new york, location attendance:prudential center 18023}
+- {game:81, date:april 11, team:charlotte, location attendance:prudential center 13853}
+
+2) Parse numeric attendance and rank all games by attendance
+SQL:
+SELECT game, date, team, "location attendance" AS location_attendance,
+  NULLIF(regexp_replace("location attendance", '[^0-9]+', '', 'g'), '')::integer AS attendance_num,
+  (LOWER("location attendance") LIKE '%prudential%') AS is_prudential
+FROM t_2010_11_new_jersey_nets_season
+ORDER BY attendance_num DESC
+LIMIT 10;
+Key results (by attendance descending):
+- game 76 vs miami at prudential center: attendance 18,711 (highest)
+- game 79 vs new york at prudential center: attendance 18,023
+- game 77 vs minnesota at prudential center: attendance 13,461
+
+3) Specifically among Prudential Center games, order by attendance
+SQL:
+SELECT game, date, team, "location attendance",
+       regexp_replace("location attendance", '[^0-9]', '', 'g') AS digits,
+       NULLIF(regexp_replace("location attendance", '[^0-9]', '', 'g'), '') AS digits2,
+       CASE WHEN NULLIF(regexp_replace("location attendance", '[^0-9]', '', 'g'), '') IS NULL THEN NULL ELSE CAST(NULLIF(regexp_replace("location attendance", '[^0-9]', '', 'g'), '') AS integer) END AS attendance_num
+FROM t_2010_11_new_jersey_nets_season
+WHERE lower("location attendance") LIKE '%prudential%'
+ORDER BY attendance_num DESC NULLS LAST;
+Returned:
+- vs miami: prudential center 18711 (highest at Prudential)
+- vs new york: prudential center 18023
+- vs charlotte: prudential center 13853
+- vs minnesota: prudential center 13461
+
+Conclusion
+- The most highly attended game (overall and at Prudential Center) was against Miami, not Minnesota. Therefore, the claim is contradicted by the data.
+
+Assumptions
+- Interpreted the claim within the scope of the available dataset: the 2010–11 New Jersey Nets season table (t_2010_11_new_jersey_nets_season).
+- "Most highly attended" was taken to mean the maximum recorded attendance in this table. Venue matching was done by substring "prudential" within the "location attendance" field.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

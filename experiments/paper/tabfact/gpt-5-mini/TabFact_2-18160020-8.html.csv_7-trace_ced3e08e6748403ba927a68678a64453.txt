@@ -1,0 +1,51 @@
+
+<userQuery>
+<query>
+miguel zapata have exactly 24 goal under his name
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “miguel zapata have exactly 24 goal under his name.”
+
+Data source exploration
+- Available data source: TabFact (PostgreSQL), public schema.
+- Relevant table (sports-related): public.t_2008_09_segunda_divisi_n_b with columns: goalkeeper (text), goals (bigint), matches (bigint), average (double precision), team (text).
+
+Evidence gathered
+1) Search for any record containing “Miguel Zapata” (case-insensitive):
+SQL executed:
+SELECT goalkeeper, goals, matches, average, team
+FROM public.t_2008_09_segunda_divisi_n_b
+WHERE goalkeeper ILIKE '%Miguel Zapata%';
+Result:
+- goalkeeper: miguel zapata; goals: 17; matches: 28; average: 0.61; team: atlético ciudad
+
+2) Verify exact (case-insensitive) match and uniqueness:
+SQL executed:
+SELECT COUNT(*) AS count FROM public.t_2008_09_segunda_divisi_n_b WHERE lower(goalkeeper) = lower('Miguel Zapata');
+Returned: {"count": 1}
+
+SQL executed:
+SELECT goalkeeper, goals FROM public.t_2008_09_segunda_divisi_n_b WHERE lower(goalkeeper) = lower('Miguel Zapata');
+Returned: {"goalkeeper": "miguel zapata", "goals": 17}
+
+3) Check for any other “Zapata” entries:
+SQL executed:
+SELECT goalkeeper, goals, matches, team
+FROM public.t_2008_09_segunda_divisi_n_b
+WHERE goalkeeper ILIKE '%zapata%';
+Result:
+- goalkeeper: miguel zapata; goals: 17; matches: 28; team: atlético ciudad
+
+Conclusion
+- The only “Miguel Zapata” record in the available authoritative dataset shows 17 goals, not 24. Therefore, the claim that he has exactly 24 goals is not supported by the data.
+
+Assumptions
+- Interpreted the claim within the scope of the available dataset (2008–09 Segunda División B goalkeeper table). The “goals” column is taken as recorded in this table for the player named “Miguel Zapata.” No other data sources were available to check alternative competitions or seasons.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

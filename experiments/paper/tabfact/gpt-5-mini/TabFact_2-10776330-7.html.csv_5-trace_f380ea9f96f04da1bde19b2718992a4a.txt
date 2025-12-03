@@ -1,0 +1,69 @@
+
+<userQuery>
+<query>
+during the 1961 vfl season , lake oval venue record the highest crowd participation
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: During the 1961 VFL season, the Lake Oval venue recorded the highest crowd participation (attendance).
+
+Data sources explored
+- Discovered database: TabFact (public schema)
+- Relevant table: public.t_1961_vfl_season
+- Table schema (from schema inspection):
+  - Columns: "home team" (text), "home team score" (text), "away team" (text), "away team score" (text), "venue" (text), "crowd" (bigint), "date" (text)
+
+Evidence and executed SQL
+1) Determine the highest recorded crowd in the 1961 VFL season
+- SQL:
+  SELECT MAX(crowd) AS max_crowd FROM public.t_1961_vfl_season;
+- Result:
+  max_crowd = 49678
+
+2) Get the match details for the maximum attendance
+- SQL:
+  SELECT "date","home team","away team","venue","crowd"
+  FROM public.t_1961_vfl_season
+  WHERE crowd = (SELECT MAX(crowd) FROM public.t_1961_vfl_season)
+  ORDER BY "date";
+- Result row(s):
+  {"date":"3 june 1961","home team":"melbourne","away team":"carlton","venue":"mcg","crowd":49678}
+
+3) Compare maximum attendance by venue (to see where Lake Oval ranks)
+- SQL:
+  SELECT venue, MAX(crowd) AS max_crowd
+  FROM public.t_1961_vfl_season
+  GROUP BY venue
+  ORDER BY max_crowd DESC;
+- Result (top to bottom):
+  - mcg — 49678
+  - victoria park — 28290
+  - kardinia park — 18683
+  - glenferrie oval — 15000
+  - lake oval — 14500
+  - arden street oval — 13000
+
+4) List all 1961 matches at Lake Oval to confirm its highest crowd
+- SQL:
+  SELECT "date", "home team", "away team", crowd, venue
+  FROM public.t_1961_vfl_season
+  WHERE venue ILIKE '%Lake Oval%'
+  ORDER BY crowd DESC;
+- Result:
+  - 3 June 1961 — South Melbourne vs Fitzroy — Crowd: 14500 — Venue: lake oval
+
+Conclusion
+- The highest recorded crowd in the 1961 VFL season was 49,678 at the MCG (Melbourne vs Carlton, 3 June 1961).
+- Lake Oval’s highest recorded crowd that season was 14,500, which is well below the season’s maximum and ranks below several other venues.
+- Therefore, the claim that Lake Oval recorded the highest crowd participation during the 1961 VFL season is not supported by the data and is contradicted by the evidence.
+
+Assumptions
+- "Highest crowd participation" is interpreted as the single-match maximum attendance.
+- The table public.t_1961_vfl_season contains all official VFL matches for the 1961 season with accurate venues and crowds.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

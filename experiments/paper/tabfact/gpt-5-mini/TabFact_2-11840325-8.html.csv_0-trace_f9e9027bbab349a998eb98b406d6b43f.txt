@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+in 2012 , the oakland raiders lose to the kansas city chief at arrowhead stadium with a result of 15 - 0
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “In 2012, the Oakland Raiders lose to the Kansas City Chiefs at Arrowhead Stadium with a result of 15 - 0.”
+
+Data sources consulted
+- Database: TabFact (postgres_tabfact2)
+- Schema: public
+- Table: public.chiefs_raiders_rivalry (columns: year, date, winner, result, loser, location) — a table of Chiefs–Raiders game results.
+
+Evidence and executed SQL
+1) Direct check for the claimed event (Chiefs 15–0 over Raiders at Arrowhead in 2012)
+SQL:
+SELECT count(*) AS match_count
+FROM public.chiefs_raiders_rivalry
+WHERE year = 2012
+  AND winner ILIKE '%Chiefs%'
+  AND loser ILIKE '%Raiders%'
+  AND result ~ '15\s*-\s*0'
+  AND location ILIKE '%Arrowhead%';
+Result:
+match_count = 0
+Interpretation: No 2012 entry matches a Chiefs 15–0 win over the Raiders at Arrowhead.
+
+2) List all 2012 Chiefs–Raiders games to locate any 15–0 result
+SQL:
+SELECT year, date, winner, result, loser, location
+FROM public.chiefs_raiders_rivalry
+WHERE year = 2012
+  AND ((winner ILIKE '%Chiefs%' AND loser ILIKE '%Raiders%')
+       OR (winner ILIKE '%Raiders%' AND loser ILIKE '%Chiefs%'));
+Results:
+- date: october 28, location: arrowhead stadium, winner: oakland raiders, result: 26 - 16, loser: kansas city chiefs, year: 2012
+- date: december 16, location: oco coliseum, winner: oakland raiders, result: 15 - 0, loser: kansas city chiefs, year: 2012
+Interpretation: In 2012, the Raiders beat the Chiefs 26–16 at Arrowhead. The 15–0 game was in Oakland (O.co Coliseum), with the Raiders defeating the Chiefs.
+
+Conclusion
+- The claim is false. There was no 2012 game where the Chiefs shut out the Raiders 15–0 at Arrowhead. Instead:
+  - At Arrowhead (Oct 28, 2012): Raiders 26–16 Chiefs (Raiders won).
+  - The 15–0 score occurred at O.co Coliseum (Dec 16, 2012): Raiders 15–0 Chiefs (Raiders won).
+
+Assumptions
+- Case-insensitive matching (ILIKE) was used for team names and location.
+- Score pattern matched with a regex allowing spaces around the hyphen.
+- The public.chiefs_raiders_rivalry table is treated as authoritative for Chiefs–Raiders results.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

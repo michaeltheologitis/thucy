@@ -1,0 +1,63 @@
+
+<userQuery>
+<query>
+the number of student enrol at st andrew university be 600
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the number of student enrol at st andrew university be 600.”
+
+Summary conclusion: Supported by the available data. The public.north_state_conference table contains an institution named “st andrews university” with enrollment = 600.
+
+Data source discovery
+- Discovered source: postgres_tabfact25 (PostgreSQL), schema: public
+
+Relevant schema
+- Table: public.north_state_conference(institution text, location text, founded bigint, type text, enrollment bigint, nickname text, joined text, left text, "current conference" text)
+
+Evidence and executed SQL
+1) Locate rows for St Andrew(s) variants and show enrollment
+- Executed SQL:
+SELECT institution, enrollment FROM public.north_state_conference WHERE institution ILIKE 'St Andrew University' OR institution ILIKE '%St Andrew%' OR institution ILIKE '%St. Andrew%' OR institution ILIKE '%St Andrews%' OR institution ILIKE '%St. Andrews%' OR institution ILIKE '%Saint Andrew%';
+- Result: 1 row found — institution: st andrews university; enrollment: 600
+
+2) Confirm uniqueness of matching institution names
+- Executed SQL (grouped names):
+SELECT institution, COUNT(*) AS cnt
+FROM public.north_state_conference
+WHERE institution ~* '(^|[^a-zA-Z0-9])st\.?\s*andre' OR institution ~* '(^|[^a-zA-Z0-9])saint\s*andre'
+GROUP BY institution
+ORDER BY cnt DESC, institution;
+- Result: st andrews university, cnt = 1
+
+- Executed SQL (total matches):
+SELECT COUNT(*) AS total_matches
+FROM public.north_state_conference
+WHERE institution ~* '(^|[^a-zA-Z0-9])st\.?\s*andre' OR institution ~* '(^|[^a-zA-Z0-9])saint\s*andre';
+- Result: total_matches = 1
+
+- Executed SQL (distinct institutions):
+SELECT COUNT(DISTINCT institution) AS unique_institutions
+FROM public.north_state_conference
+WHERE institution ~* '(^|[^a-zA-Z0-9])st\.?\s*andre' OR institution ~* '(^|[^a-zA-Z0-9])saint\s*andre';
+- Result: unique_institutions = 1
+
+3) Direct exact-name enrollment lookup
+- Executed SQL:
+SELECT enrollment FROM public.north_state_conference WHERE institution = 'st andrews university';
+- Result: enrollment = 600
+
+Conclusion
+- The dataset shows “st andrews university” has enrollment 600, matching the claim’s substance.
+
+Assumptions
+- Interpreted the claim as: the enrollment at St Andrew(s) University equals 600.
+- Treated “st andrew university” as referring to the row labeled “st andrews university” in the data.
+- No time frame is specified in the data; enrollment is taken as the value stored in the table without temporal qualifiers.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

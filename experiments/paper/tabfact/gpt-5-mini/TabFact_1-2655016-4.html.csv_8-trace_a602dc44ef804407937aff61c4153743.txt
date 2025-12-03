@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+each of the episode title have letter somewhere within the title
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “each of the episode title have letter somewhere within the title.”
+
+Data source explored
+- Database: postgres_tabfact23 (TabFact), schema: public
+- Relevant table discovered: public.list_of_all_that_episodes
+  - Columns: season, series, episode title, original air date, nick prod
+
+What I checked
+- Whether every value in column "episode title" contains at least one alphabetic character (A–Z or a–z).
+
+Evidence and executed SQL
+1) Total number of episodes
+- Result: 18
+- SQL:
+  SELECT COUNT(*) AS total_episodes FROM public.list_of_all_that_episodes;
+
+2) Count of episodes whose titles contain at least one alphabetic letter
+- Result: 16
+- SQL:
+  SELECT COUNT(*) AS episodes_with_letter FROM public.list_of_all_that_episodes WHERE "episode title" ~ '[A-Za-z]';
+
+3) Titles that contain no alphabetic letters (evidence of exceptions)
+- Results (distinct values):
+  - 112
+  - 702
+- SQL:
+  SELECT DISTINCT "episode title" FROM public.list_of_all_that_episodes WHERE NOT (COALESCE("episode title", '') ~ '[A-Za-z]') ORDER BY "episode title" NULLS FIRST;
+
+Conclusion
+- Not every episode title contains an alphabetic letter; at least two titles (“112”, “702”) contain no letters. Therefore, the claim is contradicted by the data.
+
+Assumptions
+- Interpreted “have letter” to mean “contains at least one alphabetic character (A–Z or a–z).”
+- Verification performed against the available authoritative dataset: public.list_of_all_that_episodes.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

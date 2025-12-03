@@ -1,0 +1,99 @@
+
+<userQuery>
+<query>
+nine elm works be the manufacturer of an undine with a 2 - 4 - 0wt wheel arrangement from 1884 - 1886
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify:
+"nine elm works be the manufacturer of an undine with a 2 - 4 - 0wt wheel arrangement from 1884 - 1886"
+
+Summary conclusion:
+- The dataset confirms a class named "undine" built by "nine elms works" with wheel arrangement "2 - 4 - 0" and built in 1859–60, withdrawn 1884–1886. It does not show "WT" for Undine, and 1884–1886 refers to withdrawals, not the build period. Therefore, the claim mixes true and false elements.
+
+Data source discovery:
+- Available source: PostgreSQL (TabFact/postgres_tabfact4), schema public, table: locomotives_of_the_southern_railway (owner: guest_user).
+
+Schema used:
+- Table public.locomotives_of_the_southern_railway columns: class (text), wheel arrangement (text), manufacturer (text), year made (text), quantity made (text), quantity preserved (text), year (s) withdrawn (text).
+
+Evidence and executed SQL:
+1) Test for a record matching all parts of the claim (Nine Elms + Undine + 2-4-0WT + built 1884–1886):
+SQL:
+SELECT *
+FROM public.locomotives_of_the_southern_railway
+WHERE manufacturer ILIKE '%Nine Elms%'
+  AND (class ILIKE '%Undine%')
+  AND ("wheel arrangement" ILIKE '%2-4-0WT%' OR "wheel arrangement" ILIKE '%2-4-0 WT%')
+  AND ("year made" ~ '^[0-9]{4}$' AND ("year made")::int BETWEEN 1884 AND 1886);
+Result: No rows matched.
+
+2) Retrieve the Undine entry directly:
+SQL:
+SELECT *
+FROM public.locomotives_of_the_southern_railway
+WHERE "class" ILIKE 'undine';
+Result (full row):
+{ "class": "undine",
+  "manufacturer": "nine elms works",
+  "quantity made": "12",
+  "quantity preserved": "0",
+  "wheel arrangement": "2 - 4 - 0",
+  "year (s) withdrawn": "1884 - 1886",
+  "year made": "1859 - 60" }
+Key points from this row:
+- Manufacturer: nine elms works (matches the claim)
+- Wheel arrangement: 2 - 4 - 0 (does NOT include WT)
+- Year made: 1859 - 60 (not 1884–1886)
+- Year(s) withdrawn: 1884 - 1886 (likely the source of the date range in the claim)
+
+3) Check whether any Undine entry has a WT suffix in wheel arrangement:
+SQL:
+SELECT "class", "manufacturer", "wheel arrangement", "year made"
+FROM public.locomotives_of_the_southern_railway
+WHERE lower("class") = 'undine' AND "wheel arrangement" ILIKE '%WT%';
+Result: 0 rows.
+
+4) Confirm that 2-4-0WT types exist in the dataset (and who built them):
+SQL:
+SELECT class, manufacturer, "wheel arrangement", "year made"
+FROM public.locomotives_of_the_southern_railway
+WHERE "wheel arrangement" ILIKE '%2 - 4 - 0%'
+  AND "wheel arrangement" ILIKE '%WT%';
+Results:
+- minerva | nine elms works | 2 - 4 - 0wt | 1856
+- nelson  | nine elms works | 2 - 4 - 0wt | 1858
+- nile    | nine elms works | 2 - 4 - 0wt | 1859
+- 177     | beyer , peacock & co (82) nine elms works (3) | 2 - 4 - 0wt | 1863 - 1875
+Interpretation: Nine Elms Works did build other 2-4-0WT classes, but Undine is not one of them according to this dataset.
+
+5) Explicitly show build vs withdrawal years for Undine:
+SQL:
+SELECT "class", "year made", "year (s) withdrawn" FROM public.locomotives_of_the_southern_railway WHERE lower("class") = 'undine';
+Result:
+- class: undine
+- year made: 1859 - 60
+- year(s) withdrawn: 1884 - 1886
+
+Assessment of each element of the claim:
+- Manufacturer: "nine elms works" — Supported.
+- Class/name: "undine" — Supported.
+- Wheel arrangement: "2 - 4 - 0wt" — Not supported (Undine is recorded as "2 - 4 - 0" without WT).
+- Date range "from 1884 - 1886": Not supported as a build period (the dataset shows 1859–60 as the build years). The range 1884–1886 corresponds to withdrawals, not manufacturing.
+
+Overall reasoning:
+- The dataset confirms Undine was a Nine Elms Works product with a 2‑4‑0 arrangement built 1859–60 and withdrawn 1884–86. The claim incorrectly appends WT to the wheel arrangement and assigns 1884–1886 as the timeframe (which applies to withdrawal, not construction).
+
+Assumptions made:
+- Interpreted "nine elm works" as "nine elms works" (case-insensitive match).
+- Treated "undine" as a class entry in the provided table (no separate naming table exists).
+- Interpreted "from 1884 - 1886" as implying a build period unless otherwise stated; the dataset shows this as the withdrawal period for Undine.
+- String matching performed case-insensitively on relevant fields.
+
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

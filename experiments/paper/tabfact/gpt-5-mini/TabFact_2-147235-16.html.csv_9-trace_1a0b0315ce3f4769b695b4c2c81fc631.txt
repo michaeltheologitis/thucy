@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+錢 and 斤 be the only character that have metric value measure in g
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “錢 and 斤 be the only character that have metric value measure in g.”
+
+Data sources explored
+- Discovered a PostgreSQL database (TabFact) with a relevant table: public.chinese_units_of_measurement, containing text fields for character, jyutping, relative value, metric value, and imperial value.
+
+Evidence
+1) Check the entries for 錢 and 斤
+Executed SQL:
+SELECT character, jyutping, "relative value", "metric value", "imperial value" FROM public.chinese_units_of_measurement WHERE character IN ('斤','錢');
+Results:
+- 錢 — metric value: 3.779936375 g; relative value: 1 / 160
+- 斤 — metric value: 604.78982 g; relative value: 1
+
+2) Find all characters whose metric value is expressed specifically in grams (unit exactly “g”, not mg or kg)
+Executed SQL:
+SELECT DISTINCT character, "metric value" AS metric_value
+FROM public.chinese_units_of_measurement
+WHERE "metric value" ILIKE '% g' AND "metric value" NOT ILIKE '%mg%' AND "metric value" NOT ILIKE '%kg%'
+ORDER BY character;
+Results:
+- 兩 — 37.79936375 g
+- 斤 — 604.78982 g
+- 錢 — 3.779936375 g
+
+Assessment
+- The dataset shows that, in addition to 斤 and 錢, the character 兩 also has a metric value expressed in grams. Therefore, 錢 and 斤 are not the only characters with metric values in grams.
+
+Conclusion
+- The claim is contradicted by the data.
+
+Assumptions
+- “metric value measure in g” is interpreted as entries whose metric value unit is exactly grams (“g”), excluding milligrams (mg) and kilograms (kg).
+- “character” refers to the Chinese unit character field in the table.
+- Verification is based on the single authoritative table discovered in the accessible database.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

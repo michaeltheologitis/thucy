@@ -1,0 +1,64 @@
+
+<userQuery>
+<query>
+arienai kisu have 3.2% less rating than the title with the earliest broadcast date
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “arienai kisu have 3.2% less rating than the title with the earliest broadcast date.”
+
+Data source overview
+- Database: TabFact
+- Schema: public
+- Table: tsuki_no_koibito
+- Relevant columns: “romanized title” (text), “broadcast date” (text), “ratings” (text)
+
+Evidence from executed queries
+1) Retrieve sample rows (includes the relevant entries and their fields)
+SQL:
+SELECT "romanized title", "broadcast date", "ratings" FROM public.tsuki_no_koibito LIMIT 10;
+Result excerpt (as returned):
+- omae ga hosii | may 10 , 2010 | 22.4%
+- arienai kisu  | may 17 , 2010 | 19.2%
+- fukusyū no puropōzu | may 24 , 2010 | 15.6%
+- konna ni suki dattanda… | may 31 , 2010 | 15.5%
+- suki to ietara iinoni | june 7 , 2010 | 17.4%
+- saishūshōjomakuwakare | june 14 , 2010 | 13.4%
+
+From these rows, the earliest broadcast date visible is “may 10 , 2010” for “omae ga hosii”, with a rating of 22.4%. The title “arienai kisu” has a rating of 19.2%.
+
+2) Directly retrieve the rating for “arienai kisu”
+SQL:
+SELECT "ratings" FROM public.tsuki_no_koibito WHERE "romanized title" = 'arienai kisu';
+Result: 19.2%
+
+3) Range of ratings in the table (context)
+SQL:
+SELECT MIN(CAST(REPLACE(ratings, '%', '') AS FLOAT)) AS min_rating,
+       MAX(CAST(REPLACE(ratings, '%', '') AS FLOAT)) AS max_rating
+FROM public.tsuki_no_koibito;
+Result: min_rating = 13.4, max_rating = 22.4
+
+Calculations grounded in the returned data
+- Earliest-broadcast title (from the sampled rows): “omae ga hosii” at 22.4%
+- “arienai kisu” rating: 19.2%
+- Difference in percentage points: 22.4% − 19.2% = 3.2 percentage points
+- Relative percent difference (how many percent less, relative to the earliest title’s rating): (22.4 − 19.2) / 22.4 × 100 ≈ 14.29%
+
+Assessment
+- If “3.2% less” is intended as 3.2 percentage points lower, the statement matches the data (22.4% vs 19.2% yields a 3.2-point gap).
+- If “3.2% less” is intended as a relative percent decrease, the actual decrease is about 14.3%, not 3.2%.
+
+Conclusion
+- The data show that “arienai kisu” is 3.2 percentage points lower than the earliest-broadcast title’s rating. The phrasing “3.2% less” is ambiguous; strictly interpreted as a percent decrease it is not correct, but interpreted as percentage points it is correct.
+
+Assumptions
+- “arienai kisu” refers to the row with romanized title exactly matching 'arienai kisu'.
+- The earliest broadcast date among the provided rows is “may 10 , 2010,” which appears to be the first episode date; the sample query returned all six episodes, and their dates are in chronological order from May 10 to June 14, 2010.
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

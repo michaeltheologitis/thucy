@@ -1,0 +1,37 @@
+
+<userQuery>
+<query>
+the score of the game when birmingham city be the home team be 0 - 0
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The user asserts that when Birmingham City are the home team, the score is 0-0. I verify this against the available data (FA Cup 1983-84 table).
+
+Data source explored:
+- Database: public schema
+- Table: t_1983_84_fa_cup (columns: "tie no" text, "home team" text, "score" text, "away team" text, "date" text)
+
+Evidence 1: List all FA Cup 1983-84 matches with Birmingham City as home team
+Executed SQL:
+SELECT "tie no", "date", "home team", "score", "away team" FROM public.t_1983_84_fa_cup WHERE lower("home team") = 'birmingham city';
+Result:
+- Tie No: 4; Date: 10 March 1984; Home Team: Birmingham City; Score: 1 - 3; Away Team: Watford
+
+Evidence 2: Count Birmingham City home matches with score 0-0 (handling common dash variants and ignoring spaces)
+Executed SQL:
+SELECT COUNT(*) FROM t_1983_84_fa_cup WHERE lower("home team") = 'birmingham city' AND regexp_replace(score, '\s', '', 'g') IN ('0-0','0–0','0—0','0-0')
+Result:
+- Count: 0
+
+Conclusion based on data:
+- In the FA Cup 1983-84 dataset, Birmingham City had one home match (vs Watford) with a score of 1 - 3. There are zero Birmingham City home matches with a 0-0 score.
+
+Assumptions:
+- The claim is evaluated within the scope of the available dataset (FA Cup 1983-84). No other seasons or competitions are included because they are not present in the connected data sources.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

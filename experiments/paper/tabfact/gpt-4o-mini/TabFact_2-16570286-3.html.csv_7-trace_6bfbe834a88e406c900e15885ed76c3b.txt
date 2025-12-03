@@ -1,0 +1,57 @@
+
+<userQuery>
+<query>
+all of the england player take as many wicket as bill johnston
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim: "all of the england player take as many wicket as bill johnston"
+- Interpreted within the available data (1948 Ashes series): This asserts that every England player listed for the 1948 Ashes took as many wickets as Bill Johnston.
+- Finding: False. Bill Johnston took 27 wickets; no England player in the dataset reached 27 wickets, and their wicket tallies are all lower.
+
+Data sources explored
+- Available database: public schema with table public.t_1948_ashes_series (players and bowling stats for the 1948 Ashes series).
+  - Columns: player (text), team (text), matches (bigint), wickets (bigint), average (double precision), best bowling (text)
+
+Evidence and executed SQL
+1) Identify players and wickets (full list to see England vs. Australia wicket counts)
+SQL:
+SELECT player, team, wickets FROM public.t_1948_ashes_series;
+Result excerpt:
+- ray lindwall | australia | 27
+- bill johnston | australia | 27
+- alec bedser | england | 18
+- keith miller | australia | 13
+- ernie toshack | australia | 11
+- norman yardley | england | 9
+- jim laker | england | 9
+
+2) Players with exactly 27 wickets (to test equality with Bill Johnston)
+SQL:
+SELECT player, team, wickets FROM public.t_1948_ashes_series WHERE wickets = 27;
+Result:
+- ray lindwall | australia | 27
+- bill johnston | australia | 27
+Interpretation: No England player appears with 27 wickets.
+
+3) Bill Johnston’s wickets (to confirm his tally explicitly)
+SQL:
+SELECT player, wickets FROM public.t_1948_ashes_series WHERE player ILIKE 'Bill Johnston';
+Result:
+- bill johnston | 27
+
+Conclusion
+- No England player in the dataset has as many wickets as Bill Johnston (27). England players listed have 18, 9, and 9 wickets, all less than 27.
+- Therefore, the claim that “all of the England player(s) take as many wicket(s) as Bill Johnston” is contradicted by the data.
+
+Assumptions
+- “as many wickets as” is interpreted as an equality comparison of wicket counts.
+- “England player” refers to players recorded under team = 'england' in this 1948 Ashes series table (not career totals or other series).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,54 @@
+
+<userQuery>
+<query>
+the detroit piston win by over 10 point in 3 game during this period of their 2010 - 2011 season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+What I verified
+- Claim interpreted as: In the Detroit Pistons’ 2010–2011 season, they had exactly three wins by more than 10 points.
+
+What the data shows
+- Data source discovered: a PostgreSQL database with table public.t_2010_11_detroit_pistons_season containing per-game results for the Pistons’ 2010–11 season.
+- The score field encodes outcome plus scores (e.g., 'w 113 - 102 (ot)' or 'l 90 - 92'). The first number is the Pistons’ points, the second is the opponent’s.
+- Querying this table yields 3 wins with a margin greater than 10 points, on March 6 (vs Washington, margin 11), March 16 (vs Toronto, margin 14), and March 26 (vs Indiana, margin 12).
+
+Executed SQL (evidence)
+1) Count of wins by more than 10 points
+SQL:
+SELECT COUNT(*) AS wins_over_10_points
+FROM public.t_2010_11_detroit_pistons_season
+WHERE score LIKE 'w %' AND 
+      (CAST(SUBSTRING(score FROM 3 FOR POSITION('-' IN score)-3) AS INTEGER) - 
+       CAST(SUBSTRING(score FROM POSITION('-' IN score) + 2 FOR POSITION('(' IN score)-POSITION('-' IN score) - 3) AS INTEGER)) > 10;
+Result: 3
+
+2) List of those games with computed margins
+SQL:
+SELECT date, team AS opponent, 
+       CAST(SUBSTRING(score FROM 3 FOR POSITION('-' IN score)-3) AS INTEGER) AS team_score,
+       CAST(SUBSTRING(score FROM POSITION('-' IN score) + 2 FOR POSITION('(' IN score)-POSITION('-' IN score) - 3) AS INTEGER) AS opponent_score,
+       (CAST(SUBSTRING(score FROM 3 FOR POSITION('-' IN score)-3) AS INTEGER) - 
+        CAST(SUBSTRING(score FROM POSITION('-' IN score) + 2 FOR POSITION('(' IN score)-POSITION('-' IN score) - 3) AS INTEGER)) AS margin
+FROM public.t_2010_11_detroit_pistons_season
+WHERE score LIKE 'w %' AND 
+      (CAST(SUBSTRING(score FROM 3 FOR POSITION('-' IN score)-3) AS INTEGER) - 
+       CAST(SUBSTRING(score FROM POSITION('-' IN score) + 2 FOR POSITION('(' IN score)-POSITION('-' IN score) - 3) AS INTEGER)) > 10;
+Results:
+- Date: March 6 | Opponent: Washington | Margin: 11
+- Date: March 16 | Opponent: Toronto | Margin: 14
+- Date: March 26 | Opponent: Indiana | Margin: 12
+
+Conclusion
+- The data supports the claim: the Pistons recorded three wins by more than 10 points in the 2010–2011 season.
+
+Assumptions
+- “This period” was interpreted as the entire 2010–2011 regular season covered by public.t_2010_11_detroit_pistons_season.
+- The score format places the Pistons’ score first, opponent’s second, consistent with sampled rows and outcomes indicated by the leading 'w'/'l'.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

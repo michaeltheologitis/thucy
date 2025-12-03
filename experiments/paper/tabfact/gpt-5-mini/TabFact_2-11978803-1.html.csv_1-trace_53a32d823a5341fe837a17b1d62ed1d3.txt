@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+the competition on august 15 , 2012 , which result in a win , be play at a baku , venue
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary conclusion:
+The data shows that on August 15, 2012 there is a match entry with result "win" and the venue listed as "baku , azerbaijan". Therefore, the match that resulted in a win on that date was played at a Baku venue.
+
+Data source inspected:
+- Database: TabFact
+- Schema: public
+- Table: branimir_suba_i (columns: date, venue, score, result, competition)
+
+Evidence and executed SQL:
+1) Locate the row for August 15, 2012
+SQL executed:
+SELECT * FROM public.branimir_suba_i
+WHERE date ILIKE '%August%15%2012%' OR date ILIKE '%Aug%15%2012%' OR date = 'August 15, 2012'
+LIMIT 50;
+
+Result:
+[{"competition":"friendly","date":"august 15 , 2012","result":"win","score":"3 - 0","venue":"baku , azerbaijan"}]
+
+2) Verify the venue contains "Baku" for the winning result on that date
+SQL executed:
+SELECT venue, venue ILIKE '%baku%' AS contains_baku
+FROM public.branimir_suba_i
+WHERE (date ILIKE '%August%15%2012%' OR date ILIKE '%Aug%15%2012%' OR date = 'August 15, 2012')
+  AND result ILIKE '%win%';
+
+Result:
+[{"venue":"baku , azerbaijan","contains_baku":true}]
+
+Interpretation:
+- The row for August 15, 2012 has result = "win" and venue = "baku , azerbaijan". The venue string indeed contains "Baku" (case-insensitive), satisfying the claim that the winning match on that date was played at a Baku venue.
+
+Assumptions made:
+- The claim refers to the match records contained in the table public.branimir_suba_i.
+- Date matching is case-insensitive and pattern-based because dates are stored as free text.
+- "Baku venue" means the venue field contains the city name "Baku" (case-insensitive).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

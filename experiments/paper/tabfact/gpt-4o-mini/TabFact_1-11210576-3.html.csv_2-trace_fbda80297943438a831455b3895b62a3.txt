@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+the duration of 02x03 - 03x05 be list for max martini
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Overview:
+- Task interpreted as: List all episode codes within the range 02x03 to 03x05 (inclusive) in which Max Martini appears, based on available authoritative data.
+- Data source explored: TabFact database, schema public, table list_of_csi_miami_characters.
+
+Data discovery and schema:
+- Database: TabFact
+- Schema: public
+- Table: list_of_csi_miami_characters
+  - Columns: character (text), position (text), actor (text), first episode (text), final episode (text), duration (text), final episode count (bigint)
+
+Evidence and executed SQL:
+1) Locate entries for Max Martini and retrieve appearance span (duration):
+SQL:
+SELECT actor, character, "first episode", "final episode", duration 
+FROM public.list_of_csi_miami_characters 
+WHERE LOWER(actor) LIKE '%martini%';
+Result (relevant row):
+- Actor: Max Martini
+- Character: Bob Keaton
+- First Episode: Big Brother
+- Final Episode: Vengeance
+- Duration: 02x08, 03x20 - 03x22
+
+2) Confirm that Max Martini’s duration includes episode 02x08:
+SQL:
+SELECT duration FROM list_of_csi_miami_characters 
+WHERE actor = 'Max Martini' AND duration LIKE '%02x08%';
+Result: Row returned (true) — duration contains 02x08.
+
+3) Confirm there are no appearances for Max Martini between 03x01 and 03x05:
+SQL:
+SELECT COUNT(*) FROM list_of_csi_miami_characters 
+WHERE actor = 'Max Martini' 
+  AND (duration LIKE '%03x01%' OR duration LIKE '%03x02%' OR duration LIKE '%03x03%' OR duration LIKE '%03x04%' OR duration LIKE '%03x05%');
+Result: 0 (no such episodes present in the duration field).
+
+Conclusion:
+- Max Martini’s documented CSI: Miami appearances are: 02x08 and 03x20–03x22.
+- Within the requested range 02x03–03x05 (inclusive), the only matching episode is: 02x08.
+
+Answer (list for 02x03–03x05):
+- 02x08
+
+Assumptions:
+- The query pertains to CSI: Miami (the only available authoritative dataset here), and the ‘duration’ field encodes appearance episodes in the SSxEE format.
+- The range 02x03–03x05 is interpreted inclusively.
+- The user intent is to list the episodes (not runtime in minutes) in that range for Max Martini based on the ‘duration’ field.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

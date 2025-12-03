@@ -1,0 +1,91 @@
+
+<userQuery>
+<query>
+2 of the project be propose , but never list and never complete
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: Two items were proposed but were never listed and never completed.
+
+Data source explored
+- Available dataset: public.list_of_superfund_sites_in_mississippi (Superfund sites in Mississippi) with columns including: cerclis id, name, county, proposed, listed, construction completed, partially deleted, deleted.
+
+Sanity checks on value formats
+- Executed SQL to see distinct values for the relevant columns and confirm how “listed” and “construction completed” represent missing/unset states.
+
+SQL 1: Distinct values in proposed
+SELECT DISTINCT "proposed" FROM public.list_of_superfund_sites_in_mississippi ORDER BY "proposed";
+Result values:
+- 03 / 08 / 2004
+- 05 / 10 / 1993
+- 05 / 11 / 2000
+- 06 / 14 / 2001
+- 06 / 23 / 1993
+- 09 / 08 / 1983
+- 09 / 27 / 2006
+- 10 / 15 / 1984
+- cleanup completed before formal creation of npl
+
+SQL 2: Distinct values in listed
+SELECT DISTINCT "listed" FROM public.list_of_superfund_sites_in_mississippi ORDER BY "listed";
+Result values:
+- -
+- 03 / 07 / 2007
+- 06 / 10 / 1986
+- 07 / 22 / 2004
+- 07 / 27 / 2000
+- 09 / 13 / 2001
+- 09 / 21 / 1984
+- cleanup completed before formal creation of npl
+
+SQL 3: Distinct values in construction completed
+SELECT DISTINCT "construction completed" FROM public.list_of_superfund_sites_in_mississippi ORDER BY "construction completed";
+Result values:
+- -
+- 08 / 08 / 1997
+- 09 / 17 / 1993
+- 12 / 30 / 1982
+
+SQL 4: Total rows
+SELECT COUNT(*) AS total_rows FROM public.list_of_superfund_sites_in_mississippi;
+Result: 9
+
+Verification of the claim
+- We interpret “proposed” as rows where proposed is a date (not the text 'cleanup completed before formal creation of npl').
+- “Never listed” is interpreted as listed = '-'.
+- “Never completed” is interpreted as construction completed = '-'.
+
+SQL 5: Retrieve matching rows
+SELECT name, "cerclis id", proposed, listed, "construction completed"
+FROM public.list_of_superfund_sites_in_mississippi
+WHERE proposed IS NOT NULL
+  AND proposed <> 'cleanup completed before formal creation of npl'
+  AND listed = '-'
+  AND "construction completed" = '-';
+Rows returned:
+- name: chemfax , inc; cerclis id: msd008154486; proposed: 06 / 23 / 1993; listed: -; construction completed: -
+- name: potter co; cerclis id: msd056029648; proposed: 05 / 10 / 1993; listed: -; construction completed: -
+
+SQL 6: Count of such rows
+SELECT count(*)
+FROM public.list_of_superfund_sites_in_mississippi
+WHERE proposed IS NOT NULL
+  AND proposed <> 'cleanup completed before formal creation of npl'
+  AND listed = '-'
+  AND "construction completed" = '-';
+Result: 2
+
+Conclusion
+- The data show exactly two sites with a proposed date that have never been listed and have no construction completed date. This supports the claim.
+
+Assumptions made
+- “Project” refers to Superfund sites in the provided dataset.
+- A hyphen ('-') in listed or construction completed indicates “never listed”/“not completed.”
+- “Proposed” is satisfied by having a concrete proposed date (excluding the special text 'cleanup completed before formal creation of npl').
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

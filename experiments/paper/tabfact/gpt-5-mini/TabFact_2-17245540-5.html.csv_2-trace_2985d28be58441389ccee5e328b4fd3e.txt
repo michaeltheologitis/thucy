@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+johnny miller place t3
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Interpreted claim: The user asserts that, in the relevant dataset, Johnny Miller’s recorded place is “t3”.
+- Data source discovery: Located a PostgreSQL database (TabFact) with a golf-related table: public.t_1973_u_s_open_golf (columns: place, player, country, score, to par).
+
+Evidence
+1) Targeted lookup for Johnny Miller’s place
+Executed SQL:
+SELECT place FROM public.t_1973_u_s_open_golf WHERE lower(player) = lower('Johnny Miller');
+Result:
+[{"place":"t3"}]
+
+2) Contextual listing of all rows (to see placement values and tied positions)
+Executed SQL:
+SELECT place, player, country, score, "to par"
+FROM public.t_1973_u_s_open_golf
+ORDER BY
+  CASE WHEN regexp_replace(place, '[^0-9]', '', 'g') ~ '^[0-9]+'
+       THEN (regexp_replace(place, '[^0-9]', '', 'g'))::int
+       ELSE NULL
+  END ASC,
+  place ASC;
+Result excerpt (as returned):
+1 | gary player | south africa | 67 + 70 = 137 | - 5
+2 | jim colbert | united states | 70 + 68 = 138 | - 4
+t3 | jack nicklaus | united states | 71 + 69 = 140 | - 2
+t3 | johnny miller | united states | 71 + 69 = 140 | - 2
+t3 | bob charles | new zealand | 71 + 69 = 140 | - 2
+...
+
+Conclusion
+- The database table explicitly records Johnny Miller’s place as t3. This directly supports the claim.
+
+Assumptions
+- The claim lacked context; I verified it against the available golf table public.t_1973_u_s_open_golf in the TabFact database and interpreted “place t3” as the placement value recorded in that table (likely a specific leaderboard snapshot).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,68 @@
+
+<userQuery>
+<query>
+only 4 of the athlete have a mark greater than 29 foot
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “only 4 of the athlete have a mark greater than 29 foot.”
+
+Data source discovery
+- Available database: public
+- Relevant table: long_jump
+- Table schema (from discovery):
+  - mark (TEXT)
+  - wind (DOUBLE PRECISION)
+  - athlete (TEXT)
+  - nationality (TEXT)
+  - venue (TEXT)
+  - date (TEXT)
+
+Understanding the data format
+- We first inspected sample rows to understand how marks are recorded. The mark column stores distances as meters with a feet+inches equivalent in parentheses (e.g., “8.95 m (29ft4¼in)”).
+
+Executed SQL (format check)
+SELECT * FROM long_jump LIMIT 20;
+
+Observed sample output (abridged):
+- mike powell | august 30 , 1991 | 8.95 m (29ft4¼in) | united states | tokyo | 0.3
+- bob beamon | october 18 , 1968 | 8.90 m (29ft2¼in) a | united states | mexico city | 2
+- carl lewis | august 30 , 1991 | 8.87 m (29ft1in) | united states | tokyo | 0.2
+- robert emmiyan | may 22 , 1987 | 8.86 m (29ft0¾in) a | soviet union | tsakhkadzor | 1.9
+
+Verification approach
+- We parse the numeric meters from mark, convert to feet (feet = meters × 3.28084), and determine, per athlete, whether any recorded mark exceeds 29.00 feet. We then count distinct athletes meeting this criterion and list them.
+
+Executed SQL (athletes and their best feet; threshold > 29 feet)
+SELECT DISTINCT athlete, MAX(CAST(SUBSTRING(mark FROM '([0-9.]+)') AS DOUBLE PRECISION) * 3.28084) AS best_mark
+FROM long_jump
+GROUP BY athlete
+HAVING MAX(CAST(SUBSTRING(mark FROM '([0-9.]+)') AS DOUBLE PRECISION) * 3.28084) > 29;
+
+Result (athletes with best mark > 29 ft):
+- Mike Powell — Best Mark ≈ 29.36 ft
+- Bob Beamon — Best Mark ≈ 29.20 ft
+- Carl Lewis — Best Mark ≈ 29.10 ft
+- Robert Emmiyan — Best Mark ≈ 29.07 ft
+
+Executed SQL (cross-check: count distinct athletes over 29 ft across all rows)
+SELECT COUNT(DISTINCT athlete) AS total_athletes
+FROM long_jump
+WHERE CAST(SUBSTRING(mark FROM '([0-9.]+)') AS DOUBLE PRECISION) * 3.28084 > 29;
+
+Result: 4
+
+Conclusion
+- The data show exactly 4 distinct athletes have a mark strictly greater than 29 feet. This supports the claim.
+
+Assumptions
+- “Greater than 29 foot” is interpreted as strictly greater than 29.00 feet (> 29.00), not ≥ 29.00.
+- We evaluate distinct athletes (not number of performances) and use each athlete’s best recorded mark in the dataset.
+- We convert meters (extracted from the mark text) to feet using 1 m = 3.28084 ft and ignore the feet+inches substring for computation to avoid parsing fractional inch glyphs.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

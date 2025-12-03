@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+担 / 擔 be the only character that have a metric value measure in kg
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “担 / 擔 be the only character that have a metric value measure in kg.”
+
+Data discovery
+- Available source: PostgreSQL database TabFact (public schema) with table public.chinese_units_of_measurement.
+- Table columns: jyutping, character, portuguese, "relative value", "metric value", "imperial value" (all text).
+
+Evidence collected
+1) Overview of all units in the table
+Executed SQL:
+SELECT character, portuguese, "relative value", "metric value", "imperial value" FROM public.chinese_units_of_measurement;
+Result rows (character | portuguese | relative value | metric value | imperial value):
+- 厘 | liz | 1 / 1600 | 37.79931 mg | ~0.2133 dr
+- 分 | condorim | 1 / 1600 | 377.9936375 mg | ~0.2133 dr
+- 錢 | maz | 1 / 160 | 3.779936375 g | ~2.1333dr
+- 兩 | tael | 1 / 16 | 37.79936375 g | ~1.3333oz
+- 斤 | cate | 1 | 604.78982 g | ~1.3333lb
+- 担 / 擔 | pico | 100 | 60.478982 kg | ~133.3333lb
+
+2) Direct check for entries expressed in kilograms
+Executed SQL:
+SELECT character, "metric value" FROM public.chinese_units_of_measurement WHERE "metric value" ILIKE '%kg%';
+Result:
+- 担 / 擔 | 60.478982 kg
+
+3) Count of entries with metric value in kilograms
+Executed SQL:
+SELECT COUNT(*) AS count_kg FROM public.chinese_units_of_measurement WHERE "metric value" ILIKE '%kg%';
+Result:
+- count_kg = 1
+
+Assessment
+- In this dataset, only the entry for “担 / 擔” has its metric value expressed in kilograms (“60.478982 kg”).
+- All other characters’ metric values are given in mg or g, not kg.
+
+Conclusion
+- The claim is supported by the available data in this table: “担 / 擔” is the only character whose metric value is recorded in kilograms.
+
+Assumptions and scope
+- I interpreted the claim with respect to the accessible dataset (public.chinese_units_of_measurement). Broader statements about all Chinese characters or other datasets were not evaluated here, as I grounded the verification strictly on the available data source.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,77 @@
+
+<userQuery>
+<query>
+when 16.22 (118) be the away team score , the home team score be the highest
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Interpretation: Identify all 1982 VFL matches where the away team score equals the AFL-style score string 16.22 (118), then determine whether the home team score in those games is the highest among that set and report the corresponding game(s).
+- Result: Exactly one match satisfies the condition. In that game, the home team (Hawthorn) scored 20.20 (140). Since this is the only qualifying match, 140 is the highest home score among those games.
+
+Evidence from Data and Executed SQL
+1) Find all matches with away team score = '16.22 (118)'
+Executed SQL:
+SELECT * FROM public.t_1982_vfl_season WHERE "away team score" = '16.22 (118)';
+
+2) Compute numeric home points for those matches and return the ones with the maximum home points
+Executed SQL:
+WITH computed_home_points AS (
+    SELECT 
+        "date", 
+        "venue", 
+        "home team", 
+        "home team score", 
+        "away team", 
+        "away team score", 
+        CASE 
+            WHEN "home team score" LIKE '%(%' THEN 
+                CAST(SUBSTRING("home team score" FROM '\((\d+)\)') AS INTEGER) 
+            ELSE 
+                CAST("home team score" AS INTEGER) 
+        END AS home_points 
+    FROM public.t_1982_vfl_season 
+    WHERE "away team score" = '16.22 (118)'
+), max_home_points AS (
+    SELECT MAX(home_points) AS max_points FROM computed_home_points
+)
+SELECT * FROM computed_home_points WHERE home_points = (SELECT max_points FROM max_home_points);
+
+Result returned by the above queries:
+- Date: 7 August 1982
+- Venue: Princes Park
+- Home Team: Hawthorn
+- Home Team Score: 20.20 (140)
+- Away Team: Collingwood
+- Away Team Score: 16.22 (118)
+- Computed Home Points: 140
+
+Cross-check: Is 140 the highest home score in the entire 1982 season?
+- To clarify the scope, we also computed the overall highest home score across the season. The top values show that 150 (North Melbourne 22.18 (150)) exceeds 140, so Hawthorn’s 140 is not the overall season high.
+Executed SQL:
+SELECT date, venue, "home team", "home team score", CAST(SUBSTRING("home team score" FROM '\((\d+)\)') AS INTEGER) AS home_points
+FROM public.t_1982_vfl_season
+WHERE "home team score" LIKE '%(%'  
+ORDER BY home_points DESC
+LIMIT 5;
+
+Top results from this query included:
+- 7 August 1982 — North Melbourne — 22.18 (150) — 150 — Arden Street Oval
+- 7 August 1982 — Fitzroy — 21.16 (142) — 142 — Junction Oval
+- 7 August 1982 — Hawthorn — 20.20 (140) — 140 — Princes Park
+- 7 August 1982 — Essendon — 20.17 (137) — 137 — VFL Park
+
+Conclusion
+- Among matches where the away team scored exactly 16.22 (118), the highest home team score is 140, recorded by Hawthorn on 7 August 1982 at Princes Park versus Collingwood. The evidence supports the claim under this interpretation.
+- Note: If the intended meaning was that this home score is the highest in the entire 1982 season, that is not supported by the data (North Melbourne recorded 150).
+
+Assumptions
+- “The highest” is interpreted as “the highest home team score among the matches where the away team scored 16.22 (118).”
+- Scores stored as text in AFL format were converted to numeric totals by extracting the value inside parentheses; rows without parentheses would be cast directly to integers.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,52 @@
+
+<userQuery>
+<query>
+the call sign for astral media 's radio station be cjui - fm
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Astral Media’s radio station has the call sign CJUI-FM.”
+
+What the data shows
+- The media_in_kelowna table lists a station with call sign “cjui - fm” (formatting and casing as stored), branded “103.9 the juice,” owned by “vista broadcast group,” not Astral Media.
+- The only station in this dataset explicitly owned by “astral media” has the call sign “ckfr” (AM 1150), branded “am 1150.”
+
+Supporting evidence (executed SQL and results)
+1) List all stations to see ownership and call signs
+SQL:
+SELECT * FROM public.media_in_kelowna;
+Results excerpt:
+- …
+- frequency: 0 103.9 fm | call sign: cjui - fm | branding: 103.9 the juice | format: adult hits | owner: vista broadcast group
+- …
+- frequency: 1150 am | call sign: ckfr | branding: am 1150 | format: news / talk | owner: astral media
+
+2) Find the station(s) owned by Astral Media
+SQL:
+SELECT frequency, "call sign", branding, format, owner
+FROM media_in_kelowna
+WHERE owner ILIKE '%Astral%';
+Result:
+- frequency: 1150 am | call sign: ckfr | branding: am 1150 | format: news / talk | owner: astral media
+
+3) Confirm the “CJUI” call sign row and its owner
+SQL:
+SELECT frequency, "call sign", branding, owner
+FROM media_in_kelowna
+WHERE "call sign" ILIKE '%cjui%';
+Result:
+- frequency: 0 103.9 fm | call sign: cjui - fm | branding: 103.9 the juice | owner: vista broadcast group
+
+Conclusion
+- The call sign “CJUI-FM” (stored as “cjui - fm”) corresponds to a station owned by Vista Broadcast Group, not Astral Media. The Astral Media station in this dataset is CKFR. Therefore, the claim is false.
+
+Assumptions
+- “Astral Media’s radio station” refers to stations represented in the media_in_kelowna dataset.
+- Minor differences in spacing/casing of call signs (e.g., “cjui - fm” vs “CJUI-FM”) are considered equivalent identifiers for verification purposes.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

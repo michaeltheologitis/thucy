@@ -1,0 +1,50 @@
+
+<userQuery>
+<query>
+the new orleans saint be the opponent for the first time in the 11th week
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: For the 1997 Oakland Raiders, the Week 11 opponent was the New Orleans Saints (and this was the first time they faced the Saints that season).
+
+Data source discovery
+- Available database: TabFact (public schema)
+- Relevant table: public.t_1997_oakland_raiders_season (columns: week, date, opponent, result, "tv time", attendance)
+
+Evidence and executed SQL
+1) Full schedule by week to locate Week 11 opponent
+SQL:
+SELECT week, date, opponent, result FROM public.t_1997_oakland_raiders_season ORDER BY week;
+Key rows observed:
+- 11 | november 9 , 1997 | new orleans saints | l 13 - 10
+
+2) Direct check for Week 11 row
+SQL:
+SELECT week, date, opponent, result FROM public.t_1997_oakland_raiders_season WHERE week = 11;
+Result:
+- 11 | november 9 , 1997 | new orleans saints | l 13 - 10
+
+3) Verify it was the first (and only) game vs the Saints that season
+SQL:
+SELECT week, date, opponent, result FROM public.t_1997_oakland_raiders_season WHERE opponent ILIKE '%Saints%' ORDER BY week;
+Result:
+- week: 11 | date: november 9 , 1997 | opponent: new orleans saints | result: l 13 - 10
+
+SQL:
+SELECT MIN(week) AS min_week FROM public.t_1997_oakland_raiders_season WHERE opponent ILIKE '%Saints%';
+Result:
+- min_week: 11
+
+Findings
+- The Week 11 opponent for the 1997 Oakland Raiders was the New Orleans Saints, and this was the first (and only) meeting with the Saints that season.
+
+Assumptions
+- The claim refers to the 1997 Oakland Raiders schedule contained in public.t_1997_oakland_raiders_season.
+- The phrase "for the first time" is taken to mean the first meeting with the Saints during that season, as no earlier weeks list the Saints as the opponent.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

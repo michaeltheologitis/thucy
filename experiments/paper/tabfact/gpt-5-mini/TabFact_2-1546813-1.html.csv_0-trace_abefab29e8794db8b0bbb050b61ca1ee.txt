@@ -1,0 +1,68 @@
+
+<userQuery>
+<query>
+the solheim cup be host in the us on 7 occassions from 1990 through 2013
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “the solheim cup be host in the us on 7 occasions from 1990 through 2013.”
+
+Data sources discovered
+- postgres_tabfact19 (TabFact) database with a public schema containing a table named solheim_cup.
+
+Relevant schema
+- Table: public.solheim_cup
+  - Columns: year (bigint), venue (text), winning team (text), score (text), usa captain (text), europe captain (text)
+  - No explicit country column; country must be inferred from the venue text.
+
+Evidence
+1) List of Solheim Cup events from 1990 to 2013 (inclusive)
+Executed SQL:
+SELECT year, venue FROM public.solheim_cup WHERE year BETWEEN 1990 AND 2013 ORDER BY year;
+Results (Year — Venue):
+- 1990 — lake nona golf & country club , florida , usa
+- 1992 — dalmahoy country club , scotland
+- 1994 — the greenbrier , west virginia , usa
+- 1996 — st pierre golf & country club , wales
+- 1998 — muirfield village , ohio , usa
+- 2000 — loch lomond golf club , scotland
+- 2002 — interlachen country club , minnesota , usa
+- 2003 — barsebäck golf & country club , sweden
+- 2005 — crooked stick golf club , indiana , usa
+- 2007 — halmstad gk , sweden
+- 2009 — rich harvest farms , illinois , usa
+- 2011 — killeen castle golf resort , ireland
+- 2013 — colorado golf club , colorado , usa
+
+2) Count of USA-hosted events between 1990 and 2013
+Executed SQL:
+SELECT COUNT(*) FROM solheim_cup WHERE year BETWEEN 1990 AND 2013 AND venue ILIKE '%usa%';
+Result:
+- count = 7
+
+3) Specific USA-hosted events in that range
+Executed SQL:
+SELECT year, venue FROM solheim_cup WHERE year BETWEEN 1990 AND 2013 AND venue ILIKE '%usa%' ORDER BY year;
+Results (Year — Venue):
+- 1990 — lake nona golf & country club , florida , usa
+- 1994 — the greenbrier , west virginia , usa
+- 1998 — muirfield village , ohio , usa
+- 2002 — interlachen country club , minnesota , usa
+- 2005 — crooked stick golf club , indiana , usa
+- 2009 — rich harvest farms , illinois , usa
+- 2013 — colorado golf club , colorado , usa
+
+Conclusion
+- The database lists 7 Solheim Cup editions hosted in the United States between 1990 and 2013 (inclusive): 1990, 1994, 1998, 2002, 2005, 2009, and 2013.
+- This matches the claim.
+
+Assumptions
+- “From 1990 through 2013” is treated as inclusive of both endpoints.
+- “Hosted in the US” is identified by venue text containing “usa” (case-insensitive), which aligns with the venue data in this table.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

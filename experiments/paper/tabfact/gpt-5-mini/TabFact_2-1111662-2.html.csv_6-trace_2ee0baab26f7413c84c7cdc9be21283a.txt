@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+tatyana lebedeva be in the long jump event
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The user asserts that Tatyana Lebedeva is/was in the long jump event.
+
+Data sources discovered:
+- PostgreSQL instance (TabFact), public schema, with one accessible table: memorial_van_damme.
+
+Schema checked:
+- Table public.memorial_van_damme columns: event (text), record (text), athlete (text), nationality (text), date (text).
+
+Evidence gathered from the data:
+1) Broad search for any entries referencing Lebedeva or the long jump
+- Executed SQL:
+SELECT event, athlete, record, date FROM public.memorial_van_damme WHERE athlete ILIKE '%lebed%' OR event ILIKE '%long jump%';
+- Result summary:
+  • long jump — heike drechsler — 7.25 m ( + 1.7 m / s) — 13 september 1991
+  • triple jump — tatyana lebedeva — 15.14 m ( + 0.3 m / s) — 5 september 2003
+- Interpretation: In this table, the long jump record is held by Heike Drechsler, and Tatyana Lebedeva appears under triple jump, not long jump.
+
+2) Exact check for Tatyana Lebedeva in long jump
+- Executed SQL:
+SELECT * FROM public.memorial_van_damme WHERE athlete = 'Tatyana Lebedeva' AND event = 'Long Jump';
+- Result: no rows returned.
+- Count confirmation SQL:
+SELECT COUNT(*) AS cnt FROM public.memorial_van_damme WHERE athlete = 'Tatyana Lebedeva' AND event = 'Long Jump';
+- Result: cnt = 0
+
+3) List all long jump entries in the table
+- Executed SQL:
+SELECT event, athlete, nationality, record, date FROM public.memorial_van_damme WHERE event ILIKE '%long jump%';
+- Result:
+  • long jump — heike drechsler — germany — 7.25 m ( + 1.7 m / s) — 13 september 1991
+
+4) List all triple jump entries in the table
+- Executed SQL:
+SELECT event, athlete, nationality, record, date FROM public.memorial_van_damme WHERE event ILIKE '%triple jump%';
+- Result:
+  • triple jump — tatyana lebedeva — russia — 15.14 m ( + 0.3 m / s) — 5 september 2003
+
+Conclusion:
+- In the only available authoritative data source (the memorial_van_damme table), Tatyana Lebedeva is recorded for the triple jump, not the long jump. No evidence in this dataset links her to the long jump event. Therefore, the claim that she was in the long jump event is not supported by the available data.
+
+Assumptions and scope:
+- The user did not specify a competition or timeframe; I verified against the accessible dataset (Memorial Van Damme records). Absence of evidence here does not speak to her overall career elsewhere, but conclusions are strictly based on the accessible data, which lists her only for triple jump.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

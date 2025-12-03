@@ -1,0 +1,64 @@
+
+<userQuery>
+<query>
+glenferrie oval venue record 5000 more crowd participant than that of the arden street oval venue
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Glenferrie Oval venue record [has] 5,000 more crowd participants than that of the Arden Street Oval venue.”
+
+Scope and data source used
+- Database: TabFact (postgres_tabfact12)
+- Schema: public
+- Table: public.t_1961_vfl_season (contains match-level data for the 1961 VFL season, including venue and crowd attendance)
+- Interpretation of “venue record”: maximum single-match crowd (attendance) at each venue within this dataset (1961 season only), as this is the only authoritative data available.
+
+Step 1: Identify exact venue names present in the data
+- SQL executed:
+  SELECT DISTINCT venue FROM public.t_1961_vfl_season ORDER BY venue;
+- Result:
+  - arden street oval
+  - glenferrie oval
+  - kardinia park
+  - lake oval
+  - mcg
+  - victoria park
+
+Step 2: Retrieve the maximum single-match crowd (venue record within this dataset) for each venue and the details of those matches
+- SQL executed:
+  SELECT t.venue, t."home team", t."away team", t.date, t.crowd
+  FROM public.t_1961_vfl_season t
+  WHERE lower(t.venue) IN ('glenferrie oval','arden street oval')
+    AND t.crowd = (
+      SELECT max(t2.crowd) FROM public.t_1961_vfl_season t2 WHERE lower(t2.venue)=lower(t.venue)
+    )
+  ORDER BY lower(t.venue);
+- Returned rows:
+  - {"venue":"arden street oval","home team":"north melbourne","away team":"st kilda","date":"3 june 1961","crowd":13000}
+  - {"venue":"glenferrie oval","home team":"hawthorn","away team":"richmond","date":"3 june 1961","crowd":15000}
+- Finding:
+  - Glenferrie Oval record (1961 dataset): 15,000
+  - Arden Street Oval record (1961 dataset): 13,000
+
+Step 3: Compute the difference between the venue records
+- SQL executed (component queries and combined):
+  1) SELECT MAX(crowd) AS max_crowd FROM public.t_1961_vfl_season WHERE venue ILIKE '%glenferrie%';
+     Result: 15000
+  2) SELECT MAX(crowd) AS max_crowd FROM public.t_1961_vfl_season WHERE venue ILIKE '%arden%';
+     Result: 13000
+  3) SELECT ((SELECT MAX(crowd) FROM public.t_1961_vfl_season WHERE venue ILIKE '%glenferrie%') - (SELECT MAX(crowd) FROM public.t_1961_vfl_season WHERE venue ILIKE '%arden%')) AS crowd_diff;
+     Result: 2000
+
+Conclusion
+- Within the available authoritative dataset (1961 VFL season), Glenferrie Oval’s venue record exceeds Arden Street Oval’s by 2,000 attendees, not 5,000. Therefore, the claim is not supported by the data at hand.
+
+Assumptions
+- “Venue record” was interpreted as the maximum single-match crowd at each venue within the 1961 VFL season dataset, since broader historical data is not available in the accessible sources.
+- Venue matching used case-insensitive comparisons to align with the stored lowercase venue names.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

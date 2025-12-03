@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+toorak park be carlton 's home stadium
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “Toorak Park is Carlton’s home stadium.”
+
+Data source inspected:
+- Database: TabFact (public schema)
+- Available table: public.t_1942_vfl_season with columns: "home team", "home team score", "away team", "away team score", "venue", "crowd", "date"
+
+Evidence gathered (1942 VFL season):
+1) Count Carlton home games and list their home venue(s)
+- SQL:
+  SELECT COUNT(*) AS cnt FROM public.t_1942_vfl_season WHERE "home team" ILIKE '%Carlton%';
+  Result:
+  cnt
+  1
+
+- SQL:
+  SELECT DISTINCT venue FROM public.t_1942_vfl_season WHERE "home team" ILIKE '%Carlton%' ORDER BY venue;
+  Result:
+  venue
+  princes park
+
+Interpretation: In the 1942 season data, Carlton’s recorded home venue is “princes park.”
+
+2) Check if Carlton hosted any match at Toorak Park in 1942
+- SQL (exact venue match):
+  SELECT COUNT(*) AS count FROM public.t_1942_vfl_season WHERE "home team" = 'Carlton' AND venue = 'Toorak Park';
+  Result: count = 0
+
+- SQL (case-insensitive partial venue match):
+  SELECT COUNT(*) AS count FROM public.t_1942_vfl_season WHERE "home team" = 'Carlton' AND venue ILIKE '%Toorak%';
+  Result: count = 0
+
+Interpretation: The 1942 data shows no Carlton home matches at Toorak Park.
+
+Conclusion based on available data: In the 1942 VFL season, Carlton’s home venue is recorded as Princes Park, and there are zero Carlton home matches at Toorak Park. However, the available dataset only covers the 1942 season, so it does not establish Carlton’s home venue(s) across other seasons or eras. Therefore, while the 1942 evidence contradicts the claim for that season, we cannot definitively verify or falsify the broader claim across all time with the available data alone.
+
+Assumptions and scope:
+- Assumed “Carlton” refers to the VFL/AFL club present in the t_1942_vfl_season table.
+- Verification is limited to the 1942 season because that is the only available dataset in the accessible source.
+- Venue naming is taken as-is from the table; case-insensitive and partial matching were used to check for variants of “Toorak Park.”
+</report>
+<verdict>
+Unknown
+</verdict>
+</verificationAnswer>

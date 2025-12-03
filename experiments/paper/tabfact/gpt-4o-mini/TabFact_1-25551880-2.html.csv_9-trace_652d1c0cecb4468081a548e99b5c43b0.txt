@@ -1,0 +1,66 @@
+
+<userQuery>
+<query>
+mar cavendish consecutively win 5 stage
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The user asks whether Mark Cavendish won 5 stages consecutively. Based on the available data (2010 Vuelta a España table), we verify if he ever had a 5-stage consecutive winning streak within that event.
+
+Findings from the data
+- In the 2010 Vuelta a España, Mark Cavendish’s longest consecutive winning streak was 2 stages (Stages 12 and 13). He also won Stage 18. There is no 5-stage consecutive streak in this dataset.
+
+Query results
+1) Longest streak of consecutive stages won by Mark Cavendish
+- Start Stage: 12
+- End Stage: 13
+- Length: 2
+- Stages: [12, 13]
+
+2) Individual stages won by Mark Cavendish
+- Stages: [12, 13, 18]
+
+Executed SQL (as evidence)
+1) Query to find the longest streak of consecutive stages won by Mark Cavendish:
+WITH wins AS (
+    SELECT stage,
+           (stage - ROW_NUMBER() OVER (ORDER BY stage)) AS streak_group
+    FROM public.t_2010_vuelta_a_espa_a
+    WHERE LOWER(winner) = 'mark cavendish'
+),
+     grouped_streaks AS (
+    SELECT streak_group,
+           MIN(stage) AS start_stage,
+           MAX(stage) AS end_stage,
+           COUNT(stage) AS length,
+           ARRAY_AGG(stage) AS stages
+    FROM wins
+    GROUP BY streak_group
+)
+SELECT start_stage,
+       end_stage,
+       length,
+       stages
+FROM grouped_streaks
+ORDER BY length DESC
+LIMIT 1;
+
+2) Query to list all individual stages won by Mark Cavendish:
+SELECT DISTINCT stage
+FROM public.t_2010_vuelta_a_espa_a
+WHERE LOWER(winner) = 'mark cavendish';
+
+Conclusion
+- The claim that Mark Cavendish won 5 stages consecutively is not supported by the available data for the 2010 Vuelta a España. The longest consecutive streak visible in this dataset is 2 stages.
+
+Assumptions
+- The claim is verified against the available data source, which contains results for the 2010 Vuelta a España only.
+- “Consecutively” is interpreted as back-to-back stage numbers within the same event.
+- Name matching for the winner is performed case-insensitively against the exact string “Mark Cavendish.”
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,74 @@
+
+<userQuery>
+<query>
+olga govortsova have win at least 1 grand slam tournament match in any give year from 2007 - 2011
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify
+Olga Govortsova won at least one Grand Slam tournament match in each year from 2007 through 2011.
+
+What I checked
+- Whether in every year 2007–2011 there is at least one Grand Slam (Australian Open, French Open, Wimbledon, US Open) where her result indicates a second round or deeper (2r, 3r, etc.), which implies at least one main-draw match win. I also cross-checked yearly Grand Slam win–loss totals.
+
+Evidence from data
+1) Grand Slam results by year (four majors only)
+SQL executed:
+SELECT tournament, "2007", "2008", "2009", "2010", "2011" FROM public.olga_govortsova WHERE tournament IN ('australian open', 'french open', 'wimbledon', 'us open');
+
+Returned rows (summarized):
+- australian open: 2007 a; 2008 1r; 2009 1r; 2010 1r; 2011 1r
+- french open: 2007 a; 2008 3r; 2009 3r; 2010 2r; 2011 2r
+- wimbledon: 2007 2r; 2008 1r; 2009 2r; 2010 1r; 2011 1r
+- us open: 2007 2r; 2008 2r; 2009 1r; 2010 1r; 2011 1r
+
+Interpretation per year:
+- 2007: Wimbledon 2r, US Open 2r → at least one win (actually two slams with wins)
+- 2008: French Open 3r, US Open 2r → at least one win
+- 2009: French Open 3r, Wimbledon 2r → at least one win
+- 2010: French Open 2r → at least one win
+- 2011: French Open 2r → at least one win
+
+2) Count of Grand Slams (among the four) with 2r-or-better each year
+SQL executed and results:
+- 2007
+  SELECT COUNT(*) AS wins_2007 FROM public.olga_govortsova WHERE tournament IN ('australian open', 'french open', 'wimbledon', 'us open') AND "2007" NOT IN ('1r', 'a')
+  Result: 2
+- 2008
+  SELECT COUNT(*) AS wins_2008 FROM public.olga_govortsova WHERE tournament IN ('australian open', 'french open', 'wimbledon', 'us open') AND "2008" NOT IN ('1r', 'a')
+  Result: 2
+- 2009
+  SELECT COUNT(*) AS wins_2009 FROM public.olga_govortsova WHERE tournament IN ('australian open', 'french open', 'wimbledon', 'us open') AND "2009" NOT IN ('1r', 'a')
+  Result: 2
+- 2010
+  SELECT COUNT(*) AS wins_2010 FROM public.olga_govortsova WHERE tournament IN ('australian open', 'french open', 'wimbledon', 'us open') AND "2010" NOT IN ('1r', 'a')
+  Result: 1
+- 2011
+  SELECT COUNT(*) AS wins_2011 FROM public.olga_govortsova WHERE tournament IN ('australian open', 'french open', 'wimbledon', 'us open') AND "2011" NOT IN ('1r', 'a')
+  Result: 1
+
+3) Yearly Grand Slam win–loss summary (corroboration)
+SQL executed:
+SELECT * FROM public.olga_govortsova WHERE tournament = 'win - loss';
+
+Returned values:
+- 2007: 2 - 2
+- 2008: 3 - 4
+- 2009: 3 - 4
+- 2010: 1 - 4
+- 2011: 1 - 4
+This indicates at least one Grand Slam match win in each of the years 2007–2011.
+
+Conclusion
+The data show that in every year from 2007 through 2011, Olga Govortsova recorded at least one Grand Slam main-draw match win. Therefore, the claim is supported by the evidence.
+
+Assumptions
+- "win at least 1 grand slam tournament match" is interpreted as winning at least one main-draw match at any of the four Grand Slam tournaments in that year.
+- Result codes: '1r' denotes a first-round loss (no wins), '2r' or deeper denotes at least one win, and 'a' denotes absence/did not participate.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

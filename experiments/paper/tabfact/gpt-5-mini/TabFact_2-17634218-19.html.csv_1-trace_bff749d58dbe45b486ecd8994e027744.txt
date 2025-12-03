@@ -1,0 +1,62 @@
+
+<userQuery>
+<query>
+takamiyama have the longest time range between his first and last record , 13 year
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “takamiyama have the longest time range between his first and last record , 13 year”
+
+Conclusion:
+- Longest range: Supported. In the available data, Takamiyama has the largest span between his first and last entries.
+- Duration of 13 years: Not exact. The computed span is 154 months ≈ 12.83 years (about 12 years and 10 months), not a full 13 years.
+
+Evidence from data (TabFact database):
+1) Inspect source table
+Executed SQL:
+SELECT name, first, last, "highest rank", total FROM public.list_of_sumo_record_holders;
+Key rows (name | first | last):
+- takamiyama | november 1969 | september 1982
+- akinoshima | november 1988 | september 2000
+- kotonishiki | september 1990 | september 1999
+(Additional rows listed in the result.)
+
+2) Compute month and year differences for all rows and sort by span
+Executed SQL:
+SELECT name, first, last,
+  ((EXTRACT(YEAR FROM to_date(initcap(last),'Month YYYY')) - EXTRACT(YEAR FROM to_date(initcap(first),'Month YYYY'))) * 12
+   + (EXTRACT(MONTH FROM to_date(initcap(last),'Month YYYY')) - EXTRACT(MONTH FROM to_date(initcap(first),'Month YYYY'))))::integer AS months_diff,
+  ROUND((( (EXTRACT(YEAR FROM to_date(initcap(last),'Month YYYY')) - EXTRACT(YEAR FROM to_date(initcap(first),'Month YYYY'))) * 12
+   + (EXTRACT(MONTH FROM to_date(initcap(last),'Month YYYY')) - EXTRACT(MONTH FROM to_date(initcap(first),'Month YYYY'))))::numeric)/12.0, 3) AS years_diff_decimal
+FROM public.list_of_sumo_record_holders
+ORDER BY months_diff DESC;
+Result highlights (ordered by months_diff DESC):
+- takamiyama; first = november 1969; last = september 1982; months_diff = 154; years_diff_decimal = 12.833
+- akinoshima; months_diff = 142; years_diff_decimal = 11.833
+- kotonishiki; months_diff = 108; years_diff_decimal = 9.000
+(etc.)
+
+3) Confirm the maximum span and who holds it
+Executed SQL:
+SELECT MAX(((date_part('year', to_date(last, 'FMMonth YYYY')) - date_part('year', to_date(first, 'FMMonth YYYY')))*12 + (date_part('month', to_date(last, 'FMMonth YYYY')) - date_part('month', to_date(first, 'FMMonth YYYY'))))::int) AS max_months_diff FROM public.list_of_sumo_record_holders;
+Result:
+- max_months_diff = 154
+
+Executed SQL:
+SELECT name, first, last, ((date_part('year', to_date(last, 'FMMonth YYYY')) - date_part('year', to_date(first, 'FMMonth YYYY')))*12 + (date_part('month', to_date(last, 'FMMonth YYYY')) - date_part('month', to_date(first, 'FMMonth YYYY'))))::int AS months_diff, ROUND((((date_part('year', to_date(last, 'FMMonth YYYY')) - date_part('year', to_date(first, 'FMMonth YYYY')))*12 + (date_part('month', to_date(last, 'FMMonth YYYY')) - date_part('month', to_date(first, 'FMMonth YYYY'))))::numeric)/12, 2) AS years_diff_decimal FROM public.list_of_sumo_record_holders WHERE ((date_part('year', to_date(last, 'FMMonth YYYY')) - date_part('year', to_date(first, 'FMMonth YYYY')))*12 + (date_part('month', to_date(last, 'FMMonth YYYY')) - date_part('month', to_date(first, 'FMMonth YYYY'))))::int = 154;
+Result:
+- takamiyama | november 1969 | september 1982 | months_diff = 154 | years_diff_decimal = 12.83
+
+Interpretation:
+- Takamiyama’s span is the longest in the table.
+- The span equals 154 months, which is approximately 12.83 years, not 13 full years.
+
+Assumptions:
+- “Time range between his first and last record” is interpreted as the difference in whole calendar months between the month-year values in columns first and last, parsed as the first day of those months. No inclusive counting or rounding up to the nearest year was applied.
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

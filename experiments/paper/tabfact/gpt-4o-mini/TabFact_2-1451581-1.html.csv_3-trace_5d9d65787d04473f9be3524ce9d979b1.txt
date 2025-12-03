@@ -1,0 +1,33 @@
+
+<userQuery>
+<query>
+rank 16 have a code (iata / icao) of ord / kord
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Data sources explored:
+- Database: TabFact (public schema)
+- Table: world_s_busiest_airports_by_cargo_traffic
+  Columns: rank (bigint), airport (text), code (iata / icao) (text), total cargo (metric tonnes) (bigint), % change (text)
+
+Evidence 1: What is at rank 16?
+- Result: Airport = London Heathrow Airport; Code (IATA/ICAO) = LHR / EGLL
+- SQL: SELECT airport, "code (iata / icao)" FROM public.world_s_busiest_airports_by_cargo_traffic WHERE rank = 16;
+
+Evidence 2: Which airport has code ORD / KORD?
+- Result: Rank = 17; Airport = O'Hare International Airport; Code = ORD / KORD
+- SQL: SELECT rank, airport, "code (iata / icao)" FROM public.world_s_busiest_airports_by_cargo_traffic WHERE LOWER("code (iata / icao)") = LOWER('ORD / KORD');
+
+Conclusion:
+- Rank 16 corresponds to LHR / EGLL, not ORD / KORD. ORD / KORD is ranked 17 in this dataset.
+
+Assumptions:
+- “rank” refers to the rank column in the world_s_busiest_airports_by_cargo_traffic table of the TabFact database.
+- Code matching is case-insensitive.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

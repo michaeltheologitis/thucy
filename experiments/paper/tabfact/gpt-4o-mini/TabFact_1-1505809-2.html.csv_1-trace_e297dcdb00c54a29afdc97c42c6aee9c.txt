@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+skip jean - michel ménard have a shot pct of 80% and 8 blank end
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Conclusion: Verified. In the 2005 Tim Hortons Brier dataset, the row for skip Jean-Michel Ménard shows a shot percentage of 80% and 8 blank ends.
+
+Evidence and exact SQL
+
+1) Data source presence
+- SQL Query Used:
+  SELECT table_schema, table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' ORDER BY table_schema, table_name;
+- Key Result (excerpt):
+  public | t_2005_tim_hortons_brier
+
+2) Table structure
+- SQL Query Used:
+  SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 't_2005_tim_hortons_brier' AND table_schema = 'public';
+- Result (columns and types):
+  locale (text), skip (text), w (bigint), l (bigint), pf (bigint), pa (bigint), ends won (bigint), ends lost (bigint), blank ends (bigint), stolen ends (bigint), shot pct (text)
+
+3) Inspecting rows for skip, shot pct, and blank ends
+- SQL Query Used:
+  SELECT skip, "shot pct", "blank ends", "ends won", "ends lost" FROM public.t_2005_tim_hortons_brier;
+- Relevant Result Row:
+  skip = jean - michel mãnard | shot pct = 80% | blank ends = 8 | ends won = 54 | ends lost = 40
+
+4) Full row for Jean-Michel Ménard (to confirm context)
+- SQL Query Used:
+  SELECT * FROM public.t_2005_tim_hortons_brier WHERE skip ILIKE '%Jean-Michel%' OR skip ILIKE '%Jean Michel%' OR skip ILIKE '%jean - michel%' OR skip ILIKE '%jean michel%' OR skip ILIKE '%jean-michel%' OR skip ILIKE '%jean - michel mãnard%' OR skip ILIKE '%jean michel mãnard%' OR skip ILIKE '%jean-michel mãnard%';
+- Result:
+  locale = Quebec; skip = Jean - Michel Mãnard; w = 7; l = 4; pf = 77; pa = 69; ends won = 54; ends lost = 40; blank ends = 8; stolen ends = 15; shot pct = 80%
+
+Assessment
+- The claim "skip jean - michel ménard have a shot pct of 80% and 8 blank end" is fully supported by the data in the 2005 Tim Hortons Brier table: shot pct = 80% and blank ends = 8 for the row corresponding to Jean-Michel Ménard (noting a minor accent variation in the stored name).
+
+Assumptions
+- The claim refers to the available dataset for the 2005 Tim Hortons Brier. If a different event/year was intended, figures could differ.
+- Minor spelling/accent differences (Ménard vs. Mãnard) are treated as the same individual.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,68 @@
+
+<userQuery>
+<query>
+less than half the 1984 - 1985 season game be play in the boston garden
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “less than half the 1984–1985 season game be play in the Boston Garden.”
+
+Data source discovered:
+- Database: TabFact (public schema)
+- Table: t_1984_85_boston_celtics_season (columns: game, date, opponent, score, location, record)
+
+Step 1 — Determine total games in the available 1984–85 dataset
+- Executed SQL:
+  SELECT COUNT(*) AS total_games FROM public.t_1984_85_boston_celtics_season;
+- Result:
+  total_games = 14
+
+Step 2 — Inspect how venues are encoded
+- Executed SQL:
+  SELECT DISTINCT location FROM public.t_1984_85_boston_celtics_season ORDER BY location;
+- Result (distinct locations):
+  boston garden; brendan byrne arena; hartford civic center; madison square garden; market square arena; the omni; the spectrum
+
+Step 3 — Count games played at Boston Garden
+- Executed SQL (exact match on venue name):
+  SELECT COUNT(*) AS boston_garden_games FROM public.t_1984_85_boston_celtics_season WHERE location = 'boston garden';
+- Result:
+  boston_garden_games = 8
+
+Step 4 — Cross-check distribution by location
+- Executed SQL:
+  SELECT location, COUNT(*) AS games
+  FROM public.t_1984_85_boston_celtics_season
+  GROUP BY location
+  ORDER BY games DESC, location;
+- Result (location : games):
+  boston garden : 8
+  brendan byrne arena : 1
+  hartford civic center : 1
+  madison square garden : 1
+  market square arena : 1
+  the omni : 1
+  the spectrum : 1
+
+Step 5 — Compute percentage of games at Boston Garden
+- Executed SQL (case-insensitive substring match, confirmatory):
+  SELECT COUNT(*) AS boston_garden_games FROM t_1984_85_boston_celtics_season WHERE lower(location) LIKE '%boston garden%';
+- Results:
+  total_games = 14 (from Step 1)
+  boston_garden_games = 8
+  Percentage = 8 / 14 ≈ 57.14%
+
+Conclusion based on available data:
+- In this 1984–85 Boston Celtics dataset (14 games), 8 games were played at Boston Garden, which is more than half (≈57.14%). Therefore, the claim that “less than half … were played in the Boston Garden” is not supported by the data.
+
+Assumptions noted:
+- I interpreted “season game” as referring to the Boston Celtics 1984–85 season because the only available dataset is t_1984_85_boston_celtics_season.
+- I treated the location column as the game venue and “boston garden” as the indicator of games played at Boston Garden.
+- The verification is constrained to the scope of the available table (14 games). Within this scope, the claim is contradicted by the data.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

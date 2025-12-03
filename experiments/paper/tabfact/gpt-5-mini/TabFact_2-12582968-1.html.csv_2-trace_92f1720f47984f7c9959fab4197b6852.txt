@@ -1,0 +1,62 @@
+
+<userQuery>
+<query>
+the competition type be a junior championship 2 time
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the competition type be a junior championship 2 time.”
+
+Data discovery and scope:
+- Available source: TabFact (PostgreSQL), public schema.
+- Relevant table: public.luk_melich with columns: year (bigint), competition (text), venue (text), position (text), notes (text).
+
+Schema confirmation:
+- Table public.luk_melich exists with the above columns; no keys or constraints.
+
+Evidence 1: Distinct competition values and their frequencies
+- SQL executed:
+  SELECT competition, COUNT(*) AS cnt
+  FROM public.luk_melich
+  GROUP BY competition
+  ORDER BY cnt DESC, competition ASC;
+- Result (excerpt):
+  - world championships — 3
+  - olympic games — 2
+  - european championships — 1
+  - european junior championships — 1
+  - european u23 championships — 1
+  - universiade — 1
+  - world junior championships — 1
+- Interpretation: Competitions that explicitly include “junior” are “world junior championships” (1) and “european junior championships” (1).
+
+Evidence 2: Count rows where competition contains “junior”
+- SQL executed:
+  SELECT COUNT(*) AS junior_count
+  FROM public.luk_melich
+  WHERE competition ILIKE '%junior%';
+- Result: junior_count = 2
+
+Evidence 3: List the junior competition rows
+- SQL executed:
+  SELECT year, competition, venue, position, notes
+  FROM public.luk_melich
+  WHERE competition ILIKE '%junior%'
+  ORDER BY year;
+- Results:
+  1) 1998 — world junior championships — annecy , france — 10th — 61.51 m
+  2) 1999 — european junior championships — riga , latvia — 5th — 64.20 m
+
+Conclusion:
+- Within the public.luk_melich dataset, competitions classified as “junior championships” (i.e., competition names containing “junior”) appear exactly 2 times. This supports the claim.
+
+Assumptions:
+- “Junior championship” is interpreted as any competition whose name includes the word “junior” (case-insensitive) in the competition column.
+- Verification is limited to the public.luk_melich table in the TabFact database, treated as the authoritative scope for this claim.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

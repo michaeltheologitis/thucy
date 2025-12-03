@@ -1,0 +1,62 @@
+
+<userQuery>
+<query>
+the hurricane win 90% of their game in 2007 which get them promote to a higher division
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the hurricane win 90% of their game in 2007 which get them promote to a higher division.”
+
+Data source explored
+- Discovered database: dundee_hurricanes (public schema)
+- Table: public.dundee_hurricanes(season bigint, division text, wins bigint, losses bigint, ties bigint, "final position" text, notes text)
+
+1) Did they win 90% of their games in 2007?
+Evidence query and result:
+SQL:
+SELECT wins, losses, ties, (wins + losses + ties) AS total_games, (CAST(wins AS DOUBLE PRECISION) / NULLIF((wins + losses + ties), 0)) AS win_pct
+FROM public.dundee_hurricanes
+WHERE season = 2007;
+Result:
+- Wins: 9
+- Losses: 1
+- Ties: 0
+- Total Games: 10
+- Win Percentage: 0.9 (90%)
+Assessment: Supported. 9 wins in 10 games is exactly 90%.
+
+Additional season detail for 2007:
+SQL:
+SELECT division, wins, losses, ties, "final position", notes 
+FROM public.dundee_hurricanes 
+WHERE season = 2007;
+Result:
+- Division: BAFN Division 2 North
+- Wins: 9, Losses: 1, Ties: 0
+- Final Position: 1st out of 6
+- Notes: Promoted to Division 1 North
+
+2) Were they promoted to a higher division after 2007?
+Evidence queries and result:
+SQL:
+SELECT season, division, notes FROM dundee_hurricanes WHERE season BETWEEN 2006 AND 2008 AND division IS NOT NULL;
+Result:
+- 2006: Division: bafl division 2 scottish, Notes: -
+- 2007: Division: bafl division 2 north, Notes: promoted to division 1 north
+- 2008: Division: bafl division 1 north, Notes: -
+Assessment: Supported. The 2007 record explicitly notes promotion to Division 1 North, and the 2008 division reflects that promotion.
+
+Conclusion
+- The data shows the Dundee Hurricanes won 9 of 10 games in 2007 (90%) and were promoted from Division 2 North to Division 1 North for the following season. The claim is supported by the evidence.
+
+Assumptions made
+- “the hurricane” refers to the Dundee Hurricanes (American football), the only “Hurricanes” entity present in the available database.
+- “win 90% of their game” is interpreted as wins divided by total games (wins + losses + ties).
+- “promote to a higher division” corresponds to moving from Division 2 North to Division 1 North as indicated in the notes and subsequent season’s division field.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,73 @@
+
+<userQuery>
+<query>
+part number lf80537 gf0411 m have a frequency of 2 ghz
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "part number lf80537 gf0411 m have a frequency of 2 ghz"
+
+Data source discovery
+- Available database: TabFact
+- Table: public.list_of_intel_pentium_dual_core_microprocessors
+- Relevant columns: model number, sspec number, frequency, l2 cache, fsb, mult, voltage, tdp, socket, release date, part number (s), release price ( usd )
+
+Evidence collected (with executed SQL)
+1) Locate entries with part number containing 'lf80537'
+SQL:
+SELECT * FROM public.list_of_intel_pentium_dual_core_microprocessors WHERE "part number (s)" LIKE '%lf80537%';
+Result (excerpt showing the most relevant match):
+- Model Number: Pentium Dual-Core T3200
+- Part Number (s): LF80537 GF0411 M
+- Frequency: 2 GHz
+
+2) Locate entries with part number containing 'gf0411'
+SQL:
+SELECT * FROM public.list_of_intel_pentium_dual_core_microprocessors WHERE "part number (s)" LIKE '%gf0411%';
+Result:
+- Model Number: Pentium Dual-Core T3200
+- SSpec Number: SLAVG (M0)
+- Frequency: 2 GHz
+- L2 Cache: 1 MB
+- FSB: 667 MT/s
+- Mult: 12
+- Voltage: 1.075 - 1.175V
+- TDP: 35 W
+- Socket: Socket P
+- Release Date: Q4 2008
+- Part Number (s): LF80537 GF0411 M
+- Release Price (USD): OEM
+
+3) Confirm a single row contains both substrings (case-insensitive)
+SQL:
+SELECT "model number", frequency, "part number (s)" 
+FROM public.list_of_intel_pentium_dual_core_microprocessors 
+WHERE LOWER("part number (s)") LIKE '%lf80537%' 
+AND LOWER("part number (s)") LIKE '%gf0411%';
+Result:
+- Model Number: pentium dual - core t3200
+- Frequency: 2 ghz
+- Part Number (s): lf80537 gf0411 m
+
+4) Robust match ignoring spaces (case-insensitive)
+SQL:
+SELECT "model number", frequency, "part number (s)"
+FROM public.list_of_intel_pentium_dual_core_microprocessors
+WHERE LOWER(REPLACE("part number (s)", ' ', '')) LIKE '%lf80537gf0411m%';
+Result:
+- Model Number: Pentium Dual - Core T3200
+- Frequency: 2 GHz
+- Part Number: lf80537 gf0411 m
+
+Conclusion
+- The table contains a processor entry with Part Number (s) = "LF80537 GF0411 M" and its frequency is explicitly listed as "2 GHz". This directly supports the claim.
+
+Assumptions
+- Matching for the part number was done case-insensitively and tolerant of spacing variations to accommodate formatting differences in the source data.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

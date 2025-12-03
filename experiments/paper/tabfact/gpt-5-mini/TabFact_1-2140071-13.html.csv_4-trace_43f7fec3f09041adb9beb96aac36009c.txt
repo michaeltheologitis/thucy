@@ -1,0 +1,76 @@
+
+<userQuery>
+<query>
+katie kansa be the coach in episode 10 premier on october 11 , 2012 and have full episode external link
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+What was checked
+- Claim interpreted as: “Katie Kansa is the coach for episode 10, which premiered on October 11, 2012, and the record has a full-episode external link.” The relevant data source is the TabFact PostgreSQL database, table public.made_tv_series with columns: season, episode, episode summary, premier date, external link, coach.
+
+Evidence from the data (with exact executed SQL)
+1) Is there a row for episode 10 with premier date October 11, 2012?
+SQL:
+SELECT season, episode, "premier date", coach, "episode summary", "external link"
+FROM made_tv_series
+WHERE episode = 10 AND "premier date" = 'October 11, 2012';
+Result: no rows returned.
+
+2) What does the database show for episode 10?
+SQL:
+SELECT season, episode, "premier date", coach, "episode summary", "external link"
+FROM made_tv_series
+WHERE episode = 10
+ORDER BY season
+LIMIT 100;
+Result:
+- season: 13
+- episode: 10
+- premier date: october 10 , 2012
+- coach: chris
+- episode summary: shane is made into a tough mudder
+- external link: full episode
+
+3) Which episode has premier date October 11, 2012?
+SQL:
+SELECT season, episode, "premier date", coach, "episode summary", "external link"
+FROM made_tv_series
+WHERE "premier date" ILIKE '%october 11%';
+Result:
+- season: 13
+- episode: 11
+- premier date: october 11 , 2012
+- coach: katie kansas
+- episode summary: shambre is made into a gogo dancer
+- external link: full episode
+
+4) Confirm spelling and coach entry containing “katie”
+SQL:
+SELECT season, episode, "premier date", coach, "external link"
+FROM public.made_tv_series
+WHERE lower(coach) LIKE '%katie%';
+Result:
+- season: 13
+- episode: 11
+- premier date: october 11 , 2012
+- coach: katie kansas
+- external link: full episode
+
+Findings
+- Coach identity: Episode 10’s coach is “chris,” not “Katie Kansa.” The name that appears in the data is “katie kansas,” and it is associated with episode 11, not episode 10.
+- Premiere date: Episode 10 premiered on “october 10 , 2012,” not October 11, 2012. October 11, 2012 corresponds to episode 11.
+- External link field: For both episode 10 and episode 11, the external link field is “full episode,” indicating that a full-episode link is recorded in the dataset. The table does not provide a URL; it records the presence as the text “full episode.”
+
+Conclusion
+- The claim that Katie Kansa was the coach in episode 10 and that it premiered on October 11, 2012 is contradicted by the data. However, the part about having a “full episode” external link is supported by the record for episode 10.
+
+Assumptions/interpretation
+- I interpreted “katie kansa” as the coach’s name. The database records the coach as “katie kansas” (with a final “s”).
+- I interpreted “episode 10 premier on october 11 , 2012” as a single episode entry with both conditions (episode number = 10 and premiere date = October 11, 2012). The dataset shows that October 11, 2012 corresponds to episode 11, not episode 10.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

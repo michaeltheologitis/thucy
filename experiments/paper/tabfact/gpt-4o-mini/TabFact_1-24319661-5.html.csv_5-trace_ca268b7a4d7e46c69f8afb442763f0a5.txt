@@ -1,0 +1,51 @@
+
+<userQuery>
+<query>
+the production code for the episode direct by robert duncan mcneill be bcw403
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim being checked: “the production code for the episode directed by Robert Duncan McNeill is bcw403.”
+
+Data sources explored
+- Connected relational data sources were discovered. The available authoritative dataset relevant to TV episodes is a PostgreSQL table: public.list_of_white_collar_episodes.
+- Table schema (key columns): "no in series" (bigint), "no in season" (bigint), title (text), "directed by" (text), "written by" (text), "us viewers (million)" (double precision), "original air date" (text), "production code" (text).
+
+Evidence and findings
+1) Identify episodes directed by Robert Duncan McNeill and their production codes.
+- Executed SQL:
+SELECT "no in season", "no in series", title, "directed by", "production code" 
+FROM list_of_white_collar_episodes 
+WHERE "directed by" ILIKE '%Robert Duncan McNeill%';
+- Result: One episode found — no in season: 4; no in series: 50; title: Parting Shots; directed by: Robert Duncan McNeill; production code: bcw404.
+- Conclusion: The White Collar episode directed by Robert Duncan McNeill has production code bcw404.
+
+2) Check what episode has production code bcw403.
+- Executed SQL:
+SELECT "no in season", "no in series", title, "directed by" FROM list_of_white_collar_episodes WHERE "production code" = 'bcw403';
+- Result: no in season: 3; no in series: 49; title: Diminishing Returns; directed by: Stefan Schwartz.
+- Conclusion: bcw403 corresponds to Diminishing Returns, which is directed by Stefan Schwartz, not Robert Duncan McNeill.
+
+3) Cross-check Season 4 production code sequence (bcw401–bcw415) to validate context.
+- Executed SQL:
+SELECT "no in series", "no in season", title, "directed by", "production code" 
+FROM list_of_white_collar_episodes 
+WHERE "production code" LIKE 'bcw4%' 
+ORDER BY "no in series";
+- Relevant results excerpt:
+  - no in series: 49; no in season: 3; title: Diminishing Returns; directed by: Stefan Schwartz; production code: bcw403.
+  - no in series: 50; no in season: 4; title: Parting Shots; directed by: Robert Duncan McNeill; production code: bcw404.
+- Conclusion: The episode directed by Robert Duncan McNeill (Parting Shots) is production code bcw404, immediately following bcw403.
+
+Overall conclusion
+- The claim is contradicted by the data. The episode directed by Robert Duncan McNeill has production code bcw404, not bcw403. Production code bcw403 belongs to a different episode directed by Stefan Schwartz.
+
+Assumptions
+- Interpreted “the episode directed by Robert Duncan McNeill” as referring to the White Collar episode(s) in the available dataset, which is the authoritative source accessible here for this domain.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

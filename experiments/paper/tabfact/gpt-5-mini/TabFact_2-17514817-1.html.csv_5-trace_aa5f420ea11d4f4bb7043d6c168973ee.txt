@@ -1,0 +1,46 @@
+
+<userQuery>
+<query>
+west berkshire brewery 's good old boy beer do not win a single award between 1995 and 2009
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “West Berkshire Brewery’s Good Old Boy beer did not win a single award between 1995 and 2009.”
+
+Finding: The data shows multiple awards for Good Old Boy within 1995–2009, contradicting the claim.
+
+Data source discovery
+- Discovered PostgreSQL database: TabFact (postgres_tabfact24), public schema.
+- Relevant table: public.west_berkshire_brewery with columns: year, beer name, prize, category, competition.
+
+Evidence from executed SQL
+1) Retrieve all awards entries for Good Old Boy (case-insensitive)
+SQL:
+SELECT year, "beer name", prize, category, competition
+FROM public.west_berkshire_brewery
+WHERE LOWER(TRIM("beer name")) = LOWER(TRIM('Good Old Boy'));
+Results (5 rows):
+- 1995 | good old boy | overall winner | beer of the festival | camra white horse branch beer festival
+- 2002 | good old boy | gold medal | best bitter | siba south east region beer competition
+- 2002 | good old boy | second reserve champion | overall | siba south east region beer competition
+- 2005 | good old boy | silver medal | best bitter | siba south east region beer competition
+- 2009 | good old boy | gold medal | in category | camra london and south east regional competition
+
+2) Count awards for Good Old Boy between 1995 and 2009 inclusive (case-insensitive)
+SQL:
+SELECT count(*) AS count FROM public.west_berkshire_brewery WHERE year BETWEEN 1995 AND 2009 AND lower(trim("beer name")) = lower('Good Old Boy');
+Result: count = 5
+
+Conclusion
+- There are 5 documented awards for Good Old Boy in the period 1995–2009 (inclusive), so the claim that it did not win a single award in that time frame is contradicted by the data.
+
+Assumptions
+- “Between 1995 and 2009” interpreted as inclusive of both endpoints.
+- Beer name matched case-insensitively with trimmed whitespace to avoid casing discrepancies in the source data.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

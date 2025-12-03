@@ -1,0 +1,52 @@
+
+<userQuery>
+<query>
+bell uh - 1 iroquois be the version of b - 58 aircraft model originate in the united state which have 2 in service
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “bell uh - 1 iroquois be the version of b - 58 aircraft model originate in the united state which have 2 in service.”
+
+Data source explored
+- Database: TabFact (public schema)
+- Table: public.uruguayan_air_force
+  - Columns: aircraft (text), origin (text), type (text), versions (text), "in service" (text)
+
+Evidence collected
+1) Identify Bell UH-1 Iroquois entries
+Executed SQL:
+SELECT aircraft, origin, type, versions, "in service" FROM public.uruguayan_air_force WHERE aircraft ILIKE '%UH-1%' OR aircraft ILIKE '%Iroquois%' OR versions ILIKE '%UH-1%' OR versions ILIKE '%Iroquois%';
+Result (1 row):
+- aircraft: bell uh - 1 iroquois | origin: united states | type: transport / utility | versions: uh - 1h | in service: 13
+
+2) Verify the exact record for “bell uh - 1 iroquois”
+Executed SQL:
+SELECT aircraft, origin, type, versions, "in service" FROM public.uruguayan_air_force WHERE TRIM(LOWER(aircraft)) = 'bell uh - 1 iroquois';
+Result (1 row):
+- aircraft: bell uh - 1 iroquois | origin: united states | type: transport / utility | versions: uh - 1h | in service: 13
+
+3) Identify entries involving “b - 58”
+Executed SQL:
+SELECT * FROM public.uruguayan_air_force WHERE aircraft ~* 'b\s*-?\s*58' OR versions ~* 'b\s*-?\s*58';
+Result (1 row):
+- aircraft: beechcraft b58 baron | origin: united states | type: trainer / liaison | versions: b - 58 | in service: 2
+
+Assessment of the claim’s components
+- “bell uh - 1 iroquois be the version of b - 58 aircraft model” — Not supported. The UH-1 Iroquois row lists its version as “uh - 1h,” not “b - 58.” The “b - 58” designation appears in the Beechcraft B58 Baron record, not the UH-1 Iroquois.
+- “originate in the united state” — Supported for the UH-1 Iroquois (origin: “united states”).
+- “which have 2 in service” — Not supported for UH-1 Iroquois (it has 13 in service). The value “2 in service” pertains to the Beechcraft B58 Baron entry.
+
+Conclusion
+- The claim mixes attributes of two different aircraft. While the UH-1 Iroquois does originate in the United States, it is not a version of “b - 58” and does not have 2 in service in this dataset. Therefore, the overall claim is largely incorrect with one true sub-assertion (origin only).
+
+Assumptions
+- Interpreted “b - 58” as the “versions” designation found in the dataset and matched it to the Beechcraft B58 Baron row.
+- Interpreted “in service” strictly as the value in the "in service" column of the uruguayan_air_force table.
+- Treated the claim as referring to entries within this specific dataset (Uruguayan Air Force).
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

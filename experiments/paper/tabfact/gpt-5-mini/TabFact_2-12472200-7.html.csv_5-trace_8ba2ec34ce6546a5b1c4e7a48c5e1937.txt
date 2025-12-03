@@ -1,0 +1,63 @@
+
+<userQuery>
+<query>
+olga govortsova reach the final in a grand slam tournament
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Olga Govortsova reach the final in a Grand Slam tournament.”
+
+Data sources explored
+- Discovered a single relational data source: postgres_tabfact2 (public schema) containing table: public.olga_govortsova.
+- Schema inspection shows columns: tournament, 2007, 2008, 2009, 2010, 2011 (all text). This table summarizes Olga Govortsova’s singles results by tournament for 2007–2011.
+
+Evidence retrieved (executed SQL and results)
+1) Retrieve the full table to review Grand Slam results
+SQL:
+SELECT * FROM public.olga_govortsova;
+Key rows returned (tournament | 2007 | 2008 | 2009 | 2010 | 2011):
+- australian open | a | 1r | 1r | 1r | 1r
+- french open     | a | 3r | 3r | 2r | 2r
+- wimbledon       | 2r | 1r | 2r | 1r | 1r
+- us open         | 2r | 2r | 1r | 1r | 1r
+(Other rows include non-Slam events and summary lines; none indicate a final.)
+
+2) Explicitly search for any final-stage indicators in any year cells
+SQL:
+SELECT tournament, '2007' AS year, "2007" AS result
+FROM public.olga_govortsova
+WHERE lower(trim("2007")) IN ('f','final','runner-up','sf')
+UNION ALL
+SELECT tournament, '2008' AS year, "2008" AS result
+FROM public.olga_govortsova
+WHERE lower(trim("2008")) IN ('f','final','runner-up','sf')
+UNION ALL
+SELECT tournament, '2009' AS year, "2009" AS result
+FROM public.olga_govortsova
+WHERE lower(trim("2009")) IN ('f','final','runner-up','sf')
+UNION ALL
+SELECT tournament, '2010' AS year, "2010" AS result
+FROM public.olga_govortsova
+WHERE lower(trim("2010")) IN ('f','final','runner-up','sf')
+UNION ALL
+SELECT tournament, '2011' AS year, "2011" AS result
+FROM public.olga_govortsova
+WHERE lower(trim("2011")) IN ('f','final','runner-up','sf')
+ORDER BY tournament, year;
+Result: No rows matched (no tournament/year entries with those final-stage values).
+
+Assessment
+- Within the available dataset (singles results for 2007–2011), Olga Govortsova did not reach a Grand Slam final. Her best Grand Slam singles results shown are third round (French Open 2008 and 2009). There is no evidence in this data of a final (or even a semifinal) appearance at a Grand Slam.
+
+Conclusion
+- The claim that Olga Govortsova reached the final in a Grand Slam tournament is not supported by the available data.
+
+Assumptions and scope notes
+- The table appears to cover singles results only and spans 2007–2011. It does not include doubles/mixed results or years outside this range. The conclusion is therefore based strictly on the observable singles data from 2007–2011 in the provided source.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

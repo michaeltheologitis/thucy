@@ -1,0 +1,57 @@
+
+<userQuery>
+<query>
+in the 2005 milwaukee brewer season be attend by more than 30000 crowd for every game
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: In the 2005 Milwaukee Brewers season, every game was attended by more than 30,000 people.
+
+Summary of findings:
+- The available 2005 Milwaukee Brewers game-level attendance data shows many games with attendance at or below 30,000. Therefore, the universal claim (“every game”) is false. Even a single game ≤ 30,000 is enough to refute the claim; the data shows 19 such games in the recorded subset.
+
+Key evidence from data:
+1) Attendance distribution for the recorded 2005 Milwaukee Brewers games
+- Result:
+  - Total games: 27
+  - Games with attendance > 30,000: 8
+  - Games with attendance ≤ 30,000 or NULL: 19
+  - Minimum attendance: 13,173
+  - Maximum attendance: 37,756
+- Executed SQL:
+  SELECT COUNT(*) AS total_games,
+         COUNT(CASE WHEN attendance > 30000 THEN 1 END) AS games_above_30000,
+         COUNT(CASE WHEN attendance <= 30000 OR attendance IS NULL THEN 1 END) AS games_below_or_equal_30000,
+         MIN(attendance) AS min_attendance,
+         MAX(attendance) AS max_attendance
+  FROM public.t_2005_milwaukee_brewers_season;
+
+2) Concrete counterexamples (games with attendance ≤ 30,000)
+- Partial list of rows returned (date, opponent, attendance):
+  - September 6 vs Reds: 13,351
+  - September 29 vs Reds: 13,173
+  - September 2 vs Padres: 18,231
+  - September 11 vs Astros: 17,392
+  - September 13 vs Diamondbacks: 23,708
+  - September 23 vs Cardinals: 22,472
+  - September 27 vs Reds: 28,031
+  - September 30 vs Pirates: 20,922
+  (19 games total at or below 30,000 in the dataset.)
+- Executed SQL:
+  SELECT date, opponent, attendance
+  FROM public.t_2005_milwaukee_brewers_season
+  WHERE attendance <= 30000 OR attendance IS NULL;
+
+Conclusion:
+- The claim is inaccurate. The dataset contains numerous 2005 Milwaukee Brewers games with attendance at or below 30,000, so it is not true that every game exceeded 30,000 attendees.
+
+Assumptions and notes:
+- The table public.t_2005_milwaukee_brewers_season is treated as authoritative for 2005 Brewers game-by-game attendance. The available rows appear to cover (at least) September games; regardless of scope, a single counterexample (of which there are many) falsifies the universal claim.
+
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

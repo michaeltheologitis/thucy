@@ -1,0 +1,52 @@
+
+<userQuery>
+<query>
+at punt road oval , melbourne be richmond 's away team opponent
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “At Punt Road Oval, Melbourne was Richmond’s away-team opponent.”
+
+Evidence from the available data (TabFact, public.t_1943_vfl_season):
+
+1) Identify how the venue appears in the data
+- SQL:
+SELECT DISTINCT venue FROM public.t_1943_vfl_season WHERE venue ILIKE '%punt road%';
+- Result:
+  - punt road oval
+
+2) Retrieve the full record(s) for matches at Punt Road Oval
+- SQL:
+SELECT * FROM public.t_1943_vfl_season WHERE TRIM(LOWER(venue)) = 'punt road oval';
+- Result (one row):
+  - date: 21 august 1943
+  - home team: richmond
+  - home team score: 15.19 (109)
+  - away team: melbourne
+  - away team score: 12.13 (85)
+  - venue: punt road oval
+  - crowd: 9000
+
+3) Check if Richmond was ever the away team at Punt Road Oval (to rule out misinterpretation)
+- SQL:
+SELECT COUNT(*) AS match_count
+FROM public.t_1943_vfl_season
+WHERE trim(lower("venue")) = 'punt road oval'
+  AND trim(lower("away team")) = 'richmond';
+- Result:
+  - match_count = 0
+
+Conclusion:
+- The dataset records one match at Punt Road Oval in the 1943 VFL season: Richmond (home) vs Melbourne (away). Thus, at Punt Road Oval, the away team opponent facing Richmond was Melbourne. This supports the interpreted claim.
+
+Assumptions:
+- The claim is interpreted as: “At Punt Road Oval, the away team opponent of Richmond was Melbourne.”
+- Matching for venue/team names was done case-insensitively with trimmed whitespace.
+- Evidence is limited to the 1943 VFL season table available in the data source.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

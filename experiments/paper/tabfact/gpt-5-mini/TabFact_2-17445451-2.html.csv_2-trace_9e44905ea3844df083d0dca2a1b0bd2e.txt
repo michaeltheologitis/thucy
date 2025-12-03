@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+the ufc 20 eveny end with a method of decision (unanimus)
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of approach
+- Discovered available data sources and inspected the schema to locate UFC-related event/fight results.
+- Queried the data for any fights logged as taking place at “UFC 20” and examined their methods of victory.
+
+Data source discovery
+- Tool: discover_data_sources
+- Result: One accessible PostgreSQL database (TabFact/postgres_tabfact23) with a public schema.
+
+Schema inspection
+- Tool: schema_query
+- Result: One table relevant to fight results was found:
+  - public.fabiano_iha (columns: res, record, opponent, method, event, round, time)
+  - This table stores fight results for the fighter Fabiano Iha, including event name and method.
+
+Evidence query and results
+- Tool: nl_query_traceable
+- Executed SQL:
+  SELECT opponent, method, CASE WHEN LOWER(method) LIKE '%unanimous%' THEN true ELSE false END AS unanimous, event, res, round, time
+  FROM public.fabiano_iha
+  WHERE event ILIKE '%UFC 20%';
+
+- Returned row:
+  - opponent: laverne clark
+  - method: tko (cut)
+  - unanimous: false
+  - event: ufc 20
+  - res: loss
+  - round: 1
+  - time: 1:31
+
+Assessment
+- The available dataset contains at least one fight at UFC 20: Fabiano Iha vs. LaVerne Clark. That bout ended by TKO (cut), not by decision—let alone a unanimous decision.
+- Therefore, any reading of the claim that implies UFC 20’s outcomes (in whole or in part) were by unanimous decision is contradicted by the data we have: at least one UFC 20 bout clearly was not a unanimous decision.
+- Limitation: The dataset only includes the fight history for Fabiano Iha, not all UFC 20 bouts. We cannot directly verify the outcome of the event’s final/main event from this dataset alone.
+
+Conclusion
+- Based on the evidence available in the connected database, the claim that “the UFC 20 event ended with a method of decision (unanimous)” is not supported; our data shows a UFC 20 fight that ended by TKO, not a unanimous decision.
+
+Assumptions and notes
+- Interpreted “eveny” as “event” and “unanimus” as “unanimous.”
+- Interpreted the claim to suggest the event outcome(s) were unanimous decisions; our verification is constrained to the accessible data, which includes at least one UFC 20 bout ending by TKO.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

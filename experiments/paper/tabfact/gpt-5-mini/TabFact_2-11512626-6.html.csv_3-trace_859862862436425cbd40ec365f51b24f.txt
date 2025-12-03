@@ -1,0 +1,47 @@
+
+<userQuery>
+<query>
+when the score be 10 - 4 , the colorado rockies' record go to 68 - 70 in a game against the athletics
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim being checked: “when the score be 10 - 4, the Colorado Rockies' record go to 68 - 70 in a game against the Athletics.”
+
+Data sources explored
+- Database: TabFact
+- Table: public.t_1997_colorado_rockies_season (columns: date text, opponent text, score text, loss text, attendance bigint, record text)
+
+Method
+- Identify all 1997 Colorado Rockies games against the Athletics and check for any game with a score of 10-4, then read the postgame record from the record column.
+
+Evidence
+1) Targeted search for an Athletics game with a normalized score of 10-4
+- Executed SQL:
+SELECT date, opponent, score, record,
+       regexp_replace(regexp_replace(score, E'–|—', '-', 'g'), E'\s+', '', 'g') as normalized_score
+FROM public.t_1997_colorado_rockies_season
+WHERE opponent ILIKE '%Athletics%'
+  AND regexp_replace(regexp_replace(score, E'–|—', '-', 'g'), E'\s+', '', 'g') = '10-4';
+- Result row:
+  {"date":"august 31","opponent":"athletics","score":"10 - 4","record":"68 - 70","normalized_score":"10-4"}
+
+2) Context: list all games vs. the Athletics
+- Executed SQL:
+SELECT date, opponent, score, record FROM public.t_1997_colorado_rockies_season WHERE opponent ILIKE '%Athletics%' ORDER BY date;
+- Results:
+  - august 30 — 4 - 3 — 67 - 70
+  - august 31 — 10 - 4 — 68 - 70
+
+Conclusion
+- The data shows that on August 31 (1997), the Rockies played the Athletics, the final score was 10 - 4, and the Rockies’ postgame record became 68 - 70. This directly supports the claim.
+
+Assumptions
+- Opponent matching used case-insensitive substring (ILIKE '%Athletics%').
+- Score normalization treated hyphen/en-dash/em-dash equivalently and ignored spaces to match “10 - 4” to “10-4”.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

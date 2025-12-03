@@ -1,0 +1,71 @@
+
+<userQuery>
+<query>
+4 of the competition out of 10 be world wide championship
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “4 of the competitions out of 10 are worldwide championships.”
+
+Data source discovery
+- Available database: TabFact
+- Schema: public
+- Table identified: public.luk_melich (columns: year, competition, venue, position, notes)
+
+Schema context (from inspection)
+- public.luk_melich columns: year (bigint), competition (text), venue (text), position (text), notes (text)
+
+Evidence and executed SQL
+1) Determine total number of competitions (rows)
+- SQL:
+  SELECT COUNT(*) AS total_rows FROM public.luk_melich;
+- Result:
+  total_rows = 10
+
+2) See how many times each competition appears
+- SQL:
+  SELECT competition, COUNT(*) AS cnt
+  FROM public.luk_melich
+  GROUP BY competition
+  ORDER BY cnt DESC, competition;
+- Results (competition — count):
+  - world championships — 3
+  - olympic games — 2
+  - european championships — 1
+  - european junior championships — 1
+  - european u23 championships — 1
+  - universiade — 1
+  - world junior championships — 1
+
+3) Count competitions that are world-level championships (strings containing both “world” and “championship”)
+- SQL (total matching):
+  SELECT count(*) AS total_world_championship_rows
+  FROM public.luk_melich
+  WHERE competition ILIKE '%world%championship%';
+- Result:
+  total_world_championship_rows = 4
+
+- SQL (breakdown of matching values):
+  SELECT competition, count(*) AS cnt
+  FROM public.luk_melich
+  WHERE competition ILIKE '%world%championship%'
+  GROUP BY competition
+  ORDER BY cnt DESC, competition;
+- Results:
+  - world championships — 3
+  - world junior championships — 1
+
+Conclusion
+- There are 10 total competition entries.
+- Of these, 4 entries are world-level championships (3 “world championships” + 1 “world junior championships”).
+- Therefore, the claim that 4 of the competitions out of 10 are worldwide championships is supported by the data.
+
+Assumptions
+- “Worldwide championship” is interpreted as any competition whose name includes both the words “world” and “championship,” which encompasses both senior and junior world championships.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,75 @@
+
+<userQuery>
+<query>
+in the 2005 milwaukee brewer season be attend by more than 30000 crowd for every game
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim being checked: "In the 2005 Milwaukee Brewers season, every game was attended by more than 30,000 people."
+
+Answer: No. The data shows multiple games with attendance at or below 30,000.
+
+Data source discovery
+- Connected database: TabFact (postgres_tabfact17)
+- Relevant table identified: public.t_2005_milwaukee_brewers_season
+  - Columns: date (text), opponent (text), score (text), loss (text), attendance (bigint), record (text)
+
+Evidence and executed SQL
+1) Total number of games in the table
+SQL:
+SELECT COUNT(*) AS total_games FROM public.t_2005_milwaukee_brewers_season;
+Result: total_games = 27
+
+2) Number of games with attendance > 30,000
+SQL:
+SELECT COUNT(*) AS games_gt_30000 FROM public.t_2005_milwaukee_brewers_season WHERE attendance > 30000;
+Result: games_gt_30000 = 8
+
+3) Minimum and maximum attendance observed
+SQL:
+SELECT MIN(attendance) AS min_attendance, MAX(attendance) AS max_attendance FROM public.t_2005_milwaukee_brewers_season;
+Result: min_attendance = 13173, max_attendance = 37756
+
+4) List of all games where attendance <= 30,000
+SQL:
+SELECT date, opponent, attendance FROM public.t_2005_milwaukee_brewers_season WHERE attendance <= 30000 ORDER BY attendance ASC;
+Results (date, opponent, attendance):
+- september 29, reds, 13173
+- september 6, reds, 13351
+- september 26, reds, 14412
+- september 7, reds, 15886
+- september 5, reds, 16144
+- september 11, astros, 17392
+- september 9, astros, 18130
+- september 2, padres, 18231
+- september 4, padres, 20042
+- september 25, cardinals, 20150
+- september 15, diamondbacks, 20741
+- september 30, pirates, 20922
+- september 28, reds, 21181
+- september 23, cardinals, 22472
+- september 13, diamondbacks, 23708
+- september 14, diamondbacks, 23793
+- september 10, astros, 24437
+- september 1, padres, 24785
+- september 27, reds, 28031
+
+5) Direct check: Did every game exceed 30,000?
+SQL:
+SELECT CASE WHEN COUNT(*) = SUM(CASE WHEN attendance > 30000 THEN 1 ELSE 0 END) THEN TRUE ELSE FALSE END AS all_games_gt_30000 FROM public.t_2005_milwaukee_brewers_season;
+Result: all_games_gt_30000 = false
+
+Conclusion based on evidence
+- Of the 27 games in the dataset, only 8 had attendance greater than 30,000; 19 did not.
+- Therefore, the claim that every 2005 Milwaukee Brewers game exceeded 30,000 in attendance is contradicted by the data.
+
+Assumptions
+- “More than 30,000” is interpreted as strictly greater than 30,000 (> 30000).
+- The table public.t_2005_milwaukee_brewers_season is taken as authoritative for the portion of the 2005 Milwaukee Brewers season it covers. While it appears to contain a subset of games (dates shown are in September), the presence of any games at or below 30,000 is sufficient to falsify the universal claim (“every game”).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+on 2 may 1999 , the surface be hard
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The statement asserts that on 2 May 1999, the recorded playing surface was Hard.
+
+Data source discovery
+- We first enumerated available schemas and tables to ground the verification in the actual database contents.
+  SQL executed:
+  1) List schemas
+  SELECT schema_name FROM information_schema.schemata;
+  2) List base tables
+  SELECT table_name FROM information_schema.tables WHERE table_type='BASE TABLE';
+
+  Result (excerpt):
+  - Schemas include: public
+  - Tables include: leanne_baker (among system tables)
+
+Table structure confirmation
+- We inspected the structure of public.leanne_baker to understand available columns.
+  SQL executed:
+  SELECT column_name, data_type, is_nullable, character_maximum_length, numeric_precision, numeric_scale
+  FROM information_schema.columns
+  WHERE table_schema = 'public'
+  AND table_name = 'leanne_baker';
+
+  Result (columns): outcome (text), date (text), location (text), surface (text), opponent in final (text), score (text)
+
+Direct verification of the date and surface
+- We queried the specific date to see the recorded surface.
+  SQL executed:
+  SELECT date, location, surface, outcome, "opponent in final", score
+  FROM public.leanne_baker
+  WHERE date ILIKE '2 May 1999';
+
+  Result:
+  - Date: 2 may 1999
+  - Location: Coatzacoalcos, Mexico
+  - Surface: Hard
+  - Outcome: Winner
+  - Opponent in Final: Candice Jairala
+  - Score: 3 - 6, 6 - 3, 7 - 5
+
+Conclusion
+- The record for 2 May 1999 in the authoritative dataset shows Surface = Hard. This directly supports the claim.
+
+Assumptions
+- The terse claim is interpreted as referring to the surface field recorded in the public.leanne_baker dataset for the event on 2 May 1999.
+- No broader context (e.g., other sports or events on that date) is implied beyond the data available in this database.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,64 @@
+
+<userQuery>
+<query>
+the furthest olga govortsova have ever advance in a grand slam tournament be the third round
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the furthest olga govortsova have ever advance in a grand slam tournament be the third round.”
+
+Data discovery
+- Available source: a PostgreSQL database with schema public and table public.olga_govortsova.
+
+Schema inspection (evidence)
+- Purpose: Identify columns to understand available years and fields.
+- SQL executed: SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'olga_govortsova';
+- Result (abridged): Columns: tournament (text), 2007 (text), 2008 (text), 2009 (text), 2010 (text), 2011 (text).
+
+Raw data review (evidence)
+- Purpose: See the actual tournament results recorded.
+- SQL executed: SELECT * FROM public.olga_govortsova;
+- Relevant Grand Slam rows observed:
+  - australian open: 2008–2011 results = 1r, 1r, 1r, 1r (2007 marked as a)
+  - french open: 2008–2011 results = 3r, 3r, 2r, 2r (2007 marked as a)
+  - wimbledon: 2007–2011 results = 2r, 1r, 2r, 1r, 1r
+  - us open: 2007–2011 results = 2r, 2r, 1r, 1r, 1r
+
+Aggregation of Grand Slam result codes (evidence)
+- Purpose: Determine the maximum round reached across Grand Slams in the available years.
+- SQL executed: SELECT DISTINCT "2007" AS result_code FROM olga_govortsova WHERE tournament IN ('australian open', 'french open', 'wimbledon', 'us open')
+UNION 
+SELECT DISTINCT "2008" FROM olga_govortsova WHERE tournament IN ('australian open', 'french open', 'wimbledon', 'us open')
+UNION 
+SELECT DISTINCT "2009" FROM olga_govortsova WHERE tournament IN ('australian open', 'french open', 'wimbledon', 'us open')
+UNION 
+SELECT DISTINCT "2010" FROM olga_govortsova WHERE tournament IN ('australian open', 'french open', 'wimbledon', 'us open')
+UNION 
+SELECT DISTINCT "2011" FROM olga_govortsova WHERE tournament IN ('australian open', 'french open', 'wimbledon', 'us open');
+- Result: {1r, 2r, 3r, a}. No values beyond 3r (e.g., 4r, qf, sf, f, w) are present in the dataset for 2007–2011.
+
+Specific confirmation of 3rd-round occurrences (evidence)
+- Purpose: Identify when/where she reached the third round at Grand Slams.
+- SQL executed: SELECT tournament, '2007' AS year, "2007" AS result FROM olga_govortsova WHERE "2007" = '3r' AND tournament IN ('australian open', 'french open', 'wimbledon', 'us open') 
+UNION ALL 
+SELECT tournament, '2008' AS year, "2008" AS result FROM olga_govortsova WHERE "2008" = '3r' AND tournament IN ('australian open', 'french open', 'wimbledon', 'us open') 
+UNION ALL 
+SELECT tournament, '2009' AS year, "2009" AS result FROM olga_govortsova WHERE "2009" = '3r' AND tournament IN ('australian open', 'french open', 'wimbledon', 'us open') 
+UNION ALL 
+SELECT tournament, '2010' AS year, "2010" AS result FROM olga_govortsova WHERE "2010" = '3r' AND tournament IN ('australian open', 'french open', 'wimbledon', 'us open') 
+UNION ALL 
+SELECT tournament, '2011' AS year, "2011" AS result FROM olga_govortsova WHERE "2011" = '3r' AND tournament IN ('australian open', 'french open', 'wimbledon', 'us open');
+- Result: French Open 2008 (3r), French Open 2009 (3r).
+
+Conclusion
+- Based on the available data (years 2007–2011), Olga Govortsova’s deepest run at a Grand Slam is the Third Round (3r), achieved at the French Open in 2008 and 2009. The dataset contains no evidence of a deeper run (e.g., 4r or beyond) within its coverage.
+
+Assumptions and limitations
+- The accessible dataset covers 2007–2011. The claim uses “ever,” which could include years outside this range. My conclusion is therefore limited to the years present in the data. No additional data sources were available to assess later years of her career.
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

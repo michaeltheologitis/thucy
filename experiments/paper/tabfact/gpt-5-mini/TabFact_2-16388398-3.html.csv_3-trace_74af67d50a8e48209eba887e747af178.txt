@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+the away team score 17.5 before a crowd of 12239 on sunday , 30 january
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- I explored the available TabFact PostgreSQL data source and inspected the public schema, which contains a table relevant to AFL pre-season matches: public.t_2000_ansett_australia_cup. This table includes columns for home/away teams, scores, ground, crowd, and date.
+- I queried this table to verify whether, on “sunday , 30 january” with a crowd of 12,239, the away team scored 17.5.
+
+Findings vs Claim
+- Date and crowd: A match exists on “sunday , 30 january” with crowd = 12239.
+- Score attribution: In that match, the home team scored 17.5 (107), while the away team scored 19.11 (125). Therefore, the statement that the away team scored 17.5 is incorrect.
+
+Executed SQL (evidence) and results
+1) Direct test for an exact match on away team score = '17.5', crowd, and date
+SQL:
+SELECT * FROM public.t_2000_ansett_australia_cup
+WHERE "away team score" = '17.5' AND crowd = 12239 AND date ILIKE '%30%' AND date ILIKE '%January%';
+Result: No rows returned.
+
+2) Identify the row for the specified crowd and date to inspect actual scores
+SQL:
+SELECT * FROM public.t_2000_ansett_australia_cup
+WHERE crowd = 12239 AND date ILIKE '%30 January%';
+Result (one row):
+{ "home team": "adelaide", "home team score": "17.5 (107)", "away team": "melbourne", "away team score": "19.11 (125)", "ground": "football park", "crowd": 12239, "date": "sunday , 30 january" }
+
+3) Check if away team score contains '17.5' as a substring (e.g., '17.5 (107)')
+SQL:
+SELECT * FROM public.t_2000_ansett_australia_cup
+WHERE "away team score" ILIKE '%17.5%' AND crowd = 12239 AND date ILIKE '%30 January%';
+Result: No rows returned.
+
+Conclusion
+- The claim is partly inaccurate: while the date and crowd match a real record, the score of 17.5 belongs to the home team (Adelaide), not the away team (Melbourne).
+
+Assumptions
+- Interpreted “sunday , 30 january” as a textual date and matched via case-insensitive substring on the date column.
+- Because scores are stored as text (e.g., "17.5 (107)"), I checked both exact equality and substring presence for '17.5' in the away team score.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

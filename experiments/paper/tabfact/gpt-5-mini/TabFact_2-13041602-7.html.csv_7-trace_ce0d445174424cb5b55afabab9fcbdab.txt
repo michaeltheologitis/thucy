@@ -1,0 +1,105 @@
+
+<userQuery>
+<query>
+there be 10 game in the 2005 milwaukee brewer season where 1 team score no point
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim being checked: “there be 10 game in the 2005 milwaukee brewer season where 1 team score no point.” Interpreted as: the 2005 Milwaukee Brewers season had 10 games in which one team was shut out (scored 0 runs).
+
+Data source discovered
+- PostgreSQL (TabFact) database with a table: public.t_2005_milwaukee_brewers_season (columns: date, opponent, score, loss, attendance, record)
+
+First, understand table coverage
+1) Total rows (games) in the table
+SQL:
+SELECT COUNT(*) AS total_games FROM public.t_2005_milwaukee_brewers_season;
+Result:
+- total_games: 27
+
+2) Distinct dates to see coverage period
+SQL:
+SELECT DISTINCT date FROM public.t_2005_milwaukee_brewers_season ORDER BY date LIMIT 200;
+Result (abbrev.):
+- september 1, september 2, …, through september 30 (various dates in September only)
+
+3) Count of rows per date (ordered by day number) to confirm September-only scope
+SQL:
+SELECT date, COUNT(*) AS count FROM public.t_2005_milwaukee_brewers_season GROUP BY date ORDER BY split_part(date,' ',2)::int;
+Result:
+- One game on each listed September date; table covers September only (27 games total)
+
+Score format verification (needed to parse shutouts)
+4) Inspect score formats
+SQL:
+SELECT DISTINCT score FROM public.t_2005_milwaukee_brewers_season ORDER BY score LIMIT 200;
+Result (examples):
+- "4 - 11", "12 - 2", "0 - 7", "0 - 2", "2 - 0", "1 - 2 (10)", …
+Inference: score is “BrewersScore - OpponentScore”, with optional extra-innings suffix like “(10)” after the opponent score.
+
+Shutout counts (within the available data)
+5) Total shutouts (either team scored 0) in this table
+SQL:
+SELECT
+COUNT(*) AS total_shutouts
+FROM (
+  SELECT
+    CAST(regexp_replace(trim(split_part(score,'-',1)),'[^0-9].*$','') AS INTEGER) AS brewers_score,
+    CAST(regexp_replace(trim(split_part(score,'-',2)),'[^0-9].*$','') AS INTEGER) AS opp_score
+  FROM public.t_2005_milwaukee_brewers_season
+) s
+WHERE brewers_score = 0 OR opp_score = 0;
+Result:
+- total_shutouts: 4
+
+6) Brewers shut out (Brewers scored 0)
+SQL:
+SELECT
+COUNT(*) AS brewers_shutouts_against
+FROM (
+  SELECT
+    CAST(regexp_replace(trim(split_part(score,'-',1)),'[^0-9].*$','') AS INTEGER) AS brewers_score,
+    CAST(regexp_replace(trim(split_part(score,'-',2)),'[^0-9].*$','') AS INTEGER) AS opp_score
+  FROM public.t_2005_milwaukee_brewers_season
+) s
+WHERE brewers_score = 0;
+Result:
+- brewers_shutouts_against: 3
+
+7) Opponent shut out (opponent scored 0)
+SQL:
+SELECT
+COUNT(*) AS opponents_shutouts
+FROM (
+  SELECT
+    CAST(regexp_replace(trim(split_part(score,'-',1)),'[^0-9].*$','') AS INTEGER) AS brewers_score,
+    CAST(regexp_replace(trim(split_part(score,'-',2)),'[^0-9].*$','') AS INTEGER) AS opp_score
+  FROM public.t_2005_milwaukee_brewers_season
+) s
+WHERE opp_score = 0;
+Result:
+- opponents_shutouts: 1
+
+8) List the specific shutout games in this table
+SQL:
+SELECT date, opponent, score FROM public.t_2005_milwaukee_brewers_season WHERE score LIKE '0 - %' OR score LIKE '% - 0' OR score LIKE '% - 0 (%' ORDER BY date;
+Result:
+- september 17 — astros — 0 - 7
+- september 22 — cubs — 0 - 3
+- september 25 — cardinals — 0 - 2
+- september 29 — reds — 2 - 0
+
+Conclusion
+- The available dataset only covers September 2005 (27 games), not the full 2005 season (162 games). Within this September-only data, there are 4 shutout games (3 where Milwaukee was shut out, 1 where Milwaukee shut out the opponent). The claim of “10 games in the 2005 season where one team scored 0” is not supported by the available evidence.
+
+Assumptions
+- The “score” field is formatted as Brewers runs first, opponent runs second; this was corroborated by checking the “loss” pitcher on example rows.
+- Each row represents one game; counting rows yields total games represented in the dataset.
+- The conclusion is strictly based on the accessible table (September-only coverage). Without full-season data in this source, we cannot confirm a full-season total of 10 shutout games; the evidence we do have contradicts 10 for the covered period.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

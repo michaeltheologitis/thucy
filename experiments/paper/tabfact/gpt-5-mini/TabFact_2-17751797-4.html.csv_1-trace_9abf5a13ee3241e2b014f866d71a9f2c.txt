@@ -1,0 +1,47 @@
+
+<userQuery>
+<query>
+the score be 2 - 3 when the away team be liverpool on the date of 30 / 01 / 1991
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim: “the score be 2 - 3 when the away team be liverpool on the date of 30 / 01 / 1991.”
+- Finding: Verified. The 1990–91 FA Cup record shows a match on 30 / 01 / 1991 with away team Liverpool and a final score of 2 - 3.
+
+Data source explored
+- Database: TabFact (public schema)
+- Table: t_1990_91_fa_cup (columns: "tie no", "home team", "score", "away team", "date" — all text)
+
+Evidence and executed SQL
+1) Locate matches where the away team is Liverpool
+SQL:
+SELECT "home team", "away team", "score", "date" FROM public.t_1990_91_fa_cup WHERE "away team" ILIKE '%Liverpool%';
+Result:
+- home team: brighton & hove albion
+- away team: liverpool
+- score: 2 - 3
+- date: 30 / 01 / 1991
+
+2) Explicitly match the date (normalizing spaces) and the away team
+SQL:
+SELECT "home team", "away team", "score", "date" FROM public.t_1990_91_fa_cup WHERE REPLACE("date",' ', '') = '30/01/1991' AND LOWER("away team") = 'liverpool';
+Result:
+- home team: brighton & hove albion
+- away team: liverpool
+- score: 2 - 3
+- date: 30 / 01 / 1991
+
+Conclusion
+- The data confirms that on 30 / 01 / 1991, with Liverpool as the away team, the score was 2 - 3. Therefore, the claim is supported by the records in the t_1990_91_fa_cup table.
+
+Assumptions
+- Date strings in the table include spaces (e.g., "30 / 01 / 1991"), so normalization (removing spaces) was applied for matching.
+- Team name matching was performed case-insensitively (stored as "liverpool").
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

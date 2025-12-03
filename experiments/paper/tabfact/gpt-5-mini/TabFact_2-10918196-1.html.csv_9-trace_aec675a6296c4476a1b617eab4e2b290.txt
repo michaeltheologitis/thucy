@@ -1,0 +1,63 @@
+
+<userQuery>
+<query>
+the new york jet have 992 more crowd attendance in their second game against the new england patriot then from their first game play against them during the 1993 season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the new york jet have 992 more crowd attendance in their second game against the new england patriot then from their first game play against them during the 1993 season.”
+
+Data source discovery:
+- Database: TabFact (public schema)
+- Relevant table: t_1993_new_york_jets_season
+  - Columns: week (bigint), date (text), opponent (text), result (text), game site (text), attendance (bigint)
+
+Evidence gathered:
+1) Identify Jets vs. Patriots games and attendances (ordered by week):
+Executed SQL:
+SELECT week, date, opponent, "game site", attendance
+FROM public.t_1993_new_york_jets_season
+WHERE opponent ILIKE '%Patriots%'
+ORDER BY week;
+
+Result:
+- Week 4 | Date: 1993 - 09 - 26 | Opponent: new england patriots | Game site: the meadowlands | Attendance: 64836
+- Week 13 | Date: 1993 - 11 - 28 | Opponent: new england patriots | Game site: foxboro stadium | Attendance: 42810
+
+2) Compute attendance difference (second minus first):
+Executed SQL:
+WITH pats AS (
+  SELECT week, attendance, ROW_NUMBER() OVER (ORDER BY week) rn
+  FROM public.t_1993_new_york_jets_season
+  WHERE opponent ILIKE '%Patriots%'
+)
+SELECT
+  (SELECT week FROM pats WHERE rn=1) AS first_week,
+  (SELECT attendance FROM pats WHERE rn=1) AS first_attendance,
+  (SELECT week FROM pats WHERE rn=2) AS second_week,
+  (SELECT attendance FROM pats WHERE rn=2) AS second_attendance,
+  ((SELECT attendance FROM pats WHERE rn=2) - (SELECT attendance FROM pats WHERE rn=1)) AS diff;
+
+Result:
+- first_week: 4
+- first_attendance: 64836
+- second_week: 13
+- second_attendance: 42810
+- diff (second - first): -22026
+
+Assessment:
+- The second game’s attendance (42,810) was 22,026 fewer than the first game’s attendance (64,836), not 992 more.
+
+Conclusion: The claim is contradicted by the data.
+
+Assumptions made:
+- “First” vs “second” game refers to chronological order by week in the 1993 season (Week 4 first, Week 13 second).
+- “Crowd attendance” corresponds to the attendance column in the table.
+- Opponent matching used a case-insensitive substring match (opponent ILIKE '%Patriots%').
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

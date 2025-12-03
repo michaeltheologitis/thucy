@@ -1,0 +1,67 @@
+
+<userQuery>
+<query>
+cologne bonn airport saw a 0.1% increase in cargo
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Cologne Bonn Airport saw a 0.1% increase in cargo.”
+
+Summary of finding
+- The available dataset shows Cologne Bonn Airport (CGN/EDDK) recorded a 0.5% change in cargo, not 0.1%. Therefore, the claim is not supported by the data.
+
+Evidence from data (with executed SQL)
+1) Column inspection to ensure correct identifiers
+SQL executed:
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'world_s_busiest_airports_by_cargo_traffic'
+ORDER BY ordinal_position;
+
+Returned columns:
+- rank (bigint)
+- airport (text)
+- code (iata / icao) (text)
+- total cargo (metric tonnes) (bigint)
+- % change (text)
+
+2) Targeted retrieval for Cologne/Bonn and CGN/EDDK
+SQL executed:
+SELECT "airport", "code (iata / icao)" AS code, "rank", "total cargo (metric tonnes)" AS total_cargo, "% change" AS percent_change
+FROM public.world_s_busiest_airports_by_cargo_traffic
+WHERE airport ILIKE '%Cologne%' OR airport ILIKE '%Bonn%' OR "code (iata / icao)" ILIKE '%CGN%' OR "code (iata / icao)" ILIKE '%EDDK%'
+ORDER BY "rank";
+
+Result returned:
+- airport: cologne bonn airport
+- code: cgn / eddk
+- rank: 28
+- total_cargo: 730054
+- percent_change: 0.5%
+
+(Additional retrieval performed earlier reached the same row via a name match; included here for completeness.)
+SQL executed:
+SELECT rank, airport, "code (iata / icao)" AS code, "total cargo (metric tonnes)" AS total_cargo, "% change" AS percent_change
+FROM public.world_s_busiest_airports_by_cargo_traffic
+WHERE airport ILIKE '%Cologne%' OR "code (iata / icao)" = 'CGN';
+
+Returned row:
+- rank: 28
+- airport: cologne bonn airport
+- code: cgn / eddk
+- total_cargo: 730054
+- percent_change: 0.5%
+
+Assessment
+- The dataset indicates a 0.5% change in cargo for Cologne Bonn Airport. The claim of a 0.1% increase is not supported by this data.
+
+Assumptions and scope
+- Timeframe is not specified in the claim. The verification is based on the available “world_s_busiest_airports_by_cargo_traffic” table snapshot in the TabFact public schema, treated as authoritative per instructions.
+- Matching performed case-insensitively on airport name containing “Cologne” or “Bonn” and code containing “CGN” or “EDDK.”
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

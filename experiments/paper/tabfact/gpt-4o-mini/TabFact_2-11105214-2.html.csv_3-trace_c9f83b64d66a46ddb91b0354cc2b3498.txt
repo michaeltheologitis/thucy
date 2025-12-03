@@ -1,0 +1,50 @@
+
+<userQuery>
+<query>
+glasgow govan be 1 the 4 constituency with result as snp gain
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Glasgow Govan is one of the four constituencies with result as ‘SNP gain.’”
+
+Data source explored: A PostgreSQL database with table scottish_parliament_general_election_2007 (public schema), containing constituency-level results and a “result” field indicating outcomes such as gains/holds.
+
+Evidence collected:
+1) Identify all constituencies where result indicates an SNP gain (case-insensitive search for both ‘SNP’ and ‘gain’):
+SQL executed:
+SELECT constituency, result FROM scottish_parliament_general_election_2007 WHERE LOWER(result) LIKE '%snp%' AND LOWER(result) LIKE '%gain%';
+Result:
+- Kilmarnock & Loudoun — SNP gain
+- Dundee West — SNP gain
+- Western Isles — SNP gain
+- Glasgow Govan — SNP gain
+
+2) Count how many constituencies meet this SNP gain criterion:
+SQL executed:
+SELECT COUNT(*) AS total_count FROM scottish_parliament_general_election_2007 WHERE LOWER(result) LIKE '%snp%' AND LOWER(result) LIKE '%gain%';
+Result: 4
+
+3) Confirm Glasgow Govan’s specific result entry:
+SQL executed:
+SELECT * FROM scottish_parliament_general_election_2007 WHERE constituency ILIKE '%Glasgow Govan%';
+Result fields (abridged):
+- Constituency: Glasgow Govan
+- Result: SNP gain
+- Winning Party 2003: Labour
+- SNP's place 2003: 2nd
+- Swing to Gain: 2.92
+
+Conclusion:
+- Glasgow Govan’s result is “SNP gain.”
+- There are exactly 4 constituencies in this dataset with an SNP gain.
+- Therefore, Glasgow Govan is indeed one of the four constituencies with result as SNP gain.
+
+Assumptions made:
+- The claim refers to the Scottish Parliament General Election 2007 data (the available authoritative dataset).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,62 @@
+
+<userQuery>
+<query>
+29 april 2012 have an outcome of winner , where tommy robredo be the opponent in the final
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Objective
+Verify the claim: “29 April 2012 have an outcome of winner, where Tommy Robredo be the opponent in the final.”
+
+Data discovery
+- Available source: PostgreSQL database with a single table in public schema: fabio_fognini (5 rows).
+
+Executed SQL (evidence)
+1) List tables and row counts
+- SQL 1:
+SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';
+- SQL 2:
+SELECT relname AS table_name, n_live_tup AS row_count FROM pg_stat_user_tables WHERE schemaname = 'public';
+Result summary: Found table public.fabio_fognini (row_count ≈ 5).
+
+2) Inspect table columns
+- SQL:
+SELECT column_name, data_type, is_nullable 
+FROM information_schema.columns 
+WHERE table_schema = 'public' AND table_name = 'fabio_fognini';
+Result summary: Columns are outcome (text), date (text), tournament (text), surface (text), "opponent in the final" (text), "score in the final" (text).
+
+3) Check Fabio Fognini’s record on 29 April 2012
+- SQL:
+SELECT outcome, tournament, surface, "opponent in the final", "score in the final" FROM public.fabio_fognini WHERE lower(date) = '29 april 2012';
+Result summary: On April 29, 2012, Fabio Fognini was runner-up at BRD Năstase Țiriac Trophy (clay, Bucharest), opponent in the final: Gilles Simon; score: 4 - 6, 3 - 6.
+
+4) Check for any final vs Tommy Robredo
+- SQL:
+SELECT date, outcome, tournament, "score in the final" AS score 
+FROM public.fabio_fognini 
+WHERE lower("opponent in the final") = 'tommy robredo';
+Result summary: Found 28 July 2013, ATP Vegeta Croatia Open Umag, outcome: Runner - Up; score: 0 - 6, 3 - 6 (opponent Tommy Robredo).
+
+5) Confirm whether 29 April 2012 has outcome = 'Winner'
+- SQL:
+SELECT "opponent in the final", tournament, outcome 
+FROM public.fabio_fognini 
+WHERE lower(date) = '29 april 2012' AND lower(outcome) = 'winner';
+Result summary: No matching records (no “Winner” outcome on that date).
+
+Conclusion
+- The data shows that on 29 April 2012, Fabio Fognini was runner-up, not winner, and his opponent in the final was Gilles Simon, not Tommy Robredo.
+- A final against Tommy Robredo exists on 28 July 2013 (Umag), with outcome runner-up.
+
+Therefore, the claim is contradicted by the data.
+
+Assumptions
+- Given the only available dataset concerns Fabio Fognini, the claim is interpreted as pertaining to Fabio Fognini’s final matches and outcomes.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

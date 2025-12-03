@@ -1,0 +1,80 @@
+
+<userQuery>
+<query>
+only 1 of the viral disease have not be assign to a family
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim tested: "only 1 of the viral disease have not be assign to a family."
+- Finding: Supported by the data in the public.viral_disease table. Exactly one row has family marked as "unassigned". There are no NULL or blank family values.
+
+Data source discovery
+- Discovered a PostgreSQL database with schema public containing table viral_disease.
+- Table columns: family (text), baltimore group (text), envelopment (text), virion shape (text), replication site (text). No keys/constraints.
+
+Step 1: Inspect table structure
+- Tool: Schema inspection
+- Result: Confirmed columns and that family is a text column (nullable allowed), guiding how to check for missing or special values.
+
+Step 2: Get totals and distinct family values
+Executed SQL and results:
+1) SQL: SELECT COUNT(*) AS total_records FROM public.viral_disease;
+   Result: 23
+
+2) SQL: SELECT COUNT(*) AS missing_family FROM public.viral_disease WHERE family IS NULL OR family = '';
+   Result: 0
+
+3) SQL: SELECT family, COUNT(*) AS count FROM public.viral_disease GROUP BY family;
+   Result (family: count):
+   - filoviridae: 1
+   - bunyaviridae: 1
+   - poxviridae: 1
+   - flaviviridae: 1
+   - arenaviridae: 1
+   - papillomaviridae: 1
+   - rhabdoviridae: 1
+   - herpesviridae: 1
+   - retroviridae: 1
+   - caliciviridae: 1
+   - picornaviridae: 1
+   - astroviridae: 1
+   - paramyxoviridae: 1
+   - coronaviridae: 1
+   - togaviridae: 1
+   - hepadnaviridae: 1
+   - orthomyxoviridae: 1
+   - hepeviridae: 1
+   - polyomaviridae: 1
+   - adenoviridae: 1
+   - reoviridae: 1
+   - unassigned: 1
+   - parvoviridae: 1
+
+Interpretation: No NULL/blank family values, but there is exactly one row explicitly labeled "unassigned" in the family column.
+
+Step 3: Verify count of unassigned and inspect the row
+Executed SQL and results:
+1) SQL: SELECT COUNT(*) AS total_unassigned FROM public.viral_disease WHERE LOWER(TRIM(family)) = 'unassigned';
+   Result: 1
+
+2) SQL: SELECT * FROM public.viral_disease WHERE LOWER(TRIM(family)) = 'unassigned';
+   Result row:
+   - Family: unassigned
+   - Baltimore Group: group v
+   - Envelopment: enveloped
+   - Virion Shape: spherical
+   - Replication Site: nucleus
+
+Conclusion
+- The dataset contains exactly one record where the family is marked as "unassigned". Therefore, the claim is supported by the data.
+
+Assumptions
+- "Not assigned to a family" is interpreted as records where family is explicitly labeled 'unassigned' (case-insensitive), in addition to checking for NULL/blank. No other sentinel values (e.g., 'unknown', 'n/a') appear in the dataset.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

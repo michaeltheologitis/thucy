@@ -1,0 +1,57 @@
+
+<userQuery>
+<query>
+in the 1984 - 85 season the boston celtic play 8 game at the boston garden
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “In the 1984–85 season the Boston Celtics played 8 games at the Boston Garden.”
+
+Data sources explored
+- Discovered available data sources:
+  - PostgreSQL database: TabFact (postgres_tabfact32) [public schema]
+- Relevant table identified via schema exploration:
+  - t_1984_85_boston_celtics_season(game bigint, date text, opponent text, score text, location text, record text)
+
+Understanding the data (location values)
+- Purpose: Confirm how venues are represented and whether “boston garden” appears as a location.
+- SQL executed:
+  SELECT DISTINCT location FROM t_1984_85_boston_celtics_season;
+- Result (distinct locations include):
+  - the omni; hartford civic center; brendan byrne arena; boston garden; market square arena; madison square garden; the spectrum
+
+Evidence 1: Count of games at Boston Garden
+- SQL executed:
+  SELECT COUNT(*) AS count FROM t_1984_85_boston_celtics_season WHERE trim(lower(location)) = 'boston garden';
+- Result:
+  - count = 8
+
+Evidence 2: Full list of Boston Garden games
+- SQL executed:
+  SELECT game, date, opponent, score, location, record
+  FROM t_1984_85_boston_celtics_season
+  WHERE lower(location) = 'boston garden'
+  ORDER BY game;
+- Returned rows:
+  - game 34 | date: fri jan 4  | opponent: new york knicks        | score: 105 - 94  | record: 28 - 6  | location: boston garden
+  - game 36 | date: wed jan 9  | opponent: chicago bulls          | score: 111 - 108 | record: 30 - 6  | location: boston garden
+  - game 37 | date: fri jan 11 | opponent: washington bullets     | score: 103 - 101 | record: 31 - 6  | location: boston garden
+  - game 39 | date: wed jan 16 | opponent: los angeles lakers     | score: 104 - 102 | record: 33 - 6  | location: boston garden
+  - game 41 | date: sun jan 20 | opponent: philadelphia 76ers     | score: 113 - 97  | record: 34 - 7  | location: boston garden
+  - game 42 | date: wed jan 23 | opponent: seattle supersonics    | score: 97 - 107  | record: 34 - 8  | location: boston garden
+  - game 43 | date: fri jan 25 | opponent: indiana pacers         | score: 125 - 94  | record: 35 - 8  | location: boston garden
+  - game 44 | date: sun jan 27 | opponent: portland trail blazers | score: 128 - 127 | record: 36 - 8  | location: boston garden
+
+Conclusion
+- The database shows exactly 8 games with location = “boston garden” for the 1984–85 Boston Celtics season table. This supports the claim.
+
+Assumptions
+- The table t_1984_85_boston_celtics_season represents the 1984–85 Boston Celtics season games and uses the “location” column to denote the venue where each game was played.
+- Case-insensitive matching was applied to the location value (“boston garden”).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

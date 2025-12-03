@@ -1,0 +1,52 @@
+
+<userQuery>
+<query>
+there be 31002 crowd attendance when uab be the opponent
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The user asserts that attendance was 31,002 when UAB (University of Alabama at Birmingham) was the opponent.
+
+Data source exploration
+- Available tables
+  - Evidence SQL: SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';
+  - Result: east_carolina_pirates_football_1990_99 (only table found)
+
+- Table schema for public.east_carolina_pirates_football_1990_99
+  - Evidence SQL: SELECT column_name, data_type, is_nullable, column_default FROM information_schema.columns WHERE table_name = 'east_carolina_pirates_football_1990_99';
+  - Result columns: date (text), opponent (text), site (text), result (text), attendance (text)
+  - Evidence SQL: SELECT kcu.column_name, tc.constraint_type FROM information_schema.table_constraints AS tc JOIN information_schema.key_column_usage AS kcu ON tc.constraint_name = kcu.constraint_name WHERE tc.table_name = 'east_carolina_pirates_football_1990_99';
+  - Result: No keys/constraints found
+
+Verification queries and results
+1) Find all games vs UAB (including alias Alabama-Birmingham)
+- Evidence SQL: SELECT date, opponent, site, result, attendance FROM public.east_carolina_pirates_football_1990_99 WHERE opponent ILIKE 'UAB' OR opponent ILIKE 'Alabama-Birmingham';
+- Result:
+  - Date: October 10
+  - Opponent: UAB
+  - Site: Dowdy - Ficklen Stadium, Greenville, NC
+  - Result: W 26 - 7
+  - Attendance: 31,002
+
+2) Independently verify attendance value equals 31,002
+- Evidence SQL: SELECT date, opponent, site, result, attendance FROM public.east_carolina_pirates_football_1990_99 WHERE REPLACE(attendance, ',', '')::integer = 31002;
+- Result (matches the above row):
+  - Date: October 10
+  - Opponent: UAB
+  - Site: Dowdy - Ficklen Stadium, Greenville, NC
+  - Result: W 26 - 7
+  - Attendance: 31,002
+
+Conclusion
+- The dataset shows that when East Carolina played UAB (home game at Dowdy-Ficklen Stadium), the recorded attendance was 31,002. This directly supports the claim.
+
+Assumptions
+- Interpreted the claim within the scope of the available dataset (East Carolina Pirates football, 1990s). The year is not specified in the table (date column holds month/day text), but the opponent and attendance match precisely.
+
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

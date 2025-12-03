@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+the episode with production code 2arg24 be direct by michael spiller
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “The episode with production code 2ARG24 was directed by Michael Spiller.”
+
+Data sources discovered:
+- PostgreSQL instance (postgres_tabfact17), public schema, containing a TV metadata table: modern_family_season_2 (with columns including title, directed by, production code, etc.).
+
+Evidence and queries:
+1) Locate the episode by production code (case-insensitive contains match used initially to find any row containing 2ARG24):
+SQL:
+SELECT "title", "no in season", "production code", "directed by" 
+FROM public.modern_family_season_2
+WHERE "production code" ILIKE '%2ARG24%';
+Result:
+- title: see you next fall; no in season: 23; production code: 2arg24; directed by: steven levitan
+
+2) Exact match verification (case-insensitive, trimmed):
+SQL:
+SELECT "title", "no in season", "production code", "directed by", "original air date"
+FROM public.modern_family_season_2
+WHERE LOWER(TRIM("production code")) = LOWER(TRIM('2arg24'));
+Result:
+- title: see you next fall; no in season: 23; production code: 2arg24; directed by: steven levitan; original air date: may 18 , 2011
+
+3) Context listing (production codes vs directors across Season 2):
+SQL:
+SELECT "no in season", title, "production code", "directed by"
+FROM public.modern_family_season_2
+ORDER BY "production code" ASC;
+Excerpt of relevant row:
+- no in season: 23; title: see you next fall; production code: 2arg24; directed by: steven levitan
+
+Conclusion:
+- The episode with production code 2ARG24 is “See You Next Fall” (Season 2, Episode 23) and was directed by Steven Levitan, not Michael Spiller.
+
+Assumptions made:
+- The user intended the claim to be about Modern Family production code “2ARG24,” as exposed by the available dataset, and meant “was directed by Michael Spiller.”
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,42 @@
+
+<userQuery>
+<query>
+the collingwood v melbourne game have the largest crowd size
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the collingwood v melbourne game have the largest crowd size.”
+
+Scope and data source grounding:
+- Available data source discovered: PostgreSQL instance “TabFact” (postgres_tabfact2), schema public.
+- Relevant table: public.t_1972_vfl_season with columns: "home team" (text), "home team score" (text), "away team" (text), "away team score" (text), "venue" (text), "crowd" (bigint), "date" (text).
+
+Evidence from data:
+1) Find the maximum recorded crowd in the dataset
+- Executed SQL:
+  SELECT MAX(crowd) AS max_crowd FROM public.t_1972_vfl_season;
+- Result:
+  max_crowd = 30883
+
+2) List the match(es) with that maximum crowd
+- Executed SQL:
+  SELECT "home team", "away team", date, venue, crowd
+  FROM public.t_1972_vfl_season
+  WHERE crowd = 30883
+  ORDER BY date, venue, "home team", "away team";
+- Result:
+  home team: collingwood; away team: melbourne; date: 15 july 1972; venue: vfl park; crowd: 30883
+
+Conclusion:
+- Within the available dataset (1972 VFL season), the maximum crowd recorded is 30,883, and the match with this crowd is Collingwood vs Melbourne on 15 July 1972 at VFL Park. Therefore, the claim is supported by the data.
+
+Assumptions made:
+- Interpreted “the collingwood v melbourne game” to mean within the scope of the available dataset (public.t_1972_vfl_season). If the claim intended a broader scope (e.g., all seasons or AFL history), that is beyond the accessible data. 
+- Considered exact equality on the crowd value to identify matches with the largest crowd; no ties were present in the returned data.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+there be more than 2 zakspeed chassis make in the year 1987
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary conclusion
+- The data shows exactly two Zakspeed chassis associated with the year 1987 ("zakspeed 861" and "zakspeed 871"). Therefore, the claim that more than two Zakspeed chassis were made in 1987 is not supported.
+
+Data source discovery
+- Available source: PostgreSQL database, schema: public, table: zakspeed.
+
+Schema inspection
+- Columns in public.zakspeed:
+  - year (bigint, not null): year of production or racing
+  - chassis (text, not null): chassis model(s)
+  - engine (s) (text, not null)
+  - tyres (text, not null)
+  - points (bigint, not null)
+- No primary/foreign keys.
+
+Evidence and executed SQL
+1) Distinct chassis entries for 1987
+SQL:
+SELECT COUNT(DISTINCT chassis) AS distinct_chassis_count FROM public.zakspeed WHERE year = 1987;
+Result: 1
+
+2) Distinct chassis string recorded for 1987
+SQL:
+SELECT DISTINCT chassis FROM public.zakspeed WHERE year = 1987;
+Result: zakspeed 861 zakspeed 871
+
+3) Counting occurrences of the token "zakspeed" within the chassis field for 1987 (to estimate number of chassis listed)
+SQL:
+SELECT chassis, (LENGTH(chassis) - LENGTH(REPLACE(chassis, 'zakspeed', ''))) / LENGTH('zakspeed') AS occurrence_count 
+FROM public.zakspeed 
+WHERE year = 1987;
+Result: occurrence_count = 2 for chassis = "zakspeed 861 zakspeed 871"
+
+4) Explicit extraction of each chassis token of the form "zakspeed <number>" for 1987
+SQL:
+SELECT unnest(regexp_matches(lower(chassis), 'zakspeed\s*\d+', 'g')) AS token FROM public.zakspeed WHERE year = 1987;
+Results:
+- zakspeed 861
+- zakspeed 871
+
+5) Count of extracted tokens
+SQL:
+SELECT COUNT(*) FROM (SELECT unnest(regexp_matches(lower(chassis), 'zakspeed\s*\d+', 'g')) AS token FROM public.zakspeed WHERE year = 1987) t;
+Result: 2
+
+Interpretation
+- Although the table stores both 1987 chassis in a single text field for that year, tokenization clearly shows two chassis: 861 and 871. This is not more than two.
+
+Assumptions
+- "Chassis made in 1987" is interpreted as the number of distinct chassis models associated with the year = 1987 in the zakspeed.chassis column.
+- Each token of the pattern "zakspeed <number>" in the chassis field represents a distinct chassis model.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

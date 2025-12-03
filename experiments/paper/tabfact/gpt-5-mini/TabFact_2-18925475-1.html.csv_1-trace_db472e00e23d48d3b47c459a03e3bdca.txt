@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+when the computer have the feature of vlan setting for intel amt network interface it do not have amt 3.0
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of the claim
+- Interpreted claim: If a computer has the feature “VLAN setting for Intel AMT network interface,” then it does not have Intel AMT 3.0 (i.e., AMT 3.0 does not support VLAN settings for the AMT NIC).
+
+Data source discovery
+- Connected sources: One PostgreSQL database (TabFact interface), schema: public.
+- Relevant table identified: public.intel_amt_versions — a feature/version matrix for Intel AMT.
+
+Schema context (relevant columns)
+- feature (text)
+- amt 3.0 (desktop) (text)
+- Other AMT version columns indicating support status (text values like yes/no).
+
+Evidence gathered (with executed SQL)
+1) Query to locate VLAN-related feature rows and check AMT 3.0 support
+Executed SQL:
+SELECT * FROM public.intel_amt_versions WHERE lower("feature") LIKE '%vlan%' OR lower("amt 1.0 (desktop)") LIKE '%vlan%' OR lower("amt 2.0 / 2.1 (desktop)") LIKE '%vlan%' OR lower("amt 2.5 / 2.6 (mobile)") LIKE '%vlan%' OR lower("amt 3.0 (desktop)") LIKE '%vlan%' OR lower("amt 4.0 (mobile)") LIKE '%vlan%' OR lower("amt 5.0 (desktop)") LIKE '%vlan%' OR lower("6.0 (desktop & mobile)") LIKE '%vlan%' OR lower("7.0 & 8.0 (desktop & mobile)") LIKE '%vlan%';
+
+Result (one matching row):
+- feature: vlan settings for intel amt network interfaces
+- amt 1.0 (desktop): no
+- amt 2.0 / 2.1 (desktop): no
+- amt 2.5 / 2.6 (mobile): no
+- amt 3.0 (desktop): yes
+- amt 4.0 (mobile): no
+- amt 5.0 (desktop): yes
+- 6.0 (desktop & mobile): yes
+- 7.0 & 8.0 (desktop & mobile): yes
+
+Interpretation
+- The feature “vlan settings for intel amt network interfaces” is explicitly marked as supported (yes) in “amt 3.0 (desktop)”.
+- Therefore, the presence of VLAN setting for the Intel AMT NIC does not rule out AMT 3.0; in fact, AMT 3.0 supports it per the data.
+
+Conclusion
+- The claim is contradicted by the data. VLAN settings for Intel AMT network interfaces are supported in AMT 3.0 (desktop).
+
+Assumptions
+- “AMT 3.0” refers to Intel Active Management Technology version 3.0 (desktop column in the table).
+- A “yes”/“no” cell denotes feature support/non-support for that AMT version.
+- The intel_amt_versions table is complete and authoritative for feature support across AMT versions.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

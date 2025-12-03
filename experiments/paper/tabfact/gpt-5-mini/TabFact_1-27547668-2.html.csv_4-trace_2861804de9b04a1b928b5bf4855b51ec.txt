@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+mike clattenburg direct one more episode than steve scaini
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “mike clattenburg direct one more episode than steve scaini.”
+
+Data source discovery
+- Available source: TabFact PostgreSQL database (public schema).
+- Relevant table: public.list_of_republic_of_doyle_episodes (episode list for the TV show “Republic of Doyle”), with a “directed by” column containing director names.
+
+Evidence collected
+1) Count episodes directed by Mike Clattenburg and Steve Scaini
+- SQL executed:
+  SELECT COUNT(*) AS mike_clattenburg_count FROM public.list_of_republic_of_doyle_episodes WHERE "directed by" ILIKE '%mike clattenburg%';
+  Result: {"mike_clattenburg_count": 2}
+
+  SELECT COUNT(*) AS steve_scaini_count FROM public.list_of_republic_of_doyle_episodes WHERE "directed by" ILIKE '%steve scaini%';
+  Result: {"steve_scaini_count": 1}
+
+- Supporting inspection of exact strings in the data:
+  SQL executed:
+  SELECT DISTINCT "directed by" FROM public.list_of_republic_of_doyle_episodes WHERE "directed by" ILIKE '%clattenburg%' ORDER BY "directed by";
+  Result: {"directed by": "mike clattenburg"}
+
+  SELECT DISTINCT "directed by" FROM public.list_of_republic_of_doyle_episodes WHERE "directed by" ILIKE '%scaini%' ORDER BY "directed by";
+  Result: {"directed by": "steve scaini"}
+
+2) List the episode titles for transparency
+- SQL executed:
+  SELECT title FROM public.list_of_republic_of_doyle_episodes WHERE "directed by" ILIKE '%Mike Clattenburg%';
+  Results:
+  - fathers and sons
+  - duchess of george
+
+  SELECT title FROM public.list_of_republic_of_doyle_episodes WHERE "directed by" ILIKE '%Steve Scaini%';
+  Results:
+  - a horse divided
+
+Analysis
+- Within the Republic of Doyle episodes data, Mike Clattenburg directed 2 episodes, while Steve Scaini directed 1 episode. The difference is exactly one episode, matching the claim.
+
+Conclusion
+- The evidence supports the statement in the context of the available dataset.
+
+Assumptions
+- Interpreted the claim within the scope of the available data (Republic of Doyle episode list), using case-insensitive substring matching on the “directed by” field. No broader, cross-series filmography data was available in the connected sources.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

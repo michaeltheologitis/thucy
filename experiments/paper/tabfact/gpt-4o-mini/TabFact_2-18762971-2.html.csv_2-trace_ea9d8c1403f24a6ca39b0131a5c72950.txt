@@ -1,0 +1,42 @@
+
+<userQuery>
+<query>
+in 3 of the game , no goal be score by either side
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “In 3 of the games, no goal was scored by either side.” Interpreted as: there were 3 goalless (0 - 0) matches.
+
+Data source explored:
+- Database schema lists table public.t_2000_01_sheffield_wednesday_f_c_season (Sheffield Wednesday FC, 2000–01 season) with columns: date (text), opponent (text), venue (text), result (text), attendance (bigint).
+
+Evidence 1: Inspect result format
+- Executed SQL:
+  SELECT date, opponent, venue, result, attendance FROM public.t_2000_01_sheffield_wednesday_f_c_season LIMIT 10;
+- Observation: result is in the format "X - Y" (Sheffield Wednesday goals – Opponent goals).
+
+Evidence 2: Count goalless matches (0 - 0)
+- Executed SQL:
+  SELECT COUNT(*) AS match_count FROM public.t_2000_01_sheffield_wednesday_f_c_season WHERE result = '0 - 0';
+- Result: match_count = 3
+
+Evidence 3: List the goalless matches
+- Executed SQL:
+  SELECT date, opponent FROM public.t_2000_01_sheffield_wednesday_f_c_season WHERE result = '0 - 0';
+- Returned rows:
+  - 30 December 2000 — Huddersfield Town
+  - 7 March 2001 — Portsmouth
+  - 6 May 2001 — Crewe Alexandra
+
+Conclusion: The data show exactly 3 matches ended 0 - 0, confirming that in 3 games no goals were scored by either side.
+
+Assumptions:
+- The claim refers to Sheffield Wednesday’s 2000–01 season as represented in the table public.t_2000_01_sheffield_wednesday_f_c_season.
+- “No goal be score by either side” is interpreted as a final score of 0 - 0.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,47 @@
+
+<userQuery>
+<query>
+the new york jet have 992 more crowd attendance in their second game against the miami dolphins then from their first game play against them during the 1993 season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: The New York Jets had 992 more in crowd attendance in their second 1993 game against the Miami Dolphins than in their first.
+
+Evidence from data
+- Data source: postgres_tabfact31 (TabFact), table public.t_1993_new_york_jets_season
+
+1) Identify the two 1993 Jets vs. Dolphins games and their attendance
+Executed SQL:
+SELECT week, date, opponent, "game site", attendance
+FROM public.t_1993_new_york_jets_season
+WHERE opponent ILIKE '%Dolphins%'
+ORDER BY week ASC;
+Results (ordered by week):
+- Week 2 | Date: 1993 - 09 - 12 | Opponent: miami dolphins | Game site: joe robbie stadium | Attendance: 70314
+- Week 10 | Date: 1993 - 11 - 07 | Opponent: miami dolphins | Game site: the meadowlands | Attendance: 71306
+
+2) Compute the attendance difference (second minus first)
+Executed SQL:
+SELECT (array_agg(attendance ORDER BY week))[1] AS first_attendance,
+       (array_agg(attendance ORDER BY week))[2] AS second_attendance,
+       ((array_agg(attendance ORDER BY week))[2] - (array_agg(attendance ORDER BY week))[1]) AS second_minus_first
+FROM public.t_1993_new_york_jets_season
+WHERE opponent ILIKE '%Dolphins%';
+Result:
+- first_attendance: 70314
+- second_attendance: 71306
+- second_minus_first: 992
+
+Conclusion
+- The second game’s attendance (71,306) exceeds the first game’s attendance (70,314) by 992, exactly matching the claim.
+
+Assumptions
+- “First” and “second” games are determined by the chronological order within the 1993 season (ordered by week).
+- Opponent matching uses case-insensitive substring match on 'Dolphins' in the opponent field.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

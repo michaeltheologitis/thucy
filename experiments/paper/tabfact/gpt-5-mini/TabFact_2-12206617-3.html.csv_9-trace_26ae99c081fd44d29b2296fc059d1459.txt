@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+the toronto blue jays lose 1 consecutive game between the 25th and the 28 may 1991
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the toronto blue jays lose 1 consecutive game between the 25th and the 28 may 1991.”
+
+Data source discovery and schema
+- Data source: TabFact (PostgreSQL), schema: public
+- Relevant table: public.t_1991_toronto_blue_jays_season
+  - Columns: date (text), opponent (text), score (text), loss (text = losing pitcher), attendance (bigint), record (text = W-L)
+
+Evidence retrieval
+Executed SQL (pulled all May games and ordered by day number so we can inspect May 25–28):
+
+SELECT date, opponent, score, loss, record
+FROM public.t_1991_toronto_blue_jays_season
+WHERE date ILIKE 'may %'
+ORDER BY CAST(regexp_replace(date, '^may\s*([0-9]{1,2}).*$', '\\1') AS integer);
+
+Relevant output rows from this query (subset around the claimed dates):
+- may 24 | angels    | 3 - 2 | finley (7 - 2)      | 25 - 17
+- may 25 | angels    | 5 - 0 | stottlemyre (5 - 1) | 25 - 18
+- may 26 | angels    | 6 - 2 | wells (5 - 4)       | 25 - 19
+- may 28 | athletics | 8 - 4 | acker (1 - 2)       | 25 - 20
+- (no row for may 27, indicating no game that day)
+
+How the evidence shows wins/losses
+- The “record” column is cumulative W-L after each game. A loss increases the second number by 1.
+- From May 24 to May 25: record changes from 25-17 to 25-18 → loss on May 25.
+- From May 25 to May 26: 25-18 to 25-19 → loss on May 26.
+- From May 26 to May 28: 25-19 to 25-20 → loss on May 28.
+- There is no game on May 27 in the table, so the games played in the range May 25–May 28 are May 25, May 26, and May 28 — all losses. These are consecutive team games (no intervening played game), i.e., a 3-game losing streak within the specified span.
+
+Conclusion
+- The Blue Jays did not “lose 1 consecutive game” between May 25 and May 28, 1991. They lost three consecutive games (May 25, May 26, and May 28), with no game on May 27.
+
+Assumptions
+- Interpreted “consecutive game” as consecutive team games (not strictly consecutive calendar days), which is standard usage in sports streaks.
+- The “loss” column is the losing pitcher (not a win/loss flag). Win/loss outcome is inferred from the change in the cumulative record (W-L).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

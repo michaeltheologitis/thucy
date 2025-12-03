@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+there be more than 2 game that have a score higher than 10 point
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim being checked: "there be more than 2 game that have a score higher than 10 point"
+
+Data sources discovered
+- Using the discovery tool, I found one accessible source: a PostgreSQL instance via the TabFact connector exposing the public schema with a single relevant table: public.t_2008_arizona_diamondbacks_season.
+
+Schema overview
+- Table: public.t_2008_arizona_diamondbacks_season
+  - Columns: date (text), opponent (text), score (text), loss (text), attendance (bigint), record (text)
+  - The score column is text, e.g., "13 - 4" or "3 - 2 (10)"; the extra part like "(10)" denotes innings and should be ignored when extracting run totals.
+
+Step 1 — Confirm dataset coverage (row count)
+- Executed SQL:
+  SELECT COUNT(*) AS row_count FROM public.t_2008_arizona_diamondbacks_season;
+- Result:
+  row_count = 26
+
+Step 2 — Inspect score formatting (sample rows)
+- Executed SQL:
+  SELECT date, opponent, score, loss, attendance, record FROM public.t_2008_arizona_diamondbacks_season LIMIT 20;
+- Sample results show score strings like:
+  - september 21 | rockies | 13 - 4
+  - september 13 | reds | 3 - 2 (10)
+
+Step 3 — Count games where either team’s score exceeds 10
+- Executed SQL (count):
+  SELECT COUNT(*) AS games_with_over_10
+  FROM public.t_2008_arizona_diamondbacks_season
+  WHERE regexp_replace(score, '^\s*(\d+)\s*-\s*(\d+).*$', '\1')::int > 10
+     OR regexp_replace(score, '^\s*(\d+)\s*-\s*(\d+).*$', '\2')::int > 10;
+- Result:
+  games_with_over_10 = 2
+
+- Executed SQL (list those games and parsed runs):
+  SELECT date, opponent, score,
+         regexp_replace(score, '^\s*(\d+)\s*-\s*(\d+).*$', '\1')::int AS run1,
+         regexp_replace(score, '^\s*(\d+)\s*-\s*(\d+).*$', '\2')::int AS run2
+  FROM public.t_2008_arizona_diamondbacks_season
+  WHERE regexp_replace(score, '^\s*(\d+)\s*-\s*(\d+).*$', '\1')::int > 10
+     OR regexp_replace(score, '^\s*(\d+)\s*-\s*(\d+).*$', '\2')::int > 10
+  ORDER BY date;
+- Result rows:
+  - september 21 | rockies | 13 - 4 | run1=13 | run2=4
+  - september 25 | cardinals | 12 - 3 | run1=12 | run2=3
+
+Conclusion
+- The data show exactly 2 games in this table where at least one team scored more than 10. Therefore, the claim that there are more than 2 such games is not supported by the data.
+
+Assumptions and notes
+- Interpretation: I interpreted “a score higher than 10 point” to mean either team’s run total in a game exceeding 10, based on the score string containing two numbers. This is the most neutral interpretation given the wording.
+- Scope: The table contains 26 games (likely a subset of a season). My conclusion is strictly within this dataset.
+- Parsing: I used regex to extract the two run values before any optional extra-innings suffix like “(10)”.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

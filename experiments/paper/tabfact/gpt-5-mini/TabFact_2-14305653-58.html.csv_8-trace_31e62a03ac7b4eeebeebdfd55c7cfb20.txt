@@ -1,0 +1,87 @@
+
+<userQuery>
+<query>
+the yugoslavian national team fail to score only 1 time , drop a world cup qualify match 2:1 against denmark
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the yugoslavian national team fail to score only 1 time , drop a world cup qualify match 2:1 against denmark.”
+
+Data source exploration
+- Available database: TabFact (postgres_tabfact19), schema public.
+- Relevant table: public.yugoslavia_national_football_team_results with columns [date, city, opponent, results, type of game]. This table records match-level results for the Yugoslavia national football team, including World Cup qualifiers (e.g., “1982 wcq”).
+
+Step 1 — Inspect sample data to understand fields
+Executed SQL:
+SELECT date, city, opponent, results, "type of game" FROM public.yugoslavia_national_football_team_results LIMIT 10;
+Result (7 rows present in table):
+1) march 22 | sarajevo | uruguay | 2:1 | friendly
+2) march 30 | belgrade | romania | 2:0 | balkan cup
+3) april 26 | borovo | poland | 2:1 | friendly
+4) august 27 | bucharest , romania | romania | 1:4 | balkan cup
+5) september 10 | luxembourg | luxembourg | 5:0 | 1982 wcq
+6) september 27 | ljubljana | denmark | 2:1 | 1982 wcq
+7) november 15 | torino , italy | italy | 0:2 | 1982 wcq
+
+Interpretation of fields:
+- results appears to be stored as goals_for:goals_against from Yugoslavia’s perspective.
+- “type of game” includes qualifiers such as “1982 wcq”.
+
+Step 2 — Did Yugoslavia fail to score only one time (in this dataset)?
+Executed SQL (robust parse of the results column):
+SELECT COUNT(*) AS zero_goals_count
+FROM public.yugoslavia_national_football_team_results
+WHERE results LIKE '%:%'
+  AND trim(split_part(results, ':', 1)) = '0';
+Result:
+- zero_goals_count = 1
+
+Executed SQL to list the zero-goal match:
+SELECT date, opponent, results, "type of game"
+FROM public.yugoslavia_national_football_team_results
+WHERE results LIKE '%:%'
+  AND trim(split_part(results, ':', 1)) = '0'
+ORDER BY date;
+Returned row:
+- november 15 | italy | 0:2 | 1982 wcq
+
+Finding:
+- In the 7 recorded matches in this table, Yugoslavia failed to score exactly once, in a 1982 World Cup qualifier against Italy (0:2).
+
+Step 3 — Check the Denmark World Cup qualifier result(s)
+Executed SQL to find all Denmark matches:
+SELECT date, city, opponent, results, "type of game" FROM public.yugoslavia_national_football_team_results WHERE opponent ILIKE '%Denmark%';
+Result:
+- september 27 | ljubljana | denmark | 2:1 | 1982 wcq
+
+Executed SQL to test if Yugoslavia ever lost vs Denmark in these records (goals_for < goals_against):
+SELECT date, city, opponent, results, "type of game"
+FROM public.yugoslavia_national_football_team_results
+WHERE opponent ILIKE '%Denmark%'
+  AND CAST(TRIM(SPLIT_PART(results, ':', 1)) AS integer) < CAST(TRIM(SPLIT_PART(results, ':', 2)) AS integer)
+ORDER BY date;
+Result:
+- No rows returned (i.e., no loss to Denmark in these records).
+
+Finding:
+- The only Denmark match in this dataset is a 1982 World Cup qualifier in Ljubljana that Yugoslavia won 2:1. There is no evidence here of Yugoslavia “dropping” (losing) a World Cup qualifier 1–2 to Denmark.
+
+Analysis vs. the claim
+- “fail to score only 1 time”: Supported by the data in this table — there is exactly one match where Yugoslavia’s goals_for = 0 (0:2 vs Italy, 1982 WCQ). Note: this conclusion is limited to the seven matches present in this dataset.
+- “drop a world cup qualify match 2:1 against denmark”: Contradicted by the data — the dataset shows Yugoslavia beat Denmark 2:1 in a 1982 World Cup qualifier; it does not show a 1:2 loss to Denmark.
+
+Conclusion
+- The dataset supports that, within the recorded matches, Yugoslavia failed to score exactly once — a 0:2 loss to Italy in a 1982 WCQ.
+- The dataset contradicts the assertion that Yugoslavia “dropped” a World Cup qualifier 2:1 against Denmark; instead, they won 2:1 against Denmark in the listed 1982 WCQ.
+
+Assumptions and scope notes
+- All conclusions are strictly based on the available table (7 matches). Broader historical claims beyond these rows are outside the scope of this dataset.
+- I interpret “2:1” in the results field as Yugoslavia’s goals first (goals_for:goals_against).
+- I interpret “drop a world cup qualify match” as “lost a World Cup qualifying match.”
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

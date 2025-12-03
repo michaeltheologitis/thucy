@@ -1,0 +1,87 @@
+
+<userQuery>
+<query>
+2 of the project be propose and list during 1993 , but be never complete
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Interpretation of the claim
+- Interpreted as: “Two of the projects were proposed and listed during 1993, but were never completed.” Given the available data source is a table of Superfund sites in Mississippi, I interpret “projects” as Superfund sites, “listed” as National Priorities List (NPL) listing date in the 'listed' column, and “never complete” as the 'construction completed' field not having a completion date (represented by “-”).
+
+Data sources explored
+- Available source: PostgreSQL database with table public.list_of_superfund_sites_in_mississippi (Superfund sites in Mississippi).
+
+Relevant schema (from schema inspection)
+- Columns: cerclis id (text), name (text), county (text), proposed (text), listed (text), construction completed (text), partially deleted (text), deleted (text).
+- The fields relevant to the claim are: proposed (proposal date), listed (NPL listing date), construction completed (construction completion status/date).
+
+Key evidence from the data
+1) What value represents “never completed”?
+- Result: The incomplete status is represented by a dash (“-”) in the construction completed column (6 occurrences).
+- SQL executed:
+  SELECT "construction completed", COUNT(*) AS count
+  FROM public.list_of_superfund_sites_in_mississippi
+  GROUP BY "construction completed";
+- Returned values and counts: 08 / 08 / 1997 (1), 12 / 30 / 1982 (1), - (6), 09 / 17 / 1993 (1)
+
+2) How many sites were proposed in 1993?
+- Distinct proposed values show two entries in 1993: 05 / 10 / 1993 and 06 / 23 / 1993.
+- SQL executed:
+  SELECT proposed, COUNT(*) AS count
+  FROM public.list_of_superfund_sites_in_mississippi
+  GROUP BY proposed
+  ORDER BY count DESC;
+
+3) How many sites were listed in 1993?
+- Result: 0 sites have a listed date containing 1993.
+- SQL executed:
+  SELECT COUNT(*) AS row_count FROM public.list_of_superfund_sites_in_mississippi WHERE listed LIKE '%1993%';
+- Distinct listed values corroborate no 1993 entries (values observed include -, 03 / 07 / 2007, 06 / 10 / 1986, 07 / 22 / 2004, 07 / 27 / 2000, 09 / 13 / 2001, 09 / 21 / 1984, cleanup completed before formal creation of npl).
+- SQL executed for distincts:
+  SELECT DISTINCT listed, COUNT(*) as count
+  FROM public.list_of_superfund_sites_in_mississippi
+  GROUP BY listed
+  ORDER BY listed;
+
+4) Which sites were proposed in 1993 and what are their listing and completion statuses?
+- Result: Two sites (Chemfax, Inc; Potter Co) were proposed in 1993; both have listed = '-' (not listed) and construction completed = '-' (not completed).
+- SQL executed:
+  SELECT name AS site_name, county, proposed, listed, "construction completed"
+  FROM public.list_of_superfund_sites_in_mississippi
+  WHERE proposed LIKE '%1993%';
+
+5) Count of sites proposed in 1993 and never completed
+- Result: 2 sites.
+- SQL executed:
+  SELECT COUNT(*) AS site_count FROM public.list_of_superfund_sites_in_mississippi WHERE proposed LIKE '%1993%' AND "construction completed" = '-';
+- Names check:
+  SELECT name FROM public.list_of_superfund_sites_in_mississippi WHERE proposed LIKE '%1993%' AND "construction completed" = '-';
+  -> Chemfax, Inc; Potter Co
+
+6) Count of sites both proposed and listed in 1993 and never completed
+- Result: 0 sites.
+- SQL executed:
+  SELECT COUNT(*) AS site_count
+  FROM public.list_of_superfund_sites_in_mississippi
+  WHERE proposed LIKE '%1993%'
+    AND listed LIKE '%1993%'
+    AND "construction completed" = '-';
+
+Assessment against the claim
+- “2 of the project … never complete”: Supported for “proposed in 1993” — there are exactly two sites proposed in 1993 and both are not construction-complete.
+- “… be propose and list during 1993 …”: Not supported — the data show zero sites with a listed date in 1993; the two sites proposed in 1993 were not listed at all (listed = '-').
+
+Conclusion
+- The claim is partly inaccurate. It is true that two sites were proposed in 1993 and have never been completed, but it is false that they were listed during 1993 (in fact, they were never listed).
+
+Assumptions made
+- “Project” refers to Superfund sites in Mississippi, the only available dataset.
+- “Listed” refers to the NPL listing date stored in the listed column.
+- “Never complete” is represented by a dash (“-”) in the construction completed field.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

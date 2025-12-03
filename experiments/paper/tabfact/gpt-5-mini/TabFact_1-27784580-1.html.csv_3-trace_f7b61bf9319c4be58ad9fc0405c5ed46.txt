@@ -1,0 +1,109 @@
+
+<userQuery>
+<query>
+fukusyū no puropōzu have 2.2% higher rating than the title with the most recent broadcast date
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “fukusyū no puropōzu have 2.2% higher rating than the title with the most recent broadcast date.”
+
+Summary of findings grounded in data:
+- “fukusyū no puropōzu” rating: 15.6%
+- Most recent broadcast title: “saishūshōjomakuwakare” (broadcast on 2010-06-14) with rating 13.4%
+- Difference in percentage points: 15.6 − 13.4 = 2.2 percentage points
+- Relative percent difference: (15.6 − 13.4) / 13.4 × 100 ≈ 16.42%
+
+Interpretation:
+- If the claim intends “2.2 percentage points higher,” it is correct.
+- If it intends “2.2% higher” in the strict relative sense, it is incorrect (actual ≈16.42% higher).
+
+Executed SQL evidence:
+1) Data exploration (to see formats and available rows)
+SQL:
+SELECT "romanized title", "broadcast date", "ratings" FROM public.tsuki_no_koibito LIMIT 10;
+Results (romanized title | broadcast date | ratings):
+1) omae ga hosii | may 10 , 2010 | 22.4%
+2) arienai kisu | may 17 , 2010 | 19.2%
+3) fukusyū no puropōzu | may 24 , 2010 | 15.6%
+4) konna ni suki dattanda… | may 31 , 2010 | 15.5%
+5) suki to ietara iinoni | june 7 , 2010 | 17.4%
+6) saishūshōjomakuwakare | june 14 , 2010 | 13.4%
+
+2) Retrieve “fukusyū no puropōzu” row with parsed date and numeric rating
+SQL:
+SELECT "romanized title" AS fuku_title,
+       "broadcast date" AS fuku_date_text,
+       to_date("broadcast date", 'FMMonth DD , YYYY') AS fuku_date,
+       regexp_replace(ratings, '%', '', 'g')::numeric AS fuku_rating
+FROM public.tsuki_no_koibito
+WHERE "romanized title" = 'fukusyū no puropōzu';
+Result:
+- fuku_title: fukusyū no puropōzu
+- fuku_date_text: may 24 , 2010
+- fuku_date: 2010-05-24
+- fuku_rating: 15.6
+
+3) Retrieve the most recent broadcast row
+SQL:
+SELECT "romanized title" AS latest_title,
+       "broadcast date" AS latest_date_text,
+       to_date("broadcast date", 'FMMonth DD , YYYY') AS latest_date,
+       regexp_replace(ratings, '%', '', 'g')::numeric AS latest_rating
+FROM public.tsuki_no_koibito
+ORDER BY to_date("broadcast date", 'FMMonth DD , YYYY') DESC
+LIMIT 1;
+Result:
+- latest_title: saishūshōjomakuwakare
+- latest_date_text: june 14 , 2010
+- latest_date: 2010-06-14
+- latest_rating: 13.4
+
+4) Compute point difference and relative percent difference
+SQL:
+WITH f AS (
+  SELECT "romanized title" AS fuku_title,
+         to_date("broadcast date", 'FMMonth DD , YYYY') AS fuku_date,
+         regexp_replace(ratings, '%', '', 'g')::numeric AS fuku_rating
+  FROM public.tsuki_no_koibito
+  WHERE "romanized title" = 'fukusyū no puropōzu'
+), l AS (
+  SELECT "romanized title" AS latest_title,
+         to_date("broadcast date", 'FMMonth DD , YYYY') AS latest_date,
+         regexp_replace(ratings, '%', '', 'g')::numeric AS latest_rating
+  FROM public.tsuki_no_koibito
+  ORDER BY to_date("broadcast date", 'FMMonth DD , YYYY') DESC
+  LIMIT 1
+)
+SELECT f.fuku_title,
+       f.fuku_date,
+       f.fuku_rating,
+       l.latest_title,
+       l.latest_date,
+       l.latest_rating,
+       (f.fuku_rating - l.latest_rating) AS point_diff,
+       ((f.fuku_rating - l.latest_rating) / l.latest_rating * 100) AS percent_diff
+FROM f CROSS JOIN l;
+Result:
+- fuku_title: fukusyū no puropōzu
+- fuku_date: 2010-05-24
+- fuku_rating: 15.6
+- latest_title: saishūshōjomakuwakare
+- latest_date: 2010-06-14
+- latest_rating: 13.4
+- point_diff: 2.2
+- percent_diff: 16.41791044776119403
+
+Conclusion:
+- The numerical difference is exactly 2.2 percentage points. Thus, the claim is supported if “%” was intended as percentage points. Strictly interpreting “% higher” as relative percent, the correct value would be about 16.42% higher, not 2.2%.
+
+Assumptions made:
+- “Higher rating” is commonly expressed in percentage points when ratings themselves are percentages; I evaluated both interpretations.
+- “Most recent broadcast date” refers to the maximum parsed date across all rows; there is a unique latest date (2010-06-14) in this dataset.
+- Matching of the romanized title is exact (case/diacritics preserved) and unique in the dataset.
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

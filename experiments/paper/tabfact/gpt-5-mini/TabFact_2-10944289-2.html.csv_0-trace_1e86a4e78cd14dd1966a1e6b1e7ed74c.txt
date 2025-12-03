@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+the indianapolis colt play the new york giant on september 10 at giant stadium , final score 26 - 21
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the indianapolis colt play the new york giant on september 10 at giant stadium , final score 26 - 21”
+
+Data source exploration:
+- Discovered one available database: TabFact (postgres_tabfact9).
+- Relevant table identified via schema inspection: public.nbc_sunday_night_football_results_2006_present (columns: date, visiting team, final score, host team, stadium).
+
+Evidence collected:
+1) Direct match for the stated matchup, date, stadium, and score
+- Executed SQL:
+  SELECT date, "visiting team", "host team", stadium, "final score"
+  FROM public.nbc_sunday_night_football_results_2006_present
+  WHERE LOWER("visiting team") = 'indianapolis colts'
+    AND LOWER("host team") = 'new york giants'
+    AND date ILIKE '%September 10%';
+- Result:
+  - date: september 10
+  - visiting team: indianapolis colts
+  - host team: new york giants
+  - stadium: giants stadium
+  - final score: 26 - 21
+
+2) Cross-check to ensure no other conflicting September 10 entries involving these teams
+- Executed SQL:
+  SELECT date, "visiting team", "host team", stadium, "final score"
+  FROM public.nbc_sunday_night_football_results_2006_present
+  WHERE (LOWER("visiting team") LIKE '%colts%' OR LOWER("host team") LIKE '%giants%')
+    AND date ILIKE '%September 10%';
+- Result (1 row):
+  - date: september 10
+  - visiting team: indianapolis colts
+  - host team: new york giants
+  - stadium: giants stadium
+  - final score: 26 - 21
+
+Assessment:
+- Teams: Indianapolis Colts vs. New York Giants — matches.
+- Date: September 10 — matches (year not specified in claim; table stores month/day).
+- Stadium: Giants Stadium — matches.
+- Final score: 26 - 21 — matches.
+
+Conclusion: The claim is fully supported by the data in the authoritative table of NBC Sunday Night Football results (2006–present).
+
+Assumptions made:
+- The claim’s singular forms (“colt”, “giant”) refer to the teams (Indianapolis Colts, New York Giants).
+- The claim omits the year; the data source records this as a September 10 game consistent with the 2006 Sunday Night Football opener.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

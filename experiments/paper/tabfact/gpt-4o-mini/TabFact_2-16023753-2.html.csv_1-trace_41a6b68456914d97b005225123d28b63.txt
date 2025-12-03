@@ -1,0 +1,40 @@
+
+<userQuery>
+<query>
+the dolphins' defense record 2 shutout during the season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “The Dolphins’ defense recorded 2 shutouts during the season.” We ground this against the only available dataset: the 1983 Miami Dolphins season (regular season, Weeks 1–16).
+
+Step 1: Identify games where the opponent scored 0 points (i.e., defensive shutouts)
+SQL (list games):
+SELECT week, date, opponent, result FROM public.t_1983_miami_dolphins_season WHERE TRIM(SPLIT_PART(result, '-', 2)) = '0';
+Result rows:
+- Week 1 | September 4, 1983 | Buffalo Bills      | w 12 - 0
+- Week 12 | November 20, 1983 | Baltimore Colts    | w 37 - 0
+
+SQL (count):
+SELECT COUNT(*) FROM public.t_1983_miami_dolphins_season WHERE TRIM(SPLIT_PART(result, '-', 2)) = '0';
+Result: 2
+
+Step 2: Confirm table scope (regular season only)
+- SQL (row count):
+  SELECT COUNT(*) AS total_rows FROM public.t_1983_miami_dolphins_season;
+  Result: 16
+- SQL (min/max week):
+  SELECT MIN(week) AS min_week, MAX(week) AS max_week FROM public.t_1983_miami_dolphins_season;
+  Results: min_week = 1, max_week = 16
+
+Conclusion based on data: The 1983 Miami Dolphins recorded 2 defensive shutouts (Week 1 vs Bills, 12–0; Week 12 vs Baltimore Colts, 37–0).
+
+Assumptions made:
+- “During the season” refers to the 1983 season represented by the available dataset (regular season Weeks 1–16).
+- “Defense recorded a shutout” means the opponent scored 0 points (i.e., the right-hand score in the team-specific result string equals 0).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

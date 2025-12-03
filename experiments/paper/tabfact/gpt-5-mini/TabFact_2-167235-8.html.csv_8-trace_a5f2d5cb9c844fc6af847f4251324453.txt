@@ -1,0 +1,70 @@
+
+<userQuery>
+<query>
+ilir meta be the first person since aleksandër meksi , to be elect as a member of the democratic party of albania political party
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Ilir Meta [will] be the first person since Aleksandër Meksi to be elected as a member of the Democratic Party of Albania.”
+
+Summary conclusion: The data show Ilir Meta is recorded as a Socialist Party of Albania prime minister, not Democratic Party. Moreover, since Aleksandër Meksi, another Democratic Party prime minister (Sali Berisha) served. Therefore, the claim is contradicted by the evidence.
+
+Data source discovery
+- Tool used: discover_data_sources
+- Result: One PostgreSQL database (TabFact) with a table public.list_of_prime_ministers_of_albania, containing columns: name, born - died, term start, term end, political party.
+
+Schema confirmation
+- Tool used: schema_query
+- Output summary: Table public.list_of_prime_ministers_of_albania has columns:
+  - name — text
+  - born - died — text
+  - term start — text
+  - term end — text
+  - political party — text
+
+Evidence 1: Party affiliation of Aleksandër Meksi and Ilir Meta
+- Executed SQL:
+  SELECT name, "political party" FROM public.list_of_prime_ministers_of_albania WHERE name ILIKE '%Meksi%' OR name ILIKE '%Meta%';
+- Result rows:
+  - name: aleksandër meksi, political party: democratic party of albania
+  - name: ilir meta, political party: socialist party of albania
+- Interpretation: Ilir Meta is listed as Socialist Party, not Democratic Party; Aleksandër Meksi is listed as Democratic Party.
+
+Evidence 2: Which prime ministers are from the Democratic Party of Albania
+- Executed SQL (helper to see distinct values):
+  SELECT DISTINCT "political party" FROM public.list_of_prime_ministers_of_albania ORDER BY "political party";
+- Distinct values returned: democratic party of albania; non - party; party of labour of albania; prime ministers 1991 onwards; socialist party of albania
+- Executed SQL (main):
+  SELECT name, "political party" FROM public.list_of_prime_ministers_of_albania WHERE lower("political party") = 'democratic party of albania';
+- Result rows:
+  - name: aleksandër meksi — political party: democratic party of albania
+  - name: sali berisha — political party: democratic party of albania
+- Interpretation: Since Meksi, Sali Berisha (also DP) served as prime minister, so Ilir Meta is not the first DP prime minister since Meksi.
+
+Evidence 3: Full row for Ilir Meta (term and party)
+- Executed SQL:
+  SELECT * FROM public.list_of_prime_ministers_of_albania WHERE name ILIKE '%Ilir Meta%';
+- Result row (all columns):
+  - name: ilir meta; born - died: 1969 -; term start: 29 october 1999; term end: 22 february 2002; political party: socialist party of albania
+- Interpretation: Confirms Ilir Meta’s party as Socialist Party during his premiership.
+
+Evidence 4: Full row for Sali Berisha (DP prime minister after Meksi)
+- Executed SQL:
+  SELECT * FROM public.list_of_prime_ministers_of_albania WHERE name ILIKE '%Sali Berisha%';
+- Result row (all columns):
+  - name: sali berisha; born - died: 1944 -; term start: 11 september 2005; term end: 15 september 2013; political party: democratic party of albania
+- Interpretation: Demonstrates a DP prime minister served after Meksi, contrary to the claim’s implication.
+
+Overall assessment
+- The claim asserts Ilir Meta is (or would be) the first person since Aleksandër Meksi to be elected as a member of the Democratic Party of Albania. The dataset shows Ilir Meta is affiliated with the Socialist Party, not DP. Additionally, Sali Berisha (DP) served as prime minister after Meksi. Therefore, the claim is inaccurate per the available data.
+
+Assumptions made for interpretation
+- Due to ambiguous phrasing, I interpreted “to be elect as a member of the Democratic Party of Albania political party” as referring to being elected prime minister under the Democratic Party banner. Even under broader interpretations (e.g., any elected office), the data still show Ilir Meta is not recorded as a Democratic Party member in this dataset.
+
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

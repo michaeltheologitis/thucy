@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+there be only one year (1983) with a title of kriegspiel in the genre arcade
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “there be only one year (1983) with a title of kriegspiel in the genre arcade.”
+
+Data source discovery
+- Available database: public schema with table public.beyond_software
+- Table columns: title (text), genre (text), c = 64 (text), zx spectrum (text), others (text), year (bigint), format (text)
+
+Evidence and executed SQL
+1) Check for any ‘Kriegspiel’ in genre ‘Arcade’ (case-insensitive)
+- Result: 0 records; no years found.
+- SQL executed:
+  SELECT COUNT(*) AS total_count FROM public.beyond_software WHERE LOWER(title) = 'kriegspiel' AND LOWER(genre) = 'arcade';
+  Result: 0
+
+  SELECT year, COUNT(*) AS count FROM public.beyond_software WHERE LOWER(title) = 'kriegspiel' AND LOWER(genre) = 'arcade' GROUP BY year ORDER BY year;
+  Result: No records
+
+  SELECT COUNT(*) AS record_count, ARRAY_AGG(DISTINCT year) AS distinct_years 
+  FROM public.beyond_software 
+  WHERE LOWER(title) = 'kriegspiel' 
+  AND LOWER(genre) = 'arcade';
+  Result: record_count = 0, distinct_years = NULL
+
+2) Identify any ‘Kriegspiel’ titles regardless of genre to see what exists in the data
+- Result: One record found — title: “kriegspiel”, genre: “strategy”, year: 1983.
+- SQL executed:
+  SELECT DISTINCT title, genre, year 
+  FROM public.beyond_software 
+  WHERE title ILIKE '%krieg%';
+  Result:
+  - title = kriegspiel, genre = strategy, year = 1983
+
+3) Confirm distinct years for titles containing ‘kriegspiel’
+- Result: Only 1983 present; 1 record total.
+- SQL executed:
+  SELECT DISTINCT year FROM public.beyond_software WHERE title ILIKE '%kriegspiel%';
+  Result: 1983
+
+  SELECT title, genre, year FROM public.beyond_software WHERE title ILIKE '%kriegspiel%';
+  Result: title = kriegspiel, genre = strategy, year = 1983
+
+Conclusion
+- The database contains an entry for “kriegspiel” in year 1983, but its genre is “strategy,” not “arcade.”
+- There are zero records for “kriegspiel” with genre “arcade” in any year. Therefore, the claim that there is “only one year (1983) with a title of kriegspiel in the genre arcade” is contradicted by the data.
+
+Assumptions
+- Title and genre comparisons use case-insensitive matching (LOWER/ILIKE) to capture potential capitalization differences.
+- The term “genre arcade” is interpreted as genre exactly equal to “arcade,” case-insensitive. The dataset’s public.beyond_software table is treated as authoritative for this verification.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

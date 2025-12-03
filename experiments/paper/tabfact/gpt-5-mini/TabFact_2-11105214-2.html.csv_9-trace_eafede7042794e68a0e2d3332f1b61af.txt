@@ -1,0 +1,67 @@
+
+<userQuery>
+<query>
+0.17 be the highest swing to gain point in the scottish parliament election , 2007
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “0.17 be the highest swing to gain point in the Scottish Parliament election, 2007.”
+
+Findings grounded in data:
+- The maximum “swing to gain” recorded in the dataset is 4.91, not 0.17.
+- The constituency associated with the maximum swing is “paisley south,” with “labour” as the 2003 winning party.
+- A value of 0.17 does exist in the dataset (for “galloway & upper nithsdale,” 2003 winning party “conservative”), but it is far from the maximum and outside the top values.
+
+Executed SQL (evidence):
+1) Maximum swing to gain
+SQL:
+SELECT MAX("swing to gain") AS max_swing FROM public.scottish_parliament_general_election_2007;
+Result:
+max_swing = 4.91
+
+2) Row(s) at the maximum swing
+SQL:
+SELECT constituency, "winning party 2003", "swing to gain"
+FROM public.scottish_parliament_general_election_2007
+WHERE "swing to gain" = (SELECT MAX("swing to gain") FROM public.scottish_parliament_general_election_2007);
+Result:
+- constituency: paisley south, winning party 2003: labour, swing to gain: 4.91
+
+3) Context: Top 10 highest swings
+SQL:
+SELECT constituency, "winning party 2003", "swing to gain"
+FROM scottish_parliament_general_election_2007
+ORDER BY "swing to gain" DESC
+LIMIT 10;
+Result (descending):
+1. paisley south — labour — 4.91
+2. west renfrewshire — labour — 4.41
+3. linlithgow — labour — 3.56
+4. aberdeen central — labour — 2.96
+5. glasgow govan — labour — 2.92
+6. western isles — labour — 2.91
+7. dundee west — labour — 2.13
+8. kilmarnock & loudoun — labour — 1.92
+9. cumbernauld & kilsyth — labour — 1.07
+10. tweeddale , ettrick & lauderdale — liberal democrats — 1.01
+
+4) Check for 0.17 specifically
+SQL:
+SELECT constituency, "winning party 2003", "swing to gain"
+FROM scottish_parliament_general_election_2007
+WHERE "swing to gain" = 0.17;
+Result:
+- galloway & upper nithsdale — conservative — 0.17
+
+Conclusion:
+- The statement is contradicted by the data: the highest “swing to gain” is 4.91, not 0.17.
+
+Assumptions made:
+- “swing to gain point” refers to the “swing to gain” measure in the table scottish_parliament_general_election_2007 within the available TabFact database.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

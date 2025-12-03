@@ -1,0 +1,71 @@
+
+<userQuery>
+<query>
+lucy watkins only write 6 episode of series 2
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim assessed: “lucy watkins only write 6 episode of series 2.”
+
+Summary conclusion: The data shows Lucy Watkins wrote exactly one episode of Merlin Series 2: Episode 10, “Sweet Dreams.” Episode 6 was written by Ben Vanstone. Therefore, the claim is inaccurate under the plausible interpretations (only wrote episode 6; or wrote six episodes).
+
+Data source discovery
+- Evidence: list available tables
+  SQL executed:
+  SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';
+  Result: public schema contains the table: merlin_series_2
+
+Schema inspection
+- Evidence: columns in public.merlin_series_2
+  SQL executed:
+  SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'merlin_series_2';
+  Result columns:
+  - no overall (bigint)
+  - no for series (bigint)
+  - title (text)
+  - directed by (text)
+  - written by (text)
+  - original air date (text)
+  - uk viewers (million) (double precision)
+
+Check if Lucy Watkins wrote episode 6
+- Evidence: title and writer for episode 6
+  SQL executed:
+  SELECT title, "written by" FROM public.merlin_series_2 WHERE "no for series" = 6;
+  Result: Title = “Beauty and the Beast (Part 2)”, Written by = Ben Vanstone
+
+Check how many episodes Lucy Watkins wrote in Series 2
+- Evidence: count episodes written by Lucy Watkins
+  SQL executed:
+  SELECT COUNT(*) FROM public.merlin_series_2 WHERE "written by" ILIKE '%Lucy Watkins%';
+  Result: 1 episode
+
+Identify which episode Lucy Watkins wrote
+- Evidence: list episodes where writer is Lucy Watkins
+  SQL executed:
+  SELECT "no for series", title, "written by" 
+  FROM public.merlin_series_2 
+  WHERE "written by" ILIKE '%Lucy Watkins%';
+  Result: no for series = 10, title = “Sweet Dreams”, written by = Lucy Watkins
+
+Context (optional): listing all episodes (by number, title, writer)
+- Evidence: series episodes overview
+  SQL executed:
+  SELECT "no for series", title, "written by" FROM public.merlin_series_2 ORDER BY "no for series";
+  Result excerpt:
+  - 6: Beauty and the Beast (Part 2) — Ben Vanstone
+  - 10: Sweet Dreams — Lucy Watkins
+
+Final assessment based on data
+- If the claim means “Lucy Watkins only wrote episode 6 of Series 2”: Contradicted. Episode 6 was written by Ben Vanstone.
+- If the claim means “Lucy Watkins wrote six episodes in Series 2”: Contradicted. She is credited with exactly one episode in this table.
+
+Assumptions made due to ambiguous phrasing
+- Interpreted “only write 6 episode” as either: (a) “only wrote episode 6,” or (b) “wrote six episodes.” The database table merlin_series_2 is treated as authoritative for Series 2 writing credits.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

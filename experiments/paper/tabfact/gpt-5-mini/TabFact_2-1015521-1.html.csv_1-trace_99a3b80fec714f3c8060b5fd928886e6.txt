@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+there be 3 c - 95 aircraft of brazilian origin currently in service
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary conclusion
+The available data shows that there are 3 C-95 (Embraer EMB-110 Bandeirante) aircraft of Brazilian origin currently in service (within the Uruguayan Air Force dataset). This directly supports the claim.
+
+Data sources explored
+- Discovered database: TabFact (postgres_tabfact20), public schema
+- Table: public.uruguayan_air_force
+- Relevant columns: aircraft (text), origin (text), type (text), versions (text), in service (text)
+
+Executed queries and evidence
+1) Initial targeted search for “C-95” in the aircraft name (no rows)
+SQL:
+SELECT type, aircraft, origin, versions, "in service" FROM public.uruguayan_air_force WHERE aircraft ILIKE '%C-95%' OR aircraft ILIKE '%C95%' OR aircraft ILIKE '%C 95%';
+Result: No rows returned.
+
+2) Filter for Brazilian-origin aircraft (locates the relevant entry explicitly showing C-95 and the in-service count)
+SQL:
+SELECT aircraft, type, origin, versions, "in service" FROM uruguayan_air_force WHERE origin ILIKE '%brazil%' OR origin ILIKE '%brasil%';
+Results:
+- aircraft: embraer emb 110 bandeirante | type: transport / utility | origin: brazil | versions: c - 95 | in service: 3
+- aircraft: embraer emb 120 brasilia     | type: transport           | origin: brazil | versions: emb 120  | in service: 1
+
+3) Exact-row retrieval to confirm version and in-service count
+SQL:
+SELECT aircraft, type, origin, versions, "in service" FROM public.uruguayan_air_force WHERE aircraft = 'embraer emb 110 bandeirante';
+Returned row:
+- {"aircraft":"embraer emb 110 bandeirante","type":"transport / utility","origin":"brazil","versions":"c - 95","in service":"3"}
+
+4) Broader corroboration (pattern search across aircraft/origin)
+SQL:
+SELECT aircraft, type, origin, versions, "in service" FROM public.uruguayan_air_force WHERE aircraft ILIKE '%Bandeirante%' OR aircraft ILIKE '%EMB%' OR origin ILIKE '%Brazil%';
+Returned rows (excerpt):
+- {"aircraft":"embraer emb 110 bandeirante","type":"transport / utility","origin":"brazil","versions":"c - 95","in service":"3"}
+- {"aircraft":"embraer emb 120 brasilia","type":"transport","origin":"brazil","versions":"emb 120","in service":"1"}
+
+Assessment
+- The uruguayan_air_force table lists the Embraer EMB-110 Bandeirante (Brazilian origin) with version “c - 95” and an in-service count of 3. This matches the claim that there are 3 C-95 aircraft of Brazilian origin currently in service.
+
+Assumptions
+- Context is the Uruguayan Air Force, as that is the only available data source. 
+- “C-95” corresponds to the version designation of the Embraer EMB-110 Bandeirante stored as “c - 95” in the dataset.
+- “Currently in service” is taken directly from the table’s “in service” field.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

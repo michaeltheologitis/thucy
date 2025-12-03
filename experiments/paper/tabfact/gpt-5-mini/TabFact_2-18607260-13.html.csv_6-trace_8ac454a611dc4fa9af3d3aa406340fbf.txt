@@ -1,0 +1,82 @@
+
+<userQuery>
+<query>
+the world cup have 3 game throughout july 1998 , all of which be in japan
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim checked: “the world cup have 3 game throughout july 1998, all of which be in japan.”
+
+Data sources explored
+- Discovered a PostgreSQL database exposing TabFact tables. Only relevant table found: public.t_1998_in_paraguayan_football.
+
+Key evidence from the data
+1) Preview of 1998 fixtures (shows World Cup entries and locations)
+SQL:
+SELECT * FROM public.t_1998_in_paraguayan_football LIMIT 50;
+Result excerpt (14 total rows): includes World Cup rows on 1998 - 06 - 12, 06 - 19, 06 - 24, 06 - 28 with venues in France; also Kirin Cup in May with venues in Japan.
+
+2) Total rows in the table
+SQL:
+SELECT count(*) FROM public.t_1998_in_paraguayan_football;
+Result: 14
+
+3) How “World Cup” is stored in comp
+SQL:
+SELECT DISTINCT comp FROM public.t_1998_in_paraguayan_football WHERE comp ILIKE '%world%';
+Result: world cup
+
+4) Count of World Cup matches in July 1998
+SQL:
+SELECT COUNT(*) AS num_world_cup_july_1998
+FROM public.t_1998_in_paraguayan_football
+WHERE comp = 'world cup'
+  AND date LIKE '1998 - 07 - %';
+Result: 0
+
+5) List of World Cup rows (date and venue)
+SQL:
+SELECT date, venue
+FROM public.t_1998_in_paraguayan_football
+WHERE comp ILIKE '%World Cup%'
+ORDER BY date;
+Results:
+- 1998 - 06 - 12 — stade de la mosson montpellier , france
+- 1998 - 06 - 19 — stade geoffroy - guichard saint - étienne , france
+- 1998 - 06 - 24 — stade de toulouse toulouse , france
+- 1998 - 06 - 28 — stade félix bollaert lens , france
+
+6) Any World Cup rows in Japan
+SQL:
+SELECT count(*) AS japan_count
+FROM public.t_1998_in_paraguayan_football
+WHERE comp ILIKE '%World Cup%'
+  AND venue ILIKE '%japan%';
+Result: 0
+
+7) Any rows at all in July 1998
+SQL:
+SELECT COUNT(*) AS july1998_count FROM public.t_1998_in_paraguayan_football WHERE "date" LIKE '1998 - 07 - %';
+Result: 0
+
+8) Total count of World Cup rows
+SQL:
+SELECT COUNT(*) AS world_cup_count
+FROM public.t_1998_in_paraguayan_football
+WHERE lower(trim(comp)) = 'world cup';
+Result: 4 (all in June, all in France)
+
+Assessment
+- The accessible 1998 football data records four World Cup matches, all in June 1998 and all in France.
+- There are zero World Cup matches in July 1998 in this data, and zero World Cup matches in Japan.
+- Therefore, the claim that there were three World Cup games throughout July 1998, all in Japan, is contradicted by the data.
+
+Assumptions
+- “World Cup” refers to the 1998 FIFA World Cup. The available table (1998 in Paraguayan football) is treated as authoritative within its scope and shows the dates/venues of the relevant World Cup matches logged there.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

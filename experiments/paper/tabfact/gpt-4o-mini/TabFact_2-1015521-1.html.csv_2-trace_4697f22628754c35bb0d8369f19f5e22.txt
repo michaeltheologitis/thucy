@@ -1,0 +1,50 @@
+
+<userQuery>
+<query>
+there be 12 t - 260 eu aircraft currently in service
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "there be 12 t - 260 eu aircraft currently in service"
+
+Data discovery and schema context:
+- Listed available schemas
+  SQL: SELECT schema_name FROM information_schema.schemata;
+  Result: information_schema, pg_catalog, pg_toast, public
+- Listed all tables
+  SQL: SELECT table_schema, table_name FROM information_schema.tables;
+  Result: public.uruguayan_air_force (relevant table)
+- Described table columns
+  SQL: SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'uruguayan_air_force';
+  Result: columns = [aircraft (text, nullable), origin (text, nullable), type (text, nullable), versions (text, nullable), in service (text, nullable)]
+
+Evidence from the data:
+1) Broad search for entries mentioning “260” to find potential matches
+   SQL: SELECT aircraft, versions, "in service" FROM public.uruguayan_air_force WHERE aircraft ILIKE '%260%' OR versions ILIKE '%260%';
+   Result: aircraft = aermacchi sf260; versions = t - 260 eu; in service = 12
+
+2) Exact (case-insensitive) match on the version string
+   SQL: SELECT aircraft, type, versions, "in service" FROM public.uruguayan_air_force WHERE LOWER(versions) = LOWER('t - 260 eu');
+   Result: aircraft = Aermacchi SF260; type = Trainer; versions = T - 260 EU; in service = 12
+
+3) Uniqueness and consistency check
+   - Count rows with the specified version
+     SQL: SELECT COUNT(*) AS total_rows FROM public.uruguayan_air_force WHERE versions ILIKE 't - 260 eu';
+     Result: total_rows = 1
+   - Distinct in-service values for that version
+     SQL: SELECT DISTINCT "in service" FROM public.uruguayan_air_force WHERE versions ILIKE 't - 260 eu';
+     Result: 12
+
+Conclusion:
+- The database shows an entry for Aermacchi SF260 with version “T - 260 EU” and an “in service” value of 12. This directly supports the claim that there are 12 T-260 EU (SF-260EU) aircraft currently in service (within the Uruguayan Air Force dataset).
+
+Assumptions made:
+- “t - 260 eu” refers to the SF-260EU variant listed in the Uruguayan Air Force dataset (public.uruguayan_air_force).
+- “currently in service” corresponds to the value in the "in service" column of this dataset.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

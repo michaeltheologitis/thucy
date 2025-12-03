@@ -1,0 +1,63 @@
+
+<userQuery>
+<query>
+gold coast blaze have the worst record in the season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “gold coast blaze have the worst record in the season.”
+
+Data source discovery
+- Available database: TabFact (PostgreSQL), public schema.
+- Relevant table identified: t_2008_09_nbl_season (contains NBL team standings and performance metrics for the 2008–09 season).
+
+Evidence
+1) Full standings sorted by % won (ascending)
+Executed SQL:
+SELECT team, "lost", "last 5", streak, home, away, "% pts", "% won"
+FROM t_2008_09_nbl_season
+ORDER BY NULLIF(regexp_replace(("% won")::text, '[^0-9\.-]+', '', 'g'), '')::numeric ASC;
+
+Result (ascending by % won):
+1) team: gold coast blaze — lost: 22 — last 5: 3 - 2 — streak: won 3 — home: 6 - 9 — away: 2 - 13 — % pts: 93.45 — % won: 26.67
+2) team: wollongong hawks — lost: 19 — last 5: 2 - 3 — streak: lost 1 — home: 9 - 6 — away: 2 - 13 — % pts: 95.03 — % won: 36.67
+3) team: cairns taipans — lost: 19 — last 5: 1 - 4 — streak: lost 3 — home: 5 - 10 — away: 6 - 9 — % pts: 93.57 — % won: 36.67
+4) team: sydney spirit — lost: 19 — last 5: 0 - 5 — streak: lost 8 — home: 9 - 6 — away: 2 - 13 — % pts: 94.51 — % won: 36.67
+5) team: adelaide 36ers — lost: 15 — last 5: 3 - 2 — streak: lost 1 — home: 12 - 3 — away: 3 - 12 — % pts: 100.92 — % won: 50
+6) team: townsville crocodiles — lost: 13 — last 5: 4 - 1 — streak: lost 1 — home: 12 - 3 — away: 5 - 10 — % pts: 99.26 — % won: 56.67
+7) team: perth wildcats — lost: 13 — last 5: 4 - 1 — streak: won 2 — home: 11 - 4 — away: 6 - 9 — % pts: 102.06 — % won: 56.67
+8) team: new zealand breakers — lost: 12 — last 5: 2 - 3 — streak: won 2 — home: 10 - 5 — away: 8 - 7 — % pts: 106.08 — % won: 60
+9) team: melbourne tigers — lost: 10 — last 5: 3 - 2 — streak: lost 1 — home: 11 - 4 — away: 9 - 6 — % pts: 106.47 — % won: 66.67
+10) team: south dragons — lost: 8 — last 5: 4 - 1 — streak: won 2 — home: 13 - 2 — away: 9 - 6 — % pts: 110.25 — % won: 73.33
+
+2) Identify the team with the lowest % won
+Executed SQL:
+SELECT team, "lost", "% won"
+FROM t_2008_09_nbl_season
+ORDER BY NULLIF(regexp_replace(("% won")::text, '[^0-9\.-]+', '', 'g'), '')::numeric ASC
+LIMIT 1;
+
+Result:
+team: gold coast blaze — lost: 22 — % won: 26.67
+
+3) Confirm Gold Coast Blaze entry
+Executed SQL:
+SELECT team, "lost", "% won"
+FROM t_2008_09_nbl_season
+WHERE team ILIKE 'Gold Coast Blaze';
+
+Result:
+team: gold coast blaze — lost: 22 — % won: 26.67
+
+Conclusion
+- In the available season dataset (2008–09 NBL), Gold Coast Blaze had the lowest win percentage (26.67%), which constitutes the worst record among listed teams in that season. The claim is supported for this season.
+
+Assumptions
+- “the season” is interpreted as the 2008–09 NBL season because this is the season table available in the connected data source. If a different season was intended, additional season tables would be needed to verify across those seasons.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

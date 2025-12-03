@@ -1,0 +1,58 @@
+
+<userQuery>
+<query>
+part number lf80537 gf0411 m with release price 90 have fsb 667 mt / s
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify:
+- "part number lf80537 gf0411 m with release price 90 have fsb 667 mt / s"
+
+Data sources discovered:
+- PostgreSQL instance TabFact (public schema). Relevant table: public.list_of_intel_pentium_dual_core_microprocessors (columns include: model number, sspec number, frequency, l2 cache, fsb, mult, voltage, tdp, socket, release date, part number (s), release price ( usd )).
+
+Evidence and executed SQL:
+1) Locate all entries containing part numbers with the pattern "lf80537" to surface the target part and nearby variants.
+Executed SQL:
+SELECT "model number", "sspec number", "fsb", "part number (s)", "release price ( usd )"
+FROM public.list_of_intel_pentium_dual_core_microprocessors
+WHERE "part number (s)" ILIKE '%lf80537%';
+Result excerpt relevant to the claim:
+- model number: pentium dual - core t3200 | sspec number: slavg (m0) | fsb: 667 mt / s | part number (s): lf80537 gf0411 m | release price ( usd ): oem
+- (for context) model number: pentium dual - core t2310 | fsb: 533 mt / s | part number (s): lf80537 ge0201 m | release price ( usd ): 90
+
+2) Retrieve the full row for the exact part number "lf80537 gf0411 m".
+Executed SQL:
+SELECT "model number","sspec number","frequency","l2 cache","fsb","mult","voltage","tdp","socket","release date","part number (s)","release price ( usd )"
+FROM public.list_of_intel_pentium_dual_core_microprocessors
+WHERE "part number (s)" ILIKE '%lf80537 gf0411 m%';
+Result:
+- model number: pentium dual - core t3200; sspec number: slavg (m0); frequency: 2 ghz; l2 cache: 1 mb; fsb: 667 mt / s; mult: 12; voltage: 1.075 - 1.175v; tdp: 35 w; socket: socket p; release date: q4 2008; part number (s): lf80537 gf0411 m; release price ( usd ): oem
+
+3) Identify all entries with a release price of 90 USD to check their FSB and part numbers.
+Executed SQL:
+SELECT "model number", "fsb", "part number (s)", "release price ( usd )" 
+FROM public.list_of_intel_pentium_dual_core_microprocessors
+WHERE "release price ( usd )" = '90';
+Result:
+- model number: pentium dual - core t2310; fsb: 533 mt / s; part number (s): lf80537 ge0201 m; release price ( usd ): 90
+
+Assessment:
+- The part number lf80537 gf0411 m corresponds to the Pentium Dual-Core T3200 and has FSB 667 MT/s. This supports the FSB portion of the claim.
+- However, the release price for lf80537 gf0411 m is listed as "oem" (not 90 USD). The only row with release price 90 USD in this dataset is a different part (lf80537 ge0201 m) with FSB 533 MT/s.
+
+Conclusion:
+- True: lf80537 gf0411 m has FSB 667 MT/s.
+- False: lf80537 gf0411 m has release price 90 USD.
+
+Assumptions:
+- Interpreted "release price 90" as matching the text value '90' in the "release price ( usd )" column.
+- Matching for the part number used case-insensitive substring search (ILIKE) in the provided authoritative table.
+- "mt / s" corresponds to MT/s (MegaTransfers per second) as represented in the dataset.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

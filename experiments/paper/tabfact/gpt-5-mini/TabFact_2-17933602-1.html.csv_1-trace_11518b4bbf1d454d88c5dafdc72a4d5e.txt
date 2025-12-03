@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+the 15th in the liga of the 2003 - 2004 season be in estádio do restelo while the13th in the liga be hold in estádio cidade de coimbra
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify
+- “the 15th in the liga of the 2003 - 2004 season be in Estádio do Restelo while the 13th in the liga be hold in Estádio Cidade de Coimbra.”
+
+What I checked
+- Which clubs are recorded as finishing 15th and 13th in the 2003–2004 Liga (Primeira Liga) and their associated stadiums in the available data.
+
+Evidence from the data
+1) Full table view to understand encoding of the 2003–2004 placements and stadiums
+- Executed SQL:
+  SELECT club, stadium, "2003 - 2004 season" FROM public.t_2004_05_primeira_liga;
+- Relevant returned rows (subset):
+  - académica de coimbra | estádio cidade de coimbra | 13th in the liga
+  - belenenses | estádio do restelo | 15th in the liga
+
+2) Targeted check for the 15th-place team in 2003–2004
+- Executed SQL:
+  SELECT club, stadium, "2003 - 2004 season" FROM t_2004_05_primeira_liga WHERE "2003 - 2004 season" LIKE '%15%';
+- Result:
+  - club: belenenses | stadium: estádio do restelo | 2003 - 2004 season: 15th in the liga
+
+3) Targeted check for the 13th-place team in 2003–2004
+- Executed SQL (step 1 - confirm literal value):
+  SELECT DISTINCT "2003 - 2004 season" FROM public.t_2004_05_primeira_liga ORDER BY "2003 - 2004 season";
+  (Excerpt shows: "13th in the liga")
+- Executed SQL (step 2 - fetch club and stadium):
+  SELECT club, stadium FROM public.t_2004_05_primeira_liga WHERE "2003 - 2004 season" = '13th in the liga';
+- Result:
+  - club: académica de coimbra | stadium: estádio cidade de coimbra
+
+Assessment
+- The data explicitly shows:
+  - 15th in the 2003–2004 Liga: Belenenses — stadium: Estádio do Restelo.
+  - 13th in the 2003–2004 Liga: Académica de Coimbra — stadium: Estádio Cidade de Coimbra.
+- This directly matches the claim.
+
+Conclusion
+- The claim is supported by the data.
+
+Assumptions made
+- “Liga” refers to the Portuguese top division (Primeira Liga) for the 2003–2004 season, as encoded in the column "2003 - 2004 season" of table t_2004_05_primeira_liga.
+- The stadium listed for each club in this table corresponds to that club’s stadium at the time referenced by the season placement text.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

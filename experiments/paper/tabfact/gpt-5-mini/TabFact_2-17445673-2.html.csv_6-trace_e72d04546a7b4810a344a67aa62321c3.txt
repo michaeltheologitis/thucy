@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+there be fewer win result than loss result
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: In the available match-results data, there are fewer win results than loss results.
+
+Data source discovery:
+- Found a PostgreSQL data source (TabFact, public schema). A table named public.tim_lajcik records fight results with a res column indicating outcome.
+
+Schema context (relevant table/columns):
+- public.tim_lajcik(res text, record text, opponent text, method text, event text, round bigint, time text)
+
+Evidence 1: Distribution of outcomes
+- Executed SQL:
+  SELECT res, COUNT(*) AS cnt
+  FROM public.tim_lajcik
+  GROUP BY res
+  ORDER BY cnt DESC;
+- Result:
+  - res = 'win', count = 7
+  - res = 'loss', count = 6
+  - res = 'draw', count = 1
+
+Evidence 2: Direct comparison of wins vs. losses
+- Executed SQL:
+  SELECT SUM(CASE WHEN res = 'win' THEN 1 ELSE 0 END) AS wins,
+         SUM(CASE WHEN res = 'loss' THEN 1 ELSE 0 END) AS losses,
+         CASE WHEN SUM(CASE WHEN res = 'win' THEN 1 ELSE 0 END) <
+                   SUM(CASE WHEN res = 'loss' THEN 1 ELSE 0 END)
+              THEN true ELSE false END AS wins_fewer_than_losses
+  FROM public.tim_lajcik;
+- Result: wins = 7, losses = 6, wins_fewer_than_losses = false
+
+Conclusion: The data show more wins (7) than losses (6). Therefore, the claim that there are fewer win results than loss results is not supported.
+
+Assumptions made:
+- The claim refers to the available results in public.tim_lajcik.
+- "Win" and "loss" are identified by exact matches to res values 'win' and 'loss' as stored.
+- No additional filtering (e.g., by event or date) was intended.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

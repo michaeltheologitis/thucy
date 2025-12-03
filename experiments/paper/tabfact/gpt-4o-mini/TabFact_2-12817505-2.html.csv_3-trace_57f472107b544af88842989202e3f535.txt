@@ -1,0 +1,60 @@
+
+<userQuery>
+<query>
+there have be 19 game since 13 august 2005 which have an attendance of 60000 or more
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “there have be 19 game since 13 august 2005 which have an attendance of 60000 or more.”
+
+Data source used
+- PostgreSQL database table: public.t_2005_06_manchester_united_f_c_season (Manchester United FC 2005–06 season league match data)
+
+What I checked
+1) Verified the table structure contains the necessary fields (date, attendance).
+   - SQL (columns):
+     SELECT column_name, data_type, is_nullable 
+     FROM information_schema.columns 
+     WHERE table_name = 't_2005_06_manchester_united_f_c_season';
+   - SQL (primary key check):
+     SELECT kcu.column_name
+     FROM information_schema.table_constraints tco
+     JOIN information_schema.key_column_usage kcu 
+     ON kcu.constraint_name = tco.constraint_name
+     WHERE tco.table_name = 't_2005_06_manchester_united_f_c_season' 
+     AND tco.constraint_type = 'PRIMARY KEY';
+   - Result summary: Columns include attendance (bigint), date (text formatted like “DD Month YYYY”), opponents (text), "h / a" (text), "result f - a" (text), "league position" (text). No primary key.
+
+2) Counted all matches on or after 2005-08-13 with attendance ≥ 60,000.
+   - SQL (count):
+     SELECT COUNT(*)
+     FROM public.t_2005_06_manchester_united_f_c_season
+     WHERE 
+         to_date(date, 'DD Month YYYY') >= '2005-08-13' AND 
+         CAST(REGEXP_REPLACE(attendance::text, ',', '', 'g') AS INTEGER) >= 60000;
+   - Result: 19 matches
+
+3) Listed those matches (for transparency):
+   - SQL (list):
+     SELECT date, opponents, "h / a", CAST(regexp_replace(attendance::text, '[^0-9]', '', 'g') AS int) AS attendance
+     FROM public.t_2005_06_manchester_united_f_c_season
+     WHERE to_date(date, 'DD Month YYYY') >= '2005-08-13' AND CAST(regexp_replace(attendance::text, '[^0-9]', '', 'g') AS int) >= 60000
+     ORDER BY to_date(date, 'DD Month YYYY');
+   - Result summary (19 rows, all Home fixtures):
+     20 Aug 2005 Aston Villa 67,934; 10 Sep 2005 Man City 67,839; 24 Sep 2005 Blackburn 67,765; 22 Oct 2005 Tottenham 67,856; 6 Nov 2005 Chelsea 67,864; 3 Dec 2005 Portsmouth 67,684; 11 Dec 2005 Everton 67,831; 14 Dec 2005 Wigan 67,793; 26 Dec 2005 West Brom 67,972; 31 Dec 2005 Bolton 67,858; 22 Jan 2006 Liverpool 67,874; 4 Feb 2006 Fulham 67,844; 12 Mar 2006 Newcastle 67,858; 26 Mar 2006 Birmingham 69,070; 29 Mar 2006 West Ham 69,522; 9 Apr 2006 Arsenal 70,908; 14 Apr 2006 Sunderland 72,519; 1 May 2006 Middlesbrough 69,531; 7 May 2006 Charlton 73,006.
+
+Conclusion
+- Based on the available dataset (Manchester United 2005–06 league matches), there are exactly 19 matches on or after 13 August 2005 with attendance of 60,000 or more. This supports the claim.
+
+Assumptions due to ambiguity
+- “Games” is interpreted as Manchester United’s 2005–06 season league fixtures, as that is the scope of the available table.
+- “Since 13 August 2005” is treated as inclusive of 13 August 2005 and later.
+- Attendance field is parsed by stripping thousand separators to compare numerically.
+- Other competitions (FA Cup, League Cup, Europe) are not represented in this table; verification is therefore scoped to the league data available.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,78 @@
+
+<userQuery>
+<query>
+equestrian at the asian game have be locate in a different city every year that it occur
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify:
+"Equestrian at the Asian Games has been located in a different city every year that it occurred."
+
+Data discovery and scope:
+- I used the available database discovery tools and found a PostgreSQL database exposing a table named public.equestrian_at_the_asian_games. All evidence below is drawn from this table.
+
+Evidence 1: Confirm the table exists
+- Executed SQL:
+  SELECT table_schema, table_name
+  FROM information_schema.tables
+  WHERE table_type = 'BASE TABLE'
+  ORDER BY table_schema, table_name;
+- Relevant result excerpt shows presence of: public.equestrian_at_the_asian_games
+
+Evidence 2: Understand the table structure
+- Executed SQL:
+  SELECT column_name, data_type, is_nullable, ordinal_position
+  FROM information_schema.columns
+  WHERE table_schema='public' AND table_name='equestrian_at_the_asian_games'
+  ORDER BY ordinal_position;
+- Result (columns):
+  1) year (bigint)
+  2) location (text)
+  3) gold (text)
+  4) silver (text)
+  5) bronze (text)
+
+Evidence 3: Check if any location (city) repeats across different years
+- Executed SQL:
+  SELECT location, COUNT(*) AS cnt,
+         CASE WHEN COUNT(*)>1 THEN array_agg(year ORDER BY year) ELSE NULL END AS years
+  FROM public.equestrian_at_the_asian_games
+  GROUP BY location
+  ORDER BY cnt DESC, location;
+- Results (location — count — years):
+  bangkok — 1 — NULL
+  busan — 1 — NULL
+  doha — 1 — NULL
+  guangzhou — 1 — NULL
+  hiroshima — 1 — NULL
+  new delhi — 1 — NULL
+  seoul — 1 — NULL
+- Interpretation: Every location appears exactly once; no city repeats among the recorded editions.
+
+Evidence 4: Full year-to-location mapping in the table
+- Executed SQL:
+  SELECT year, location FROM public.equestrian_at_the_asian_games ORDER BY year ASC;
+- Results:
+  1982 | new delhi
+  1986 | seoul
+  1994 | hiroshima
+  1998 | bangkok
+  2002 | busan
+  2006 | doha
+  2010 | guangzhou
+- Interpretation: For the years recorded (1982–2010), equestrian was held in a different city each time it occurred.
+
+Conclusion:
+- Based on the available dataset (covering the years 1982–2010), equestrian at the Asian Games has indeed been located in a different city every time it took place. There are no repeated cities in the table.
+
+Assumptions and scope notes:
+- I interpret “location” as the host city for equestrian at each Asian Games edition.
+- The table appears to list all years in which equestrian was contested between 1982 and 2010. The database provided does not include data beyond 2010; therefore, my verification applies to the covered period only.
+- I interpret “every year that it occur” to mean every edition/year in which equestrian was on the program, which in this dataset are 1982, 1986, 1994, 1998, 2002, 2006, and 2010.
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

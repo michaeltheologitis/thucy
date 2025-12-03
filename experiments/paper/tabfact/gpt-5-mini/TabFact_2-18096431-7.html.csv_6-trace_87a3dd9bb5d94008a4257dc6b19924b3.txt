@@ -1,0 +1,63 @@
+
+<userQuery>
+<query>
+mark brook and kenny perry tie for have the lowest to par
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: In the 1996 PGA Championship table, Mark Brooks and Kenny Perry are tied for the lowest to-par score.
+
+What I checked
+- Identified the relevant dataset (TabFact) and table (t_1996_pga_championship) containing player scores and “to par”.
+- Verified the players’ entries and computed the minimum “to par” value and who achieved it.
+
+Evidence from data (with executed SQL)
+1) Locate entries for Mark Brooks and Kenny Perry
+SQL:
+SELECT player, place, "to par", score FROM t_1996_pga_championship WHERE player ILIKE '%Mark Brook%' OR player ILIKE '%Mark Brooks%' OR player ILIKE '%Kenny Perry%';
+Result (abridged):
+- player: mark brooks, place: 1, to par: "- 11", score: "68 + 70 + 69 + 70 = 277"
+- player: kenny perry, place: 2, to par: "- 11", score: "66 + 72 + 71 + 68 = 277"
+
+2) Compute the minimum normalized “to par”
+SQL:
+WITH norm AS (
+  SELECT player, "to par" AS orig_to_par,
+    CASE
+      WHEN trim("to par") = 'E' THEN 0
+      ELSE CAST(REPLACE(REPLACE(REPLACE(trim("to par"), ' ', ''), E'\u2212', '-'), '−', '-') AS integer)
+    END AS to_par_numeric
+  FROM t_1996_pga_championship
+)
+SELECT MIN(to_par_numeric) AS min_to_par FROM norm;
+Result: min_to_par = -11
+
+3) List players with that minimum
+SQL:
+WITH norm AS (
+  SELECT player, place, "to par" AS orig_to_par,
+    CASE
+      WHEN trim("to par") = 'E' THEN 0
+      ELSE CAST(REPLACE(REPLACE(REPLACE(trim("to par"), ' ', ''), E'\u2212', '-'), '−', '-') AS integer)
+    END AS to_par_numeric
+  FROM t_1996_pga_championship
+)
+SELECT player, place, orig_to_par, to_par_numeric FROM norm WHERE to_par_numeric = (SELECT MIN(to_par_numeric) FROM norm) ORDER BY place::int;
+Result:
+- mark brooks, place: 1, orig_to_par: "- 11", to_par_numeric: -11
+- kenny perry, place: 2, orig_to_par: "- 11", to_par_numeric: -11
+
+Conclusion
+- Verified: Both Mark Brooks and Kenny Perry share the lowest to-par score in the table (-11). The name in the data is “mark brooks” (with an “s”).
+
+Assumptions
+- “Lowest to par” refers to the minimum “to par” value within the 1996 PGA Championship table (t_1996_pga_championship).
+- Treated “E” as 0 and normalized minus signs and spaces in the “to par” field.
+- Interpreted “mark brook” as “mark brooks.”
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

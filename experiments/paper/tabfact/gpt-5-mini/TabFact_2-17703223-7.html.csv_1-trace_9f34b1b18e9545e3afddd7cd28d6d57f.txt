@@ -1,0 +1,64 @@
+
+<userQuery>
+<query>
+there be only 1 person with a snatch of 153.0 and his total bodyweight be 104.70
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “there be only 1 person with a snatch of 153.0 and his total bodyweight be 104.70.”
+
+Data source discovery:
+- Available source: a PostgreSQL database (TabFact) exposing schema public.
+
+Schema used:
+- Table: public.weightlifting_at_the_2007_pan_american_games
+  Columns:
+  - name (text)
+  - bodyweight (double precision)
+  - snatch (text)
+  - clean & jerk (text)
+  - total (kg) (text)
+
+Evidence 1: List athlete(s) with snatch = 153.0 (numeric comparison)
+- Executed SQL:
+SELECT name, bodyweight, snatch
+FROM public.weightlifting_at_the_2007_pan_american_games
+WHERE regexp_replace(snatch,'[^0-9\.]','','g') ~ '^[0-9]+(\.[0-9]+)?$'
+  AND (regexp_replace(snatch,'[^0-9\.]','','g'))::numeric = 153.0;
+- Result:
+  - christian lópez ( gua ), bodyweight: 104.7, snatch: "153.0"
+
+Evidence 2: Count distinct athletes with snatch = 153.0 (numeric comparison)
+- Executed SQL:
+SELECT COUNT(DISTINCT name) AS distinct_athlete_count
+FROM public.weightlifting_at_the_2007_pan_american_games
+WHERE (NULLIF(trim(snatch), '-'))::numeric = 153.0;
+- Result: distinct_athlete_count = 1
+- Supporting inspection of snatch values (to justify numeric casting):
+  - Executed SQL:
+SELECT DISTINCT snatch FROM public.weightlifting_at_the_2007_pan_american_games ORDER BY snatch LIMIT 200;
+  - Result sample: "-", "140.0", "150.0", "151.0", "153.0", "157.0", "160.0", "175.0"
+
+Evidence 3: Verify that athlete’s bodyweight equals 104.70 exactly
+- Executed SQL:
+SELECT name, bodyweight, snatch,
+       (bodyweight = 104.70) AS bodyweight_equals_104_70
+FROM public.weightlifting_at_the_2007_pan_american_games
+WHERE (CASE WHEN trim(snatch) ~ '^[0-9]+(\.[0-9]+)?$' THEN trim(snatch)::double precision ELSE NULL END) = 153.0;
+- Result:
+  - name: christian lópez ( gua ), bodyweight: 104.7, snatch: 153.0, bodyweight_equals_104_70: true
+
+Conclusion:
+- The database shows exactly one athlete with a snatch of 153.0 kg. That athlete’s recorded bodyweight is 104.7 kg, which equals 104.70 when expressed to two decimal places. The claim is supported by the data.
+
+Assumptions made:
+- “total bodyweight” is interpreted as the athlete’s bodyweight (kg) field in the table, not the “total (kg)” competition result.
+- The only available authoritative dataset is public.weightlifting_at_the_2007_pan_american_games; verification is scoped to this data.
+- The snatch column is stored as text; numeric comparisons were performed by safely casting numeric-looking values and treating “-” as missing.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

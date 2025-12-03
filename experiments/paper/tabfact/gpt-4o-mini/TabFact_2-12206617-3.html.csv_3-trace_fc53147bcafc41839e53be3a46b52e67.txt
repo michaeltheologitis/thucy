@@ -1,0 +1,57 @@
+
+<userQuery>
+<query>
+the game with the lowest attendance in may of the 1991 toronto blue jay season be play against the royal
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The game with the lowest attendance in May of the 1991 Toronto Blue Jays season was played against the Royals.
+
+Data source discovery and schema grounding:
+- Available table: public.t_1991_toronto_blue_jays_season
+- Relevant columns: date (text; values like "may 3"), opponent (text), attendance (bigint)
+
+Evidence 1 — Identify the minimum-attendance May game(s):
+SQL:
+SELECT date, opponent, attendance
+FROM public.t_1991_toronto_blue_jays_season
+WHERE lower(date) LIKE 'may%'
+AND attendance = (SELECT MIN(attendance)
+                 FROM public.t_1991_toronto_blue_jays_season
+                 WHERE lower(date) LIKE 'may%')
+ORDER BY attendance ASC;
+Result:
+- Date: May 3, Opponent: Royals, Attendance: 20,809
+
+Evidence 2 — Corroborate by listing the lowest-attendance May games:
+SQL:
+SELECT date, opponent, attendance
+FROM public.t_1991_toronto_blue_jays_season
+WHERE lower(date) LIKE 'may%'
+ORDER BY attendance ASC
+LIMIT 10;
+Top results (attendance ascending):
+1) May 3 — Royals — 20,809
+2) May 5 — Royals — 22,588
+3) May 4 — Royals — 22,628
+4) May 21 — Athletics — 22,738
+5) May 2 — Royals — 22,896
+6) May 20 — Athletics — 24,631
+7) May 24 — Angels — 26,408
+8) May 17 — White Sox — 30,095
+9) May 1 — Rangers — 33,439
+10) May 22 — Athletics — 34,028
+
+Conclusion: The game with the lowest attendance in May 1991 for the Toronto Blue Jays was indeed against the Royals (May 3, 20,809 attendees). This supports the claim.
+
+Assumptions made:
+- "royal" refers to the Kansas City Royals.
+- The table represents the 1991 season, and the date text like "may 3" corresponds to May 1991.
+- If multiple games tied for the minimum, all would have been reported; here, one game holds the minimum.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

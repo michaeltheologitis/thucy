@@ -1,0 +1,52 @@
+
+<userQuery>
+<query>
+more than half of the away team have a score greater than 10
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "more than half of the away team have a score greater than 10"
+
+How I interpreted the claim
+- Interpreted "score" as the away team’s total points (the number in parentheses in the AFL score format G.B (T)).
+- Interpreted "more than half of the away team" as “in more than half of match records in the dataset, the away team’s total points exceed 10.”
+
+Data source
+- Database: TabFact (public schema)
+- Table: t_1972_vfl_season
+- Relevant columns: "away team", "away team score" (formatted as goals.behinds (total_points))
+
+Evidence
+1) Inspect sample rows and confirm format; count total rows
+Executed SQL (sample rows):
+SELECT "home team", "home team score", "away team", "away team score", "date", "venue" FROM public.t_1972_vfl_season LIMIT 10;
+Sample results included away team scores like: 9.11 (65), 17.9 (111), 8.15 (63), 15.8 (98), etc.
+
+Executed SQL (row count):
+SELECT COUNT(*) FROM public.t_1972_vfl_season;
+Result: 6
+
+2) Count matches where away team total points > 10
+Executed SQL:
+SELECT COUNT(*) AS count_gt_10 FROM public.t_1972_vfl_season WHERE (substring("away team score" from '\((\d+)\)'))::int > 10;
+Result: {"count_gt_10": 6}
+
+3) Compute fraction and boolean flag (more than half?)
+Executed SQL:
+SELECT total_rows, count_gt_10, (count_gt_10::numeric / NULLIF(total_rows,0)) AS fraction, (count_gt_10 > total_rows/2) AS more_than_half FROM (SELECT COUNT(*) AS total_rows FROM public.t_1972_vfl_season) t CROSS JOIN (SELECT COUNT(*) AS count_gt_10 FROM public.t_1972_vfl_season WHERE (substring("away team score" from '\((\d+)\)'))::int > 10) g;
+Result: {"total_rows": 6, "count_gt_10": 6, "fraction": 1.0, "more_than_half": true}
+
+Conclusion
+- All 6 out of 6 matches have away team total points > 10. Therefore, more than half is true.
+
+Assumptions
+- “Score” refers to total points (the number in parentheses) in the AFL scoring format.
+- The claim pertains to the records present in public.t_1972_vfl_season; i.e., across match records, not individual players or a specific team instance.
+- No rows with malformed scores affected the result (none were present).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

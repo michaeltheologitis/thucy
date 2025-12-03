@@ -1,0 +1,73 @@
+
+<userQuery>
+<query>
+charlotte improve to 40 - 36 with a win of 97 - 92 in ot
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "charlotte improve to 40 - 36 with a win of 97 - 92 in ot"
+
+Data sources explored
+- Discovered data sources: TabFact PostgreSQL database with a table public.t_2008_09_miami_heat_season (Miami Heat 2008–09 season game log subset).
+- Relevant schema: public.t_2008_09_miami_heat_season(game bigint, date text, team text, score text, high points text, high rebounds text, high assists text, location attendance text, record text).
+
+Evidence from data
+1) Full table sample to understand layout
+- SQL executed:
+SELECT * FROM public.t_2008_09_miami_heat_season ORDER BY game ASC LIMIT 10;
+- Returned rows (excerpt around the relevant game):
+  • game=75, date="april 1", team="dallas", score="l 96 - 98 (ot)", record="39 - 36"
+  • game=76, date="april 3", team="charlotte", score="w 97 - 92 (ot)", record="40 - 36"
+  • game=77, date="april 4", team="washington", score="w 118 - 104 (ot)", record="41 - 36"
+
+2) Targeted lookup for the Charlotte game
+- SQL executed:
+SELECT * FROM public.t_2008_09_miami_heat_season WHERE team ILIKE '%Charlotte%';
+- Result:
+  • game: 76
+  • date: april 3
+  • team: charlotte
+  • score: w 97 - 92 (ot)
+  • location attendance: time warner cable arena 19568
+  • record: 40 - 36
+
+3) Show record progression from the prior game to confirm which team’s record changed
+- SQL executed:
+SELECT * FROM public.t_2008_09_miami_heat_season WHERE game IN (75, 76) ORDER BY game;
+- Result:
+  • Game 75 (vs Dallas): score l 96 - 98 (ot), record 39 - 36
+  • Game 76 (at Charlotte): score w 97 - 92 (ot), record 40 - 36
+
+4) Parse record components to quantify change
+- SQL executed:
+SELECT game, date, record, CAST(split_part(replace(record,' ',''),'-',1) AS INTEGER) AS wins, CAST(split_part(replace(record,' ',''),'-',2) AS INTEGER) AS losses FROM public.t_2008_09_miami_heat_season WHERE game IN (75,76) ORDER BY game;
+- Result:
+  • Game 75: wins 39, losses 36
+  • Game 76: wins 40, losses 36
+
+- SQL executed:
+SELECT
+  g76.wins - g75.wins AS wins_change,
+  g76.losses - g75.losses AS losses_change
+FROM
+  (SELECT CAST(split_part(replace(record,' ',''),'-',1) AS INTEGER) AS wins, CAST(split_part(replace(record,' ',''),'-',2) AS INTEGER) AS losses FROM public.t_2008_09_miami_heat_season WHERE game = 75) g75,
+  (SELECT CAST(split_part(replace(record,' ',''),'-',1) AS INTEGER) AS wins, CAST(split_part(replace(record,' ',''),'-',2) AS INTEGER) AS losses FROM public.t_2008_09_miami_heat_season WHERE game = 76) g76;
+- Result: wins_change = 1, losses_change = 0
+
+Assessment
+- The database shows that on April 3 (game 76), the Miami Heat defeated Charlotte 97–92 in overtime, and the Heat’s record became 40–36. The score and overtime details match the claim.
+- However, the team that improved to 40–36 was Miami, not Charlotte. The table is the Miami Heat season log, and the "record" column reflects Miami’s record after each game. The previous game (75) shows Miami at 39–36; after beating Charlotte, Miami moved to 40–36.
+
+Conclusion
+- The score (97–92) and that it occurred in OT are supported by the data. But attributing the improvement to 40–36 to Charlotte is contradicted by the evidence; it was Miami’s record that improved to 40–36.
+
+Assumptions
+- "charlotte" refers to the Charlotte NBA team (Bobcats in 2008–09) as the opponent mentioned in the Miami Heat game log.
+- The available authoritative data source for this verification is limited to the Miami Heat 2008–09 season subset; within this scope, the evidence is definitive about which team’s record changed.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

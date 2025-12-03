@@ -1,0 +1,46 @@
+
+<userQuery>
+<query>
+there be 3 different director that direct 2 episode
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “There are 3 different directors who directed 2 episodes.” Dataset used: TabFact database, table public.list_of_republic_of_doyle_episodes (Republic of Doyle episodes).
+
+Evidence from data
+- Query 1 (list directors with exactly 2 episodes):
+SQL:
+SELECT "directed by", COUNT(*) AS cnt
+FROM public.list_of_republic_of_doyle_episodes
+GROUP BY "directed by"
+HAVING COUNT(*) = 2
+ORDER BY "directed by";
+Result:
+- {"directed by": "mike clattenburg", "cnt": 2}
+- {"directed by": "robert lieberman", "cnt": 2}
+- {"directed by": "steve dimarco", "cnt": 2}
+
+- Query 2 (count how many such directors there are):
+SQL:
+SELECT COUNT(*) AS num_directors_with_2_episodes
+FROM (
+  SELECT "directed by"
+  FROM public.list_of_republic_of_doyle_episodes
+  GROUP BY "directed by"
+  HAVING COUNT(*) = 2
+) sub;
+Result:
+- {"num_directors_with_2_episodes": 3}
+
+Conclusion
+- The data shows exactly 3 distinct directors with exactly 2 episodes each. The claim is supported.
+
+Assumptions
+- Interpreted the claim within the scope of the available table (public.list_of_republic_of_doyle_episodes). Each row lists a single director as stored; no rows contained multiple directors in the examined data.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

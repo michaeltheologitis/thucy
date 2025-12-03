@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+3 of west berkshire brewery 's beer each win a single award between 1995 and 2009
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “3 of West Berkshire Brewery’s beer each win a single award between 1995 and 2009.”
+
+Data source discovery:
+- Available database: public schema containing a single relevant table: west_berkshire_brewery.
+
+Schema details (from inspection):
+- Table: west_berkshire_brewery
+  - Columns: year (bigint), beer name (text), prize (text), category (text), competition (text)
+  - Each row represents an award a beer received in a given year/competition.
+
+Evidence from executed SQL:
+1) Beers with exactly one award between 1995 and 2009 (inclusive):
+Executed SQL:
+SELECT "beer name", COUNT(*) AS award_count
+FROM west_berkshire_brewery
+WHERE year BETWEEN 1995 AND 2009
+GROUP BY "beer name"
+HAVING COUNT(*) = 1;
+
+Result:
+- dr hexter 's wedding ale — 1 award
+- mash tun — 1 award
+- old father thames — 1 award
+- skiff — 1 award
+
+2) Total number of beers with exactly one award in that period:
+Executed SQL:
+SELECT COUNT(*) AS total_beers
+FROM (
+    SELECT "beer name"
+    FROM west_berkshire_brewery
+    WHERE year BETWEEN 1995 AND 2009
+    GROUP BY "beer name"
+    HAVING COUNT(*) = 1
+) AS single_award_beers;
+
+Result:
+- total_beers = 4
+
+Assessment:
+- The claim states that 3 West Berkshire Brewery beers each won a single award between 1995 and 2009. The data shows there are 4 such beers. Therefore, the claim is contradicted by the evidence.
+
+Assumptions made:
+- “Win a single award between 1995 and 2009” is interpreted as: within the inclusive years 1995–2009, a beer appears exactly once (one award event) in the awards table, regardless of awards outside this period.
+- Beer identity is determined by the text value in the "beer name" column, grouped case-sensitively as stored in the data.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,82 @@
+
+<userQuery>
+<query>
+fukusyū no puropōzu have 3.2% higher rating than the title with the most recent broadcast date
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “fukusyū no puropōzu have 3.2% higher rating than the title with the most recent broadcast date.”
+
+Data source discovery
+- Available dataset: PostgreSQL schema public containing a single table tsuki_no_koibito. No other data sources were discovered.
+
+Schema inspected
+- Table: public.tsuki_no_koibito
+  - Columns (all text): "Unnamed: 0", "episode title", "romanized title", "translation of title", "broadcast date", "ratings".
+
+Evidence and executed SQL
+1) Inspect formats (to confirm values and guide parsing)
+SQL executed:
+SELECT "romanized title", "broadcast date", "ratings" FROM public.tsuki_no_koibito LIMIT 100;
+Key returned rows (excerpt):
+- {romanized title: "fukusyū no puropōzu", broadcast date: "may 24 , 2010", ratings: "15.6%"}
+- {romanized title: "saishūshōjomakuwakare", broadcast date: "june 14 , 2010", ratings: "13.4%"}
+
+2) Identify the title with the most recent broadcast date (parsing date and rating)
+SQL executed:
+SELECT "romanized title", "broadcast date", "ratings",
+       to_date(initcap(regexp_replace("broadcast date", '\\s*,\\s*', ', ', 'g')), 'FMMonth DD, YYYY') AS broadcast_dt,
+       (regexp_replace("ratings", '%', '', 'g'))::numeric AS rating_num
+FROM public.tsuki_no_koibito
+ORDER BY broadcast_dt DESC
+LIMIT 1;
+Result:
+- romanized title: saishūshōjomakuwakare; broadcast_dt: 2010-06-14; rating_num: 13.4
+
+3) Fetch the “fukusyū no puropōzu” row with parsed values
+SQL executed:
+SELECT "romanized title", "broadcast date", "ratings",
+       to_date(initcap(regexp_replace("broadcast date", '\\s*,\\s*', ', ', 'g')), 'FMMonth DD, YYYY') AS broadcast_dt,
+       (regexp_replace("ratings", '%', '', 'g'))::numeric AS rating_num
+FROM public.tsuki_no_koibito
+WHERE "romanized title" = 'fukusyū no puropōzu';
+Result:
+- romanized title: fukusyū no puropōzu; broadcast_dt: 2010-05-24; rating_num: 15.6
+
+4) Compute differences between the two ratings
+SQL executed:
+WITH recent AS (
+  SELECT (regexp_replace("ratings", '%', '', 'g'))::numeric AS rating_num
+  FROM public.tsuki_no_koibito
+  ORDER BY to_date(initcap(regexp_replace("broadcast date", '\\s*,\\s*', ', ', 'g')), 'FMMonth DD, YYYY') DESC
+  LIMIT 1
+), fuku AS (
+  SELECT (regexp_replace("ratings", '%', '', 'g'))::numeric AS rating_num
+  FROM public.tsuki_no_koibito
+  WHERE "romanized title" = 'fukusyū no puropōzu'
+)
+SELECT fuku.rating_num AS fukusy_rating, recent.rating_num AS recent_rating,
+       (fuku.rating_num - recent.rating_num) AS diff_percentage_points,
+       ((fuku.rating_num - recent.rating_num)/recent.rating_num*100) AS rel_percent_diff
+FROM fuku, recent;
+Result:
+- fukusy_rating: 15.6; recent_rating: 13.4; diff_percentage_points: 2.2; rel_percent_diff: 16.417910447761194%
+
+Assessment
+- The title with the most recent broadcast date is “saishūshōjomakuwakare” (2010-06-14) with a rating of 13.4.
+- “fukusyū no puropōzu” has a rating of 15.6.
+- Difference: 15.6 − 13.4 = 2.2 percentage points (absolute). In relative terms, that is about 16.42% higher, not 3.2%.
+
+Conclusion: The claim is incorrect. While “fukusyū no puropōzu” does have a higher rating than the most recent-broadcast title, the difference is 2.2 percentage points (≈16.42% relatively), not 3.2%.
+
+Assumptions
+- “Rating” refers to the numeric value in the "ratings" column after removing the percent sign.
+- “Most recent broadcast date” is determined by parsing the "broadcast date" text into a date and taking the maximum.
+- “3.2% higher” was interpreted as an absolute percentage-point difference; even under a relative-percent interpretation, the computed value (≈16.42%) does not match 3.2%.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

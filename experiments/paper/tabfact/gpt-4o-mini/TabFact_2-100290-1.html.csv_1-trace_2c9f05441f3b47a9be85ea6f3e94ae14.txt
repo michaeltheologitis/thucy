@@ -1,0 +1,41 @@
+
+<userQuery>
+<query>
+pdip - 20 be the package when eeprom be less than 128 on 1 occasion
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Conclusion: The claim is supported by the data. There is exactly one row where eeprom < 128, and in that row the package is recorded as "pdip - 20".
+
+Evidence and executed SQL:
+- Listing rows with eeprom < 128
+  - Result:
+    - chip: at90s1200; eeprom: 64; package: pdip - 20
+  - SQL executed:
+    SELECT chip, eeprom, package FROM public.my_info_table WHERE eeprom < 128;
+
+- Counting rows with eeprom < 128
+  - Result: 1
+  - SQL executed:
+    SELECT COUNT(*) FROM public.my_info_table WHERE eeprom < 128;
+
+- Counting rows with eeprom < 128 where package normalizes to pdip-20 (case-insensitive, ignoring spaces and hyphen)
+  - Result: 1
+  - SQL executed:
+    SELECT COUNT(*) 
+    FROM my_info_table 
+    WHERE eeprom < 128 AND 
+    LOWER(REPLACE(REPLACE(package, ' ', ''), '-', '')) = 'pdip20'
+
+Taken together, these queries show there is exactly one occurrence ("on 1 occasion") where eeprom is less than 128, and for that occurrence the package value is recorded as "pdip - 20".
+
+Assumptions:
+- Interpreted "on 1 occasion" to mean exactly one row in the available dataset satisfies the condition.
+- Treated "pdip - 20" as equivalent to "pdip-20" regardless of spacing and case, matching the dataset’s package formatting.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

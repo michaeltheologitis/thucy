@@ -1,0 +1,62 @@
+
+<userQuery>
+<query>
+the yugoslavian national team fail to score only 1 time , drop a world cup qualify match 2:1 against denmark
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of data sources explored
+- Discovered a PostgreSQL database with table public.yugoslavia_national_football_team_results containing Yugoslavia national team match results.
+- Table columns: date (text), city (text), opponent (text), results (text), "type of game" (text). No primary/foreign keys.
+
+Evidence and executed SQL
+1) Find matches vs Denmark (case-insensitive) in World Cup qualifying
+- Result: 1 match found — Date: September 27; City: Ljubljana; Opponent: Denmark; Results: 2:1; Type of Game: 1982 WCQ
+- Executed SQL:
+  SELECT date, city, opponent, results, "type of game" 
+  FROM public.yugoslavia_national_football_team_results 
+  WHERE LOWER(opponent) LIKE '%den%' 
+  AND LOWER("type of game") LIKE '%wcq%';
+
+2) Verify any Denmark entries at all
+- Result: 1 match found (same as above)
+- Executed SQL:
+  SELECT * FROM yugoslavia_national_football_team_results WHERE opponent ILIKE '%den%';
+
+3) Check if Yugoslavia ever failed to score vs Denmark
+- Result: 0 matches where results start with '0:' and opponent contains 'den'
+- Executed SQL (count):
+  SELECT COUNT(*) AS match_count FROM public.yugoslavia_national_football_team_results WHERE LOWER(opponent) LIKE '%den%' AND results LIKE '0:%';
+- Executed SQL (detail):
+  SELECT * FROM public.yugoslavia_national_football_team_results WHERE LOWER(opponent) LIKE '%den%' AND results LIKE '0:%';
+
+4) Count all matches where Yugoslavia failed to score (regardless of opponent) and list them
+- Result: 1 match
+  - Date: November 15; Opponent: Italy; Results: 0:2; City: Torino, Italy; Type of Game: 1982 WCQ
+- Executed SQL (count):
+  SELECT COUNT(*) AS total_count
+  FROM public.yugoslavia_national_football_team_results
+  WHERE results LIKE '0:%';
+- Executed SQL (rows):
+  SELECT date, opponent, results, city, "type of game"
+  FROM public.yugoslavia_national_football_team_results
+  WHERE results LIKE '0:%';
+
+Assessment of the claim
+- "fail to score only 1 time": Supported by the data. The table shows exactly one match where Yugoslavia scored 0 (0:2 vs Italy, 1982 WCQ).
+- "drop a world cup qualify match 2:1 against denmark": Contradicted by the data. The only recorded Denmark WCQ match is 2:1 in Ljubljana, which indicates Yugoslavia scored and, given the table’s convention (Yugoslavia’s score first), they won 2–1 rather than dropped the match.
+
+Conclusion
+- The dataset supports that Yugoslavia failed to score only once (vs Italy). It does not support that they dropped a WCQ match 2:1 against Denmark; instead it shows a 2:1 in Yugoslavia’s favor.
+
+Assumptions
+- The results column lists Yugoslavia’s goals first (e.g., 2:1 means Yugoslavia 2–1 Opponent).
+- "1982 WCQ" denotes a FIFA World Cup Qualifier.
+- Opponent name matching used case-insensitive searches to account for potential formatting variations.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

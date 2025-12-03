@@ -1,0 +1,63 @@
+
+<userQuery>
+<query>
+patty sheehan , judy rankin , and kathy whitworth be all captain that win the cup 2 time
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The user asserts that Patty Sheehan, Judy Rankin, and Kathy Whitworth are all captains who won the Solheim Cup two times.
+
+What the data shows:
+- Judy Rankin: Captained twice, United States won both times (2 wins).
+- Patty Sheehan: Captained twice, United States won once (1 win, 1 loss).
+- Kathy Whitworth: Captained twice, United States won once (1 win, 1 loss).
+
+Supporting evidence from the database
+1) Retrieve the Solheim Cup years for the three named USA captains (with outcomes)
+Executed SQL:
+SELECT year, "usa captain", "winning team", venue, score
+FROM public.solheim_cup
+WHERE "usa captain" ILIKE '%Sheehan%'
+   OR "usa captain" ILIKE '%Rankin%'
+   OR "usa captain" ILIKE '%Whitworth%'
+ORDER BY year;
+
+Results:
+- 1990 — USA captain: kathy whitworth — Winning team: united states — Venue: lake nona golf & country club , florida , usa — Score: 11½ - 4½
+- 1992 — USA captain: kathy whitworth — Winning team: europe — Venue: dalmahoy country club , scotland — Score: 11½ - 6½
+- 1996 — USA captain: judy rankin — Winning team: united states — Venue: st pierre golf & country club , wales — Score: 17 - 11
+- 1998 — USA captain: judy rankin — Winning team: united states — Venue: muirfield village , ohio , usa — Score: 16 - 12
+- 2002 — USA captain: patty sheehan — Winning team: united states — Venue: interlachen country club , minnesota , usa — Score: 15½ - 12½
+- 2003 — USA captain: patty sheehan — Winning team: europe — Venue: barsebäck golf & country club , sweden — Score: 17½ - 10½
+
+2) Aggregate counts of captaincies and USA wins per USA captain
+Executed SQL (to confirm win counts):
+-- Verify winning-team values
+SELECT DISTINCT "winning team" FROM public.solheim_cup;
+
+-- Count captaincies and wins
+SELECT "usa captain" AS usa_captain,
+       COUNT(*) AS times_captained,
+       SUM(CASE WHEN "winning team" = 'united states' THEN 1 ELSE 0 END) AS usa_wins
+FROM public.solheim_cup
+GROUP BY "usa captain"
+ORDER BY times_captained DESC, usa_captain;
+
+Key rows returned:
+- judy rankin: times_captained = 2, usa_wins = 2
+- kathy whitworth: times_captained = 2, usa_wins = 1
+- patty sheehan: times_captained = 2, usa_wins = 1
+
+Conclusion based on evidence:
+- Only Judy Rankin meets the criterion of winning the cup twice as captain. Patty Sheehan and Kathy Whitworth each have one win as captain, not two. Therefore, the claim that all three “won the cup 2 time” is not supported by the data.
+
+Assumptions:
+- “The cup” refers to the Solheim Cup (women’s golf), consistent with the public.solheim_cup table.
+- “Win the cup 2 time” is interpreted as the captain’s team (United States) winning twice while that person served as USA captain.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

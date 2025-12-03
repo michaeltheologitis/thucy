@@ -1,0 +1,63 @@
+
+<userQuery>
+<query>
+on november 14 louisville play at dowdy - ficklen stadium greenville , nc
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “on november 14 louisville play at dowdy - ficklen stadium greenville , nc.”
+
+Data sources consulted
+- Database: TabFact (postgres_tabfact9)
+- Available table: public.east_carolina_pirates_football_1990_99 (columns: date, opponent, site, result, attendance). This table contains game-level records for East Carolina Pirates football within the 1990–1999 period.
+
+Evidence from executed SQL
+1) Find all East Carolina games vs. Louisville
+- SQL executed:
+SELECT date, opponent, site, result, attendance
+FROM public.east_carolina_pirates_football_1990_99
+WHERE opponent ILIKE '%louisville%';
+- Result:
+  - date: november 14
+    opponent: louisville
+    site: dowdy - ficklen stadium greenville , nc
+    result: l45 - 63
+    attendance: 26258
+
+2) Count games vs. Louisville at Dowdy-Ficklen in Greenville, NC
+- Initial (strict hyphen) SQL executed:
+SELECT COUNT(*) AS count FROM public.east_carolina_pirates_football_1990_99 WHERE opponent ILIKE 'Louisville' AND site ILIKE '%Dowdy-Ficklen%' AND site ILIKE '%Greenville%';
+- Result: count = 0 (due to site string formatting)
+- Refined (token-based) SQL executed:
+SELECT COUNT(*) AS count FROM public.east_carolina_pirates_football_1990_99 WHERE opponent ILIKE '%louisville%' AND site ILIKE '%dowdy%' AND site ILIKE '%ficklen%' AND site ILIKE '%greenville%';
+- Result: count = 1
+
+3) Verify the date is November 14 for the Louisville game
+- SQL executed:
+SELECT date, opponent, site, result, attendance
+FROM public.east_carolina_pirates_football_1990_99
+WHERE opponent ILIKE 'Louisville' AND date ILIKE 'November 14%';
+- Result:
+  - date: november 14
+    opponent: louisville
+    site: dowdy - ficklen stadium greenville , nc
+    result: l45 - 63
+    attendance: 26258
+
+Assessment
+- The dataset contains a game against Louisville with the date listed as “november 14,” and the site listed as “dowdy - ficklen stadium greenville , nc,” which directly matches the claim that Louisville played at Dowdy-Ficklen Stadium in Greenville, NC on November 14.
+
+Conclusion
+- The claim is supported by the data.
+
+Assumptions
+- “Louisville” refers to the University of Louisville football team.
+- The date field in the table does not include a year; the table name suggests the 1990–1999 period. Verification is limited to that scope but directly confirms the stated date and venue.
+- Minor formatting differences in the site name (spaces around the hyphen) are treated as equivalent to “Dowdy-Ficklen Stadium, Greenville, NC.”
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

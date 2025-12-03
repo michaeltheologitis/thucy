@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+the erp w and class for w290ag and w282ae be 27 and d for both , but 1 have a city of license of macon , georgia and the other have a city of license of griffin , georgia
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify
+- For call signs W290AG and W282AE: ERP (in watts) = 27 and FCC class = D for both; one is licensed to Macon, Georgia and the other to Griffin, Georgia.
+
+Data source discovery
+- Available database: TabFact (postgres_tabfact7)
+- Relevant table: public.wyfk with columns: call sign (text), frequency mhz (text), city of license (text), erp w (bigint), class (text), fcc info (text)
+
+Evidence
+1) Checked table size
+SQL executed:
+SELECT count(*) FROM public.wyfk;
+Result:
+[{"count":5}]
+
+2) Inspected rows to understand call sign capitalization and available fields
+SQL executed:
+SELECT "call sign", "frequency mhz", "city of license", "erp w", "class", "fcc info" FROM public.wyfk ORDER BY "call sign" LIMIT 10;
+Result:
+[{"call sign":"w230av","city of license":"gadsden , alabama","class":"d","erp w":10,"fcc info":"fcc","frequency mhz":"93.9 fm"},
+ {"call sign":"w269ax","city of license":"anniston , alabama","class":"d","erp w":10,"fcc info":"fcc","frequency mhz":"101.7 fm"},
+ {"call sign":"w273ae","city of license":"albany , georgia","class":"d","erp w":55,"fcc info":"fcc","frequency mhz":"102.5 fm"},
+ {"call sign":"w282ae","city of license":"macon , georgia","class":"d","erp w":27,"fcc info":"fcc","frequency mhz":"104.3 fm"},
+ {"call sign":"w290ag","city of license":"griffin , georgia","class":"d","erp w":27,"fcc info":"fcc","frequency mhz":"105.9 fm"}]
+
+3) Queried the two specific call signs
+SQL executed:
+SELECT "call sign", "erp w", "class", "city of license" FROM public.wyfk WHERE lower("call sign") IN ('w290ag','w282ae') ORDER BY lower("call sign");
+Result:
+[{"call sign":"w282ae","city of license":"macon , georgia","class":"d","erp w":27},
+ {"call sign":"w290ag","city of license":"griffin , georgia","class":"d","erp w":27}]
+
+Assessment of the claim
+- ERP for W282AE: 27 W — matches the claim.
+- ERP for W290AG: 27 W — matches the claim.
+- Class for W282AE: D — matches the claim.
+- Class for W290AG: D — matches the claim.
+- City of license for W282AE: Macon, Georgia — matches the claim (stored as "macon , georgia" in the data).
+- City of license for W290AG: Griffin, Georgia — matches the claim (stored as "griffin , georgia" in the data).
+
+Conclusion: All elements of the claim are supported by the data.
+
+Assumptions
+- Interpreted "erp w" as effective radiated power in watts.
+- Treated call signs case-insensitively because they are stored in lowercase in the table.
+- Interpreted the phrasing "1 have a city of license of ... and the other ..." as W282AE = Macon, GA and W290AG = Griffin, GA, consistent with the queried results.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

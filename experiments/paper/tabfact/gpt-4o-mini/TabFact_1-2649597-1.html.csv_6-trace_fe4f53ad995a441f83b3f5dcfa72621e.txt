@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+shane hall have an average finish of 33.39 between 1995 - 2008
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Conclusion: The claim is not supported by the data. Using the authoritative dataset available (public.shane_hall), Shane Hall’s overall average finish across 1995–2008 (inclusive) is 28.28 when properly weighting by the number of races each year, not 33.39.
+
+Evidence from data
+1) Per-year data used
+SQL executed:
+SELECT year, races, finish FROM public.shane_hall WHERE year BETWEEN 1995 AND 2008;
+
+Returned rows:
+- 1995: races=2, finish=24.0
+- 1996: races=14, finish=26.4
+- 1997: races=28, finish=27.1
+- 1998: races=31, finish=24.9
+- 1999: races=25, finish=25.8
+- 2000: races=2, finish=35.0
+- 2001: races=33, finish=27.9
+- 2002: races=24, finish=27.0
+- 2003: races=5, finish=35.8
+- 2004: races=9, finish=31.4
+- 2005: races=7, finish=40.9
+- 2006: races=9, finish=38.9
+- 2008: races=1, finish=43.0
+
+2) Overall average finish (weighted by number of races)
+SQL executed:
+SELECT SUM(finish * races) / NULLIF(SUM(races), 0) AS weighted_average_finish,
+       AVG(finish) AS unweighted_average_finish,
+       SUM(races) AS total_races,
+       COUNT(DISTINCT year) AS number_of_years
+FROM public.shane_hall
+WHERE year BETWEEN 1995 AND 2008;
+
+Results:
+- Weighted average finish: 28.28
+- Unweighted average of yearly finishes: 31.39
+- Total races: 190
+- Number of years: 13
+
+Interpretation
+- The correct, race-weighted overall average finish for 1995–2008 is 28.28.
+- Even the unweighted mean of yearly averages (31.39) does not match the claim of 33.39.
+
+Assumptions
+- The column finish represents the average finishing position for each year.
+- “Between 1995 – 2008” is interpreted as inclusive of those years and all available rows in that range.
+- The appropriate overall average finish across years is computed by weighting each year’s average finish by that year’s number of races: SUM(finish*races)/SUM(races).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

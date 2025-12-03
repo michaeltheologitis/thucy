@@ -1,0 +1,97 @@
+
+<userQuery>
+<query>
+the denver bronco and the chicago bear play at the rca dome , end in the broncos' favor with a score of 23 - 8
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “The Denver Broncos and the Chicago Bears play at the RCA Dome, ending in the Broncos’ favor with a score of 23–8.”
+
+Data sources discovered
+- TabFact (public schema) containing: nbc_sunday_night_football_results_2006_present — NBC Sunday Night Football game results from 2006–present.
+
+Step 1 — Understand table structure (sample rows)
+Executed SQL:
+SELECT date, "visiting team", "final score", "host team", stadium
+FROM nbc_sunday_night_football_results_2006_present
+LIMIT 10;
+Observation: Final score is stored as text in the format “visiting score - host score”; team and stadium names are lowercase.
+
+Step 2 — Direct check for Broncos vs Bears at RCA Dome
+Executed SQL:
+SELECT "date", "visiting team", "host team", "final score", "stadium"
+FROM public.nbc_sunday_night_football_results_2006_present
+WHERE "stadium" ILIKE 'RCA Dome'
+  AND (
+    ("visiting team" ILIKE '%Denver Broncos%' AND "host team" ILIKE '%Chicago Bears%')
+    OR ("visiting team" ILIKE '%Chicago Bears%' AND "host team" ILIKE '%Denver Broncos%')
+  );
+Result: No rows. There is no Broncos vs Bears game at the RCA Dome in this dataset.
+
+Step 3 — Confirm how RCA Dome appears and list SNF games at RCA Dome
+Executed SQL (distinct name check):
+SELECT DISTINCT "stadium" FROM public.nbc_sunday_night_football_results_2006_present WHERE "stadium" ILIKE '%RCA%';
+Result: rca dome
+
+Executed SQL (all RCA Dome games):
+SELECT "date", "visiting team", "host team", "final score", "stadium"
+FROM public.nbc_sunday_night_football_results_2006_present
+WHERE "stadium" ILIKE 'rca dome';
+Results:
+- november 26 — philadelphia eagles @ indianapolis colts — 21 - 45 — rca dome
+- january 6 — kansas city chiefs @ indianapolis colts — 8 - 23 — rca dome
+Observation: None involve Denver or Chicago.
+
+Step 4 — Search for a 23–8 (or 8–23) score in the dataset
+Executed SQL:
+SELECT date, "visiting team", "host team", "final score", stadium
+FROM public.nbc_sunday_night_football_results_2006_present
+WHERE "final score" IN ('23 - 8', '8 - 23')
+ORDER BY date;
+Results:
+- january 6 — kansas city chiefs @ indianapolis colts — 8 - 23 — rca dome
+Executed SQL (counts):
+SELECT COUNT(*) AS count_23_8 FROM public.nbc_sunday_night_football_results_2006_present WHERE "final score" = '23 - 8';
+Result: 0
+SELECT COUNT(*) AS count_8_23 FROM public.nbc_sunday_night_football_results_2006_present WHERE "final score" = '8 - 23';
+Result: 1
+Observation: The only 23–8-equivalent score at the RCA Dome is Chiefs @ Colts (Colts won 23–8), not Broncos vs Bears.
+
+Step 5 — Check whether Broncos vs Bears appears at all in this SNF dataset
+Executed SQL:
+SELECT count(*) AS match_count
+FROM public.nbc_sunday_night_football_results_2006_present
+WHERE ("visiting team" = 'Denver Broncos' AND "host team" = 'Chicago Bears')
+   OR ("visiting team" = 'Chicago Bears' AND "host team" = 'Denver Broncos');
+Result: 0
+Observation: Broncos vs Bears does not occur in this table (SNF 2006–present).
+
+Step 6 — Context: Broncos and Bears do appear individually, but not vs each other nor at RCA Dome
+Executed SQL (Broncos in SNF dataset):
+SELECT date, "visiting team", "host team", "final score", stadium
+FROM public.nbc_sunday_night_football_results_2006_present
+WHERE "visiting team" = 'denver broncos' OR "host team" = 'denver broncos'
+ORDER BY date;
+Results include games at gillette stadium and invesco field at mile high, not rca dome.
+
+Executed SQL (Bears in SNF dataset):
+SELECT date, "visiting team" AS visiting_team, "host team" AS host_team, "final score" AS final_score, stadium
+FROM public.nbc_sunday_night_football_results_2006_present
+WHERE "visiting team" ILIKE '%Chicago Bears%' OR "host team" ILIKE '%Chicago Bears%'
+ORDER BY date;
+Results include games at soldier field and giants stadium, not rca dome.
+
+Conclusion
+- The NBC Sunday Night Football dataset (2006–present) contains no game where the Denver Broncos played the Chicago Bears at the RCA Dome.
+- The only SNF game at the RCA Dome with a 23–8-equivalent score is Kansas City Chiefs @ Indianapolis Colts (8–23), with the Colts winning — not the Broncos over the Bears.
+- Therefore, based on the authoritative data available, the claim is contradicted.
+
+Assumptions
+- Scope is limited to the accessible dataset of NBC Sunday Night Football games (2006–present). If the claim refers to a non-SNF game or a different era, it would fall outside this data; however, the venue (RCA Dome — Indianapolis) hosting Broncos vs Bears would itself be atypical, further undermining the claim within reasonable expectations.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

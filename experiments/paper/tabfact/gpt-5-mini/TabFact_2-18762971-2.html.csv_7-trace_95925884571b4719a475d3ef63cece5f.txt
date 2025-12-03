@@ -1,0 +1,45 @@
+
+<userQuery>
+<query>
+there be 4 differnt game where no goal be score by either side
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “There were 4 different games where no goal was scored by either side.” I verified this against the only available dataset: the 2000–01 Sheffield Wednesday F.C. season match table.
+
+Data source inspected
+- Database: TabFact
+- Schema: public
+- Table: t_2000_01_sheffield_wednesday_f_c_season (columns: date text, opponent text, venue text, result text, attendance bigint)
+
+Step 1 — Inspect how 0–0 results are represented
+SQL executed:
+SELECT DISTINCT result FROM public.t_2000_01_sheffield_wednesday_f_c_season ORDER BY result;
+Result (distinct values) included: 0 - 0, 0 - 1, 0 - 2, 0 - 3, 0 - 5, 1 - 0, 1 - 1, 1 - 2, 1 - 3, 1 - 4, 2 - 0, 2 - 1, 2 - 3, 2 - 4, 3 - 1, 3 - 2, 3 - 3, 4 - 1, 5 - 2. This shows 0–0 is stored exactly as '0 - 0'.
+
+Step 2 — Count all 0–0 matches
+SQL executed:
+SELECT result, COUNT(*) AS cnt FROM public.t_2000_01_sheffield_wednesday_f_c_season GROUP BY result ORDER BY cnt DESC, result;
+Key result rows:
+- (0 - 0, 3)
+
+Step 3 — List the 0–0 matches (dates and opponents)
+SQL executed:
+SELECT date, opponent FROM public.t_2000_01_sheffield_wednesday_f_c_season WHERE result = '0 - 0' ORDER BY date;
+Returned rows:
+- 30 december 2000 — huddersfield town
+- 7 march 2001 — portsmouth
+- 6 may 2001 — crewe alexandra
+
+Conclusion
+- The table contains 3 matches that ended 0–0, not 4. Therefore, the claim is not supported by the available data.
+
+Assumptions
+- I assumed the claim refers to the only accessible dataset (the 2000–01 Sheffield Wednesday F.C. season table) and that “no goal be score by either side” corresponds to matches with a recorded result of exactly '0 - 0'.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

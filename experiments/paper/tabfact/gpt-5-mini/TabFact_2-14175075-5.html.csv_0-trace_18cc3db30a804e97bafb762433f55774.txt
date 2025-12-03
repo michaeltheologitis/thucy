@@ -1,0 +1,76 @@
+
+<userQuery>
+<query>
+cedar rapid be the site with the earliest date
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The user asserts that “Cedar Rapids” is the site with the earliest date in the available dataset.
+
+Data source discovery
+- Source: PostgreSQL database “TabFact”, schema “public”. One relevant table found.
+- Table: public.iowa_corn_cy_hawk_series
+  - Columns: date (text), site (text), sport (text), "winning team" (text), series (text)
+
+Step 1 — Inspect date values and format
+Executed SQL:
+SELECT date, site FROM public.iowa_corn_cy_hawk_series LIMIT 50;
+
+Observed rows (13 total):
+- "september 4 , 2007" — cedar rapids
+- "september 8 , 2007" — des moines
+- "september 9 , 2007" — iowa city
+- "september 15 , 2007" — ames
+- "november 10 , 2007" — peoria
+- "november 10 , 2007" — peoria
+- "december 5 , 2007" — ames
+- "december 7 , 2007" — ames
+- "december 8 , 2007" — ames
+- "december 9 , 2007" — ames
+- "february 22 , 2008" — ames
+- "march 7 , 2008" — iowa city
+- "april 1 , 2008" — ames
+
+Step 2 — Parse text dates and identify the earliest date and its site
+Executed SQL (list all with parsed date):
+WITH parsed AS (
+  SELECT date AS original_date,
+    to_date(initcap(regexp_replace(trim(date), '\s+,', ',', 'g')), 'Month DD, YYYY') AS parsed_date,
+    site
+  FROM public.iowa_corn_cy_hawk_series
+)
+SELECT original_date, parsed_date, site
+FROM parsed
+ORDER BY parsed_date ASC NULLS LAST, original_date;
+
+Key result (earliest row):
+- original_date: "september 4 , 2007", parsed_date: 2007-09-04, site: cedar rapids
+
+Executed SQL (site(s) at the minimum date):
+WITH parsed AS (
+  SELECT date AS original_date,
+    to_date(initcap(regexp_replace(trim(date), '\s+,', ',', 'g')), 'Month DD, YYYY') AS parsed_date,
+    site
+  FROM public.iowa_corn_cy_hawk_series
+)
+SELECT site
+FROM parsed
+WHERE parsed_date = (SELECT min(parsed_date) FROM parsed);
+
+Result:
+- cedar rapids
+
+Conclusion
+- The earliest parsed date in the dataset is 2007-09-04, and its site is “cedar rapids”. The claim is supported by the data.
+
+Assumptions
+- Interpreted the claim as referring to the iowa_corn_cy_hawk_series table in the TabFact public schema.
+- Treated “cedar rapid” as “Cedar Rapids”.
+- Defined “earliest date” as the minimum chronological date after normalizing and parsing the text date values.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

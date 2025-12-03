@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+3 team tie on point but be separate by goal difference
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: There exists a case where three teams are tied on points but are separated by goal difference.
+
+Data source explored: TabFact (postgres_tabfact25) — table public.t_1940_in_brazilian_football with columns: position, team, points, played, against, difference.
+
+Findings
+- The table contains exactly one instance of a three-team tie on points: at 6 points, among botafogo, vasco da gama, and américa. Their goal differences are distinct (0, -2, -10), which separates them when ordered by goal difference.
+
+Evidence with executed SQL and results
+1) Identify points totals where three or more teams are tied
+SQL:
+SELECT points, count(*) AS team_count, array_agg(team ORDER BY position) AS teams
+FROM public.t_1940_in_brazilian_football
+GROUP BY points
+HAVING count(*) >= 3
+ORDER BY points DESC;
+Result:
+- points = 6, team_count = 3, teams = ["botafogo", "vasco da gama", "américa"].
+
+2) List all tied point totals and show teams’ goal differences (text and numeric for ordering)
+SQL (step A — find tied point totals):
+SELECT points, COUNT(*) AS cnt
+FROM public.t_1940_in_brazilian_football
+GROUP BY points
+HAVING COUNT(*) > 1
+ORDER BY points DESC;
+Result rows:
+- points: 13, cnt: 2
+- points: 6, cnt: 3
+
+SQL (step B — show teams on tied points with numeric goal difference for ordering):
+SELECT team, points, difference AS goal_difference,
+       regexp_replace(replace(difference, '−', '-'), '[^0-9\-]', '', 'g')::integer AS goal_diff_num
+FROM public.t_1940_in_brazilian_football
+WHERE points IN (
+  SELECT points
+  FROM public.t_1940_in_brazilian_football
+  GROUP BY points
+  HAVING COUNT(*) > 1
+)
+ORDER BY points DESC, goal_diff_num DESC, team;
+Result rows (ordered by points desc, goal_diff_num desc):
+- fluminense — points: 13, goal_difference: 10, goal_diff_num: 10
+- flamengo — points: 13, goal_difference: 8, goal_diff_num: 8
+- botafogo — points: 6, goal_difference: 0, goal_diff_num: 0
+- vasco da gama — points: 6, goal_difference: - 2, goal_diff_num: -2
+- américa — points: 6, goal_difference: - 10, goal_diff_num: -10
+
+Conclusion: The data shows a three-team tie on points (6) that is indeed separated by goal difference (0, -2, -10), satisfying the claim.
+
+Assumptions
+- Because the request was ambiguous and no specific league/season was provided, I verified the claim against the only available sports standings table in the accessible database: public.t_1940_in_brazilian_football (interpreted as a standings table for Brazilian football in 1940). If you intended a different competition/season, provide details and I can re-verify accordingly.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

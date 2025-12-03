@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+as porto novo score no point against the victoria club mokanda
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Conclusion: Verified. In the 1971 African Cup of Champions Clubs, AS Porto Novo failed to score against Victoria Club Mokanda, losing 0–3 on aggregate (legs: 0–1 and 0–2).
+
+Evidence and executed SQL
+1) Discover available tables
+- Result: Found table public.t_1971_african_cup_of_champions_clubs
+- SQL executed:
+SELECT table_schema, table_name FROM information_schema.tables WHERE table_schema = 'public';
+
+2) Inspect table structure
+- Result: Columns are: team 1 (text), agg (text), team 2 (text), 1st leg (text), 2nd leg (text)
+- SQL executed:
+SELECT column_name, data_type, is_nullable, ordinal_position 
+FROM information_schema.columns 
+WHERE table_name = 't_1971_african_cup_of_champions_clubs' 
+AND table_schema = 'public' 
+ORDER BY ordinal_position;
+
+3) Find ties involving AS Porto Novo/Porto-Novo
+- Result: Identified tie vs Victoria Club Mokanda with scores 1st leg 0–1, 2nd leg 0–2, aggregate 0–3
+- SQL executed:
+SELECT * FROM public.t_1971_african_cup_of_champions_clubs WHERE "team 1" ILIKE '%Porto%' OR "team 2" ILIKE '%Porto%' OR "team 1" ILIKE '%Porto-Novo%' OR "team 2" ILIKE '%Porto-Novo%';
+
+4) Retrieve the specific row (AS Porto Novo vs Victoria Club Mokanda)
+- Result (row values):
+  - Team 1: as porto novo
+  - Team 2: victoria club mokanda
+  - 1st leg: 0 - 1
+  - 2nd leg: 0 - 2
+  - Aggregate: 0 - 3
+- SQL executed:
+SELECT * FROM public.t_1971_african_cup_of_champions_clubs WHERE ("team 1" ILIKE '%Porto%' AND ("team 2" ILIKE '%Mokanda%' OR "team 2" ILIKE '%Victoria%')) OR ("team 2" ILIKE '%Porto%' AND ("team 1" ILIKE '%Mokanda%' OR "team 1" ILIKE '%Victoria%'));
+
+Assumptions
+- "score no point" is interpreted as scoring zero goals in a football (soccer) tie.
+- The claim is about the 1971 African Cup of Champions Clubs (the scope of the available dataset).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

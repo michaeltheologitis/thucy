@@ -1,0 +1,54 @@
+
+<userQuery>
+<query>
+irregular galaxy have 2 ngc number in the list
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim being checked: “irregular galaxy have 2 ngc number in the list.”
+
+Data source discovery
+- Available database: PostgreSQL with a public schema containing astronomical data.
+- Identified table: public.list_of_ngc_objects_5001_6000 (NGC objects numbered 5001–6000).
+
+Table structure confirmation
+Result (columns):
+1) ngc number (bigint)
+2) apparent magnitude (double precision)
+3) object type (text)
+4) constellation (text)
+5) right ascension ( j2000 ) (text)
+6) declination ( j2000 ) (text)
+Executed SQL:
+SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'list_of_ngc_objects_5001_6000';
+
+Verification steps and evidence
+1) Count irregular galaxies and list their NGC numbers (treat any object with object type containing “irregular” as an irregular galaxy):
+- Result: 2 irregular galaxies with NGC numbers {5408, 5477}
+Executed SQL:
+SELECT COUNT(*) AS total_irregular_galaxies, ARRAY_AGG("ngc number") AS irregular_galaxy_numbers
+FROM public.list_of_ngc_objects_5001_6000
+WHERE "object type" LIKE '%irregular%'
+
+2) Show the matching rows for clarity:
+- Result rows:
+  - NGC number: 5408, object type: irregular galaxy
+  - NGC number: 5477, object type: irregular galaxy
+Executed SQL:
+SELECT "ngc number", "object type" 
+FROM public.list_of_ngc_objects_5001_6000 
+WHERE "object type" ILIKE '%irregular%';
+
+Conclusion
+- The table public.list_of_ngc_objects_5001_6000 contains exactly two entries classified as “irregular galaxy”: NGC 5408 and NGC 5477. This supports the claim that, in this list, irregular galaxies have 2 NGC numbers.
+
+Assumptions made
+- “the list” refers to the available table public.list_of_ngc_objects_5001_6000 (NGC 5001–6000).
+- “irregular galaxy” identification is based on the object type text containing the substring “irregular.”
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

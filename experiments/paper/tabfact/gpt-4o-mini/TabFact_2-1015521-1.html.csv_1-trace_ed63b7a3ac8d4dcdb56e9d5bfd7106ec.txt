@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+there be 3 c - 95 aircraft of brazilian origin currently in service
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim: “there be 3 c - 95 aircraft of brazilian origin currently in service.”
+- Context interpreted from available data: Uruguayan Air Force inventory (TabFact, public schema).
+- Finding: The table contains an entry for Embraer EMB 110 Bandeirante (Brazilian origin), with version “C - 95” and an “In Service” count of 3. This directly supports the claim.
+
+Data source discovery
+- Available source: TabFact database, public schema, table: uruguayan_air_force (inventory-like listing for the Uruguayan Air Force).
+
+Schema overview (from schema tool)
+- Columns: aircraft (text), origin (text), type (text), versions (text), "in service" (text). Note: Despite the schema tool labeling "in service" as text, queries indicate it stores numeric counts in this dataset.
+
+Executed SQL and evidence
+1) Initial exploratory queries (no direct match due to formatting and column semantics)
+- SQL:
+  SELECT * FROM public.uruguayan_air_force WHERE aircraft LIKE '%C-95%';
+  Result: No rows.
+
+- SQL:
+  SELECT * FROM public.uruguayan_air_force WHERE origin = 'Brazil' AND "in service" = 'Yes';
+  Result: No rows (the "in service" field appears numeric in this dataset rather than Yes/No).
+
+2) Broader search for Brazilian-origin and EMB/Bandeirante naming
+- SQL:
+  SELECT * FROM public.uruguayan_air_force WHERE origin ILIKE '%Brazil%'
+  Result (relevant rows summarized):
+  • Aircraft: Embraer EMB 110 Bandeirante | Origin: Brazil | Type: Transport / Utility | Versions: C - 95 | In Service: 3
+  • Aircraft: Embraer EMB 120 Brasilia     | Origin: Brazil | Type: Transport         | Versions: EMB 120 | In Service: 1
+
+- SQL:
+  SELECT * FROM public.uruguayan_air_force WHERE aircraft ILIKE '%EMB%' OR aircraft ILIKE '%Bandeirante%' OR aircraft ILIKE '%C 95%'
+  Result: Same relevant rows as above, including the C - 95 variant with In Service: 3.
+
+3) Targeted confirmation of the specific C - 95 row
+- SQL:
+  SELECT aircraft, origin, type, versions, "in service"
+  FROM public.uruguayan_air_force
+  WHERE versions ILIKE 'C - 95' AND origin ILIKE '%Brazil%';
+  Result:
+  • Aircraft: embraer emb 110 bandeirante | Origin: brazil | Type: transport / utility | Versions: c - 95 | In Service: 3
+
+Conclusion
+- The data shows there are 3 C - 95 aircraft (a variant of the Embraer EMB 110 Bandeirante) of Brazilian origin currently in service (count = 3) in the Uruguayan Air Force inventory. This supports the claim.
+
+Assumptions
+- The claim is interpreted within the scope of the available dataset (Uruguayan Air Force). “Currently in service” is taken to mean the numeric value in the "in service" column of that table. “C - 95” is interpreted as the version field corresponding to the Embraer EMB 110 Bandeirante of Brazilian origin.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

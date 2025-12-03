@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+galina voskoboeva play a total of 3 game on a hard tennis court , and 1 on clay
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “galina voskoboeva play a total of 3 game on a hard tennis court, and 1 on clay.”
+
+Data source discovery
+- Tool: discover_data_sources
+- Finding: One PostgreSQL database available (TabFact), public schema.
+
+Schema check
+- Tool: schema_query
+- Result: Table public.galina_voskoboeva with columns: outcome (text), date (text), tournament (text), surface (text), opponent (text), score (text). This appears to list Galina Voskoboeva’s match results, including surface.
+
+Evidence from data (with exact executed SQL)
+1) Total number of matches (rows)
+- SQL:
+  SELECT COUNT(*) AS total_matches FROM public.galina_voskoboeva;
+- Result: total_matches = 5
+
+2) Breakdown by surface (as stored)
+- SQL:
+  SELECT surface, COUNT(*) AS match_count
+  FROM public.galina_voskoboeva
+  GROUP BY surface
+  ORDER BY match_count DESC;
+- Results:
+  - surface = "hard (i)", match_count = 2
+  - surface = "clay", match_count = 2
+  - surface = "hard", match_count = 1
+
+3) Exact-case counts for literal ‘Hard’ and ‘Clay’ (to check casing)
+- SQL:
+  SELECT SUM(CASE WHEN surface = 'Hard' THEN 1 ELSE 0 END) AS Hard_exact,
+         SUM(CASE WHEN surface = 'Clay' THEN 1 ELSE 0 END) AS Clay_exact
+  FROM public.galina_voskoboeva;
+- Result: Hard_exact = 0, Clay_exact = 0
+
+4) Variant-aware (case-insensitive) counts for hard and clay
+- SQL:
+  SELECT SUM(CASE WHEN lower(surface) LIKE '%hard%' THEN 1 ELSE 0 END) AS hard_variants,
+         SUM(CASE WHEN lower(surface) LIKE '%clay%' THEN 1 ELSE 0 END) AS clay_variants
+  FROM public.galina_voskoboeva;
+- Results: hard_variants = 3, clay_variants = 2
+
+Assessment of the claim
+- “3 game on a hard tennis court”: Supported when treating “hard (i)” (hard indoor) as a hard-court variant. Data shows 3 hard-related matches (1 “hard” + 2 “hard (i)”).
+- “1 on clay”: Not supported. Data shows 2 matches on clay.
+
+Conclusion: The hard-court count is correct; the clay count is not.
+
+Assumptions
+- “game” is interpreted as “match.”
+- “hard” includes both “hard” and “hard (i)” (indoor hard) as counted by the variant-aware query.
+- Verification is based on the entirety of the available table public.galina_voskoboeva in the TabFact database.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

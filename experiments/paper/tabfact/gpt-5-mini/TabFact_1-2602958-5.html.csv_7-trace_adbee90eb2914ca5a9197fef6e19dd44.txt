@@ -1,0 +1,50 @@
+
+<userQuery>
+<query>
+daniel palladino direct 3 episode fewer than amy sherman - palladino do
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+What I checked
+- Whether Daniel Palladino directed exactly 3 fewer episodes than Amy Sherman-Palladino, using the available authoritative data source discovered (a table of Gilmore Girls episodes with director metadata).
+
+Data source discovery
+- Available database: TabFact (public schema)
+- Table: public.list_of_gilmore_girls_episodes
+- Relevant columns: title (text), director (text), writer (s) (text), etc.
+
+Key evidence
+1) Identify directors containing “Palladino” and their episode counts
+SQL executed:
+SELECT director, COUNT(*) AS episode_count
+FROM public.list_of_gilmore_girls_episodes
+WHERE lower(director) LIKE '%palladino%'
+GROUP BY director
+ORDER BY episode_count DESC, director;
+Result:
+- amy sherman - palladino — 1
+- daniel palladino — 1
+
+2) Per-person counts using robust matching (case-insensitive, allowing spaces around the hyphen for Amy Sherman‑Palladino)
+- Daniel Palladino
+SQL executed:
+SELECT count(*) AS count FROM public.list_of_gilmore_girls_episodes WHERE director ~* 'daniel palladino';
+Result: 1
+
+- Amy Sherman‑Palladino (allowing optional spaces around the hyphen)
+SQL executed:
+SELECT count(*) AS count FROM public.list_of_gilmore_girls_episodes WHERE director ~* 'amy sherman\s*-\s*palladino';
+Result: 1
+
+Conclusion
+- Daniel Palladino directed 1 episode; Amy Sherman‑Palladino directed 1 episode in this dataset. The difference is 0, not “3 fewer.”
+
+Assumptions
+- The claim is interpreted within the scope of the only available authoritative dataset: the Gilmore Girls episode table (public.list_of_gilmore_girls_episodes). If the intent was to compare across other series or all works, that data is not present here, and this verification pertains strictly to Gilmore Girls episodes in this dataset.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

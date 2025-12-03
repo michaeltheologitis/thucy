@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+wimbledon have only 1 a result during the year 1986 to 1999
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “wimbledon have only 1 a result during the year 1986 to 1999.” I interpret this as: in the katrina_adams table, for the tournament row labeled “wimbledon,” the number of cells with the value 'a' across the year columns spanning 1986–1999 is exactly 1.
+
+Evidence from data
+1) Inspect the Wimbledon row values across the relevant years
+SQL executed:
+SELECT "1986","1988","1989","1990","1991","1992","1993","1994","1995","1996","1997","1998","1999" FROM public.katrina_adams WHERE tournament='wimbledon';
+Result:
+{"1986":"a","1988":"sf","1989":"qf","1990":"3r","1991":"qf","1992":"3r","1993":"1r","1994":"2r","1995":"3r","1996":"qf","1997":"3r","1998":"3r","1999":"1r"}
+
+2) Count occurrences of 'a' and list the year(s) where it appears
+SQL executed:
+SELECT
+(CASE WHEN "1986"='a' THEN 1 ELSE 0 END) + (CASE WHEN "1988"='a' THEN 1 ELSE 0 END) + (CASE WHEN "1989"='a' THEN 1 ELSE 0 END) + (CASE WHEN "1990"='a' THEN 1 ELSE 0 END) + (CASE WHEN "1991"='a' THEN 1 ELSE 0 END) + (CASE WHEN "1992"='a' THEN 1 ELSE 0 END) + (CASE WHEN "1993"='a' THEN 1 ELSE 0 END) + (CASE WHEN "1994"='a' THEN 1 ELSE 0 END) + (CASE WHEN "1995"='a' THEN 1 ELSE 0 END) + (CASE WHEN "1996"='a' THEN 1 ELSE 0 END) + (CASE WHEN "1997"='a' THEN 1 ELSE 0 END) + (CASE WHEN "1998"='a' THEN 1 ELSE 0 END) + (CASE WHEN "1999"='a' THEN 1 ELSE 0 END) AS a_count,
+array_remove(ARRAY[
+CASE WHEN "1986"='a' THEN '1986' ELSE NULL END,
+CASE WHEN "1988"='a' THEN '1988' ELSE NULL END,
+CASE WHEN "1989"='a' THEN '1989' ELSE NULL END,
+CASE WHEN "1990"='a' THEN '1990' ELSE NULL END,
+CASE WHEN "1991"='a' THEN '1991' ELSE NULL END,
+CASE WHEN "1992"='a' THEN '1992' ELSE NULL END,
+CASE WHEN "1993"='a' THEN '1993' ELSE NULL END,
+CASE WHEN "1994"='a' THEN '1994' ELSE NULL END,
+CASE WHEN "1995"='a' THEN '1995' ELSE NULL END,
+CASE WHEN "1996"='a' THEN '1996' ELSE NULL END,
+CASE WHEN "1997"='a' THEN '1997' ELSE NULL END,
+CASE WHEN "1998"='a' THEN '1998' ELSE NULL END,
+CASE WHEN "1999"='a' THEN '1999' ELSE NULL END
+], NULL) AS years_with_a
+FROM public.katrina_adams
+WHERE tournament='wimbledon';
+Result:
+{"a_count":1, "years_with_a":["1986"]}
+
+Conclusion: The data show exactly one 'a' entry for Wimbledon across the 1986–1999 year columns (specifically in 1986). Therefore, the claim is supported by the evidence.
+
+Assumptions made:
+- “wimbledon” refers to the tournament row labeled 'wimbledon' in the katrina_adams table.
+- “a result” refers to the literal cell value 'a' in the year-by-year results.
+- The year range 1986–1999 is evaluated over the available year columns in this table: 1986 and 1988–1999 (note: 1987 is not present in this schema and thus not counted).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

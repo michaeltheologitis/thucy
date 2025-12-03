@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+the date of vacancy be 28 december 2011 with the incoming head coach be carlos azenha
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of approach
+- Discovered available data sources and examined the relevant schema to ground the verification in actual data.
+- Queried the Primeira Liga 2010–2011 table for any record referencing Carlos Azenha, then retrieved the full row and performed an exact-match check on the claim’s fields.
+
+Data source and schema inspected
+- Database: PostgreSQL (public schema)
+- Table: t_2010_11_primeira_liga
+- Columns: team, outgoing head coach, manner of departure, date of vacancy, position in table, incoming head coach, date of appointment
+
+Evidence collected
+1) Search for records mentioning Azenha (case-insensitive)
+- Result: Found Portimonense with incoming head coach Carlos Azenha; date of vacancy shown as 28 December 2011; date of appointment shown as 29 December 2010.
+- Executed SQL:
+SELECT team, "incoming head coach", "date of vacancy", "date of appointment" 
+FROM t_2010_11_primeira_liga 
+WHERE LOWER("incoming head coach") LIKE '%azenha%';
+
+2) Retrieve the full row for the Azenha record
+- Result: 
+  - Team: Portimonense
+  - Outgoing Head Coach: Litos
+  - Manner of Departure: Sacked
+  - Date of Vacancy: 28 December 2011
+  - Position in Table: 16th
+  - Incoming Head Coach: Carlos Azenha
+  - Date of Appointment: 29 December 2010
+- Executed SQL:
+SELECT * FROM t_2010_11_primeira_liga WHERE "incoming head coach" ILIKE '%Azenha%';
+
+3) Exact-match verification on the claim’s fields (robust to case/whitespace)
+- Result: Returned the Portimonense row with date of vacancy = 28 december 2011 and incoming head coach = carlos azenha.
+- Executed SQL:
+SELECT * FROM t_2010_11_primeira_liga WHERE TRIM(LOWER("date of vacancy")) = '28 december 2011' AND TRIM(LOWER("incoming head coach")) = 'carlos azenha';
+
+Conclusion
+- The table contains a record where the date of vacancy is 28 December 2011 and the incoming head coach is Carlos Azenha (team: Portimonense). Therefore, the claim is supported by the data.
+
+Assumptions
+- The claim refers to the available Primeira Liga 2010–11 dataset and pertains to the Portimonense entry found in that dataset.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

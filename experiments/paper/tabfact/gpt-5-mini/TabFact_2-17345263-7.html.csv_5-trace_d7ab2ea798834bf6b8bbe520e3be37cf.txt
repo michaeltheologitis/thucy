@@ -1,0 +1,57 @@
+
+<userQuery>
+<query>
+alabama be the opponent when the attendance be 81079
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Alabama be the opponent when the attendance be 81079.”
+
+Data sources explored
+- Database: TabFact (public schema)
+- Table: east_carolina_pirates_football_1990_99
+  - Columns: date (text), opponent (text), site (text), result (text), attendance (text)
+
+Evidence collected
+1) Check for any game with normalized attendance = 81,079
+Executed SQL:
+SELECT date, opponent, site, result, attendance
+FROM public.east_carolina_pirates_football_1990_99
+WHERE regexp_replace(coalesce(attendance,''), '[, ]', '', 'g') = '81079';
+Result: No rows returned.
+
+Confirmation count:
+SELECT count(*) AS match_count
+FROM public.east_carolina_pirates_football_1990_99
+WHERE regexp_replace(coalesce(attendance,''), '[, ]', '', 'g') = '81079';
+Result: match_count = 0
+
+2) Check all games against Alabama and their attendance
+Executed SQL:
+SELECT date, opponent, site, result, attendance
+FROM public.east_carolina_pirates_football_1990_99
+WHERE opponent ILIKE '%Alabama%'
+ORDER BY date;
+Result:
+- date: october 17
+  opponent: alabama
+  site: legion field birmingham , al
+  result: l22 - 23
+  attendance: 80079
+
+Assessment
+- There is no game in this dataset with attendance exactly 81,079.
+- The only Alabama game in the dataset lists attendance 80,079, not 81,079.
+
+Conclusion
+- The claim is contradicted by the available data in this source.
+
+Assumptions
+- The claim is interpreted within the scope of the available dataset (East Carolina Pirates football, 1990–1999). If the claim refers to a different team/season/database, it is outside the accessible data and cannot be verified here.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

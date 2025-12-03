@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+the game where the home team score 12.15 (87) be hold at mcg
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary conclusion: In the available 1981 VFL season data, there is no game at the MCG where the home team scored 12.15 (87). The only instance of a home team scoring 12.15 (87) occurred at Moorabbin Oval (St Kilda vs Footscray on 29 August 1981).
+
+Data source discovery
+- Discovered database: TabFact
+- Relevant table: public.t_1981_vfl_season
+- Columns: "home team" (text), "home team score" (text), "away team" (text), "away team score" (text), "venue" (text), "crowd" (bigint), "date" (text)
+
+Evidence and executed SQL
+1) Exact match for home team score '12.15 (87)' at venue exactly 'MCG'
+SQL:
+SELECT "home team", "home team score", "away team", "away team score", "venue", "date", crowd
+FROM public.t_1981_vfl_season
+WHERE "home team score" = '12.15 (87)' AND "venue" = 'MCG';
+Result: No matches found.
+
+2) Flexible search: home team score contains '12.15' and '(87)' and venue contains 'MCG' (case-insensitive)
+SQL:
+SELECT count(*) AS cnt FROM public.t_1981_vfl_season WHERE "home team score" ILIKE '%12.15%' AND "home team score" ILIKE '%(87)%' AND "venue" ILIKE '%MCG%';
+Result: cnt = 0
+
+3) Venue variants for MCG ('MCG', 'M.C.G.', or contains 'Melbourne Cricket Ground') with exact score '12.15 (87)'
+SQL:
+SELECT COUNT(*) AS match_count FROM public.t_1981_vfl_season
+WHERE "home team score" = '12.15 (87)'
+  AND ("venue" IN ('MCG', 'M.C.G.') OR "venue" ILIKE '%Melbourne Cricket Ground%');
+Result: 0 matches.
+
+4) Any match in the season where either team scored exactly '12.15 (87)'
+SQL:
+SELECT "home team", "home team score", "away team", "away team score", "venue", "date"
+FROM public.t_1981_vfl_season
+WHERE "home team score" = '12.15 (87)' OR "away team score" = '12.15 (87)'
+ORDER BY "date";
+Result:
+- Date: 29 august 1981; Home team: st kilda; Home team score: 12.15 (87); Away team: footscray; Away team score: 5.8 (38); Venue: moorabbin oval
+
+Conclusion
+- Within the 1981 VFL season dataset, there is no game at the MCG with a home team score of 12.15 (87). The only occurrence of a home team scoring 12.15 (87) was St Kilda vs Footscray at Moorabbin Oval on 29 August 1981.
+
+Assumptions
+- Interpreted 'MCG' as the Melbourne Cricket Ground and checked common variants ('MCG', 'M.C.G.', 'Melbourne Cricket Ground').
+- The user’s request is evaluated against the available dataset (1981 VFL season). Broader years were not available in the connected data.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

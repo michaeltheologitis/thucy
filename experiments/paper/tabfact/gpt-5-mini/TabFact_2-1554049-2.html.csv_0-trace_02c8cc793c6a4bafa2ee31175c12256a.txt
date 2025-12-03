@@ -1,0 +1,60 @@
+
+<userQuery>
+<query>
+at auckland , new zealand on october 10 , 2004 , the playing surface be hard
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “at auckland , new zealand on october 10 , 2004 , the playing surface be hard.”
+
+Data source inspected: TabFact (postgres_tabfact5) → public.ji_nov_k
+- Columns: date (text), tournament (text), surface (text), opponent (text), score (text)
+
+Evidence and executed SQL
+1) Check for exact date string match
+SQL:
+SELECT count(*) FROM public.ji_nov_k WHERE date = 'October 10, 2004';
+Result:
+[{"count":0}]
+Interpretation: No rows exactly match the date text 'October 10, 2004'.
+
+2) Retrieve all 2004 entries to locate any October 10, 2004 row regardless of capitalization/spacing
+SQL:
+SELECT date, tournament, surface, opponent, score FROM public.ji_nov_k WHERE date ILIKE '%2004%';
+Result:
+[
+  {"date":"october 10 , 2004","tournament":"tokyo , japan","surface":"hard","opponent":"taylor dent","score":"5 - 7 , 6 - 1 , 6 - 3"},
+  {"date":"november 3 , 2004","tournament":"basel , switzerland","surface":"carpet (i)","opponent":"david nalbandian","score":"5 - 7 , 6 - 3 , 6 - 4 , 1 - 6 , 6 - 2"}
+]
+Interpretation: There is an entry for October 10, 2004, but it is for Tokyo, Japan (surface = hard), not Auckland, New Zealand.
+
+3) Check if any row mentions Auckland
+SQL:
+SELECT count(*) FROM public.ji_nov_k WHERE tournament ILIKE '%Auckland%';
+Result:
+[{"count":1}]
+Interpretation: One row references Auckland in the tournament field.
+
+4) Inspect the Auckland row to confirm date and surface
+SQL:
+SELECT date, tournament, surface, opponent, score FROM public.ji_nov_k WHERE tournament ILIKE '%Auckland%';
+Result:
+[{"date":"january 14 , 1996","tournament":"auckland , new zealand","surface":"hard","opponent":"brett steven","score":"6 - 4 , 6 - 4"}]
+Interpretation: The Auckland, New Zealand entry in this dataset is dated January 14, 1996, with surface = hard. There is no Auckland entry on October 10, 2004.
+
+Conclusion
+- No record exists for a match at Auckland, New Zealand on October 10, 2004 in public.ji_nov_k.
+- The only Auckland entry is from January 14, 1996 (surface = hard).
+- October 10, 2004 corresponds to Tokyo, Japan (surface = hard), not Auckland.
+Therefore, the specific claim that “at Auckland, New Zealand on October 10, 2004, the playing surface is hard” is not supported by the available data because there is no such Auckland record on that date.
+
+Assumptions
+- “Playing surface” maps to the surface column in public.ji_nov_k.
+- The claim refers to entries in this dataset; dates are stored as text with varying capitalization/spacing, so case-insensitive matching (ILIKE) was used to locate relevant rows.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,91 @@
+
+<userQuery>
+<query>
+the yugoslavian national team win both of its friendly match by a score of 2:1
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary conclusion: The data shows exactly two friendly matches in the table, and both ended 2:1 in favor of Yugoslavia. Therefore, the claim is supported by the available evidence.
+
+Data sources discovered:
+- One PostgreSQL database (TabFact) with a single table in the public schema.
+
+Schema inspected:
+- Table: public.yugoslavia_national_football_team_results
+  - Columns: date (text), city (text), opponent (text), results (text), type of game (text)
+
+Evidence queries and results:
+1) Full table scan to see all matches
+- Executed SQL:
+  SELECT date, opponent, results, "type of game" FROM public.yugoslavia_national_football_team_results;
+- Returned rows (7):
+  1) date: march 22, opponent: uruguay, results: 2:1, type of game: friendly
+  2) date: march 30, opponent: romania, results: 2:0, type of game: balkan cup
+  3) date: april 26, opponent: poland, results: 2:1, type of game: friendly
+  4) date: august 27, opponent: romania, results: 1:4, type of game: balkan cup
+  5) date: september 10, opponent: luxembourg, results: 5:0, type of game: 1982 wcq
+  6) date: september 27, opponent: denmark, results: 2:1, type of game: 1982 wcq
+  7) date: november 15, opponent: italy, results: 0:2, type of game: 1982 wcq
+
+2) Filter only friendly matches
+- Executed SQL:
+  SELECT date, opponent, results
+  FROM public.yugoslavia_national_football_team_results
+  WHERE "type of game" = 'friendly';
+- Result:
+  - march 22 vs uruguay — 2:1
+  - april 26 vs poland — 2:1
+
+3) Count of friendly matches and how many finished 2:1
+- Executed SQL (game type labels):
+  SELECT DISTINCT "type of game" FROM public.yugoslavia_national_football_team_results ORDER BY "type of game";
+- Result distinct values: 1982 wcq; balkan cup; friendly
+
+- Executed SQL (count total friendlies):
+  SELECT COUNT(*) AS total_friendly FROM public.yugoslavia_national_football_team_results WHERE "type of game" ILIKE '%friend%';
+- Result: total_friendly = 2
+
+- Executed SQL (distinct scores among friendlies):
+  SELECT DISTINCT results FROM public.yugoslavia_national_football_team_results WHERE "type of game" ILIKE '%friend%' ORDER BY results;
+- Result: 2:1
+
+- Executed SQL (count friendlies with result 2:1):
+  SELECT COUNT(*) AS friendly_2_1 FROM public.yugoslavia_national_football_team_results WHERE "type of game" ILIKE '%friend%' AND results = '2:1';
+- Result: friendly_2_1 = 2
+
+4) Orientation check: does the first number correspond to Yugoslavia’s goals?
+- Executed SQL (rows vs Italy and Romania):
+  SELECT date, city, opponent, results, "type of game"
+  FROM public.yugoslavia_national_football_team_results
+  WHERE opponent ILIKE 'italy' OR opponent ILIKE 'romania'
+  ORDER BY date;
+- Results:
+  - august 27 | bucharest , romania | romania | 1:4 | balkan cup
+  - march 30  | belgrade            | romania | 2:0 | balkan cup
+  - november 15 | torino , italy    | italy   | 0:2 | 1982 wcq
+- Executed SQL (parse scores and classify outcome):
+  SELECT date, city, opponent, results,
+         split_part(results, ':', 1)::int AS first_num,
+         split_part(results, ':', 2)::int AS second_num,
+         CASE WHEN split_part(results, ':', 1)::int < split_part(results, ':', 2)::int THEN 'Yugoslavia lost'
+              WHEN split_part(results, ':', 1)::int = split_part(results, ':', 2)::int THEN 'Draw'
+              ELSE 'Yugoslavia won' END AS outcome
+  FROM public.yugoslavia_national_football_team_results
+  WHERE opponent ILIKE 'italy' OR opponent ILIKE 'romania'
+  ORDER BY date;
+- Results show: 1:4 and 0:2 => 'Yugoslavia lost'; 2:0 => 'Yugoslavia won', confirming first number is Yugoslavia’s goals.
+
+Assessment:
+- The table contains exactly two friendly matches, and both have a results value of 2:1, which—based on the score orientation confirmed above—are wins for Yugoslavia. This directly supports the claim that the Yugoslavian national team won both of its friendly matches 2:1 in the given dataset.
+
+Assumptions/notes:
+- I interpret “friendly match” as rows where the "type of game" column equals 'friendly'.
+- I interpret the "results" field as '<Yugoslavia goals>:<opponent goals>'; this is supported by the loss/win pattern in non-friendly rows (e.g., 1:4 and 0:2 as losses, 2:0 as a win).
+- The claim is evaluated against the contents of this specific table (TabFact slice), not the full historical record of Yugoslavia’s national team matches.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

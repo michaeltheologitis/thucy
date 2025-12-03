@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+in 3 of the game , no goal be score by either side
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim interpreted: “In 3 of the games, no goal was scored by either side.” I interpret this as asserting there are exactly three 0-0 matches in the available dataset.
+
+Data sources discovered
+- Using discovery, I found one accessible database: TabFact (PostgreSQL), schema public.
+
+Schema examined
+- Table: public.t_2000_01_sheffield_wednesday_f_c_season
+  - Columns: date (text), opponent (text), venue (text), result (text), attendance (bigint)
+  - This table records match-level results for Sheffield Wednesday F.C.’s 2000–01 season.
+
+Evidence 1: Distinct result counts show exactly three 0 - 0 games
+- Executed SQL:
+  SELECT result, COUNT(*) AS sample_count
+  FROM public.t_2000_01_sheffield_wednesday_f_c_season
+  GROUP BY result
+  ORDER BY sample_count DESC, result;
+- Relevant output excerpt:
+  - 0 - 0 — 3
+- Interpretation: The result string “0 - 0” occurs exactly 3 times.
+
+Evidence 2: Direct count of 0 - 0 results
+- Executed SQL:
+  SELECT COUNT(*) AS count_zero_zero
+  FROM public.t_2000_01_sheffield_wednesday_f_c_season
+  WHERE result = '0 - 0';
+- Result: count_zero_zero = 3
+
+Evidence 3: Listing the specific 0 - 0 matches
+- Executed SQL:
+  SELECT date, opponent, venue, result
+  FROM public.t_2000_01_sheffield_wednesday_f_c_season
+  WHERE result ~ '(^|[^0-9])0[^0-9]+0([^0-9]|$)'
+  ORDER BY date;
+- Returned rows:
+  - 30 december 2000 — huddersfield town — a — 0 - 0
+  - 7 march 2001 — portsmouth — h — 0 - 0
+  - 6 may 2001 — crewe alexandra — h — 0 - 0
+
+Conclusion
+- The data shows there are exactly three matches that ended 0-0 in the available season table. This supports the claim.
+
+Assumptions
+- Because only one relevant table was available, I assumed the claim refers to the matches recorded in public.t_2000_01_sheffield_wednesday_f_c_season (Sheffield Wednesday F.C., 2000–01 season).
+- I treated “no goal was scored by either side” as synonymous with a 0-0 final score.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

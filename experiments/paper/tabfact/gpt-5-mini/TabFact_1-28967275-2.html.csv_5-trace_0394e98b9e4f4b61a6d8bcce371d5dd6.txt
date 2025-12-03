@@ -1,0 +1,78 @@
+
+<userQuery>
+<query>
+1 episode be title the expulsion
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: There is an episode titled “The Expulsion” (or that Episode 1 is titled “The Expulsion”).
+
+Data source checked
+- PostgreSQL database: TabFact (postgres_tabfact21)
+- Schema: public
+- Table: my_info_table with columns: episode (bigint), series (bigint), episode title (text), original air date (text), production code (bigint)
+
+Evidence gathered
+1) Check for an exact case-insensitive match on the title “The Expulsion”
+- SQL:
+  SELECT count(*) AS match_count FROM public.my_info_table WHERE lower("episode title") = lower('The Expulsion');
+- Result: match_count = 0
+
+- SQL (details of matching rows):
+  SELECT "episode", "series", "episode title", "original air date", "production code" FROM public.my_info_table WHERE lower("episode title") = lower('The Expulsion');
+- Result: no rows returned
+
+2) Check for any partial match containing “expuls” (case-insensitive)
+- SQL:
+  SELECT COUNT(*) AS match_count FROM public.my_info_table WHERE "episode title" ILIKE '%expuls%';
+- Result: match_count = 0
+
+3) Check whether Episode 1 exists in this table (in case the claim meant “Episode 1 is titled ‘The Expulsion’”)
+- SQL:
+  SELECT COUNT(*) AS match_count FROM public.my_info_table WHERE episode = 1;
+- Result: match_count = 0
+
+4) Inventory of all episodes in the table (ordered by episode)
+- SQL:
+  SELECT episode, series, "episode title" FROM public.my_info_table ORDER BY episode ASC;
+- Result (episodes 27–51):
+  27 | 1 | return to genesis
+  28 | 2 | the suspension
+  29 | 3 | a team reinvented
+  30 | 4 | the new captain
+  31 | 5 | the homecoming
+  32 | 6 | netherball rules!
+  33 | 7 | doubts within
+  34 | 8 | rocket 's decent
+  35 | 9 | the all - stars
+  36 | 10 | rocket vs sinedd
+  37 | 11 | the champions stumble
+  38 | 12 | last stand
+  39 | 13 | fluxless
+  40 | 14 | new order
+  41 | 15 | revelations
+  42 | 16 | new rules
+  43 | 17 | open doors
+  44 | 18 | warren steps in
+  45 | 19 | the technodroid v3s
+  46 | 20 | the fallen star
+  47 | 21 | coach artegor
+  48 | 22 | rocket , the midfielder
+  49 | 23 | destiny
+  50 | 24 | final preparations
+  51 | 25 | a team unravels
+
+Conclusion
+- The dataset contains no episode titled “The Expulsion” (exact or partial match), and there is no Episode 1 present in this table. The claim is not supported by the data.
+
+Assumptions due to ambiguity
+- I interpreted the fragmented claim as either: (a) “There exists an episode titled ‘The Expulsion’,” or (b) “Episode 1 is titled ‘The Expulsion’.” I verified both interpretations against the available table.
+- Title matching was performed case-insensitively and with a partial-match check.
+- I treated the available table as the authoritative list of episodes for this dataset.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

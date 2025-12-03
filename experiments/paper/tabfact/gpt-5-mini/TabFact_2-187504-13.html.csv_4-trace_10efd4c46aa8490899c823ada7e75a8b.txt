@@ -1,0 +1,45 @@
+
+<userQuery>
+<query>
+the soviet union receive 4 more medal than east germany in the total medal count
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim: “the soviet union receive 4 more medal than east germany in the total medal count.”
+- Scope of verification: 1988 Winter Olympics (based on the only available data source).
+
+Data source discovery
+- Available source: PostgreSQL (TabFact) with one table in public schema: t_1988_winter_olympics.
+
+Schema checked
+- Table: public.t_1988_winter_olympics
+  - Columns: rank (bigint), nation (text), gold (bigint), silver (bigint), bronze (bigint), total (bigint)
+
+Evidence from executed SQL
+1) Retrieve medal counts for the two nations
+SQL:
+SELECT nation, gold, silver, bronze, total FROM t_1988_winter_olympics WHERE nation IN ('soviet union (urs)', 'east germany (gdr)') ORDER BY nation;
+Result:
+- east germany (gdr): gold=9, silver=10, bronze=6, total=25
+- soviet union (urs): gold=11, silver=9, bronze=9, total=29
+
+2) Compute the difference (Soviet Union minus East Germany)
+SQL:
+SELECT s.total - e.total AS difference FROM (SELECT total FROM t_1988_winter_olympics WHERE nation='soviet union (urs)') s CROSS JOIN (SELECT total FROM t_1988_winter_olympics WHERE nation='east germany (gdr)') e;
+Result:
+- difference = 4
+
+Conclusion
+- In the 1988 Winter Olympics, the Soviet Union had 29 total medals and East Germany had 25 total medals. The difference is 4, matching the claim.
+
+Assumptions
+- The claim is interpreted within the only accessible dataset (1988 Winter Olympics) and “total medal count” refers to the total column for that event.
+- Nation names are matched as stored: “soviet union (urs)” and “east germany (gdr)”.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

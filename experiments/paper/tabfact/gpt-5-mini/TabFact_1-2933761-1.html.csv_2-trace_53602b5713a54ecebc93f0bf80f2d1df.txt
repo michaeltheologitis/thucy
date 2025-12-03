@@ -1,0 +1,79 @@
+
+<userQuery>
+<query>
+only 1 female have a prison connection in the usa
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim: "only 1 female have a prison connection in the usa"
+- Finding: Verified within the available data. Exactly one female entry has a prison connection in the USA.
+
+Data source discovery
+- One data source found: postgres_tabfact20 (TabFact), public schema.
+- Table available: public.cube_film_series with columns: name (text), occupation (text), gender (text), prison connection (text), played by (text), status (text).
+
+Schema evidence
+- Tables and columns (from schema inspection):
+  - cube_film_series: name, occupation, gender, prison connection, played by, status.
+
+Evidence from executed SQL
+1) Distinct counts for gender
+SQL executed:
+SELECT COALESCE(gender, '<NULL>') AS gender_value, COUNT(*) AS cnt
+FROM public.cube_film_series
+GROUP BY COALESCE(gender, '<NULL>')
+ORDER BY cnt DESC, gender_value;
+Result:
+- male: 4
+- female: 2
+
+2) Distinct counts for "prison connection"
+SQL executed:
+SELECT COALESCE("prison connection", '<NULL>') AS prison_connection_value, COUNT(*) AS cnt
+FROM public.cube_film_series
+GROUP BY COALESCE("prison connection", '<NULL>')
+ORDER BY cnt DESC, prison_connection_value;
+Result (values include country tags):
+- leavenworth prison (usa): 2
+- san quentin state prison (usa): 1
+- centre pãnitentiaire de rennes (france): 1
+- holloway women's prison (uk): 1
+- kazan prison (russia): 1
+
+3) Count of female entries with a USA prison connection
+SQL executed:
+SELECT COUNT(*) FROM public.cube_film_series WHERE gender ILIKE 'Female' AND "prison connection" ILIKE '%USA%';
+Result:
+- count = 1
+
+4) Details of the female entry with a USA prison connection
+SQL executed:
+SELECT name, occupation, "prison connection", "played by", status FROM public.cube_film_series WHERE gender ILIKE 'Female' AND "prison connection" ILIKE '%USA%';
+Result:
+- name: joan leaven; occupation: mathematics student; prison connection: leavenworth prison (usa); played by: nicole de boer; status: dead
+
+5) Cross-check: counts by gender for USA prison connections
+SQL executed:
+SELECT gender, count(*) AS cnt
+FROM public.cube_film_series
+WHERE "prison connection" ILIKE '%USA%'
+GROUP BY gender
+ORDER BY cnt DESC;
+Result:
+- male: 2
+- female: 1
+
+Conclusion
+- The dataset shows exactly one female with a prison connection in the USA. Therefore, the claim is supported by the available evidence.
+
+Assumptions and scope
+- "In the USA" was operationalized as rows where the "prison connection" field contains the substring "USA" (case-insensitive). Variants like "United States" were not present.
+- Verification is limited to the public.cube_film_series table in the postgres_tabfact20 data source. No other datasets were available.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

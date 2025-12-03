@@ -1,0 +1,81 @@
+
+<userQuery>
+<query>
+the second most rebound by a bobcat player in 1 game be 20
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “The second-most rebounds by a Charlotte Bobcats player in a single game is 20.”
+
+Data sources discovered
+- PostgreSQL database with a single table for the Charlotte Bobcats 2009–2010 season: public.t_2009_10_charlotte_bobcats_season
+
+Schema summary (relevant fields)
+- game (bigint)
+- date (text)
+- team (text)
+- score (text)
+- "high points" (text)
+- "high rebounds" (text) — stores the game’s highest rebounds by any Bobcats player as free text (number and likely player name)
+- "high assists" (text)
+- "location attendance" (text)
+- record (text)
+
+Method
+- Extract the leading integer from the "high rebounds" text to obtain the numeric rebound count per game.
+- Determine the top two distinct single-game rebound counts for the 2009–10 season.
+- Cross-check dates/players for context where available.
+
+Evidence and executed SQL
+1) Top two distinct single-game rebound counts (numeric) in 2009–10
+SQL executed:
+SELECT DISTINCT CAST(REGEXP_REPLACE("high rebounds", '\\D', '', 'g') AS INTEGER) AS rebound_count
+FROM public.t_2009_10_charlotte_bobcats_season
+WHERE "high rebounds" IS NOT NULL
+ORDER BY rebound_count DESC
+LIMIT 2;
+
+Result: [20, 17]
+- Highest single-game rebounds: 20
+- Second-highest single-game rebounds: 17
+
+2) Additional context returned by query (dates/players) for 2009–10
+SQL executed:
+SELECT DISTINCT ON (rebounds) rebounds, date
+FROM (
+    SELECT CAST(SUBSTRING("high rebounds" FROM '([0-9]+)') AS INTEGER) AS rebounds, date
+    FROM public.t_2009_10_charlotte_bobcats_season
+    WHERE "high rebounds" IS NOT NULL
+) AS subquery
+WHERE rebounds IS NOT NULL
+ORDER BY rebounds DESC;
+
+Follow-up lookups used:
+-- For 17 rebounds
+SELECT date
+FROM public.t_2009_10_charlotte_bobcats_season
+WHERE "high rebounds" LIKE '%(17)%';
+
+-- For 20 rebounds
+SELECT date
+FROM public.t_2009_10_charlotte_bobcats_season
+WHERE "high rebounds" LIKE '%(20)%';
+
+Returned context (from the executed NL query):
+- 20 rebounds on February 10 (Nazr Mohammed)
+- 17 rebounds on February 3 (Nazr Mohammed)
+
+Conclusion
+- Within the 2009–10 Charlotte Bobcats season, the second-highest single-game rebound total is 17, not 20. Therefore, the claim is not supported by the available data.
+
+Assumptions
+- “Bobcat player” is interpreted as a Charlotte Bobcats player.
+- Scope is limited to the available authoritative dataset (the 2009–10 season). The claim might be intended as franchise-all-time, but only the 2009–10 season is available; conclusions are drawn strictly from this dataset.
+- The numeric rebound count is the leading integer in the "high rebounds" text field.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

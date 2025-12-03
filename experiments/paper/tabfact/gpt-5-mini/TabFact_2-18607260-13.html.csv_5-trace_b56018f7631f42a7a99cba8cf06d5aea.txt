@@ -1,0 +1,62 @@
+
+<userQuery>
+<query>
+the kirin cup have game on both june 1 and 3 , 1998
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim assessed: “the kirin cup have game on both june 1 and 3, 1998.”
+
+Data source discovery
+- Available database: TabFact (public schema)
+- Relevant table: public.t_1998_in_paraguayan_football (columns: date, venue, score, comp, report)
+
+Evidence 1: When did “Kirin Cup” matches occur in 1998 (per this dataset)?
+Executed SQL:
+SELECT date, comp, report
+FROM public.t_1998_in_paraguayan_football
+WHERE lower(comp) LIKE '%kirin%' OR lower(report) LIKE '%kirin%';
+
+Result:
+- {date: "1998 - 05 - 17", comp: "kirin cup", report: "455"}
+- {date: "1998 - 05 - 21", comp: "kirin cup", report: "456"}
+
+Chronological ordering (executed SQL):
+SELECT date, comp, report
+FROM public.t_1998_in_paraguayan_football
+WHERE lower(comp) LIKE '%kirin%' OR lower(report) LIKE '%kirin%'
+ORDER BY to_date(replace(date,' - ','-'),'YYYY-MM-DD') ASC;
+
+Ordered result:
+- 1998 - 05 - 17 | kirin cup | 455
+- 1998 - 05 - 21 | kirin cup | 456
+
+Interpretation: In this dataset, Kirin Cup matches (at least those involving Paraguay) were on May 17 and May 21, 1998—not in June.
+
+Evidence 2: What matches exist on 1998-06-01 and 1998-06-03, and are they Kirin Cup?
+Executed SQL:
+SELECT date, comp, report, score, venue,
+       CASE WHEN comp ILIKE '%kirin%' OR report ILIKE '%kirin%' THEN true ELSE false END AS kirin_mentioned,
+       LOWER(regexp_replace(date, '\\s+', '', 'g')) AS date_normalized
+FROM public.t_1998_in_paraguayan_football
+WHERE LOWER(regexp_replace(date, '\\s+', '', 'g')) IN ('1998-06-01','1998-06-03');
+
+Result:
+- date: 1998 - 06 - 01 | comp: f | report: 457 | score: 5 - 1 | venue: philips stadion eindhoven , netherlands | kirin_mentioned: false
+- date: 1998 - 06 - 03 | comp: f | report: 458 | score: 3 - 2 | venue: steaua stadium bucharest , romania | kirin_mentioned: false
+
+Interpretation: Matches on June 1 and June 3, 1998 in this dataset are friendlies in Europe (Netherlands and Romania), not Kirin Cup fixtures.
+
+Conclusion
+- Based on the available authoritative dataset, Kirin Cup matches in 1998 appear on May 17 and May 21. June 1 and June 3 matches recorded in the data are not part of the Kirin Cup. Therefore, the claim is contradicted by the evidence.
+
+Assumptions
+- The TabFact table for 1998 Paraguayan football reliably captures Paraguay’s 1998 national-team fixtures and labels Kirin Cup matches with comp = 'kirin cup'.
+- The verification is constrained to the available data; broader Kirin Cup schedules beyond what’s recorded here were not available in the connected data sources.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+otto graham have win 44 more game than brady quinn
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim being checked: “Otto Graham has 44 more wins than Brady Quinn.”
+
+Data source discovery:
+- Accessible source: PostgreSQL database (TabFact), public schema.
+- Relevant table: public.list_of_cleveland_browns_starting_quarterbacks
+
+Schema details (from schema inspection):
+- Columns: quarterback (text), uniform no (s) (text), games started (bigint), wins (bigint), losses (bigint), ties (bigint), winning pct (double precision)
+
+Evidence from executed SQL queries:
+1) Identify the exact rows for the two quarterbacks and their wins
+Executed SQL:
+SELECT quarterback, wins FROM public.list_of_cleveland_browns_starting_quarterbacks WHERE quarterback ILIKE '%Graham%' OR quarterback ILIKE '%Quinn%';
+Result:
+- quarterback: graham , otto — wins: 57
+- quarterback: quinn , brady — wins: 3
+
+2) Compute the difference in wins (Otto Graham minus Brady Quinn)
+Executed SQL:
+SELECT
+  (SELECT wins FROM public.list_of_cleveland_browns_starting_quarterbacks WHERE LOWER(quarterback) LIKE '%graham%') AS otto_wins,
+  (SELECT wins FROM public.list_of_cleveland_browns_starting_quarterbacks WHERE LOWER(quarterback) LIKE '%quinn%') AS brady_wins,
+  (SELECT wins FROM public.list_of_cleveland_browns_starting_quarterbacks WHERE LOWER(quarterback) LIKE '%graham%') -
+  (SELECT wins FROM public.list_of_cleveland_browns_starting_quarterbacks WHERE LOWER(quarterback) LIKE '%quinn%') AS otto_minus_brady;
+Result:
+- otto_wins: 57
+- brady_wins: 3
+- otto_minus_brady: 54
+
+Conclusion:
+- According to the Browns starting quarterbacks table, Otto Graham has 57 wins and Brady Quinn has 3 wins as Browns starters. The difference is 54, not 44. Therefore, the claim is contradicted by the data in the available authoritative source.
+
+Assumptions noted:
+- “Wins” are interpreted as wins as the starting quarterback for the Cleveland Browns, based on the only accessible authoritative dataset (list_of_cleveland_browns_starting_quarterbacks). This does not include wins for other NFL teams or leagues beyond what the table tracks.
+- Name matching used case-insensitive substring searches on the quarterback field to locate the records for “graham , otto” and “quinn , brady.”
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

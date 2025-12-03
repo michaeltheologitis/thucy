@@ -1,0 +1,76 @@
+
+<userQuery>
+<query>
+on sunday , september 30 , the chicago bear beat the green bay packer 31 - 20
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "on sunday , september 30 , the chicago bear beat the green bay packer 31 - 20"
+
+Summary conclusion: Verified. The Bears–Packers rivalry table shows that on Sunday, September 30, 1951, the Chicago Bears defeated the Green Bay Packers 31–20.
+
+Data source discovery:
+- Accessible source: PostgreSQL instance (TabFact via postgres_tabfact10), public schema.
+- Relevant table: public.bears_packers_rivalry (columns: year, date [text], winner, result, loser, attendance, location).
+
+Evidence and executed SQL:
+1) Inspect sample rows to understand date/result formats
+SQL:
+SELECT year, date, winner, result, loser FROM public.bears_packers_rivalry ORDER BY year DESC LIMIT 20;
+Key returned row (18th in sample):
+- 1951 | sunday , september 30 | chicago bears | 31 - 20 | green bay packers
+
+2) Targeted search for September 30 with 31 - 20 Bears over Packers
+SQL:
+SELECT year, date, winner, result, loser
+FROM public.bears_packers_rivalry
+WHERE lower(date) LIKE '%september 30%';
+Result:
+- 1951 | sunday , september 30 | chicago bears | 31 - 20 | green bay packers
+
+Confirmation with exact team/score match
+SQL:
+SELECT year, date, winner, result, loser
+FROM public.bears_packers_rivalry
+WHERE lower(date) LIKE '%september 30%'
+  AND lower(winner) = 'chicago bears'
+  AND lower(loser) = 'green bay packers'
+  AND lower(result) = '31 - 20';
+Result:
+- 1951 | sunday , september 30 | chicago bears | 31 - 20 | green bay packers
+
+3) Verify that September 30, 1951 is a Sunday (weekday computation)
+SQL (locate 1951 dates to confirm exact stored text):
+SELECT year, date FROM public.bears_packers_rivalry WHERE year = 1951;
+Returned:
+- { year: 1951, date: 'sunday , september 30' }
+- { year: 1951, date: 'sunday , november 18' }
+
+SQL (parse month/day and compute weekday):
+SELECT year, date AS date_text,
+       trim(split_part(date,',',2)) AS md_text,
+       to_date(year || ' ' || trim(split_part(date,',',2)), 'YYYY FMMonth DD') AS real_date,
+       to_char(to_date(year || ' ' || trim(split_part(date,',',2)), 'YYYY FMMonth DD'), 'FMDay') AS weekday_name,
+       extract(dow from to_date(year || ' ' || trim(split_part(date,',',2)), 'YYYY FMMonth DD')) AS dow
+FROM public.bears_packers_rivalry
+WHERE year = 1951 AND split_part(date,',',2) ILIKE '%september%';
+Returned:
+- { year: 1951, date_text: 'sunday , september 30', md_text: 'september 30', real_date: '1951-09-30', weekday_name: 'Sunday', dow: 0 }
+Interpretation: 1951-09-30 is a Sunday (PostgreSQL dow=0 indicates Sunday).
+
+Assessment of each part of the claim:
+- "on sunday" — Supported (date_text contains "sunday"; computed weekday = Sunday).
+- "september 30" — Supported (date_text: "september 30"; parsed date 1951-09-30).
+- "the chicago bear beat the green bay packer" — Supported (winner: chicago bears; loser: green bay packers). Singular/plural in the claim is treated as referring to team names.
+- "31 - 20" — Supported (result exactly "31 - 20").
+
+Assumptions:
+- The claim did not specify a year; I interpret it as referring to the occurrence found in the dataset, which is the 1951 game on September 30.
+- Minor grammatical differences (singular vs. plural team names) are interpreted as references to the team franchises.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

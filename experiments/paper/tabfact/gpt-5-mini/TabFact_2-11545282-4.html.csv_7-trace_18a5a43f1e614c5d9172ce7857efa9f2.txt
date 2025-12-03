@@ -1,0 +1,73 @@
+
+<userQuery>
+<query>
+adrian dantley be on the team the entire time that brad davis be also on the team , as well as surpass davis by 4 additional year
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim (interpreted): Adrian Dantley was on the same team for the entire period that Brad Davis was also on that team, and Dantley remained 4 additional years beyond Davis.
+
+What team we verified against: Utah Jazz (based on the available data source: utah_jazz_all_time_roster table).
+
+Findings
+- Overlap/containment: Supported. The data shows Brad Davis’s Utah Jazz tenure (1979–1980) is fully contained within Adrian Dantley’s Utah Jazz tenure (1979–1986).
+- “4 additional years” beyond Davis: Not supported. Using the recorded end years, Dantley’s Jazz tenure ends in 1986 while Davis’s ends in 1980 — a difference of 6 years, not 4.
+
+Supporting evidence (exact executed SQL and results)
+1) Locate both players and their Jazz years
+SQL executed:
+SELECT player, "years for jazz" FROM utah_jazz_all_time_roster WHERE player ILIKE '%Dantley%' OR player ILIKE '%Davis%' ORDER BY player;
+Results:
+- adrian dantley — 1979 - 86
+- brad davis — 1979 - 80
+
+2) Parse start and end years (expanding 2-digit end years to the same century as the start)
+SQL executed:
+SELECT player, "years for jazz" as raw,
+       CAST(trim(split_part("years for jazz", '-',1)) AS integer) as start_year,
+       CASE WHEN length(trim(split_part("years for jazz", '-',2))) <= 2
+            THEN (CAST(trim(split_part("years for jazz", '-',1)) AS integer)/100)*100 + CAST(trim(split_part("years for jazz", '-',2)) AS integer)
+            ELSE CAST(trim(split_part("years for jazz", '-',2)) AS integer)
+       END as end_year
+FROM public.utah_jazz_all_time_roster
+WHERE lower(player) IN ('adrian dantley','brad davis');
+Results:
+- player: adrian dantley, raw: 1979 - 86, start_year: 1979, end_year: 1986
+- player: brad davis,    raw: 1979 - 80, start_year: 1979, end_year: 1980
+
+3) Compute how many more years Dantley remained with the Jazz beyond Davis’s end year
+SQL executed:
+WITH parsed AS (
+  SELECT player,
+   substring("years for jazz" FROM '([0-9]{4})')::int AS start_year,
+   CASE WHEN char_length(substring(trim("years for jazz") FROM '([0-9]{2,4})$')) = 2
+      THEN ((substring("years for jazz" FROM '([0-9]{4})')::int/100)*100 + substring(trim("years for jazz") FROM '([0-9]{2,4})$')::int)
+      ELSE substring(trim("years for jazz") FROM '([0-9]{2,4})$')::int
+   END AS end_year
+  FROM utah_jazz_all_time_roster
+  WHERE player IN ('adrian dantley','brad davis')
+)
+SELECT
+ (SELECT end_year FROM parsed WHERE player='adrian dantley') AS adrian_end,
+ (SELECT end_year FROM parsed WHERE player='brad davis') AS brad_end,
+ ( (SELECT end_year FROM parsed WHERE player='adrian dantley') - (SELECT end_year FROM parsed WHERE player='brad davis') ) AS years_more;
+Results:
+- adrian_end: 1986
+- brad_end: 1980
+- years_more: 6
+
+Conclusion
+- The containment part of the claim is true for the Utah Jazz: Dantley’s Jazz tenure fully covers Davis’s Jazz tenure.
+- The “surpass by 4 years” part is false according to the data; the documented difference is 6 years.
+
+Assumptions
+- “Team” refers to the Utah Jazz, the team for which we have an authoritative all-time roster dataset in the connected database.
+- Two-digit end years (e.g., “86”) in the dataset are interpreted in the same century as the start year (e.g., 1979–86 → 1979–1986).
+- “Surpass by X years” is interpreted as the difference between the players’ end years with the team (1986 – 1980 = 6).
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

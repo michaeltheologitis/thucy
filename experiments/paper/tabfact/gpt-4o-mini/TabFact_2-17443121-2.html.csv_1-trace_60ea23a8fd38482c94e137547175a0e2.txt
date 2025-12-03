@@ -1,0 +1,58 @@
+
+<userQuery>
+<query>
+in season 1 of gary unmarried , the least viewed episode of the season be the finale , which air on may 20 , 2009
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify:
+“In Season 1 of Gary Unmarried, the least viewed episode of the season is the finale, which aired on May 20, 2009.”
+
+Data source discovery and schema:
+- Discovered a PostgreSQL database (TabFact) with table: public.gary_unmarried
+- Table columns:
+  - episode (text)
+  - air date (text)
+  - timeslot (text)
+  - 18 - 49 (text)
+  - viewers (double precision)
+
+Step 1: Inspect sample records to understand data values
+Executed SQL:
+SELECT * FROM gary_unmarried LIMIT 10;
+Key observations from returned rows:
+- Air dates are stored as text in the form “september 24 , 2008”, etc.
+- Viewers is a numeric field (in millions).
+- Sample includes Season 1 episode entries from 2008 and 2009.
+
+Step 2: Retrieve all Season 1 episodes (aired on or before May 20, 2009), ordered by air date, with their viewers
+Executed SQL:
+SELECT episode, "air date" AS original_air_date, viewers
+FROM gary_unmarried
+WHERE TO_DATE("air date", 'Month DD, YYYY') <= '2009-05-20'
+ORDER BY TO_DATE("air date", 'Month DD, YYYY');
+
+Relevant returned rows (abridged to essential points):
+- ...
+- gary and his half brother — may 6 , 2009 — viewers: 6.66
+- gary fixes allison 's garbage disposal — may 20 , 2009 — viewers: 5.55
+
+From the full returned list (Sept 24, 2008 through May 20, 2009), the viewers values are: 6.84, 6.97, 7.43, 7.71, 7.85, 6.44, 6.71, 8.14, 7.72, 8.03, 7.55, 7.07, 7.07, 6.86, 7.26, 7.71, 7.57, 7.30, 6.66, 5.55. The minimum is 5.55 million for the episode on May 20, 2009, which is the season finale (“Gary Fixes Allison’s Garbage Disposal”).
+
+Findings:
+- Finale air date: The data shows the finale aired on May 20, 2009.
+- Least viewed episode of Season 1: Among all Season 1 episodes (air dates up to and including May 20, 2009), the lowest viewership is 5.55 million, which corresponds to the finale. No other Season 1 episode in the returned list has fewer viewers.
+
+Conclusion:
+- The claim is supported by the data: the Season 1 finale of Gary Unmarried aired on May 20, 2009 and had the lowest viewership of the season.
+
+Assumptions:
+- Season 1 is defined as episodes with air dates from September 2008 up to and including May 20, 2009, as per the dataset.
+- “Viewers” represents total viewers in millions, as indicated by the numeric values in the viewers column.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+the total number of draw for bridgenorth be 0
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+Claim: “the total number of draw for bridgenorth be 0.”
+Conclusion: Supported by the data; Bridgenorth has 0 draws.
+
+Data Source Exploration
+- Discovered data sources: A public PostgreSQL database with a single table: public.my_info_table.
+- Schema (relevant columns):
+  - "ntfa div 1" (text)
+  - wins (bigint)
+  - byes (bigint)
+  - losses (bigint)
+  - draws (bigint)
+  - against (bigint)
+
+Evidence and Executed SQL
+1) Retrieve Bridgenorth row to inspect draws and related stats
+Executed SQL:
+SELECT wins, byes, losses, draws, against FROM my_info_table WHERE "ntfa div 1" ILIKE 'Bridgenorth' OR "ntfa div 1" ILIKE 'Bridgnorth';
+Result:
+- Wins: 15
+- Byes: 0
+- Losses: 3
+- Draws: 0
+- Against: 1247
+
+2) Aggregate check of total draws for all entries named Bridgenorth/Bridgnorth
+Executed SQL:
+SELECT SUM(draws) AS total_draws 
+FROM my_info_table 
+WHERE "ntfa div 1" IN ('Bridgenorth', 'Bridgnorth');
+Result:
+- total_draws: 0
+
+Assessment
+- Both the direct row lookup and the aggregate sum confirm draws = 0 for Bridgenorth/Bridgnorth.
+
+Assumptions
+- “bridgenorth” refers to the team entry whose name appears in the "ntfa div 1" column as either 'Bridgenorth' or 'Bridgnorth'.
+- “total number of draw” refers to the value in the draws column for that team (and, if multiple rows existed, their sum).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,64 @@
+
+<userQuery>
+<query>
+during the 1993 new york jet season , the new york jet play 8 game at the game site name the robert f kennedy memorial stadium
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of approach
+- Discovered the available data sources and identified a relevant table for the 1993 New York Jets season.
+- Inspected the schema to understand available fields.
+- Queried the dataset to count games by venue and to specifically check occurrences of “robert f kennedy memorial stadium,” and to list the detailed record(s) for that venue.
+
+Data source discovery
+- Discovered data source: PostgreSQL TabFact database (public schema) containing table t_1993_new_york_jets_season.
+
+Schema details
+- Table: public.t_1993_new_york_jets_season
+  - Columns: week (bigint), date (text), opponent (text), result (text), "game site" (text), attendance (bigint)
+
+Evidence 1: Distinct game sites and counts
+Executed SQL:
+SELECT "game site", COUNT(*) AS games
+FROM t_1993_new_york_jets_season
+GROUP BY "game site"
+ORDER BY games DESC;
+
+Result (site : number of games):
+- the meadowlands : 8
+- houston astrodome : 1
+- robert f kennedy memorial stadium : 1
+- rca dome : 1
+- los angeles memorial coliseum : 1
+- foxboro stadium : 1
+- giants stadium : 1
+- rich stadium : 1
+- joe robbie stadium : 1
+
+Evidence 2: Exact count of games at Robert F. Kennedy Memorial Stadium
+Executed SQL:
+SELECT COUNT(*) AS count FROM public.t_1993_new_york_jets_season WHERE lower("game site") = 'robert f kennedy memorial stadium';
+
+Result:
+- count: 1
+
+Evidence 3: Details of the RFK Stadium game
+Executed SQL:
+SELECT week, date, opponent, result, "game site" FROM public.t_1993_new_york_jets_season WHERE "game site" ILIKE '%robert f kennedy memorial stadium%';
+
+Result:
+- Week 15 — Date: 1993-12-11 — Opponent: Washington Redskins — Result: W 3 - 0 — Game site: robert f kennedy memorial stadium
+
+Conclusion
+- The data shows the New York Jets played exactly 1 game at Robert F. Kennedy Memorial Stadium in the 1993 season, not 8. They played 8 games at “the meadowlands.” Therefore, the claim is contradicted by the evidence.
+
+Assumptions
+- The table represents the full 1993 regular-season schedule for the New York Jets.
+- Venue names are taken as-is from the "game site" field, and the database is authoritative within its scope.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

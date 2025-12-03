@@ -1,0 +1,44 @@
+
+<userQuery>
+<query>
+the title of the episode that air on march 31 , 2008 be , new york : secret societies
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The episode that aired on March 31, 2008 is titled “New York: Secret Societies.”
+
+Data sources explored
+- Discovered data source: PostgreSQL instance (TabFact), public schema.
+- Relevant table identified: public.cities_of_the_underworld (columns: "production no", "episode no", "original airdate", "episode title", "host").
+
+Evidence and executed SQL
+1) Locate the episode by airdate components (month/day/year)
+SQL:
+SELECT "episode title", "original airdate" FROM public.cities_of_the_underworld WHERE "original airdate" ILIKE '%March%' AND "original airdate" ILIKE '%31%' AND "original airdate" ILIKE '%2008%';
+Result:
+- episode title: new york : secret societies
+- original airdate: march 31 , 2008
+
+2) Confirm exact (case-insensitive) airdate match and retrieve more details
+SQL:
+SELECT "episode title", "production no", "episode no", "host" FROM public.cities_of_the_underworld WHERE lower(trim("original airdate")) = lower('march 31 , 2008');
+Result (1 row):
+- episode title: new york : secret societies
+- production no: 23
+- episode no: 209
+- host: don wildman
+
+Conclusion
+- The data shows that the episode with original airdate “march 31 , 2008” is titled “new york : secret societies.” The claim is supported.
+
+Assumptions
+- The table public.cities_of_the_underworld represents the TV series “Cities of the Underworld.”
+- Airtdate is stored as free text; matching used case-insensitive comparison and text search for the specific date string.
+
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

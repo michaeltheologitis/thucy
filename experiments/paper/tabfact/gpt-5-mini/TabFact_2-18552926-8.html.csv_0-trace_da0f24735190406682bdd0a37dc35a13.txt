@@ -1,0 +1,76 @@
+
+<userQuery>
+<query>
+fox mulder win best actor in a leading role in 1996
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "fox mulder win best actor in a leading role in 1996"
+
+Data source discovery
+- Available database: TabFact (public schema)
+- Relevant table: list_of_awards_and_nominations_received_by_the_x_files
+  Columns: year, category, recipients and nominees, role / episode, result
+
+Evidence collected (with exact executed SQL)
+1) Schema confirmation
+SQL:
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name = 'list_of_awards_and_nominations_received_by_the_x_files';
+Result:
+[{"column_name":"year","data_type":"bigint"},{"column_name":"category","data_type":"text"},{"column_name":"recipients and nominees","data_type":"text"},{"column_name":"role / episode","data_type":"text"},{"column_name":"result","data_type":"text"}]
+
+2) Broad check for 1996 entries mentioning David Duchovny or Fox Mulder
+SQL:
+SELECT year, category, "recipients and nominees", "role / episode", result
+FROM public.list_of_awards_and_nominations_received_by_the_x_files
+WHERE year = 1996
+  AND (
+    "recipients and nominees" ILIKE '%David Duchovny%'
+    OR "role / episode" ILIKE '%Fox Mulder%'
+  );
+Result:
+[{"category":"best actor in a leading role - drama series","recipients and nominees":"david duchovny","result":"won","role / episode":"fox mulder","year":1996}]
+
+3) Targeted check: 1996, category includes 'Actor', result indicates a win, recipient or role matches
+SQL:
+SELECT year, category, "recipients and nominees", "role / episode", result
+FROM public.list_of_awards_and_nominations_received_by_the_x_files
+WHERE year = 1996
+  AND category ILIKE '%Actor%'
+  AND result ILIKE '%won%'
+  AND (
+    "recipients and nominees" ILIKE '%David Duchovny%'
+    OR "role / episode" ILIKE '%Fox Mulder%'
+  );
+Result:
+[{"category":"best actor in a leading role - drama series","recipients and nominees":"david duchovny","result":"won","role / episode":"fox mulder","year":1996}]
+
+4) All 1996 rows for David Duchovny (sanity check)
+SQL:
+SELECT year, category, "recipients and nominees", "role / episode", result
+FROM list_of_awards_and_nominations_received_by_the_x_files
+WHERE year = 1996
+  AND lower("recipients and nominees") LIKE '%david duchovny%';
+Result:
+- 1996 | best actor in a leading role - drama series | david duchovny | fox mulder | won
+
+Analysis
+- The dataset records that in 1996, David Duchovny won an award with the category labeled "best actor in a leading role - drama series" for the role "fox mulder".
+- The claim phrases the winner as "fox mulder" (the character). Strictly, awards are conferred to the actor (David Duchovny), not the character. However, the win explicitly pertains to the performance as Fox Mulder and matches the phrasing "best actor in a leading role" (with the qualifier "drama series").
+
+Conclusion
+- The core of the claim—that there was a 1996 win tied to Fox Mulder for "best actor in a leading role"—is supported by the data. The only imprecision is attributing the win to the character rather than the actor and the omission of the "drama series" qualifier.
+
+Assumptions
+- Interpreted "best actor in a leading role" as it appears in the available dataset (which specifies "- drama series"). The dataset does not specify the award body; conclusions are based solely on the table provided.
+- Treated references to "Fox Mulder" as identifying the role associated with David Duchovny in the awards record, not as the literal award recipient.
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

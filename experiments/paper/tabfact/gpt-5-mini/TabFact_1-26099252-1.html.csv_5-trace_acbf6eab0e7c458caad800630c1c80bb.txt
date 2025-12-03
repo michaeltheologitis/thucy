@@ -1,0 +1,62 @@
+
+<userQuery>
+<query>
+when vp8 ( webm ) be 6.0 , and the vp9 ( webm ) be 29.0 , the operating system be window
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify
+“When vp8 ( webm ) be 6.0, and the vp9 ( webm ) be 29.0, the operating system be window.” Interpreted as: there exists a row in the data where the column "vp8 ( webm )" = 6.0 and "vp9 ( webm )" = 29.0, and the "operating system" is Windows.
+
+Data source and schema
+- Discovered database: TabFact (postgres_tabfact23), schema: public
+- Table: public.html5_video
+- Columns (text unless noted): browser; operating system; latest stable release; theora; h264; vp8 ( webm ); vp9 ( webm )
+
+Evidence
+1) Distinct values of operating system
+SQL executed:
+SELECT DISTINCT "operating system"
+FROM public.html5_video
+ORDER BY "operating system";
+Result (abridged): ["windows", "android", "ios", "macos x", "windows phone", "windows rt", "all supported", "30.0.1599.101 (october 15 , 2013 )"]
+
+2) Direct check for a row with operating system = 'windows' AND "vp8 ( webm )" = '6.0' AND "vp9 ( webm )" = '29.0'
+SQL executed:
+SELECT browser, "operating system", "latest stable release", "vp8 ( webm )", "vp9 ( webm )"
+FROM public.html5_video
+WHERE lower("operating system") = 'windows'
+  AND "vp8 ( webm )" = '6.0'
+  AND "vp9 ( webm )" = '29.0';
+Result: 0 rows
+
+3) What values actually appear for Windows rows
+SQL executed:
+SELECT * FROM public.html5_video WHERE lower("operating system") = 'windows';
+Result:
+[{"browser":"internet explorer","h264":"9.0","latest stable release":"v11.0.9600.16384 (17 october 2013 )","operating system":"windows","theora":"manual install","vp8 ( webm )":"manual install","vp9 ( webm )":"no"}]
+Interpretation: For the only Windows row, "vp8 ( webm )" is "manual install" and "vp9 ( webm )" is "no" — not 6.0 and 29.0.
+
+4) Do any rows have vp8(webm) containing '6.0' and vp9(webm) containing '29.0'? If so, what OS do they list?
+SQL executed:
+SELECT browser, "operating system", "vp8 ( webm )", "vp9 ( webm )" 
+FROM public.html5_video
+WHERE "vp8 ( webm )" LIKE '%6.0%'
+  AND "vp9 ( webm )" LIKE '%29.0%';
+Result:
+- browser: google chrome; operating system: "30.0.1599.101 (october 15 , 2013 )"; vp8 ( webm ): "6.0"; vp9 ( webm ): "29.0"
+Interpretation: The row that has vp8=6.0 and vp9=29.0 is not labeled with operating system 'windows'.
+
+Conclusion
+The data shows no Windows row where "vp8 ( webm )" = 6.0 and "vp9 ( webm )" = 29.0. The only Windows row has "vp8 ( webm )" = "manual install" and "vp9 ( webm )" = "no". Therefore, the claim is contradicted by the available data.
+
+Assumptions
+- Interpreted “window” as the operating system value 'windows' (case-insensitive) in the operating system column.
+- Interpreted equality on the literal stored text values in the "vp8 ( webm )" and "vp9 ( webm )" columns.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

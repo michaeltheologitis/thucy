@@ -1,0 +1,96 @@
+
+<userQuery>
+<query>
+34028 be the total attendance on september 11
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “34028 be the total attendance on September 11.”
+
+Data sources explored
+- Verified available database: TabFact (schema: public). Contains table public.east_carolina_pirates_football_1990_99 with columns: date (text), opponent (text), site (text), result (text), attendance (text).
+
+What the data shows
+- There are no games in this dataset with a date matching “September 11” (including common textual/numeric variants). Therefore, the total attendance on September 11 in this dataset is 0.
+- The dataset does include “september 12” with attendance 34028 (opponent: chattanooga). This likely explains the 34028 figure, but it is for September 12, not September 11.
+
+Executed SQL queries and returned results (evidence)
+1) Check for exact textual match "September 11"
+SQL:
+SELECT COUNT(*) AS matching_rows
+FROM public.east_carolina_pirates_football_1990_99
+WHERE date ILIKE '%September 11%';
+Result:
+matching_rows = 0
+
+2) Sum attendance for exact textual match "September 11"
+SQL:
+SELECT COALESCE(SUM(NULLIF(regexp_replace(attendance, '[^0-9]', '', 'g'), '')::bigint), 0) AS total_attendance
+FROM public.east_carolina_pirates_football_1990_99
+WHERE date ILIKE '%September 11%';
+Result:
+total_attendance = 0
+
+3) Show dataset size (context)
+SQL:
+SELECT count(*) FROM public.east_carolina_pirates_football_1990_99;
+Result:
+count = 12
+
+4) Check common September 11 textual patterns
+SQL:
+SELECT count(*)
+FROM public.east_carolina_pirates_football_1990_99
+WHERE date ILIKE '%September 11%'
+   OR date ILIKE '%Sept 11%'
+   OR date ILIKE '%Sept. 11%'
+   OR date ILIKE '%Sep 11%'
+   OR date ILIKE '%Sep. 11%'
+   OR date ILIKE '%9/11%'
+   OR date ILIKE '%09/11%'
+   OR date ILIKE '%9-11%'
+   OR date ILIKE '%09-11%';
+Result:
+count = 0
+
+5) List September entries for context (to show nearby dates)
+SQL:
+SELECT date, attendance, opponent
+FROM public.east_carolina_pirates_football_1990_99
+WHERE date ILIKE '%september%';
+Results:
+- date = "september 5", attendance = "48134", opponent = "virginia tech"
+- date = "september 12", attendance = "34028", opponent = "chattanooga"
+- date = "september 19", attendance = "19186", opponent = "ohio"
+
+6) Regex-based comprehensive match and sum for “September 11” variants
+SQL (count):
+SELECT COUNT(*) AS match_count
+FROM public.east_carolina_pirates_football_1990_99
+WHERE date ~* '(^|\s)(September|Sept\.?|Sep\.?)\s+11(\b|$)'
+   OR date ~* '(^|\s)0?9[/-]11(\b|$)';
+Result:
+match_count = 0
+
+SQL (sum):
+SELECT COALESCE(SUM(COALESCE(NULLIF(regexp_replace(attendance, '[^0-9]', '', 'g'), '')::integer, 0)), 0) AS total_attendance_int
+FROM public.east_carolina_pirates_football_1990_99
+WHERE date ~* '(^|\s)(September|Sept\.?|Sep\.?)\s+11(\b|$)'
+   OR date ~* '(^|\s)0?9[/-]11(\b|$)';
+Result:
+total_attendance_int = 0
+
+Conclusion
+- The claim that the total attendance on September 11 is 34028 is not supported by the available data; the dataset contains no events on September 11, so the total is 0. A nearby date, September 12, has attendance 34028.
+
+Assumptions
+- Scope is limited to the authoritative data source discovered (TabFact public.east_carolina_pirates_football_1990_99, seasons 1990–1999).
+- Date matching was performed case-insensitively and included common textual/numeric variants for “September 11.”
+- Attendance values are stored as text and were converted to integers by stripping non-digit characters before summation.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,57 @@
+
+<userQuery>
+<query>
+there be more than 2 zakspeed chassis make in the year 1987
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “there be more than 2 zakspeed chassis make in the year 1987.”
+
+Data source explored
+- Database: TabFact (public schema)
+- Table: public.zakspeed with columns: year (bigint), chassis (text), engine (s) (text), tyres (text), points (bigint)
+
+Evidence and executed SQL
+1) Confirm available years in the Zakspeed table
+- SQL:
+  SELECT DISTINCT year FROM public.zakspeed ORDER BY year;
+- Result:
+  1985, 1986, 1987, 1988, 1989
+
+2) Retrieve the Zakspeed entry for 1987
+- SQL:
+  SELECT * FROM public.zakspeed WHERE year = 1987;
+- Result (one row):
+  { year: 1987, chassis: "zakspeed 861 zakspeed 871", "engine (s)": "zakspeed s4 t / c", tyres: "g", points: 2 }
+  Interpretation: The chassis field lists two chassis names for 1987: “zakspeed 861” and “zakspeed 871”.
+
+3) Count the number of chassis names listed for 1987 (by counting occurrences of the substring “zakspeed”)
+- SQL:
+  SELECT SUM(((length(lower(chassis)) - length(replace(lower(chassis),'zakspeed',''))) / length('zakspeed')::numeric))::bigint AS zakspeed_occurrences
+  FROM public.zakspeed
+  WHERE year = 1987;
+- Result:
+  zakspeed_occurrences = 2
+
+4) (Supplementary) Count rows in 1987 that contain any chassis text mentioning Zakspeed
+- SQL:
+  SELECT COUNT(*) AS rows_with_zakspeed
+  FROM public.zakspeed
+  WHERE year = 1987 AND lower(chassis) LIKE '%zakspeed%';
+- Result:
+  rows_with_zakspeed = 1
+
+Conclusion
+- The data shows two Zakspeed chassis listed for 1987: 861 and 871. Therefore, the number of Zakspeed chassis for 1987 is 2, which is not more than 2.
+
+Final answer: The claim is not supported by the data.
+
+Assumptions
+- Interpreted “chassis make in the year 1987” as the chassis listed in the zakspeed table for the 1987 season (i.e., chassis used/associated with Zakspeed in 1987). No additional semantics beyond what is present in the table were inferred.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

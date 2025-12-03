@@ -1,0 +1,73 @@
+
+<userQuery>
+<query>
+9 of the dolphin final 10 game be victory
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “The Dolphins won 9 of their final 10 games.”
+
+Data sources discovered
+- Database: TabFact (public schema)
+- Available relevant table: public.t_1983_miami_dolphins_season (game-by-game results for the 1983 Miami Dolphins)
+
+Evidence
+1) Full season game list (ordered by week)
+SQL executed:
+SELECT week, date, opponent, result, attendance FROM public.t_1983_miami_dolphins_season ORDER BY week ASC;
+Key rows (Weeks 7–16, i.e., the final 10 games):
+- Week 7: result = w 32 - 14
+- Week 8: result = w 21 - 7
+- Week 9: result = w 30 - 14
+- Week 10: result = w 20 - 17
+- Week 11: result = l 17 - 6
+- Week 12: result = w 37 - 0
+- Week 13: result = w 38 - 14
+- Week 14: result = w 24 - 17
+- Week 15: result = w 31 - 24
+- Week 16: result = w 34 - 14
+This shows 9 wins and 1 loss over the final 10 games.
+
+2) Direct computation of wins in the final 10 games
+SQL executed:
+SELECT week, result, date, opponent FROM public.t_1983_miami_dolphins_season ORDER BY week DESC LIMIT 10;
+(returns Weeks 16→7 with one loss at Week 11 and nine wins)
+
+SQL executed:
+SELECT COUNT(*) FILTER (WHERE lower(result) LIKE 'w%') AS wins, COUNT(*) AS total_games
+FROM (
+  SELECT result
+  FROM public.t_1983_miami_dolphins_season
+  ORDER BY week DESC
+  LIMIT 10
+) AS last10;
+Result: wins = 9, total_games = 10
+
+3) Season coverage check
+SQL executed:
+SELECT COUNT(*) AS game_count FROM public.t_1983_miami_dolphins_season;
+Result: {"game_count":16}
+
+SQL executed:
+SELECT MIN(week) AS min_week, MAX(week) AS max_week FROM public.t_1983_miami_dolphins_season;
+Result: {"min_week":1, "max_week":16}
+
+SQL executed:
+SELECT COUNT(DISTINCT week) AS distinct_week_count, COUNT(*) FILTER (WHERE week IS NULL) AS null_week_count FROM public.t_1983_miami_dolphins_season;
+Result: {"distinct_week_count":16, "null_week_count":0}
+
+Conclusion
+- The data for the 1983 Miami Dolphins shows they won 9 of their final 10 games. This directly supports the claim as interpreted.
+
+Assumptions
+- “Dolphins” refers to the Miami Dolphins (NFL).
+- Due to available data, the claim was evaluated for the 1983 season (the only season table accessible).
+- “Final 10 games” refers to the last 10 listed by week (Weeks 7–16) in the regular season table.
+- A “victory” is identified where the result field begins with 'w' (case-insensitive).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,86 @@
+
+<userQuery>
+<query>
+a majority of the people who score over par be from the united state
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: Among players who finished over par, a majority are from the United States (based on the available dataset).
+
+Data source discovery
+- Available database: TabFact
+- Relevant table: t_1989_u_s_open_golf (1989 U.S. Open Golf tournament)
+- Columns: place (text), player (text), country (text), score (text), "to par" (text), money (bigint)
+
+How “over par” was determined
+- Observed "to par" values include: "+ 3", "+ 2", "+ 1", "- 1", "- 2", and "e" (even).
+- Operational definition: over par = rows where "to par" LIKE '+%'.
+
+Evidence 1: Distinct values of "to par"
+Executed SQL:
+SELECT "to par", COUNT(*) AS count
+FROM t_1989_u_s_open_golf
+GROUP BY "to par"
+ORDER BY count DESC;
+Result summary:
+- + 3: 4 occurrences
+- - 1: 3 occurrences
+- + 1: 2 occurrences
+- + 2: 1 occurrence
+- - 2: 1 occurrence
+- e: 1 occurrence
+
+Evidence 2: Over-par players by country
+Executed SQL:
+SELECT country, COUNT(player) AS player_count, COUNT(player) * 1.0 / SUM(COUNT(player)) OVER () AS share
+FROM t_1989_u_s_open_golf
+WHERE "to par" LIKE '+%'
+GROUP BY country
+ORDER BY player_count DESC;
+Result summary:
+- United States: 5 players (~71.4%)
+- Japan: 1 player (~14.3%)
+- Spain: 1 player (~14.3%)
+
+Evidence 3: List of over-par players (names, countries, to-par)
+Executed SQL:
+SELECT player, country, "to par"
+FROM t_1989_u_s_open_golf
+WHERE "to par" LIKE '+%';
+Result rows:
+- Masashi Ozaki (Japan) — +1
+- Scott Simpson (United States) — +1
+- Peter Jacobsen (United States) — +2
+- Paul Azinger (United States) — +3
+- Hubert Green (United States) — +3
+- Tom Kite (United States) — +3
+- José María Olazábal (Spain) — +3
+
+Evidence 4: Total over-par count and U.S. share (normalized country check)
+Executed SQL:
+SELECT COUNT(*) AS total_over_par_players
+FROM t_1989_u_s_open_golf
+WHERE "to par" LIKE '+%';
+Executed SQL:
+SELECT COUNT(*) AS us_over_par_players
+FROM t_1989_u_s_open_golf
+WHERE "to par" LIKE '+%' AND LOWER(TRIM(country)) = 'united states';
+Results:
+- total_over_par_players: 7
+- us_over_par_players: 5
+
+Conclusion
+- 5 of 7 over-par players are from the United States (~71.4%). This is a clear majority.
+- The claim is supported by the data available for the 1989 U.S. Open tournament.
+
+Assumptions
+- “People who score over par” refers to players in this dataset with "to par" values starting with '+', i.e., finishing above par.
+- “United state” is interpreted as “United States.”
+- The claim is evaluated against the provided dataset (1989 U.S. Open), not across all tournaments or years.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

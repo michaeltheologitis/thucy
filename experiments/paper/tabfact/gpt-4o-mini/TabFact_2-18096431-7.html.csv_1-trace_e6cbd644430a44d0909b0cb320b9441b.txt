@@ -1,0 +1,44 @@
+
+<userQuery>
+<query>
+mark brook and kenny perry tie for have the lowest to par
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The statement is taken to mean that, in the 1996 PGA Championship, Mark Brooks and Kenny Perry tied for the lowest score relative to par (to-par) after regulation play.
+
+Data source explored:
+- Database schema: public
+- Table: t_1996_pga_championship
+- Columns: place (text), player (text), country (text), score (text), "to par" (text), money (bigint)
+
+Method and evidence:
+Because the "to par" field is stored as text (with possible whitespace or Unicode minus), I normalized it and computed the minimum numeric value, then listed all players at that minimum.
+
+Executed SQL (including normalization and selection of players at the minimum to-par):
+WITH normalized_scores AS (
+    SELECT place, player, score, "to par" AS raw,
+           REGEXP_REPLACE(TRANSLATE(TRIM("to par"), '−–—', '-'), '\s+', '', 'g') AS to_par_norm
+    FROM public.t_1996_pga_championship)
+SELECT place, player, score, raw AS "to_par", to_par_norm
+FROM normalized_scores
+WHERE to_par_norm::int = (SELECT MIN(to_par_norm::int) FROM normalized_scores WHERE to_par_norm ~ '^[+-]?\d+$');
+
+Result:
+- Minimum normalized to-par: -11
+- Players at -11:
+  - Mark Brooks — Place: 1; Score: 68 + 70 + 69 + 70 = 277; Raw "to par": - 11; Normalized: -11
+  - Kenny Perry — Place: 2; Score: 66 + 72 + 71 + 68 = 277; Raw "to par": - 11; Normalized: -11
+
+Conclusion:
+- The data shows that Mark Brooks and Kenny Perry both finished regulation at -11, tying for the lowest to-par score in the 1996 PGA Championship. Mark Brooks then won the championship via playoff, which explains the final places of 1 and 2, but the to-par tie at -11 is verified.
+
+Assumptions:
+- The claim refers specifically to the 1996 PGA Championship (the available dataset). "Tie for have the lowest to par" is interpreted as tying for the lowest to-par over 72-hole regulation scoring in that event.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

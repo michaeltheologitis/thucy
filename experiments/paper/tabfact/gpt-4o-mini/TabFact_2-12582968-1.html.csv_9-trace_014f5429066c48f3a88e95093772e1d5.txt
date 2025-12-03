@@ -1,0 +1,52 @@
+
+<userQuery>
+<query>
+lukáš melich never throw for greater than 78 m
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim assessed: “lukáš melich never throw for greater than 78 m.”
+
+Summary conclusion: The data show Lukáš Melich has a recorded throw over 78 m. His maximum recorded throw is 79.36 m at the 2013 World Championships (Moscow). Therefore, the claim is false.
+
+Data source exploration:
+- Available data sources (discovery): A PostgreSQL database with a public schema containing a single table: luk_melich.
+- Table schema (public.luk_melich):
+  - year (bigint)
+  - competition (text)
+  - venue (text)
+  - position (text)
+  - notes (text)
+
+Evidence and executed SQL:
+1) Maximum throw distance recorded for Lukáš Melich
+Executed SQL:
+SELECT MAX(CAST(SUBSTRING(notes FROM '([0-9]+(\.[0-9]+)?) m') AS numeric)) AS max_distance
+FROM luk_melich
+WHERE notes SIMILAR TO '%[0-9]+(\.[0-9]+)? m%'
+AND competition IS NOT NULL;
+Result: 79.36
+
+2) All competitions where throw distance exceeded 78 meters
+Executed SQL:
+SELECT year, competition, venue, CAST(SUBSTRING(notes FROM '([0-9]+(\.[0-9]+)?) m') AS numeric) AS distance_m, notes
+FROM luk_melich
+WHERE notes SIMILAR TO '%[0-9]+(\.[0-9]+)? m%'
+AND CAST(SUBSTRING(notes FROM '([0-9]+(\.[0-9]+)?) m') AS numeric) > 78
+ORDER BY distance_m DESC;
+Result row:
+- Year: 2013; Competition: World Championships; Venue: Moscow, Russia; Distance: 79.36 m; Notes: "79.36 m"
+
+Conclusion:
+- The database records at least one throw by Lukáš Melich greater than 78 m (79.36 m). The claim “never throw for greater than 78 m” is contradicted by the data.
+
+Assumptions:
+- Distances are stored within the notes column as text patterns like “79.36 m,” and the regex extraction accurately captures the throw distance.
+- The luk_melich table comprehensively represents the athlete’s performance records available in this data source.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

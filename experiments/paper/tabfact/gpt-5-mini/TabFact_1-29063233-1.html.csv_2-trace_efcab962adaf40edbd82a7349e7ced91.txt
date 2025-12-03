@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+the lady of the lake episode have the most uk viewer
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the lady of the lake episode have the most uk viewer.”
+
+Data discovery
+- Available source: postgres_tabfact23 (TabFact) → public.merlin_series_2
+- Relevant columns: title (text), no for series (bigint), uk viewers (million) (double precision)
+
+Evidence
+1) UK viewership for the episode titled “The Lady of the Lake”
+SQL executed:
+SELECT "title", "uk viewers (million)" FROM merlin_series_2 WHERE LOWER(title) = LOWER('The Lady of the Lake');
+Result: title = "the lady of the lake", uk viewers (million) = 6.3
+
+2) Maximum UK viewership across Series 2
+SQL executed:
+SELECT MAX("uk viewers (million)") AS max_viewers FROM merlin_series_2;
+Result: max_viewers = 6.3
+
+3) Episode(s) that achieved the maximum
+SQL executed:
+SELECT "no for series", "title", "uk viewers (million)" FROM merlin_series_2 WHERE "uk viewers (million)" = (SELECT MAX("uk viewers (million)") FROM merlin_series_2) ORDER BY "no for series";
+Result: no for series = 9, title = "the lady of the lake", uk viewers (million) = 6.3
+
+4) All episodes sorted by UK viewership (descending)
+SQL executed:
+SELECT "no for series", "title", "uk viewers (million)" FROM merlin_series_2 ORDER BY "uk viewers (million)" DESC;
+Results (top to bottom):
+- 9 | the lady of the lake | 6.3
+- 8 | the sins of the father | 6.16
+- 6 | beauty and the beast (part 2) | 6.14
+- 3 | the nightmare begins | 6.09
+- 10 | sweet dreams | 6.02
+- 12 | the fires of idirsholas | 6.01
+- 11 | the witch 's quickening | 6.01
+- 2 | the once and future queen | 5.94
+- 1 | the curse of cornelius sigan | 5.77
+- 4 | lancelot and guinevere | 5.69
+- 7 | the witchfinder | 5.62
+- 5 | beauty and the beast (part 1) | 5.53
+
+Conclusion
+- The episode “The Lady of the Lake” has the highest UK viewership (6.3 million) among Merlin Series 2 episodes in the available dataset. The claim is supported by the data.
+
+Assumptions
+- The claim refers to BBC Merlin Series 2 and “most UK viewers” means the highest value in the column "uk viewers (million)" for that series.
+- Title matching was done case-insensitively.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+the dolphins' final 10 game be victory
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "the dolphins' final 10 game be victory"
+
+How I interpreted the claim
+- Interpreted as: For the season represented in the available dataset, the Miami Dolphins won their final 10 regular-season games.
+
+Data source discovery
+- Available source: postgres_tabfact15 (TabFact), schema public
+- Relevant table: public.t_1983_miami_dolphins_season (columns: week, date, opponent, result, attendance)
+
+Evidence from data
+1) Full season games ordered by week
+- Executed SQL:
+  SELECT week, date, opponent, result, attendance
+  FROM public.t_1983_miami_dolphins_season
+  ORDER BY week;
+- Key rows (Weeks 7–16 are the final 10 games):
+  Week 7: result = w 32 - 14
+  Week 8: result = w 21 - 7
+  Week 9: result = w 30 - 14
+  Week 10: result = w 20 - 17
+  Week 11: result = l 17 - 6
+  Week 12: result = w 37 - 0
+  Week 13: result = w 38 - 14
+  Week 14: result = w 24 - 17
+  Week 15: result = w 31 - 24
+  Week 16: result = w 34 - 14
+
+2) Final 10 games with win flag and total wins
+- Executed SQL (list):
+  SELECT week, date, opponent, result,
+         CASE WHEN result ILIKE 'w%' THEN 1 ELSE 0 END AS win_flag
+  FROM public.t_1983_miami_dolphins_season
+  ORDER BY week DESC
+  LIMIT 10;
+- Results (weeks 16 down to 7): win_flag values = 1,1,1,1,1,0,1,1,1,1
+
+- Executed SQL (aggregate):
+  SELECT SUM(CASE WHEN result ILIKE 'w%' THEN 1 ELSE 0 END) AS total_wins
+  FROM (
+    SELECT result
+    FROM public.t_1983_miami_dolphins_season
+    ORDER BY week DESC
+    LIMIT 10
+  ) sub;
+- Result: total_wins = 9
+
+Conclusion
+- The 1983 Miami Dolphins did not win their final 10 regular-season games; they won 9 of the last 10, with a loss in Week 11.
+
+Assumptions
+- I assumed the claim refers to the Miami Dolphins team and to the 1983 season (the only available dataset), interpreting "final 10 game" as the final 10 regular-season games. I treated results beginning with 'w' as wins and 'l' as losses.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

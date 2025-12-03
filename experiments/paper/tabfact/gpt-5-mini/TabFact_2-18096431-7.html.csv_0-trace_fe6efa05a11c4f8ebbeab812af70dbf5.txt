@@ -1,0 +1,79 @@
+
+<userQuery>
+<query>
+mark brook be the player who earn the most money
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+What I checked and how
+
+1) Discovered available data
+- Purpose: Confirm what data is available to verify the claim.
+- SQL executed:
+  SELECT table_name
+  FROM information_schema.tables
+  WHERE table_schema = 'public'
+    AND table_type = 'BASE TABLE'
+  ORDER BY table_name;
+- Result: One table in the public schema: t_1996_pga_championship
+
+2) Understood the table structure
+- Purpose: Inspect columns and data types, especially the money field.
+- SQL executed:
+  SELECT column_name, data_type FROM information_schema.columns WHERE table_schema='public' AND table_name='t_1996_pga_championship';
+- Result: Columns: place (text), player (text), country (text), score (text), to par (text), money (bigint).
+
+3) Identify who earned the most money in the table
+- Purpose: Rank players by money and find the top earner(s).
+- SQL executed:
+  SELECT player, money
+  FROM public.t_1996_pga_championship
+  WHERE money IS NOT NULL
+  ORDER BY money DESC, player;
+- Result (top rows):
+  - mark brooks — 430000
+  - kenny perry — 260000
+  - steve elkington — 140000
+  - tommy tolles — 140000
+  - jesper parnevik — 86667
+  - justin leonard — 86667
+  - vijay singh — 86667
+  - Others at 57500
+
+- SQL executed:
+  SELECT MAX(money) AS max_money FROM public.t_1996_pga_championship WHERE money IS NOT NULL;
+- Result: max_money = 430000
+
+- SQL executed:
+  SELECT player, money
+  FROM public.t_1996_pga_championship
+  WHERE money = (
+    SELECT MAX(money) FROM public.t_1996_pga_championship WHERE money IS NOT NULL
+  )
+  ORDER BY player;
+- Result: mark brooks — 430000 (no ties)
+
+4) Check the exact spelling “mark brook” vs “mark brooks”
+- Purpose: Confirm whether the table contains “mark brook” or the closely related “mark brooks”.
+- SQL executed:
+  SELECT * FROM public.t_1996_pga_championship WHERE lower(player) = 'mark brook';
+- Result: No rows returned.
+
+- SQL executed:
+  SELECT DISTINCT player FROM public.t_1996_pga_championship WHERE lower(player) LIKE 'mark brook%';
+- Result: mark brooks
+
+Conclusion
+- The player with the highest money in the available dataset (t_1996_pga_championship) is mark brooks with 430000. There is no exact entry for “mark brook,” but “mark brooks” clearly matches and is the top earner.
+
+Assumptions
+- The claim refers to the available dataset (t_1996_pga_championship) and interprets “the player who earn the most money” as the player with the maximum value in the money column for this table.
+- The name “mark brook” is interpreted as “mark brooks” due to close spelling and the exact match found in the data.
+- Case-insensitive comparisons were used when checking player name variants.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

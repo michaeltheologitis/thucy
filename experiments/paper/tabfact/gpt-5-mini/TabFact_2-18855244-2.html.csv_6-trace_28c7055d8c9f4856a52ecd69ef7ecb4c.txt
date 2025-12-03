@@ -1,0 +1,71 @@
+
+<userQuery>
+<query>
+larisa latyna have 7 less medal than carl osbum
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “larisa latyna have 7 less medal than carl osbum.”
+
+Data sources discovered
+- postgres_tabfact15 (public schema)
+- Table: public.list_of_multiple_olympic_medalists (columns: medal count, date, athlete, nation, sport, record medal event)
+
+Evidence from the database
+1) Locate the two athletes (case-insensitive matching)
+SQL:
+SELECT athlete, "medal count" FROM public.list_of_multiple_olympic_medalists WHERE athlete ILIKE '%larisa%' AND athlete ILIKE '%latynin%';
+Returned rows:
+- athlete: larisa latynina, medal count: 13
+- athlete: larisa latynina, medal count: 14
+- athlete: larisa latynina, medal count: 15
+- athlete: larisa latynina, medal count: 16
+- athlete: larisa latynina, medal count: 17
+- athlete: larisa latynina, medal count: 18
+
+SQL:
+SELECT athlete, "medal count" FROM public.list_of_multiple_olympic_medalists WHERE athlete ILIKE '%carl%' AND athlete ILIKE '%osburn%';
+Returned rows:
+- athlete: carl osburn, medal count: 8
+- athlete: carl osburn, medal count: 9
+- athlete: carl osburn, medal count: 10
+- athlete: carl osburn, medal count: 11
+
+2) Compute maximum medal totals per athlete and the differences
+SQL:
+SELECT athlete, MAX("medal count") AS max_medals
+FROM public.list_of_multiple_olympic_medalists
+WHERE athlete IN ('Larisa Latynina','Carl Osburn')
+GROUP BY athlete;
+Returned rows:
+- athlete = Larisa Latynina, max_medals = 18
+- athlete = Carl Osburn,    max_medals = 11
+
+SQL:
+WITH m AS (
+  SELECT athlete, MAX("medal count") AS max_medals
+  FROM public.list_of_multiple_olympic_medalists
+  WHERE athlete IN ('Larisa Latynina','Carl Osburn')
+  GROUP BY athlete
+)
+SELECT
+  (SELECT max_medals FROM m WHERE athlete='Larisa Latynina') - (SELECT max_medals FROM m WHERE athlete='Carl Osburn') AS larisa_minus_carl,
+  (SELECT max_medals FROM m WHERE athlete='Carl Osburn') - (SELECT max_medals FROM m WHERE athlete='Larisa Latynina') AS carl_minus_larisa;
+Returned row:
+- larisa_minus_carl = 7, carl_minus_larisa = -7
+
+Conclusion
+- Larisa Latynina’s total medals (max) = 18.
+- Carl Osburn’s total medals (max) = 11.
+- Difference = 7 in favor of Larisa Latynina. Therefore, the claim that “Larisa has 7 less medals than Carl” is false; she actually has 7 more medals than Carl.
+
+Assumptions
+- “larisa latyna” refers to Larisa Latynina; “carl osbum” refers to Carl Osburn.
+- “medal” refers to total Olympic medals per athlete, taken as the maximum medal count recorded for each athlete in the table.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

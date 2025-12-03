@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+ileyton hewitt have win the master series 2 time , in 2004 and 2005
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “Lleyton Hewitt won the Masters Series 2 times, in 2004 and 2005.”
+
+Conclusion: He did win two ATP Masters Series titles, but they occurred in 2002 and 2003 (both at Indian Wells), not in 2004 or 2005. In 2004 and 2005 he was runner-up at Cincinnati and Indian Wells, respectively.
+
+Data source checked
+- Database: TabFact
+- Schema: public
+- Table: lleyton_hewitt (columns: outcome, year, championship, surface, opponent, score)
+
+Step 1: Explore available championships to ground the context
+Result (selected distinct championships in this table): Paris; Stuttgart; Cincinnati; Indian Wells; Indian Wells (2); Cincinnati (2)
+Executed SQL:
+SELECT championship, COUNT(*) AS record_count 
+FROM public.lleyton_hewitt 
+GROUP BY championship;
+
+Step 2: Identify all title-winning entries for Hewitt
+Result (title wins):
+- 2002 — Indian Wells — Opponent: Tim Henman — Score: 6 - 1, 6 - 2
+- 2003 — Indian Wells (2) — Opponent: Gustavo Kuerten — Score: 6 - 1, 6 - 1
+Executed SQL:
+SELECT year, championship, opponent, score 
+FROM public.lleyton_hewitt 
+WHERE outcome ILIKE '%Winner%' OR outcome ILIKE '%Champion%' OR outcome ILIKE '%Won%';
+
+Step 3: Check results specifically in 2004 and 2005
+Result (no titles; runner-up finishes):
+- 2004 — Cincinnati (2) — Outcome: runner - up — Opponent: Andre Agassi — Score: 3 - 6 , 6 - 3 , 2 - 6
+- 2005 — Indian Wells — Outcome: runner - up — Opponent: Roger Federer — Score: 2 - 6 , 4 - 6 , 4 - 6
+Executed SQL:
+SELECT outcome, year, championship, opponent, score
+FROM public.lleyton_hewitt
+WHERE year IN (2004, 2005);
+
+Assessment of the claim
+- True: Hewitt has two Masters Series (Masters 1000) titles in total.
+- False: The years cited (2004 and 2005) are incorrect; his wins were in 2002 and 2003. In the cited years he was runner-up.
+
+Assumptions
+- “master series” is interpreted as ATP Masters Series (now called ATP Masters 1000) tournaments.
+- “ileyton hewitt” refers to Lleyton Hewitt.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

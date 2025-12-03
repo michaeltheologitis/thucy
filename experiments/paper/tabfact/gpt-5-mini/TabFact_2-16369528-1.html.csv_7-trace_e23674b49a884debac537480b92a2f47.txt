@@ -1,0 +1,117 @@
+
+<userQuery>
+<query>
+there be over 3 time when the reader 's vote be not n / a and the lifetime achievement be also na
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify
+"There be over 3 time when the reader's vote be not n/a and the lifetime achievement be also na."
+
+Data sources explored
+- Discovered database: postgres_tabfact33 (public schema)
+- Relevant table: public.ned_kelly_awards
+- Relevant columns: "reader 's vote" (text), "lifetime achievement" (text)
+
+Schema confirmation
+- Table ned_kelly_awards columns:
+  - year — bigint
+  - best teenage / young adult — text
+  - reader 's vote — text
+  - best non - fiction — text
+  - lifetime achievement — text
+
+How "N/A" is represented in data
+- Distinct values show the dataset uses the literal text "na" (lowercase, no slash) to represent not applicable.
+
+Evidence queries and results
+1) Distinct values and frequencies for reader's vote
+SQL executed:
+SELECT "reader 's vote" AS readers_vote, COUNT(*) AS frequency
+FROM ned_kelly_awards
+GROUP BY "reader 's vote"
+ORDER BY frequency DESC;
+Result:
+- "na": 14
+- "bleeding hearts by lindy cameron": 1
+- "apartment 255 by bunty avieson": 1
+
+2) Distinct values and frequencies for lifetime achievement
+SQL executed:
+SELECT COALESCE("lifetime achievement", '<NULL>') AS lifetime_achievement, COUNT(*) AS freq
+FROM ned_kelly_awards
+GROUP BY COALESCE("lifetime achievement", '<NULL>')
+ORDER BY freq DESC;
+Result (top values):
+- na: 3
+- alan yates (aka carter brown ): 1
+- peter corris: 1
+- professor stephen knight: 1
+- andrew rule and john silvester: 1
+- shane maloney: 1
+- sandra harvey and lindsay simpson: 1
+- bob bottom: 1
+- jon cleary: 1
+- patrick gallagher: 1
+- marele day: 1
+- peter doyle: 1
+- kerry greenwood: 1
+- stuart coupe: 1
+(No NULLs present for lifetime achievement.)
+
+3) Count rows where reader's vote is not 'na'
+SQL executed:
+SELECT COUNT(*) AS count_non_na
+FROM public.ned_kelly_awards
+WHERE "reader 's vote" IS NOT NULL
+  AND LOWER(TRIM("reader 's vote")) <> 'na';
+Result:
+- count_non_na: 2
+
+List those rows
+SQL executed:
+SELECT "year", "reader 's vote" AS reader_vote
+FROM public.ned_kelly_awards
+WHERE "reader 's vote" IS NOT NULL
+  AND LOWER(TRIM("reader 's vote")) <> 'na'
+ORDER BY "year";
+Result rows:
+- 2001 — bleeding hearts by lindy cameron
+- 2002 — apartment 255 by bunty avieson
+
+4) Core verification: rows where reader's vote is not 'na' AND lifetime achievement is 'na'
+SQL executed (robust to case/whitespace, excludes NULL/blank as not applicable):
+SELECT COUNT(*) AS count_reader_not_na_lifetime_na
+FROM public.ned_kelly_awards
+WHERE LOWER(TRIM(COALESCE("lifetime achievement",''))) = 'na'
+  AND LOWER(TRIM(COALESCE("reader 's vote",''))) <> 'na'
+  AND LOWER(TRIM(COALESCE("reader 's vote",''))) <> '' ;
+Result:
+- count_reader_not_na_lifetime_na: 0
+
+Years for any such rows (for inspection)
+SQL executed:
+SELECT DISTINCT "year" AS year
+FROM public.ned_kelly_awards
+WHERE LOWER(TRIM(COALESCE("lifetime achievement",''))) = 'na'
+  AND LOWER(TRIM(COALESCE("reader 's vote",''))) <> 'na'
+  AND LOWER(TRIM(COALESCE("reader 's vote",''))) <> ''
+ORDER BY "year";
+Result:
+- No rows returned (consistent with count = 0)
+
+Conclusion
+- There are 0 occurrences where the reader's vote is not N/A (not 'na') and the lifetime achievement is 'na' in the same record. This is not "over 3"; it is zero. The claim is contradicted by the data.
+
+Assumptions
+- Interpreted the user's "n / a" as the dataset's "na" literal.
+- Interpreted the claim as referring to rows where both conditions are true simultaneously in the same record.
+- Comparisons used case-insensitive, trimmed matching to be robust to incidental whitespace/case.
+
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

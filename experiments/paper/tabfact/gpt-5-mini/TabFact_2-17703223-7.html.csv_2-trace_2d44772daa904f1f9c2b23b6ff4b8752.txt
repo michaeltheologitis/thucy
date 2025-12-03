@@ -1,0 +1,94 @@
+
+<userQuery>
+<query>
+the person with the snatch 153.0 and clean & jerk of 180.0 be ijose espinoza ( nca ) with total bodyweight greater than 100 kg
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the person with the snatch 153.0 and clean & jerk of 180.0 be ijose espinoza ( nca ) with total bodyweight greater than 100 kg.”
+
+Data sources discovered
+- Available authoritative source: TabFact PostgreSQL, public schema.
+  - Discovery summary indicated a single accessible PostgreSQL instance with at least one public table.
+
+Schema inspection
+- Relevant table: public.weightlifting_at_the_2007_pan_american_games
+  - Columns: name (text), bodyweight (double precision), snatch (text), clean & jerk (text), total (kg) (text)
+  - No explicit nationality column; nationality codes appear embedded in the name text (e.g., “( nca )”).
+
+Evidence 1: Does any row have snatch = 153 and clean & jerk = 180?
+- Executed SQL (numeric parse of text fields):
+  SELECT name, bodyweight, snatch, "clean & jerk", "total (kg)"
+  FROM public.weightlifting_at_the_2007_pan_american_games
+  WHERE
+    (CASE WHEN NULLIF(regexp_replace(trim(snatch), '[^0-9.+\-eE]', '', 'g'), '') IS NOT NULL
+          THEN (regexp_replace(trim(snatch), '[^0-9.+\-eE]', '', 'g'))::double precision
+          ELSE NULL END) = 153
+    AND
+    (CASE WHEN NULLIF(regexp_replace(trim("clean & jerk"), '[^0-9.+\-eE]', '', 'g'), '') IS NOT NULL
+          THEN (regexp_replace(trim("clean & jerk"), '[^0-9.+\-eE]', '', 'g'))::double precision
+          ELSE NULL END) = 180;
+- Result: 0 rows.
+- Confirmation count query:
+  SELECT count(*) AS match_count
+  FROM public.weightlifting_at_the_2007_pan_american_games
+  WHERE
+    (CASE WHEN NULLIF(regexp_replace(trim(snatch), '[^0-9.+\-eE]', '', 'g'), '') IS NOT NULL
+          THEN (regexp_replace(trim(snatch), '[^0-9.+\-eE]', '', 'g'))::double precision
+          ELSE NULL END) = 153
+    AND
+    (CASE WHEN NULLIF(regexp_replace(trim("clean & jerk"), '[^0-9.+\-eE]', '', 'g'), '') IS NOT NULL
+          THEN (regexp_replace(trim("clean & jerk"), '[^0-9.+\-eE]', '', 'g'))::double precision
+          ELSE NULL END) = 180;
+- Result: match_count = 0.
+
+Evidence 2: Who has clean & jerk = 180?
+- SQL:
+  SELECT name, bodyweight, snatch, "clean & jerk", "total (kg)" 
+  FROM public.weightlifting_at_the_2007_pan_american_games
+  WHERE trim("clean & jerk") ~ '^[0-9]+(\.[0-9]+)?$'
+    AND CAST(trim("clean & jerk") AS numeric) = 180;
+- Results:
+  1) pedro stetsiuk ( arg ), bodyweight 102.45, snatch 160.0, clean & jerk 180.0, total 340.0
+  2) bruno brandão ( bra ), bodyweight 99.1, snatch 157.0, clean & jerk 180.0, total 337.0
+- Neither is “josé/ijose espinoza ( nca )”.
+
+Evidence 3: Who has snatch = 153?
+- SQL:
+  SELECT name, bodyweight, snatch, "clean & jerk", "total (kg)"
+  FROM public.weightlifting_at_the_2007_pan_american_games
+  WHERE trim(snatch) ~ '^[0-9]+(\.[0-9]+)?$'
+    AND CAST(trim(snatch) AS numeric) = 153;
+- Result:
+  - christian lópez ( gua ), bodyweight 104.7, snatch 153.0, clean & jerk 182.0, total 335.0
+- This athlete’s clean & jerk is 182.0, not 180.0.
+
+Evidence 4: What are the recorded entries for Espinoza (NCA)?
+- SQL:
+  SELECT name, bodyweight, snatch, "clean & jerk", "total (kg)" 
+  FROM weightlifting_at_the_2007_pan_american_games
+  WHERE name ILIKE '%espinoza%';
+- Result:
+  - josé espinoza ( nca ), bodyweight 99.4, snatch '-', clean & jerk '-', total (kg) 'dnf'
+- This shows no recorded successful snatch or clean & jerk, and bodyweight is 99.4 (< 100 kg).
+
+Findings
+- No athlete in the table has the combination snatch 153.0 and clean & jerk 180.0.
+- The athlete with clean & jerk 180.0 and bodyweight > 100 kg is pedro stetsiuk ( arg ), not jose/ijose espinoza ( nca ).
+- The athlete with snatch 153.0 is christian lópez ( gua ), whose clean & jerk is 182.0, not 180.0.
+- jose espinoza ( nca ) has DNF with no lifts recorded and bodyweight 99.4 kg (not greater than 100 kg).
+
+Conclusion
+- The claim is contradicted by the data on multiple points: the combination of lifts does not exist for jose/ijose espinoza, and the stated bodyweight condition (> 100 kg) is false for him.
+
+Assumptions
+- The verification is grounded in the TabFact public table “weightlifting_at_the_2007_pan_american_games,” which is treated as authoritative for this event.
+- Nationality code appears within the name field (e.g., “( nca )”).
+- Text lift values were parsed into numerics when possible to enable exact numeric comparisons.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

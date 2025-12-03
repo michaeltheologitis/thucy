@@ -1,0 +1,99 @@
+
+<userQuery>
+<query>
+the screening that start march 29 , 2006 , be complete may 3rd , 2006
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim interpreted: There exists a screening record that started on March 29, 2006 and was completed on May 3, 2006.
+- Finding: No record in the authoritative data source matches those exact dates. The closest record shows screening started on 27 March 2006 and completed on 5 May 2006.
+
+Data sources checked
+- Discovered data source: postgres_tabfact9 (public schema)
+- Relevant table: public.my_info_table with columns:
+  - "screening started" (text)
+  - "screening completed" (text)
+  - "chapter unfrozen" (text)
+  - "chapter opened" (text)
+  - "chapter closed" (text)
+
+Evidence and executed SQL
+1) Full scan of relevant columns
+SQL executed:
+SELECT "screening started", "screening completed"
+FROM public.my_info_table;
+Result (excerpt relevant to 2006):
+[ {"screening completed":"22 december 2005","screening started":"25 november 2005"},
+  {"screening completed":"3 march 2006","screening started":"6 february 2006"},
+  {"screening completed":"28 april 2006","screening started":"9 march 2006"},
+  {"screening completed":"23 march 2006","screening started":"16 february 2006"},
+  {"screening completed":"22 march 2006","screening started":"8 february 2006"},
+  {"screening completed":"5 may 2006","screening started":"27 march 2006"},
+  {"screening completed":"2 june 2006","screening started":"3 april 2006"},
+  {"screening completed":"30 june 2006","screening started":"18 may 2006"},
+  ... ]
+Observation: No row shows started = 29 March 2006 and completed = 3 May 2006.
+
+2) Exact text match for the pair (case-sensitive)
+SQL executed:
+SELECT COUNT(*) AS match_count
+FROM public.my_info_table
+WHERE "screening started" = '29 March 2006'
+  AND "screening completed" = '3 May 2006';
+Result:
+match_count = 0
+
+3) Exact text match for the pair (case-insensitive, trimmed)
+SQL executed:
+SELECT COUNT(*) AS match_count
+FROM public.my_info_table
+WHERE trim(lower("screening started")) = lower('29 March 2006')
+  AND trim(lower("screening completed")) = lower('3 May 2006');
+Result:
+match_count = 0
+
+4) Individual date checks (case-insensitive) to see if either date appears at all
+SQL executed:
+SELECT count(*) AS cnt FROM public.my_info_table WHERE trim(lower("screening started")) = lower('29 March 2006');
+Result: cnt = 0
+
+SQL executed:
+SELECT count(*) AS cnt FROM public.my_info_table WHERE trim(lower("screening completed")) = lower('3 May 2006');
+Result: cnt = 0
+
+5) Loose pattern searches (case-insensitive)
+SQL executed:
+SELECT count(*) AS cnt FROM public.my_info_table WHERE "screening started" ILIKE '%29%march%2006%';
+Result: cnt = 0
+
+SQL executed:
+SELECT count(*) AS cnt FROM public.my_info_table WHERE "screening completed" ILIKE '%3%may%2006%';
+Result: cnt = 0
+
+6) Nearest match (±3 days window around the claimed dates, parsing text as DD Month YYYY)
+SQL executed:
+SELECT "screening started", "screening completed"
+FROM public.my_info_table
+WHERE "screening started" ~ '^[0-9]{1,2} [A-Za-z]+ [0-9]{4}$'
+  AND "screening completed" ~ '^[0-9]{1,2} [A-Za-z]+ [0-9]{4}$'
+  AND to_date("screening started", 'DD Month YYYY') BETWEEN DATE '2006-03-26' AND DATE '2006-04-01'
+  AND to_date("screening completed", 'DD Month YYYY') BETWEEN DATE '2006-04-30' AND DATE '2006-05-06';
+Result:
+[{"screening completed":"5 may 2006","screening started":"27 march 2006"}]
+Observation: The closest record differs by two days earlier for start and two days later for completion compared with the claim.
+
+Conclusion
+- The database contains no record with screening started on March 29, 2006 and screening completed on May 3, 2006. Therefore, the claim is not supported by the data.
+
+Assumptions
+- The claim refers to the fields "screening started" and "screening completed" in the authoritative table public.my_info_table.
+- Dates are stored as English text in the format "DD Month YYYY" (case-insensitive). Variants like "May 3rd, 2006" would be normalized conceptually to "3 May 2006" for matching.
+- If the claim intended approximate dates rather than exact, the nearest match is: started 27 March 2006 and completed 5 May 2006 (shown above).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

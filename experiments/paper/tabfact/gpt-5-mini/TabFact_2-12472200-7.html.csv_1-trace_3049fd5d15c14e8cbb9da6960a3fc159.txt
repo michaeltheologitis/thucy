@@ -1,0 +1,87 @@
+
+<userQuery>
+<query>
+the furthest olga govortsova have ever advance in a grand slam tournament be the third round
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Data sources discovered
+- TabFact PostgreSQL instance with one relevant table: public.olga_govortsova.
+
+Step 1: Inspect Olga Govortsova’s Grand Slam results in the available table
+Executed SQL:
+SELECT * FROM public.olga_govortsova;
+
+Result (relevant rows):
+- {tournament: "australian open", 2007: "a", 2008: "1r", 2009: "1r", 2010: "1r", 2011: "1r"}
+- {tournament: "french open", 2007: "a", 2008: "3r", 2009: "3r", 2010: "2r", 2011: "2r"}
+- {tournament: "wimbledon", 2007: "2r", 2008: "1r", 2009: "2r", 2010: "1r", 2011: "1r"}
+- {tournament: "us open", 2007: "2r", 2008: "2r", 2009: "1r", 2010: "1r", 2011: "1r"}
+(Additional rows in the table concern other tournaments and summary lines.)
+
+Step 2: Compute the deepest Grand Slam round recorded in this table (2007–2011)
+Executed SQL:
+WITH gs AS (
+  SELECT tournament, '2007' AS year, lower("2007") AS result FROM public.olga_govortsova WHERE tournament IN ('australian open','french open','wimbledon','us open')
+  UNION ALL SELECT tournament, '2008', lower("2008") FROM public.olga_govortsova WHERE tournament IN ('australian open','french open','wimbledon','us open')
+  UNION ALL SELECT tournament, '2009', lower("2009") FROM public.olga_govortsova WHERE tournament IN ('australian open','french open','wimbledon','us open')
+  UNION ALL SELECT tournament, '2010', lower("2010") FROM public.olga_govortsova WHERE tournament IN ('australian open','french open','wimbledon','us open')
+  UNION ALL SELECT tournament, '2011', lower("2011") FROM public.olga_govortsova WHERE tournament IN ('australian open','french open','wimbledon','us open')
+), mapped AS (
+  SELECT *,
+    CASE
+      WHEN result IN ('w','winner','win','w/o') THEN 8
+      WHEN result IN ('f') THEN 7
+      WHEN result IN ('sf') THEN 6
+      WHEN result IN ('qf') THEN 5
+      WHEN result IN ('4r') THEN 4
+      WHEN result IN ('3r') THEN 3
+      WHEN result IN ('2r') THEN 2
+      WHEN result IN ('1r') THEN 1
+      ELSE 0 END AS depth
+  FROM gs
+)
+SELECT max(depth) AS max_depth FROM mapped;
+
+Result:
+- max_depth = 3
+
+Executed SQL to list which events hit that maximum:
+WITH gs AS (
+  SELECT tournament, '2007' AS year, lower("2007") AS result FROM public.olga_govortsova WHERE tournament IN ('australian open','french open','wimbledon','us open')
+  UNION ALL SELECT tournament, '2008', lower("2008") FROM public.olga_govortsova WHERE tournament IN ('australian open','french open','wimbledon','us open')
+  UNION ALL SELECT tournament, '2009', lower("2009") FROM public.olga_govortsova WHERE tournament IN ('australian open','french open','wimbledon','us open')
+  UNION ALL SELECT tournament, '2010', lower("2010") FROM public.olga_govortsova WHERE tournament IN ('australian open','french open','wimbledon','us open')
+  UNION ALL SELECT tournament, '2011', lower("2011") FROM public.olga_govortsova WHERE tournament IN ('australian open','french open','wimbledon','us open')
+), mapped AS (
+  SELECT *,
+    CASE
+      WHEN result IN ('w','winner','win','w/o') THEN 8
+      WHEN result IN ('f') THEN 7
+      WHEN result IN ('sf') THEN 6
+      WHEN result IN ('qf') THEN 5
+      WHEN result IN ('4r') THEN 4
+      WHEN result IN ('3r') THEN 3
+      WHEN result IN ('2r') THEN 2
+      WHEN result IN ('1r') THEN 1
+      ELSE 0 END AS depth
+  FROM gs
+)
+SELECT tournament, year, result FROM mapped WHERE depth = (SELECT max(depth) FROM mapped) ORDER BY tournament, year;
+
+Result:
+- {tournament: "french open", year: "2008", result: "3r"}
+- {tournament: "french open", year: "2009", result: "3r"}
+
+Conclusion from available data (2007–2011): The furthest Grand Slam round recorded for Olga Govortsova in this dataset is the third round (3R), achieved at the French Open in 2008 and 2009.
+
+Assumptions and scope notes
+- The only accessible dataset covers results labeled by year columns 2007–2011. No data beyond 2011 is available here, so “ever” is interpreted within the scope of this table.
+- Round codes were mapped as: 1R<2R<3R<4R<QF<SF<F<W. Values not matching these codes were treated as non-round entries.
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,82 @@
+
+<userQuery>
+<query>
+wrestling be the sport with the latest date in 2008
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “wrestling be the sport with the latest date in 2008.”
+
+Data source discovered
+- PostgreSQL database: TabFact
+- Public schema tables: iowa_corn_cy_hawk_series (columns: date text, site text, sport text, "winning team" text, series text)
+
+Evidence and executed SQL
+1) Identify whether wrestling appears in the table and its date(s)
+SQL:
+SELECT DISTINCT sport FROM iowa_corn_cy_hawk_series ORDER BY sport;
+Result (distinct sports): football; m basketball; m cross country; m golf; softball; volleyball; w basketball; w cross country; w gymnastics; w soccer; w swimming; wrestling
+
+SQL:
+SELECT date, sport, site, "winning team", series
+FROM iowa_corn_cy_hawk_series
+WHERE sport ILIKE '%wrestling%';
+Result:
+- date: december 9 , 2007; sport: wrestling; site: ames; winning team: iowa; series: iowa state 16 - 5
+Interpretation: The only wrestling row is dated in 2007, not 2008.
+
+2) List all rows in 2008 and inspect their dates and sports
+SQL:
+SELECT * FROM iowa_corn_cy_hawk_series WHERE date LIKE '%2008%';
+Results:
+- {date: "february 22 , 2008", site: "ames", sport: "w gymnastics", winning team: "iowa state", series: "iowa state 18 - 5"}
+- {date: "march 7 , 2008", site: "iowa city", sport: "w gymnastics", winning team: "iowa", series: "iowa state 18 - 7"}
+- {date: "april 1 , 2008", site: "ames", sport: "softball", winning team: "iowa", series: "iowa state 18 - 9"}
+
+3) Parse 2008 dates to determine the latest date and which sport it corresponds to
+SQL:
+SELECT date, sport, to_date(initcap(date), 'FMMonth DD , YYYY') AS parsed_date
+FROM public.iowa_corn_cy_hawk_series
+WHERE date LIKE '%2008%'
+ORDER BY parsed_date;
+Results:
+- date: "february 22 , 2008"; sport: "w gymnastics"; parsed_date: 2008-02-22
+- date: "march 7 , 2008"; sport: "w gymnastics"; parsed_date: 2008-03-07
+- date: "april 1 , 2008"; sport: "softball"; parsed_date: 2008-04-01
+
+SQL:
+WITH parsed AS (
+  SELECT sport, to_date(initcap(date), 'FMMonth DD , YYYY') AS parsed_date
+  FROM public.iowa_corn_cy_hawk_series
+  WHERE date LIKE '%2008%'
+)
+SELECT max(parsed_date) AS max_date FROM parsed;
+Result:
+- max_date: 2008-04-01
+
+SQL:
+WITH parsed AS (
+  SELECT sport, to_date(initcap(date), 'FMMonth DD , YYYY') AS parsed_date
+  FROM public.iowa_corn_cy_hawk_series
+  WHERE date LIKE '%2008%'
+)
+SELECT sport FROM parsed WHERE parsed_date = (SELECT max(parsed_date) FROM parsed);
+Result:
+- sport: softball
+
+Conclusion based on data
+- Wrestling does not have any entries in 2008 in this table (only an entry on December 9, 2007).
+- The latest date in 2008 is 2008-04-01, and the sport on that date is softball.
+- Therefore, the claim that wrestling is the sport with the latest date in 2008 is not supported by the data and is contradicted by it.
+
+Assumptions
+- Interpreted the claim within the scope of the available dataset (public.iowa_corn_cy_hawk_series).
+- Assumed the date text uses a "Month Day , Year" format; used initcap(...) with to_date('FMMonth DD , YYYY') for parsing.
+
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

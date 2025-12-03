@@ -1,0 +1,68 @@
+
+<userQuery>
+<query>
+arienai kisu have 5.8% more rating than the title with the earliest broadcast date
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “arienai kisu have 5.8% more rating than the title with the earliest broadcast date.”
+
+Data source discovered
+- PostgreSQL database: TabFact (postgres_tabfact11)
+- Public schema table: public.tsuki_no_koibito with columns: "episode title", "romanized title", "translation of title", "broadcast date", "ratings".
+
+Evidence and executed SQL
+1) Identify the row for “arienai kisu”
+SQL:
+SELECT "romanized title","broadcast date","ratings" FROM tsuki_no_koibito WHERE lower("romanized title") = 'arienai kisu';
+Result:
+{ "romanized title": "arienai kisu", "broadcast date": "may 17 , 2010", "ratings": "19.2%" }
+
+2) Identify the earliest broadcast date entry
+SQL:
+SELECT "romanized title","broadcast date","ratings", to_date(initcap(replace("broadcast date",',','')),'Month DD YYYY') AS bcast_dt FROM tsuki_no_koibito ORDER BY bcast_dt ASC LIMIT 1;
+Result:
+{ "romanized title": "omae ga hosii", "broadcast date": "may 10 , 2010", "ratings": "22.4%", "bcast_dt": "2010-05-10" }
+
+3) Compute absolute and relative rating differences
+SQL:
+WITH ar AS (
+  SELECT replace("ratings",'%','')::numeric AS ar_rating
+  FROM tsuki_no_koibito
+  WHERE lower("romanized title") = 'arienai kisu'
+  LIMIT 1
+), earliest AS (
+  SELECT replace("ratings",'%','')::numeric AS e_rating
+  FROM tsuki_no_koibito
+  ORDER BY to_date(initcap(replace("broadcast date",',','')),'Month DD YYYY') ASC
+  LIMIT 1
+)
+SELECT ar.ar_rating AS arienai_kisu_rating,
+       earliest.e_rating AS earliest_rating,
+       round(abs(ar.ar_rating - earliest.e_rating)::numeric,2) AS abs_diff_pp,
+       round(((ar.ar_rating - earliest.e_rating)/earliest.e_rating*100)::numeric,2) AS rel_percent_diff
+FROM ar, earliest;
+Result:
+{ "arienai_kisu_rating": 19.2, "earliest_rating": 22.4, "abs_diff_pp": 3.20, "rel_percent_diff": -14.29 }
+
+Findings
+- Earliest broadcast: “omae ga hosii” on 2010-05-10 with rating 22.4%.
+- “arienai kisu” rating: 19.2%.
+- Differences:
+  - Absolute: 3.2 percentage points lower (not higher).
+  - Relative: 14.29% lower, not 5.8% higher.
+
+Conclusion
+The claim is not supported by the data. “arienai kisu” does not have 5.8% more rating than the earliest-broadcast title; it has 14.29% less (3.2 points lower).
+
+Assumptions
+- Matched the episode by romanized title case-insensitively.
+- Interpreted “more rating” as relative percent difference ((A−B)/B*100). Even if interpreted as percentage-point difference, the result (−3.2 points) still contradicts the claim.
+- Interpreted “title with the earliest broadcast date” as the earliest entry within the same table (tsuki_no_koibito).
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+the lowest attendance figure for a game be 12376
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Scope and data sources
+- Discovered data asset: PostgreSQL database “TabFact” (postgres_tabfact7), schema public.
+- Relevant table: public.t_2009_10_charlotte_bobcats_season (no PK). Columns: game (bigint), date (text), team (text), score (text), high points (text), high rebounds (text), high assists (text), location attendance (text), record (text).
+
+Understanding the attendance field
+- The attendance information is embedded in the text column "location attendance" as: "<arena name> <attendance_number>", e.g., "time warner cable arena 19164".
+
+Verification steps and evidence
+1) Inspect sample rows to confirm format
+SQL executed:
+SELECT game, date, team, "location attendance" FROM public.t_2009_10_charlotte_bobcats_season WHERE "location attendance" IS NOT NULL ORDER BY game LIMIT 50;
+Key returned rows (truncated):
+- {game:47, date:"february 1", team:"portland", location attendance:"rose garden 20106"}
+- {game:48, date:"february 3", team:"la lakers", location attendance:"staples center 18997"}
+- {game:49, date:"february 6", team:"new orleans", location attendance:"time warner cable arena 19164"}
+- {game:50, date:"february 9", team:"washington", location attendance:"time warner cable arena 12376"}
+
+2) Compute the minimum numeric attendance by extracting digits and casting to integer
+SQL executed:
+SELECT MIN((regexp_replace("location attendance",'[^0-9]','', 'g'))::integer) AS min_att
+FROM public.t_2009_10_charlotte_bobcats_season
+WHERE "location attendance" ~ '[0-9]';
+Result: {min_att: 12376}
+
+3) List the game(s) at that minimum
+SQL executed:
+SELECT game, date, team, "location attendance"
+FROM public.t_2009_10_charlotte_bobcats_season
+WHERE (regexp_replace("location attendance",'[^0-9]','', 'g'))::integer = 12376
+ORDER BY game;
+Result:
+- {game:50, date:"february 9", team:"washington", location attendance:"time warner cable arena 12376"}
+
+Conclusion
+- The lowest attendance figure for a game in this dataset is 12,376.
+
+Assumptions
+- The claim refers to the “attendance for a game” within the table public.t_2009_10_charlotte_bobcats_season (Charlotte Bobcats 2009–10 season) and uses the numeric value embedded in the "location attendance" field as the attendance count.
+- Attendance is the integer formed by removing non-digits from the "location attendance" text, which consistently places the attendance as the trailing number.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

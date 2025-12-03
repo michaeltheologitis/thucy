@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+charley johnson have 2047 attempt
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim evaluated: "charley johnson have 2047 attempt"
+
+Data source explored:
+- Database: TabFact (PostgreSQL), schema: public
+- Relevant table: public.my_info_table (columns: name, completions, attempts, completion %, yards, touchdowns, interceptions, qb rating) — appears to store quarterback passing statistics.
+
+Evidence from executed SQL:
+1) Locate Charley Johnson and retrieve attempts
+SQL executed:
+SELECT name, attempts, completions, "completion %", yards, touchdowns, interceptions, "qb rating" 
+FROM public.my_info_table
+WHERE name ILIKE '%charley%johnson%';
+
+Result:
+{name: "charley johnson", attempts: 2047, completions: 1030, "completion %": "50.3%", yards: 14928, touchdowns: 108, interceptions: 110, "qb rating": 69.6}
+
+2) Confirm available columns (to check for any granularity indicator)
+SQL executed:
+SELECT column_name
+FROM information_schema.columns
+WHERE table_schema='public' AND table_name='my_info_table'
+ORDER BY ordinal_position;
+
+Result:
+name; completions; attempts; completion %; yards; touchdowns; interceptions; qb rating
+
+Assessment:
+- The row for "charley johnson" shows attempts = 2047. This directly supports the claim that Charley Johnson has 2047 attempts (interpreted as passing attempts per the table schema).
+- The table does not specify whether these statistics are per-season, per-career, or another aggregation level, but this does not affect verification of the numeric value present in the data source.
+
+Conclusion: The claim is supported by the data returned from the authoritative source.
+
+Assumptions:
+- "attempt" refers to the "attempts" field in the passing statistics context present in public.my_info_table.
+- The name match uses ILIKE with '%charley%johnson%', which returned a single record labeled exactly "charley johnson".
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

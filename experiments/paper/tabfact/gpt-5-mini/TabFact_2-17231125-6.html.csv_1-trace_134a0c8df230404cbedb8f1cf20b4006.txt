@@ -1,0 +1,47 @@
+
+<userQuery>
+<query>
+larry mize and scott simpson be tie for 5th place
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "larry mize and scott simpson be tie for 5th place"
+
+Data sources consulted:
+- PostgreSQL database: TabFact (schema: public)
+- Table: public.t_1988_u_s_open_golf (columns: place, player, country, score, to par)
+
+Evidence gathered (executed SQL and results):
+1) Full leaderboard entries for the table
+SQL:
+SELECT * FROM public.t_1988_u_s_open_golf;
+Key returned rows (country | place | player | score | to par):
+- united states | 1  | curtis strange  | 70 + 67 + 69 = 206 | - 7
+- england       | t2 | nick faldo      | 72 + 67 + 68 = 207 | - 6
+- united states | t2 | bob gilder      | 68 + 69 + 70 = 207 | - 6
+- united states | t2 | scott simpson   | 69 + 66 + 72 = 207 | - 6
+- united states | t5 | larry mize      | 69 + 67 + 72 = 208 | - 5
+- united states | t5 | d a weibring    | 71 + 69 + 68 = 208 | - 5
+
+2) Directly check Larry Mize and Scott Simpson
+SQL:
+SELECT * FROM public.t_1988_u_s_open_golf WHERE player ILIKE 'larry mize' OR player ILIKE 'scott simpson';
+Results:
+- united states | t2 | scott simpson | 69 + 66 + 72 = 207 | - 6
+- united states | t5 | larry mize    | 69 + 67 + 72 = 208 | - 5
+
+Findings:
+- Larry Mize is tied for 5th place (place = 't5').
+- Scott Simpson is tied for 2nd place (place = 't2'), not tied for 5th.
+
+Conclusion: The claim that both Larry Mize and Scott Simpson are tied for 5th place is not supported by the data.
+
+Assumptions made:
+- The claim refers to the 1988 U.S. Open golf leaderboard, which is the available authoritative dataset. Ties are denoted by a 't' prefix in the 'place' column (e.g., 't5' = tied for 5th). Name matching was case-insensitive using ILIKE.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

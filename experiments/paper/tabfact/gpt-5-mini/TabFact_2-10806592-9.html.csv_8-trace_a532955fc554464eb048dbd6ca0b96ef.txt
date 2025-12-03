@@ -1,0 +1,69 @@
+
+<userQuery>
+<query>
+no game on the 18th of june draw a crowd of more fewer than 20000
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted for verification: “No game on the 18th of June drew a crowd of more than 20,000.”
+
+Data source context
+- Available database: TabFact (postgres_tabfact7), schema public, table t_1938_vfl_season
+- Columns: "home team" (text), "home team score" (text), "away team" (text), "away team score" (text), "venue" (text), "crowd" (bigint), "date" (text)
+
+What the data shows
+1) Sample of all rows (the table contains 6 rows, all on 18 June 1938)
+SQL executed:
+SELECT "home team", "home team score", "away team", "away team score", "venue", "crowd", "date" FROM public.t_1938_vfl_season LIMIT 15;
+
+Returned rows (abbrev.):
+- geelong vs hawthorn | crowd: 7000  | date: 18 june 1938
+- fitzroy vs south melbourne | crowd: 12000 | date: 18 june 1938
+- st kilda vs melbourne | crowd: 14000 | date: 18 june 1938
+- richmond vs essendon | crowd: 20000 | date: 18 june 1938
+- footscray vs collingwood | crowd: 18000 | date: 18 june 1938
+- north melbourne vs carlton | crowd: 13000 | date: 18 june 1938
+
+Row count check
+SQL executed:
+SELECT COUNT(*) AS total_rows FROM public.t_1938_vfl_season;
+Result: total_rows = 6
+
+2) Attendance comparison relative to 20,000 for 18 June 1938
+SQL executed:
+SELECT COUNT(*) AS total_games,
+       SUM(CASE WHEN crowd > 20000 THEN 1 ELSE 0 END) AS games_gt_20000,
+       SUM(CASE WHEN crowd = 20000 THEN 1 ELSE 0 END) AS games_eq_20000,
+       SUM(CASE WHEN crowd < 20000 THEN 1 ELSE 0 END) AS games_lt_20000
+FROM public.t_1938_vfl_season
+WHERE date = '18 june 1938';
+
+Result: { total_games: 6, games_gt_20000: 0, games_eq_20000: 1, games_lt_20000: 5 }
+
+3) All games on 18 June 1938, ordered by crowd
+SQL executed:
+SELECT "home team", "away team", crowd, date
+FROM public.t_1938_vfl_season
+WHERE date = '18 june 1938'
+ORDER BY crowd DESC;
+
+Results (crowds): 20000, 18000, 14000, 13000, 12000, 7000
+
+Assessment
+- There are 6 games on 18 June 1938 in this dataset.
+- None drew more than 20,000 spectators (0 games > 20,000); one drew exactly 20,000; five drew fewer than 20,000.
+- Therefore, interpreted as “No game on 18 June drew a crowd of more than 20,000,” the claim is supported by the data.
+
+Note on alternative reading
+- If the intended claim was “No game on 18 June drew a crowd of fewer than 20,000,” it would be contradicted by the data (5 of 6 games are below 20,000).
+
+Assumptions
+- “18th of June” refers to the date value present in the dataset, which is stored as the literal text '18 june 1938'.
+- The phrase “more fewer than 20000” is interpreted as “more than 20000,” given the contradictory wording and the dataset context.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

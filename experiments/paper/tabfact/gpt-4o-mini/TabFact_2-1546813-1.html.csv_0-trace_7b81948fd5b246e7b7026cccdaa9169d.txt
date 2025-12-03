@@ -1,0 +1,60 @@
+
+<userQuery>
+<query>
+the solheim cup be host in the us on 7 occassions from 1990 through 2013
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: “the solheim cup be host in the us on 7 occasions from 1990 through 2013.”
+
+Summary conclusion: Verified. The data show 7 U.S.-hosted Solheim Cups between 1990 and 2013 inclusive: 1990, 1994, 1998, 2002, 2005, 2009, and 2013.
+
+Data discovery and schema
+- Discovered database: TabFact
+- Schema: public
+- Table: solheim_cup
+- Columns: year (bigint), venue (text), winning team (text), score (text), usa captain (text), europe captain (text)
+
+Evidence 1: List all editions (1990–2013) with venues
+- Executed SQL (exact):
+  SELECT year, venue FROM solheim_cup WHERE year BETWEEN 1990 AND 2013;
+- Results (year → venue):
+  2013 → “colorado golf club , colorado , usa”
+  2011 → “killeen castle golf resort , ireland”
+  2009 → “rich harvest farms , illinois , usa”
+  2007 → “halmstad gk , sweden”
+  2005 → “crooked stick golf club , indiana , usa”
+  2003 → “barsebäck golf & country club , sweden”
+  2002 → “interlachen country club , minnesota , usa”
+  2000 → “loch lomond golf club , scotland”
+  1998 → “muirfield village , ohio , usa”
+  1996 → “st pierre golf & country club , wales”
+  1994 → “the greenbrier , west virginia , usa”
+  1992 → “dalmahoy country club , scotland”
+  1990 → “lake nona golf & country club , florida , usa”
+
+Evidence 2: Count U.S.-hosted editions (venue contains “usa”) in 1990–2013
+- Executed SQL (exact):
+  1) SELECT COUNT(year) as count, ARRAY_AGG(year) AS years
+     FROM public.solheim_cup
+     WHERE year BETWEEN 1990 AND 2013 AND venue ILIKE '%usa%';
+  2) SELECT year
+     FROM public.solheim_cup
+     WHERE year BETWEEN 1990 AND 2013 AND venue ILIKE '%usa%';
+- Results:
+  Count = 7
+  Years = {1990, 1994, 1998, 2002, 2005, 2009, 2013}
+
+Conclusion based on evidence
+- There are exactly seven editions hosted in the USA within 1990–2013 inclusive. This matches the claim.
+
+Assumptions
+- Host country was determined by the presence of “usa” in the venue text field, which is consistently populated in this dataset for U.S. venues.
+- The range “from 1990 through 2013” is interpreted as inclusive of both 1990 and 2013.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

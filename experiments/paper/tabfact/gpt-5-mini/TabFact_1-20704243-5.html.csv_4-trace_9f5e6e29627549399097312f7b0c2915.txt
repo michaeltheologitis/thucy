@@ -1,0 +1,60 @@
+
+<userQuery>
+<query>
+the 10 li'l grifter job direct by marc roskin originally air july 3 , 2011
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “The 10 Li'l Grifters Job” was directed by Marc Roskin and originally aired July 3, 2011.
+
+Data sources explored:
+- PostgreSQL database: TabFact
+- Table: public.list_of_leverage_episodes
+- Relevant columns: title (text), directed by (text), original air date (text)
+
+Evidence from executed SQL queries:
+1) Locate the episode by title (broad match)
+SQL:
+SELECT title, "directed by", "original air date" FROM public.list_of_leverage_episodes WHERE title ILIKE '%Grifters%';
+Result:
+[{"title":"the 10 li'l grifters job","directed by":"arvin brown","original air date":"july 3 , 2011"}]
+
+2) Confirm via exact (case-insensitive) title match
+SQL:
+SELECT series, season, title, "directed by", "original air date" 
+FROM public.list_of_leverage_episodes
+WHERE lower(title) = lower('the 10 li''l grifters job');
+Result:
+- series: 46
+- season: 2
+- title: the 10 li'l grifters job
+- directed by: arvin brown
+- original air date: july 3 , 2011
+
+3) Check for episodes directed by Marc Roskin (to see if the director name appears elsewhere)
+SQL:
+SELECT title, season, "original air date" FROM public.list_of_leverage_episodes WHERE "directed by" ILIKE '%marc roskin%';
+Results:
+- the 15 minutes job — Season: 3 — Original air date: july 10 , 2011
+- the experimental job — Season: 11 — Original air date: november 27 , 2011
+- the girls' night out job — Season: 13 — Original air date: december 11 , 2011
+- the gold job — Season: 16 — Original air date: january 1 , 2012
+
+Findings:
+- Director: The episode “the 10 li'l grifters job” is listed as directed by Arvin Brown, not Marc Roskin.
+- Original air date: The episode’s original air date is “july 3 , 2011,” which matches the claim’s date (formatting and case as stored in the dataset).
+
+Conclusion:
+- The air date is correct.
+- The director is incorrect per the authoritative dataset.
+
+Assumptions made:
+- The claim refers to the TV series Leverage episode titled “The 10 Li'l Grifters Job.”
+- Matching on title was done case-insensitively and verified with an exact match to avoid false positives.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

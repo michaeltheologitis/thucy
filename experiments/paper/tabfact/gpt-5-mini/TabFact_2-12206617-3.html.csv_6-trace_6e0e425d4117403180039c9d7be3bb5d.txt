@@ -1,0 +1,74 @@
+
+<userQuery>
+<query>
+the toronto blue jay play the angel 3 time in may during the 1991 season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "the toronto blue jay play the angel 3 time in may during the 1991 season"
+
+Data sources discovered and used:
+- Database: postgres_tabfact11 (TabFact)
+- Table: public.t_1991_toronto_blue_jays_season (columns: date [text], opponent [text], score [text], loss [text], attendance [bigint], record [text])
+
+What the data shows:
+- The 1991 Toronto Blue Jays played the Angels four times in May: May 24, May 25, May 26, and May 31. This contradicts the claim of three times.
+- All games versus the Angels present in this dataset occur in May; the dataset shows four total Angels games in 1991, all in May.
+
+Executed SQL queries and returned results (evidence):
+1) Identify May dates vs. Angels and list them
+SQL:
+SELECT date
+FROM public.t_1991_toronto_blue_jays_season
+WHERE lower(date) LIKE 'may %' AND lower(opponent) LIKE '%angels%'
+ORDER BY date;
+Result:
+- may 24
+- may 25
+- may 26
+- may 31
+
+2) Count of May games vs. Angels
+SQL:
+SELECT count(*)
+FROM public.t_1991_toronto_blue_jays_season
+WHERE lower(date) LIKE 'may %' AND lower(opponent) LIKE '%angels%';
+Result:
+- count: 4
+
+3) Total games vs. Angels in 1991 (all months in this dataset)
+SQL:
+SELECT count(*)
+FROM public.t_1991_toronto_blue_jays_season
+WHERE lower(opponent) LIKE '%angels%';
+Result:
+- count: 4
+
+4) Month distribution for games vs. Angels
+SQL:
+SELECT month, games
+FROM (
+  SELECT split_part(lower(date),' ',1) AS month, count(*) AS games
+  FROM public.t_1991_toronto_blue_jays_season
+  WHERE lower(opponent) LIKE '%angels%'
+  GROUP BY month
+) t
+ORDER BY CASE month
+  WHEN 'jan' THEN 1 WHEN 'feb' THEN 2 WHEN 'mar' THEN 3 WHEN 'apr' THEN 4 WHEN 'may' THEN 5 WHEN 'jun' THEN 6 WHEN 'jul' THEN 7 WHEN 'aug' THEN 8 WHEN 'sep' THEN 9 WHEN 'oct' THEN 10 WHEN 'nov' THEN 11 WHEN 'dec' THEN 12 ELSE 99 END;
+Result:
+- month: may, games: 4
+
+Conclusion: The data shows four May games vs the Angels in 1991, not three. Therefore, the claim is not supported by the evidence.
+
+Assumptions:
+- "angel" is interpreted as the California Angels (opponent stored as "angels").
+- Matching was done case-insensitively on both the date’s month token and the opponent name (using lower(...)).
+- The date column encodes the month as the first token (e.g., "may 24").
+- The table public.t_1991_toronto_blue_jays_season is treated as authoritative for the 1991 Blue Jays schedule/results within the accessible data environment.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

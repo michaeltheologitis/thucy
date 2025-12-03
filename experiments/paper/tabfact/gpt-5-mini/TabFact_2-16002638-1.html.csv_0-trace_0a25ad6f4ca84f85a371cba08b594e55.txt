@@ -1,0 +1,39 @@
+
+<userQuery>
+<query>
+the hurricane win 90% of their game in 2007 which get them promote to a higher division
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “The Hurricanes won 90% of their games in 2007, which got them promoted to a higher division.” Within the available data environment, “Hurricanes” maps to the Dundee Hurricanes (American football) table.
+
+Findings from data
+- Season performance (2007): 9 wins, 1 loss, 0 ties out of 10 games → 90.0% winning percentage.
+- Division and outcome: Finished 1st in BAFL Division 2 North; notes state “promoted to division 1 north.”
+
+Supporting evidence (executed SQL and results)
+1) Core season record and computed winning percentage
+SQL executed:
+SELECT season, division, wins, losses, ties, (wins+losses+ties) AS games_played, CASE WHEN (wins+losses+ties)=0 THEN NULL ELSE ROUND((wins::numeric)/(wins+losses+ties)::numeric,3) END AS winning_pct, "final position", notes FROM public.dundee_hurricanes WHERE season=2007;
+Result:
+{"season":2007, "division":"bafl division 2 north", "wins":9, "losses":1, "ties":0, "games_played":10, "winning_pct":0.900, "final position":"1 / 6", "notes":"promoted to division 1 north"}
+
+2) Promotion confirmation via notes field
+SQL executed:
+SELECT season, notes, (notes ILIKE '%promot%') AS promoted FROM public.dundee_hurricanes WHERE season=2007;
+Result:
+{"season":2007, "notes":"promoted to division 1 north", "promoted":true}
+
+Conclusion
+- The team won 90% of their games in 2007 (9/10) and were promoted afterward to Division 1 North. The claim is supported by the data.
+
+Assumptions
+- “the hurricane” refers to the Dundee Hurricanes, as this is the available Hurricanes dataset in the connected data source.
+- Promotion status is inferred from the notes field, which explicitly states promotion.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

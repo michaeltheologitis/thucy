@@ -1,0 +1,57 @@
+
+<userQuery>
+<query>
+north avenue plain street market street have both 12.2 and 12.8 list in the milepost column
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+What I checked:
+- Claim: “north avenue plain street market street have both 12.2 and 12.8 list in the milepost column.”
+
+Data sources consulted:
+- PostgreSQL database: TabFact (public schema)
+- Identified table: public.massachusetts_route_139 with a milepost column (text) and a street names column (text)
+
+Step 1 — Confirm relevant table and columns:
+- Schema inspection shows public.massachusetts_route_139 includes columns: county, location, "street names", milepost, "roads intersected", notes. The milepost column exists.
+
+Step 2 — Retrieve rows for the specified street names and inspect milepost values:
+Executed SQL:
+SELECT county, location, "street names", milepost, "roads intersected", notes
+FROM public.massachusetts_route_139
+WHERE "street names" ILIKE '%North Avenue%'
+   OR "street names" ILIKE '%Plain Street%'
+   OR "street names" ILIKE '%Market Street%'
+ORDER BY "street names", milepost;
+
+Result:
+- county: plymouth | location: rockland | street names: north avenue plain street market street | milepost: 12.2 | roads intersected: route 123 | notes: western terminus of route 123 / 139 concurrency
+- county: plymouth | location: rockland | street names: north avenue plain street market street | milepost: 12.8 | roads intersected: route 123 | notes: eastern terminus of route 123 / 139 concurrency
+
+Step 3 — Verify distinct milepost values exactly for the street names string:
+Executed SQL:
+SELECT milepost
+FROM (
+  SELECT DISTINCT milepost, (trim(milepost))::double precision AS mp_num
+  FROM public.massachusetts_route_139
+  WHERE lower("street names") = 'north avenue plain street market street'
+    AND trim(milepost) ~ '^[0-9]+(\.[0-9]+)?$'
+) AS sub
+ORDER BY mp_num;
+
+Result (distinct milepost values):
+- 12.2
+- 12.8
+
+Conclusion:
+- The table contains two entries for the street names value “north avenue plain street market street,” with milepost values 12.2 and 12.8. This supports the claim.
+
+Assumptions:
+- I interpreted the claim as referring to the single "street names" value 'north avenue plain street market street' present in public.massachusetts_route_139, and checked whether its milepost values include both 12.2 and 12.8. The match was made case-insensitively.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

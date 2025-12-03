@@ -1,0 +1,90 @@
+
+<userQuery>
+<query>
+the yugoslavian national team suffer its worst outcome lose 1:4 in the balkan cup against romania on august 27
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify:
+“the Yugoslavian national team suffer its worst outcome lose 1:4 in the Balkan Cup against Romania on August 27.”
+
+Data source discovery:
+- A live PostgreSQL database (postgres_tabfact12, schema: public) is available. It contains a relevant table: yugoslavia_national_football_team_results with columns: date (text), city (text), opponent (text), results (text), type of game (text).
+
+Step 1 — Find Yugoslavia’s Balkan Cup matches and check the August 27 result vs Romania
+Executed SQL:
+SELECT date, city, opponent, results, "type of game" FROM public.yugoslavia_national_football_team_results WHERE "type of game" ILIKE '%Balkan Cup%' LIMIT 50;
+
+Returned rows:
+- {date: "march 30", city: "belgrade", opponent: "romania", results: "2:0", type: "balkan cup"}
+- {date: "august 27", city: "bucharest , romania", opponent: "romania", results: "1:4", type: "balkan cup"}
+
+Finding: There is a Balkan Cup match on “august 27” versus Romania, result “1:4,” matching the claim. The city is recorded as “bucharest , romania.”
+
+Step 2 — Determine whether this is the worst Balkan Cup outcome (by goal difference)
+Executed SQL:
+WITH b AS (
+  SELECT date, city, opponent, results, "type of game" AS type,
+    (regexp_replace(results, '^.*?([0-9]+)\D+([0-9]+).*$','\1'))::int AS gf,
+    (regexp_replace(results, '^.*?([0-9]+)\D+([0-9]+).*$','\2'))::int AS ga
+  FROM public.yugoslavia_national_football_team_results
+  WHERE "type of game" ILIKE '%Balkan Cup%'
+)
+SELECT date, city, opponent, results, type, gf, ga, (gf - ga) AS gd
+FROM b
+ORDER BY gd ASC;
+
+Returned rows (ordered by worst goal difference first):
+- {date: "august 27", city: "bucharest , romania", opponent: "romania", results: "1:4", type: "balkan cup", gf: 1, ga: 4, gd: -3}
+- {date: "march 30", city: "belgrade", opponent: "romania", results: "2:0", type: "balkan cup", gf: 2, ga: 0, gd: 2}
+
+Finding: Among Balkan Cup matches in this dataset, the 1:4 loss on August 27 is the worst outcome by goal difference (−3).
+
+Step 3 — (Cross-check) Is this also the worst outcome overall in the dataset?
+Executed SQL (sample results inspection):
+SELECT results FROM public.yugoslavia_national_football_team_results LIMIT 30;
+
+Executed SQL (find minimum goal difference row):
+SELECT date, opponent, results, "type of game", ((regexp_replace(results, '.*?(\d+)\s*[:\-]\s*(\d+).*', '\1'))::int - (regexp_replace(results, '.*?(\d+)\s*[:\-]\s*(\d+).*', '\2'))::int) AS gd
+FROM public.yugoslavia_national_football_team_results
+WHERE results ~ '(\d+)\s*[:\-]\s*(\d+)'
+ORDER BY gd ASC
+LIMIT 1;
+
+Returned row:
+{ "date": "august 27", "opponent": "romania", "results": "1:4", "type of game": "balkan cup", "gd": -3 }
+
+Executed SQL (confirm min goal difference value):
+SELECT MIN( (regexp_replace(results, '.*?(\d+)\s*[:\-]\s*(\d+).*', '\1'))::int - (regexp_replace(results, '.*?(\d+)\s*[:\-]\s*(\d+).*', '\2'))::int) AS min_gd
+FROM public.yugoslavia_national_football_team_results
+WHERE results ~ '(\d+)\s*[:\-]\s*(\d+)';
+
+Returned row:
+{ "min_gd": -3 }
+
+Executed SQL (list all matches with that worst goal difference):
+SELECT date, opponent, results, "type of game", ((regexp_replace(results, '.*?(\d+)\s*[:\-]\s*(\d+).*', '\1'))::int - (regexp_replace(results, '.*?(\d+)\s*[:\-]\s*(\d+).*', '\2'))::int) AS gd
+FROM public.yugoslavia_national_football_team_results
+WHERE results ~ '(\d+)\s*[:\-]\s*(\d+)'
+AND ((regexp_replace(results, '.*?(\d+)\s*[:\-]\s*(\d+).*', '\1'))::int - (regexp_replace(results, '.*?(\d+)\s*[:\-]\s*(\d+).*', '\2'))::int) = -3
+ORDER BY date;
+
+Returned rows:
+{ "date": "august 27", "opponent": "romania", "results": "1:4", "type of game": "balkan cup", "gd": -3 }
+
+Finding: Within this dataset, the 1:4 loss on August 27 is also the worst overall defeat recorded (goal difference −3). This corroborates the “worst outcome” phrasing in the Balkan Cup context and, in this dataset, overall.
+
+Conclusion:
+- The data show that Yugoslavia lost 1:4 to Romania in the Balkan Cup on August 27, and this is the worst Balkan Cup result by goal difference in the dataset. Therefore, the claim is supported by the evidence.
+
+Assumptions:
+- “Worst outcome” is interpreted as worst goal difference (largest-margin loss); the data support this within Balkan Cup matches.
+- The results column is parsed as Yugoslavia goals first, opponent goals second (format like “X:Y”).
+- The date is stored without a year (e.g., “august 27”); the claim likewise does not specify a year.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

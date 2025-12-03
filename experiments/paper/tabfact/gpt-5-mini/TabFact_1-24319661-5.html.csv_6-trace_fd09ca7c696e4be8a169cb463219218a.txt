@@ -1,0 +1,62 @@
+
+<userQuery>
+<query>
+episode number 10 of the season have bcw410 as a production code and an air date of september 11 , 2012
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “episode number 10 of the season have bcw410 as a production code and an air date of september 11 , 2012.”
+
+Data source discovery
+- Available source: TabFact (public schema). It contains a table with White Collar episode details: public.list_of_white_collar_episodes, including columns for episode title, episode number in season, production code, and original air date.
+
+Evidence 1 — Check the episode with production code BCW410
+- Executed SQL:
+SELECT "title","no in season","no in series","production code","original air date"
+FROM public.list_of_white_collar_episodes
+WHERE lower("production code") = lower('BCW410');
+- Result:
+  - title: Vested Interest
+  - no in season: 10
+  - no in series: 56
+  - production code: bcw410
+  - original air date: september 18 , 2012
+- Interpretation:
+  - The production code bcw410 corresponds to episode number 10 in its season, titled “Vested Interest.” However, its original air date is september 18 , 2012, not september 11 , 2012.
+
+Evidence 2 — Check which episode aired on September 11, 2012
+- Exploratory SQL (to confirm date formatting and nearby entries):
+SELECT "title", "no in season", "production code", "original air date"
+FROM public.list_of_white_collar_episodes
+WHERE "original air date" LIKE '%2012%'
+LIMIT 50;
+- Relevant results included:
+  - ...
+  - ancient history — no in season: 8 — bcw408 — september 4 , 2012
+  - gloves off — no in season: 9 — bcw409 — september 11 , 2012
+  - vested interest — no in season: 10 — bcw410 — september 18 , 2012
+- Exact-match SQL for the date:
+SELECT "title", "no in season", "production code", "original air date"
+FROM public.list_of_white_collar_episodes
+WHERE "original air date" = 'september 11 , 2012';
+- Result:
+  - title: gloves off
+  - no in season: 9
+  - production code: bcw409
+  - original air date: september 11 , 2012
+- Interpretation:
+  - September 11, 2012 corresponds to episode 9 (“Gloves Off”), production code bcw409—not episode 10.
+
+Conclusion
+- True: Episode number 10 has production code bcw410.
+- False: Its air date is not September 11, 2012; it is September 18, 2012. September 11, 2012 belongs to episode 9, production code bcw409.
+
+Assumptions
+- The claim did not specify the TV series. I inferred the series is “White Collar” based on the production code format (BCW410) and the available database table named list_of_white_collar_episodes. All verification is grounded in that table’s data.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

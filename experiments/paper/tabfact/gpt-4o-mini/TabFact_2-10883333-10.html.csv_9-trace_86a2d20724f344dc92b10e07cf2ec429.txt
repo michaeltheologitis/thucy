@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+moorabbin oval have less crowd than kardinia park
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim assessed: “Moorabbin Oval have less crowd than Kardinia Park.”
+
+Data source explored: A PostgreSQL database with table public.t_1975_vfl_season (1975 VFL matches) containing venue and crowd (attendance) data.
+
+Evidence collected
+1) Distinct venues and match counts (confirms both venues exist in the data)
+SQL:
+SELECT venue, COUNT(*) AS match_count FROM public.t_1975_vfl_season GROUP BY venue;
+Result excerpt:
+- VFL Park: 1
+- Moorabbin Oval: 1
+- Junction Oval: 1
+- Princes Park: 1
+- MCG: 1
+- Kardinia Park: 1
+
+2) Full rows (shows the actual attendances for the relevant venues)
+SQL:
+SELECT * FROM public.t_1975_vfl_season;
+Result excerpt (relevant rows):
+- Venue: Kardinia Park; Crowd: 13,328; Date: 7 June 1975; Home: Geelong; Away: Melbourne
+- Venue: Moorabbin Oval; Crowd: 17,811; Date: 7 June 1975; Home: St Kilda; Away: North Melbourne
+
+3) Average crowd per venue (corroborates the per-venue attendance figures)
+SQL:
+SELECT venue, AVG(crowd) AS average_crowd FROM public.t_1975_vfl_season GROUP BY venue;
+and specifically for the two venues:
+SELECT venue, AVG(crowd) AS average_crowd FROM public.t_1975_vfl_season WHERE venue IN ('Moorabbin Oval', 'Kardinia Park') GROUP BY venue;
+Results:
+- Moorabbin Oval: 17,811
+- Kardinia Park: 13,328
+
+Analysis
+- In the available 1975 VFL data (the matches dated 7 June 1975), the recorded crowd at Moorabbin Oval (17,811) exceeded that at Kardinia Park (13,328). Therefore, within this dataset, Moorabbin Oval did not have less crowd than Kardinia Park; it had more.
+
+Conclusion
+- The claim is contradicted by the data available in the database.
+
+Assumptions and scope
+- “Crowd” is interpreted as match attendance.
+- The verification is based solely on the accessible dataset (matches dated 7 June 1975 in the 1975 VFL season table). Broader or different time periods are not reflected in this data.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

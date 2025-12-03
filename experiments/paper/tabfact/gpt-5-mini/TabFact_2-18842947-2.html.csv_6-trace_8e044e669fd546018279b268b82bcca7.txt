@@ -1,0 +1,54 @@
+
+<userQuery>
+<query>
+the highest attendance figure for a game be 42048
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim assessed: “the highest attendance figure for a game be 42,048.”
+- Data source used: TabFact (postgres_tabfact20), public schema.
+- Relevant table: public.t_1976_detroit_lions_season (columns: week, date, opponent, result, attendance).
+
+What I checked
+1) Verified the schema contains game-level attendance.
+2) Queried the maximum attendance and identified the corresponding game(s).
+3) Checked whether an attendance value of 42,048 appears and, if so, which game it corresponds to.
+
+Evidence from executed SQL
+1) Schema inspection (via schema tool)
+- Table: t_1976_detroit_lions_season
+  - Columns: week (bigint), date (text), opponent (text), result (text), attendance (bigint)
+  - No primary key reported
+
+2) Maximum attendance
+SQL executed:
+SELECT MAX(attendance) AS max_attendance FROM public.t_1976_detroit_lions_season;
+Result returned: {"max_attendance": 78042}
+
+3) Game(s) with the maximum attendance
+SQL executed:
+SELECT week, date, opponent, result, attendance FROM public.t_1976_detroit_lions_season WHERE attendance = (SELECT MAX(attendance) FROM public.t_1976_detroit_lions_season) ORDER BY week;
+Result returned: {"week": 11, "date": "november 21 , 1976", "opponent": "chicago bears", "result": "w 14 - 10", "attendance": 78042}
+
+4) Presence of 42,048 attendance
+SQL executed:
+SELECT week, date, opponent, result, attendance
+FROM public.t_1976_detroit_lions_season
+WHERE attendance = 42048;
+Result returned: One game found — Week 10, Date: "november 14 , 1976", Opponent: "new orleans saints", Result: "l 17 - 16", Attendance: 42048
+
+Conclusion
+- The highest attendance in the available data is 78,042 (Week 11 vs. Chicago Bears on November 21, 1976), not 42,048.
+- While 42,048 does appear as an attendance figure (Week 10 vs. New Orleans Saints), it is not the maximum.
+
+Assumptions
+- The claim refers to “highest attendance” within the available dataset: the 1976 Detroit Lions season game log in the TabFact database.
+- “Game” refers to any row in t_1976_detroit_lions_season, and “attendance” refers to the attendance column in that table.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+there be 3 year show when the reader 's vote be na and the lifetime achievement be na
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “there be 3 year show when the reader's vote be na and the lifetime achievement be na.”
+
+Data source discovery
+- Available source: PostgreSQL database with a single relevant table in the public schema: ned_kelly_awards.
+- Table ned_kelly_awards columns:
+  - year (bigint)
+  - best teenage / young adult (text)
+  - reader 's vote (text)
+  - best non - fiction (text)
+  - lifetime achievement (text)
+
+Evidence and executed SQL
+1) Count years where both reader's vote and lifetime achievement are the literal string 'na' (case-insensitive, trimmed), and list the years
+Result: count = 3; years = [1998, 2000, 2011]
+SQL:
+SELECT COUNT(*) AS count, ARRAY_AGG("year" ORDER BY "year") AS years
+FROM public.ned_kelly_awards
+WHERE LOWER(TRIM("reader 's vote")) = 'na' AND LOWER(TRIM("lifetime achievement")) = 'na';
+
+2) Check if there are years where both fields are NULL (to distinguish literal 'na' from missing values)
+Result: count = 0; years = null
+SQL:
+SELECT COUNT(*) AS count, ARRAY_AGG("year" ORDER BY "year") AS years
+FROM public.ned_kelly_awards
+WHERE "reader 's vote" IS NULL AND "lifetime achievement" IS NULL;
+
+3) Sensitivity check: treat common missing markers as NA (NULL or one of 'na','n/a','','none','not awarded','-','—')
+Result: count = 3; years = [1998, 2000, 2011]
+SQL:
+SELECT COUNT(*) AS count, ARRAY_AGG("year" ORDER BY "year") AS years
+FROM public.ned_kelly_awards
+WHERE ("reader 's vote" IS NULL OR LOWER(TRIM("reader 's vote")) IN ('na','n/a','','none','not awarded','-','—'))
+AND ("lifetime achievement" IS NULL OR LOWER(TRIM("lifetime achievement")) IN ('na','n/a','','none','not awarded','-','—'));
+
+4) Reference: observed normalized values frequency in both columns
+Summary of relevant findings: 'na' appears 14 times in reader's vote and 3 times in lifetime achievement.
+SQL:
+SELECT DISTINCT LOWER(TRIM("reader 's vote")) AS normalized_value, COUNT(*) AS count
+FROM public.ned_kelly_awards
+GROUP BY normalized_value
+UNION ALL
+SELECT DISTINCT LOWER(TRIM("lifetime achievement")) AS normalized_value, COUNT(*) AS count
+FROM public.ned_kelly_awards
+GROUP BY normalized_value;
+
+Conclusion
+- The data show exactly 3 years (1998, 2000, 2011) where both reader's vote and lifetime achievement are recorded as 'na'. This directly supports the claim.
+
+Assumptions
+- Interpreted “na” in the claim as the literal string 'na' (case-insensitive) in the dataset; verification also checked the NULL/missing case, which yielded 0 matching years, confirming that 'na' is used as a value rather than a SQL NULL in these fields.
+- Interpreted “year show” as the number of year records (rows) in the ned_kelly_awards table.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

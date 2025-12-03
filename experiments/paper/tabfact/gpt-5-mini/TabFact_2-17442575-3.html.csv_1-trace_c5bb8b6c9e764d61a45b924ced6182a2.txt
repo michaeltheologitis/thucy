@@ -1,0 +1,54 @@
+
+<userQuery>
+<query>
+on april 10 the chicago black hawk v detroit red wing 's record be 1 - 1
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “on april 10 the chicago black hawk v detroit red wing's record be 1 - 1.”
+
+Data source discovery:
+- Available database: TabFact (public schema)
+- Relevant table: public.t_1965_66_chicago_black_hawks_season
+
+Schema details (from the data source):
+- Columns: date (text), visitor (text), score (text), home (text), record (text)
+- Content: Game-level rows for the 1965–66 Chicago Black Hawks season, with a “record” field reflecting the team’s cumulative record at that point (in this context, it aligns with series record during playoffs).
+
+Evidence 1 — Direct lookup for April 10 vs Detroit Red Wings:
+- Executed SQL:
+  SELECT date, visitor, score, home, record
+  FROM public.t_1965_66_chicago_black_hawks_season
+  WHERE date ILIKE '%April 10%'
+    AND (visitor ILIKE '%Detroit Red Wings%' OR home ILIKE '%Detroit Red Wings%')
+    AND (visitor ILIKE '%Chicago Black Hawks%' OR home ILIKE '%Chicago Black Hawks%');
+- Result:
+  date: april 10 | visitor: detroit red wings | score: 7 - 0 | home: chicago black hawks | record: 1 - 1
+- Interpretation: On April 10, Chicago (home) beat Detroit (visitor) 7–0; the “record” shown is 1 - 1 at that point.
+
+Evidence 2 — Context across the series vs Detroit Red Wings:
+- Executed SQL:
+  SELECT date, visitor, score, home, record
+  FROM public.t_1965_66_chicago_black_hawks_season
+  WHERE (visitor ILIKE '%Chicago Black Hawks%' AND home ILIKE '%Detroit Red Wings%')
+     OR (visitor ILIKE '%Detroit Red Wings%' AND home ILIKE '%Chicago Black Hawks%')
+  ORDER BY date ASC;
+- Key returned rows (ordered lexicographically by date text):
+  • april 7  — detroit red wings at chicago black hawks — 1 - 2 — record: 1 - 0
+  • april 10 — detroit red wings at chicago black hawks — 7 - 0 — record: 1 - 1
+  • subsequent games progress the series to 2 - 4 overall
+- Interpretation: After the April 7 win, Chicago’s record was 1 - 0; after the April 10 game, it became 1 - 1, confirming the claim.
+
+Conclusion: The data clearly shows that on April 10 of the 1965–66 season during the Chicago Black Hawks vs. Detroit Red Wings series, the record shown in the table is 1 - 1.
+
+Assumptions and interpretation notes:
+- “chicago black hawk” and “detroit red wing” are interpreted as the team names “Chicago Black Hawks” and “Detroit Red Wings.”
+- “record” is taken directly from the table’s “record” field, which in this playoff context corresponds to the series standing after each game.
+- The date “April 10” is interpreted within the available 1965–66 season dataset, as that is the only accessible relevant data source.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

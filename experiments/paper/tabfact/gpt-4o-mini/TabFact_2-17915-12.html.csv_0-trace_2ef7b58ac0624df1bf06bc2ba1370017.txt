@@ -1,0 +1,50 @@
+
+<userQuery>
+<query>
+lleyton hewitt have win the master series final 2 time , in 2002 and 2003
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Scope and data source
+- Discovered a PostgreSQL database with a single table: public.lleyton_hewitt capturing Lleyton Hewitt’s finals at Masters-level events (columns: outcome, year, championship, surface, opponent, score).
+
+Schema snapshot
+- Table public.lleyton_hewitt(outcome text, year bigint, championship text, surface text, opponent text, score text)
+
+Evidence
+1) Distinct championships present (to confirm dataset focus)
+SQL:
+SELECT championship, COUNT(*) as row_count FROM public.lleyton_hewitt GROUP BY championship;
+Result (abridged): Paris (1), Stuttgart (1), Cincinnati (1), Indian Wells (2), Indian Wells (2) (1), Cincinnati (2) (1)
+
+2) All recorded finals by year (to see wins and years)
+SQL:
+SELECT year, championship, outcome, opponent, score, surface FROM public.lleyton_hewitt ORDER BY year;
+Key rows:
+- 2002 | Indian Wells | winner | Tim Henman | 6 - 1, 6 - 2 | hard
+- 2003 | Indian Wells (2) | winner | Gustavo Kuerten | 6 - 1, 6 - 1 | hard
+
+3) Direct check of wins in 2002 and 2003
+SQL:
+SELECT year, championship, opponent, score FROM public.lleyton_hewitt WHERE outcome = 'winner' AND year IN (2002, 2003) ORDER BY year;
+Result:
+- 2002 | Indian Wells | Tim Henman | 6 - 1, 6 - 2
+- 2003 | Indian Wells (2) | Gustavo Kuerten | 6 - 1, 6 - 1
+
+4) Total number of Masters wins recorded (to confirm count = 2)
+SQL:
+SELECT COUNT(*) AS total_wins FROM public.lleyton_hewitt WHERE outcome = 'winner';
+Result: 2
+
+Conclusion
+- The data shows Lleyton Hewitt won two Masters Series (Masters 1000) finals, both at Indian Wells, in 2002 and 2003. This matches the claim as interpreted to mean Masters Series event finals.
+
+Assumptions
+- “master series final” refers to ATP Masters Series (now Masters 1000) event finals, not the season-ending Masters Cup/ATP Finals (which are not represented in this table).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

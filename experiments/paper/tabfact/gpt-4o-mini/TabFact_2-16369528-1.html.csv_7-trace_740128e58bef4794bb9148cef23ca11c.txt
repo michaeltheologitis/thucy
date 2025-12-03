@@ -1,0 +1,94 @@
+
+<userQuery>
+<query>
+there be over 3 time when the reader 's vote be not n / a and the lifetime achievement be also na
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify
+“There be over 3 time when the reader's vote be not N/A and the lifetime achievement be also NA.” Interpreted as: count rows where the Reader's Vote field is not N/A and the Lifetime Achievement field is NA; check if this count > 3.
+
+Data discovery and schema
+- Data source discovered: public schema with table public.ned_kelly_awards.
+- Columns (all text except year): year, "best teenage / young adult", "reader 's vote", "best non - fiction", "lifetime achievement".
+
+How NA is encoded in the data
+1) Reader's Vote – raw values and normalized forms
+SQL:
+SELECT "reader 's vote",
+       LOWER(TRIM(REGEXP_REPLACE("reader 's vote", '[^A-Za-z/]', '', 'g'))) AS normalized_vote,
+       COUNT(*) AS count
+FROM public.ned_kelly_awards
+GROUP BY "reader 's vote", normalized_vote
+ORDER BY count DESC;
+Result summary from the database:
+- Raw "na" (normalized na): 14
+- "bleeding hearts by lindy cameron" (normalized bleedingheartsbylindycameron): 1
+- "apartment 255 by bunty avieson" (normalized apartmentbybuntyavieson): 1
+Interpretation: NA for Reader's Vote is encoded as the string "na" (lowercase, no slash) in this dataset.
+
+2) Lifetime Achievement – normalized values
+SQL:
+SELECT LOWER(TRIM(REGEXP_REPLACE("lifetime achievement", '[^a-zA-Z/]', '', 'g'))) AS normalized,
+       COUNT(*) AS count
+FROM public.ned_kelly_awards
+GROUP BY normalized
+ORDER BY count DESC;
+Key result: normalized value "na" occurs 3 times among Lifetime Achievement entries (consistent with NA encoding as "na").
+
+Direct test of the claim
+A) Count rows where Reader's Vote is NOT NA and Lifetime Achievement IS NA (using consistent normalization)
+SQL (count):
+SELECT COUNT(*) AS count_rows
+FROM public.ned_kelly_awards
+WHERE REGEXP_REPLACE(LOWER("reader 's vote"), '[^a-z/]+', '', 'g') <> 'na'
+  AND REGEXP_REPLACE(LOWER("lifetime achievement"), '[^a-z/]+', '', 'g') = 'na';
+Result: 0 rows
+
+SQL (list any matches):
+SELECT year, "reader 's vote", "lifetime achievement"
+FROM public.ned_kelly_awards
+WHERE REGEXP_REPLACE(LOWER("reader 's vote"), '[^a-z/]+', '', 'g') <> 'na'
+  AND REGEXP_REPLACE(LOWER("lifetime achievement"), '[^a-z/]+', '', 'g') = 'na';
+Result: no rows
+
+B) Show all rows where Lifetime Achievement is NA to inspect Reader's Vote values
+SQL:
+SELECT year, "reader 's vote", "lifetime achievement"
+FROM public.ned_kelly_awards
+WHERE LOWER(REGEXP_REPLACE("lifetime achievement", '[^a-zA-Z/]', '', 'g')) = 'na';
+Result rows from the database:
+- 1998: reader's vote = na; lifetime achievement = na
+- 2000: reader's vote = na; lifetime achievement = na
+- 2011: reader's vote = na; lifetime achievement = na
+Interpretation: In every year where Lifetime Achievement is NA, Reader's Vote is also NA; therefore there are zero rows where Reader's Vote is not NA and Lifetime Achievement is NA.
+
+Additional corroboration: total non-NA Reader's Vote rows
+SQL (count non-NA in Reader's Vote):
+SELECT COUNT(*)
+FROM public.ned_kelly_awards
+WHERE LOWER(REGEXP_REPLACE("reader 's vote", '[^a-zA-Z/]', '', 'g')) <> 'na';
+Result: 2
+
+SQL (list those rows):
+SELECT year, "reader 's vote"
+FROM public.ned_kelly_awards
+WHERE LOWER(REGEXP_REPLACE("reader 's vote", '[^a-zA-Z/]', '', 'g')) <> 'na';
+Results from the database:
+- 2001: bleeding hearts by lindy cameron
+- 2002: apartment 255 by bunty avieson
+Interpretation: Only two years have Reader's Vote not NA at all; thus it is impossible to have “over 3” rows simultaneously satisfying Reader's Vote not NA and Lifetime Achievement NA. The actual count is 0.
+
+Conclusion
+The data show 0 occurrences where Reader's Vote is not NA and Lifetime Achievement is NA. Therefore, the claim that there are over 3 such instances is contradicted by the evidence.
+
+Assumptions
+- Interpreted “not n / a” as a non-missing value, normalizing by removing punctuation/spaces and lowercasing so that variants like "N/A", "na", or "n a" all map to "na"; likewise for “also na” in Lifetime Achievement.
+- Treated the public.ned_kelly_awards table as the authoritative dataset for this claim.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

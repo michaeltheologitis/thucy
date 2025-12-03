@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+the erp w and class for w290ag and w230av be 55 and d for both , but 1 have a city of license of anniston , alabama and the other have a city of license of macon , georgia
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify:
+- “The ERP (W) and class for W290AG and W230AV are 55 and D for both, and one has a city of license of Anniston, Alabama and the other has a city of license of Macon, Georgia.”
+
+Data sources consulted:
+- Database: TabFact (public schema)
+- Table: wyfk
+- Relevant columns: call sign (text), frequency mhz (text), city of license (text), erp w (bigint), class (text), fcc info (text)
+
+Evidence gathered (executed SQL and results):
+1) List all rows to see available call signs and attributes
+SQL:
+SELECT "call sign", "city of license", "erp w", "class" FROM wyfk;
+Results snapshot:
+- w230av — Gadsden, Alabama; ERP 10; Class d
+- w269ax — Anniston, Alabama; ERP 10; Class d
+- w273ae — Albany, Georgia; ERP 55; Class d
+- w282ae — Macon, Georgia; ERP 27; Class d
+- w290ag — Griffin, Georgia; ERP 27; Class d
+
+2) Specific check: W290AG
+SQL:
+SELECT "call sign", "city of license", "erp w", "class" FROM wyfk WHERE "call sign" = 'w290ag';
+Result:
+- City of License: Griffin, Georgia; ERP W: 27; Class: D
+
+3) Specific check: W230AV
+SQL:
+SELECT "call sign", "city of license", "erp w", "class" FROM public.wyfk WHERE "call sign" = 'w230av';
+Result:
+- City of License: Gadsden, Alabama; ERP W: 10; Class: D
+
+Assessment of each part of the claim:
+- “Class D for both W290AG and W230AV” — Supported by data (both are Class D).
+- “ERP 55 W for both” — Contradicted by data. W290AG has 27 W and W230AV has 10 W.
+- “One is licensed to Anniston, Alabama and the other to Macon, Georgia” — Contradicted by data for these call signs. W290AG is licensed to Griffin, Georgia; W230AV to Gadsden, Alabama. Note: Anniston, Alabama in this table corresponds to W269AX; Macon, Georgia corresponds to W282AE; 55 W ERP corresponds to W273AE (Albany, Georgia).
+
+Conclusion: The claim is mostly incorrect, except for both being Class D.
+
+Assumptions made:
+- The call signs provided refer to FM translators listed in the wyfk table exactly as stored (lowercase in this dataset).
+- The TabFact.public.wyfk table is treated as authoritative per instructions.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

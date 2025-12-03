@@ -1,0 +1,58 @@
+
+<userQuery>
+<query>
+miguel zapata be the goalkeeper with 24 goal and an average of 0.61
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Miguel Zapata be the goalkeeper with 24 goals and an average of 0.61.”
+
+What the data shows
+- Data source discovered: PostgreSQL database “TabFact”, public schema, table: t_2008_09_segunda_divisi_n_b (columns: goalkeeper, goals, matches, average, team).
+
+Evidence 1 — Retrieve Miguel Zapata’s row
+Executed SQL:
+SELECT goalkeeper, goals, matches, average, team
+FROM public.t_2008_09_segunda_divisi_n_b
+WHERE goalkeeper ILIKE 'Miguel Zapata';
+Result:
+- goalkeeper: miguel zapata
+- team: atlético ciudad
+- goals: 17
+- matches: 28
+- average: 0.61
+
+Evidence 2 — Check if any goalkeeper has goals = 24 and average = 0.61
+Executed SQL:
+SELECT goalkeeper, goals, matches, average, team FROM public.t_2008_09_segunda_divisi_n_b WHERE goals = 24 AND average = 0.61;
+Result: No rows returned
+
+Evidence 3 — List any goalkeeper with name containing “zapata” (to ensure no alternate entries)
+Executed SQL:
+SELECT goalkeeper, goals, matches, average, team FROM public.t_2008_09_segunda_divisi_n_b WHERE goalkeeper ILIKE '%zapata%';
+Result:
+- goalkeeper: miguel zapata; goals: 17; matches: 28; average: 0.61; team: atlético ciudad
+
+Evidence 4 — Cross-check the average from goals and matches
+Executed SQL:
+SELECT goalkeeper, goals, matches, average, (goals::float / NULLIF(matches,0)) AS calc_avg, (average - (goals::float / NULLIF(matches,0))) AS diff
+FROM public."t_2008_09_segunda_divisi_n_b"
+WHERE goalkeeper = 'miguel zapata';
+Result:
+- goals: 17; matches: 28; stored average: 0.61; calc_avg: 0.6071428571428571; diff: 0.0028571428571428914
+Interpretation: The stored average of 0.61 is consistent with 17/28 when rounded to two decimals.
+
+Conclusion
+- Correct: The average of 0.61 for Miguel Zapata is supported by the data.
+- Incorrect: The goals value is 17 (not 24) in the dataset.
+
+Assumptions
+- “Goal” refers to the “goals” column in the t_2008_09_segunda_divisi_n_b table, which for goalkeepers typically represents goals conceded in this dataset.
+- The claim refers to the same season and dataset represented by the table (2008–09 Segunda División B).
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

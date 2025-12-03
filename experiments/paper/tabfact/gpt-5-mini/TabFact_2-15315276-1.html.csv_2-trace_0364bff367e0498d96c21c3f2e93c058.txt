@@ -1,0 +1,60 @@
+
+<userQuery>
+<query>
+after 2012 the winner 's share be never less than 15000
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “after 2012 the winner's share be never less than 15000.”
+
+Data source overview
+- Connected database: TabFact (PostgreSQL), schema: public
+- Relevant table: public.northeast_delta_dental_international
+- Columns include: year (bigint), purse (bigint), and a prize column exactly named “winner 's share” (bigint)
+
+Step 1: Confirm available years and coverage after 2012
+- SQL:
+  SELECT DISTINCT year FROM public.northeast_delta_dental_international ORDER BY year;
+  Result: 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
+- SQL:
+  SELECT MIN(year) AS min_year, MAX(year) AS max_year FROM public.northeast_delta_dental_international;
+  Result: min_year = 2004, max_year = 2013
+- SQL:
+  SELECT COUNT(*) AS rows_after_2012 FROM public.northeast_delta_dental_international WHERE year > 2012;
+  Result: rows_after_2012 = 1
+Interpretation: The table has data through 2013, with exactly one row strictly after 2012.
+
+Step 2: Check winner's share strictly after 2012 (year > 2012)
+- SQL:
+  SELECT year, "winner 's share" FROM public.northeast_delta_dental_international WHERE year > 2012 ORDER BY year;
+  Result: (2013, 15000)
+- SQL:
+  SELECT MIN("winner 's share") AS min_winner_share FROM public.northeast_delta_dental_international WHERE year > 2012;
+  Result: min_winner_share = 15000
+- SQL:
+  SELECT COUNT(*) AS count_under_15000 FROM public.northeast_delta_dental_international WHERE year > 2012 AND "winner 's share" < 15000;
+  Result: count_under_15000 = 0
+Interpretation: For the only year after 2012 (2013), the winner’s share equals 15000, and there are no values below 15000.
+
+Step 3 (robustness): Also check 2012-and-later (≥ 2012), in case “after 2012” was intended inclusively
+- SQL:
+  SELECT year, "winner 's share" FROM public.northeast_delta_dental_international WHERE year = 2012;
+  Result: (2012, 15000)
+- SQL:
+  SELECT COUNT(*) AS count_below_15000 FROM public.northeast_delta_dental_international WHERE year >= 2012 AND "winner 's share" < 15000;
+  Result: count_below_15000 = 0
+Interpretation: Even including 2012, there are no rows with winner’s share below 15000.
+
+Conclusion
+- Based on the dataset, for years strictly after 2012, the winner’s share is never less than 15000 (it is exactly 15000 in 2013). The claim is supported by the data.
+
+Assumptions
+- Interpreted “after 2012” as years > 2012; I also checked ≥ 2012 to cover an inclusive interpretation, with the same conclusion.
+- Relied on the table public.northeast_delta_dental_international and its column exactly named “winner 's share.”
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

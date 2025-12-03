@@ -1,0 +1,71 @@
+
+<userQuery>
+<query>
+anne street have no major junction in the milepost
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “anne street have no major junction in the milepost.”
+
+Data sources discovered:
+- PostgreSQL database (schema: public)
+  - Table: massachusetts_route_139
+    - Columns: county (text), location (text), "street names" (text), milepost (text), "roads intersected" (text), notes (text)
+
+Schema context:
+- There is no dedicated boolean/enum field indicating “major junction.” Instead, textual indicators such as “(no major junctions)” appear in the milepost, roads intersected, and notes fields.
+
+Evidence 1: Locate any entries referencing Anne Street and inspect the milepost
+- SQL:
+  SELECT county, location, "street names", milepost, "roads intersected", notes
+  FROM public.massachusetts_route_139
+  WHERE LOWER("street names") LIKE '%anne street%'
+     OR LOWER("roads intersected") LIKE '%anne street%';
+- Result:
+  - County: Norfolk
+  - Location: Weymouth
+  - Street Names: Anne Street
+  - Milepost: (no major junctions)
+  - Roads Intersected: (no major junctions)
+  - Notes: (no major junctions)
+
+Evidence 2: Confirm there is only one relevant record containing “Anne”
+- SQL (count):
+  SELECT COUNT(*) AS total_count
+  FROM public.massachusetts_route_139
+  WHERE LOWER("street names") LIKE '%anne%'
+     OR LOWER("roads intersected") LIKE '%anne%';
+- Result: total_count = 1
+
+- SQL (details for completeness):
+  SELECT county, location, "street names", milepost, "roads intersected", notes
+  FROM public.massachusetts_route_139
+  WHERE LOWER("street names") LIKE '%anne%'
+     OR LOWER("roads intersected") LIKE '%anne%';
+- Result: Norfolk | Weymouth | Anne Street | (no major junctions) | (no major junctions) | (no major junctions)
+
+Evidence 3: Context on how “milepost” and “notes” are used in this dataset
+- SQL:
+  SELECT milepost, notes FROM public.massachusetts_route_139 LIMIT 5;
+- Sample results (illustrative):
+  - 3.0 | route 24 exit 20
+  - (no major junctions) | (no major junctions)
+  - 12.2 | western terminus of route 123 / 139 concurrency
+  - 12.8 | eastern terminus of route 123 / 139 concurrency
+  - 17.9 | northern terminus of route 53 / 139 concurrency
+- Interpretation: The milepost field usually contains numeric mile values where applicable, but explicitly uses the text “(no major junctions)” when there are none to record. The Anne Street record follows this pattern, indicating no major junctions.
+
+Conclusion:
+- The dataset contains a single entry for Anne Street on Massachusetts Route 139 (Weymouth, Norfolk County), and its milepost value is “(no major junctions).” This directly supports the claim that Anne Street has no major junction noted in the milepost field.
+
+Assumptions made:
+- “Major junction” is interpreted according to the dataset’s textual indicator “(no major junctions).”
+- “Milepost” refers to the column named milepost in public.massachusetts_route_139.
+- “Anne street” refers to the entry where "street names" = Anne Street (case-insensitive match).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

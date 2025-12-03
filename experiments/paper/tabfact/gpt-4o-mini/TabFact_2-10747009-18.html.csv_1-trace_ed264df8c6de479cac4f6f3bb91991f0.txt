@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+western oval have footscray as it 's home team
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Western Oval have Footscray as its home team.”
+
+Data sources discovered
+- PostgreSQL database (TabFact) with a single relevant table: public.t_1927_vfl_season (1927 VFL season match data).
+
+Schema details (public.t_1927_vfl_season)
+- Columns: home team (text), home team score (text), away team (text), away team score (text), venue (text), crowd (bigint), date (text)
+- No primary keys or constraints
+
+Evidence
+1) Distinct home teams at Western Oval
+- Result: Footscray
+- Executed SQL:
+  SELECT DISTINCT "home team" 
+  FROM public.t_1927_vfl_season 
+  WHERE LOWER(venue) = 'western oval' OR venue ILIKE '%western oval%';
+
+2) Count of matches at Western Oval by home team
+- Result: Footscray — 1 match
+- Executed SQL:
+  SELECT "home team", COUNT(*) AS match_count
+  FROM public.t_1927_vfl_season
+  WHERE venue ILIKE '%Western Oval%'
+  GROUP BY "home team";
+
+3) Distinct venues when Footscray is the home team
+- Result: Western Oval
+- Executed SQL:
+  SELECT DISTINCT venue FROM t_1927_vfl_season WHERE LOWER("home team") = 'footscray';
+
+Conclusion
+- Within the available 1927 VFL season dataset, all matches recorded at “Western Oval” have Footscray as the home team, and Footscray’s home venue is “Western Oval.” This supports the claim in the context of this data.
+
+Assumptions
+- The claim is interpreted in the VFL/AFL context and assessed against the available 1927 season data. No assertion is made beyond the scope of this dataset.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

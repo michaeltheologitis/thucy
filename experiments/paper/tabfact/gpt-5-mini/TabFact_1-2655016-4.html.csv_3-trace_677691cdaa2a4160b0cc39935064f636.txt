@@ -1,0 +1,46 @@
+
+<userQuery>
+<query>
+2 episode title consist entirely of number
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: 2 episode title consist entirely of number.
+
+Data sources explored:
+- Database: TabFact (PostgreSQL), schema: public
+- Table: list_of_all_that_episodes
+  - Columns: season (bigint), series (bigint), "episode title" (text), "original air date" (text), "nick prod" (bigint)
+
+Evidence 1 — Identify all episodes whose title is only digits:
+Executed SQL:
+SELECT season, series, "episode title", "original air date"
+FROM public.list_of_all_that_episodes
+WHERE trim("episode title") ~ '^[0-9]+$'
+ORDER BY series, season, CAST(trim("episode title") AS bigint);
+
+Result rows:
+- season: 8, series: 45, episode title: 702, original air date: december 28 , 1996
+- season: 11, series: 48, episode title: 112, original air date: january 18 , 1997
+
+Evidence 2 — Count such episodes:
+Executed SQL:
+SELECT COUNT(*) AS digit_only_count
+FROM public.list_of_all_that_episodes
+WHERE trim("episode title") ~ '^[0-9]+$';
+
+Result:
+- digit_only_count: 2
+
+Conclusion:
+- The dataset contains exactly 2 episodes whose titles consist entirely of digits. This supports the claim.
+
+Assumptions:
+- “Consist entirely of number” interpreted as titles that, after trimming whitespace, contain only the characters 0–9 (regex ^[0-9]+$).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

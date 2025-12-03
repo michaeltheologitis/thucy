@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+no game on the 18th of june draw a crowd of more fewer than 20000
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted and scope
+- Interpreted claim: “No game on the 18th of June drew a crowd of more than 20,000.”
+- Data scope: The available authoritative dataset covers the 1938 VFL season and contains matches dated 18 June 1938.
+
+Evidence from data
+1) All matches and crowds on the date in scope
+- SQL executed:
+  SELECT "home team", "away team", venue, crowd, date FROM t_1938_vfl_season;
+- Result (abridged to relevant fields):
+  • Geelong vs Hawthorn — Corio Oval — crowd 7,000 — 18 June 1938
+  • Fitzroy vs South Melbourne — Brunswick Street Oval — crowd 12,000 — 18 June 1938
+  • St Kilda vs Melbourne — Junction Oval — crowd 14,000 — 18 June 1938
+  • Richmond vs Essendon — Punt Road Oval — crowd 20,000 — 18 June 1938
+  • Footscray vs Collingwood — Western Oval — crowd 18,000 — 18 June 1938
+  • North Melbourne vs Carlton — Arden Street Oval — crowd 13,000 — 18 June 1938
+
+2) Summary statistics on crowds for the date(s) present
+- SQL executed:
+  SELECT date,
+         COUNT(*) AS total_games,
+         MIN(crowd) AS min_crowd,
+         MAX(crowd) AS max_crowd,
+         COUNT(CASE WHEN crowd > 20000 THEN 1 END) AS count_crowds_gt_20000,
+         COUNT(CASE WHEN crowd >= 20000 THEN 1 END) AS count_crowds_ge_20000,
+         COUNT(CASE WHEN crowd < 20000 THEN 1 END) AS count_crowds_lt_20000
+  FROM t_1938_vfl_season
+  GROUP BY date
+  ORDER BY date;
+- Result for 18 June 1938:
+  • Total games: 6
+  • Min crowd: 7,000; Max crowd: 20,000
+  • Crowds > 20,000: 0; Crowds ≥ 20,000: 1; Crowds < 20,000: 5
+
+Assessment
+- No game exceeded 20,000 attendees on 18 June 1938. The largest reported crowd was exactly 20,000, with the rest below 20,000.
+- Therefore, the interpreted claim (“no game drew more than 20,000”) is supported by the data.
+
+Assumptions made (due to ambiguous phrasing)
+- “more fewer than 20000” was interpreted as “more than 20,000.”
+- “18th of June” refers to the date present in the dataset: 18 June 1938.
+- “game” refers to the VFL matches recorded in the t_1938_vfl_season table.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

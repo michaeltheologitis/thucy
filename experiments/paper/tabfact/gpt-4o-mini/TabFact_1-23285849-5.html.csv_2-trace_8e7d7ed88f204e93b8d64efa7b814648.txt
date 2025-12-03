@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+attendance of all game at the pepsi center be over 15000
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “All games at the Pepsi Center have attendance over 15,000.”
+
+Data sources discovered
+- PostgreSQL database with one relevant table: public.t_2009_10_denver_nuggets_season (Denver Nuggets 2009–2010 season). Key column for this check: "location attendance" (text combining venue name and attendance).
+
+Evidence
+1) Summary check of all Pepsi Center games (case-insensitive), extracting the trailing attendance number
+SQL executed:
+SELECT COUNT(*) AS total_games,
+       MIN(CAST(regexp_replace("location attendance", '.*?(\\d+)$', '\\1') AS INTEGER)) AS min_attendance,
+       MAX(CAST(regexp_replace("location attendance", '.*?(\\d+)$', '\\1') AS INTEGER)) AS max_attendance,
+       COUNT(*) FILTER (WHERE CAST(regexp_replace("location attendance", '.*?(\\d+)$', '\\1') AS INTEGER) <= 15000) AS games_under_15000
+FROM public.t_2009_10_denver_nuggets_season
+WHERE LOWER("location attendance") LIKE '%pepsi center%';
+
+Results:
+- Total Games at Pepsi Center: 6
+- Minimum Attendance: 15,823
+- Maximum Attendance: 19,359
+- Count of games with attendance <= 15,000: 0
+
+2) List of Pepsi Center games with attendance (ascending)
+SQL executed:
+select date, team, CAST(regexp_replace("location attendance", '.*?(\\d+)$', '\\1') AS INTEGER) AS attendance
+from public.t_2009_10_denver_nuggets_season
+where LOWER("location attendance") LIKE 'pepsi center %'
+order by attendance asc;
+
+Returned rows (date, opponent/team, attendance):
+- November 1 — Grizzlies — 15,823
+- November 24 — Nets — 16,307
+- November 17 — Raptors — 16,446
+- November 13 — Lakers — 19,141
+- November 27 — Knicks — 19,155
+- November 21 — Bulls — 19,359
+
+Conclusion
+- Within the available 2009–10 Denver Nuggets dataset, every game at the Pepsi Center has attendance strictly greater than 15,000. No exceptions were found.
+
+Assumptions
+- “All game at the Pepsi Center” is interpreted as all Pepsi Center games present in the 2009–10 Denver Nuggets table available in this database. The verification does not extend beyond this dataset (e.g., other seasons or teams) due to data scope.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

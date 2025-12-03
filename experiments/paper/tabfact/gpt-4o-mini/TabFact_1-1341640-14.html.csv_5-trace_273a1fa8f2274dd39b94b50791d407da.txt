@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+in 1974 republican phil crane beat henry hyde who be a democrat
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “In 1974 Republican Phil Crane beat Henry Hyde, who was a Democrat.”
+
+What the data shows:
+- Both Phil Crane and Henry Hyde are listed as Republican incumbents in Illinois in the 1980 U.S. House elections data, in different districts.
+- Henry Hyde’s “first elected” year is 1974, and his party is Republican, contradicting the claim that he was a Democrat.
+- Phil Crane’s “first elected” year is 1969, meaning he did not first defeat Hyde in 1974; they were serving in different districts and did not run against each other.
+- No evidence in the dataset indicates Henry Hyde ran as a Democrat, nor that Crane defeated Hyde at any point.
+
+Executed SQL and results (evidence):
+1) Locate any rows mentioning Crane or Hyde
+SQL:
+SELECT * FROM united_states_house_of_representatives_elections_1980 
+WHERE incumbent ILIKE '%Crane%' OR incumbent ILIKE '%Hyde%' 
+OR candidates ILIKE '%Crane%' OR candidates ILIKE '%Hyde%';
+Results excerpt:
+- District: Illinois 6; Incumbent: Henry Hyde; Party: Republican; First Elected: 1974; Result: Re-elected; Candidates: Henry Hyde (R) 67.0%, Mario Reymond Reda (D) 33.0%
+- District: Illinois 12; Incumbent: Phil Crane; Party: Republican; First Elected: 1969; Result: Re-elected; Candidates: Phil Crane (R) 74.1%, David McCartney (D) 25.9%
+
+2) Confirm Henry Hyde’s party and first election
+SQL:
+SELECT district, incumbent, party, "first elected", result, candidates 
+FROM united_states_house_of_representatives_elections_1980 
+WHERE incumbent ILIKE '%Henry Hyde%';
+Results:
+- District: Illinois 6; Incumbent: Henry Hyde; Party: Republican; First Elected: 1974; Result: Re-elected; Candidates: Henry Hyde (R) 67.0%, Mario Reymond Reda (D) 33.0%
+
+3) Confirm Phil Crane’s party and first election
+SQL:
+SELECT district, incumbent, party, "first elected", result, candidates FROM united_states_house_of_representatives_elections_1980 WHERE incumbent ILIKE '%Phil Crane%';
+Results:
+- District: Illinois 12; Incumbent: Phil Crane; Party: Republican; First Elected: 1969; Result: Re-elected; Candidates: Phil Crane (R) 74.1%, David McCartney (D) 25.9%
+
+4) Check for any instance of Henry Hyde listed as a Democrat
+SQL:
+SELECT district, candidates FROM united_states_house_of_representatives_elections_1980 WHERE candidates ILIKE '%Henry Hyde (D)%';
+Results:
+- No rows returned.
+
+Conclusion:
+- The dataset shows Henry Hyde as a Republican (not a Democrat) and first elected in 1974 to Illinois’s 6th district.
+- Phil Crane was already serving (first elected 1969) in Illinois’s 12th district. They did not run against each other in 1974.
+- Therefore, the claim that “Republican Phil Crane beat Henry Hyde (a Democrat) in 1974” is contradicted by the data.
+
+Assumptions and scope notes:
+- Available verified data covers the 1980 House elections but includes each incumbent’s party and “first elected” year, which we used to infer Hyde’s 1974 party and the fact they served in different districts. No data in this source indicates any Hyde candidacy as a Democrat or a Crane-vs-Hyde race.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

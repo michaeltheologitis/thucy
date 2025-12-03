@@ -1,0 +1,87 @@
+
+<userQuery>
+<query>
+the 2 player with the highest league apps be malcolm brown and peter hart
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- I explored the available data and found a single PostgreSQL source (TabFact) with one relevant table containing player appearance statistics for Huddersfield Town F.C.’s 1979–80 season.
+- I examined the “league apps” values and extracted the leading integer from the text to compare players’ league appearances numerically.
+- Result: Three players share the highest number of league appearances (46): Malcolm Brown, Peter Hart, and Dave Sutton.
+
+Data source discovery
+- Available source: TabFact (public schema)
+- Relevant table: t_1979_80_huddersfield_town_f_c_season
+
+Schema details (from schema inspection)
+- Columns: name (text), position (text), "league apps" (text), "league goals" (bigint), "fa cup apps" (bigint), "fa cup goals" (bigint), "league cup apps" (text), "league cup goals" (bigint), "total apps" (text), "total goals" (bigint)
+
+Evidence and executed SQL
+1) Raw league apps by player
+SQL:
+SELECT name, "league apps" FROM public.t_1979_80_huddersfield_town_f_c_season;
+Results (player — league apps):
+- jim branagan — 0
+- malcolm brown — 46
+- david cowling — 39 (1)
+- peter fletcher — 30 (8)
+- keith hanvey — 33
+- peter hart — 46
+- ian holmes — 6 (4)
+- steve kindon — 22 (1)
+- mick laverick — 45
+- bernard purdie — 18 (4)
+- andy rankin — 24
+- ian robins — 45
+- fred robinson — 30
+- tommy smith — 0
+- brian stanton — 41
+- alan starling — 22
+- dave sutton — 46
+- chris topping — 13
+
+2) Ordered by numeric league apps (extracting the leading integer)
+SQL:
+SELECT name, "league apps", (substring("league apps" FROM '^\d+'))::int AS league_apps_num
+FROM public.t_1979_80_huddersfield_town_f_c_season
+ORDER BY league_apps_num DESC NULLS LAST, name;
+Results (top):
+- dave sutton — 46 — 46
+- malcolm brown — 46 — 46
+- peter hart — 46 — 46
+- ian robins — 45 — 45
+- mick laverick — 45 — 45
+...
+
+3) Players with the maximum numeric league apps
+SQL:
+WITH t AS (
+  SELECT name, "league apps", (substring("league apps" FROM '^\d+'))::int AS league_apps_num
+  FROM public.t_1979_80_huddersfield_town_f_c_season
+)
+SELECT name, "league apps", league_apps_num
+FROM t
+WHERE league_apps_num = (SELECT MAX(league_apps_num) FROM t)
+ORDER BY name;
+Results:
+- dave sutton — 46 — 46
+- malcolm brown — 46 — 46
+- peter hart — 46 — 46
+
+Assessment
+- The claim states that the two players with the highest league appearances are Malcolm Brown and Peter Hart.
+- The data show three co-leaders at 46 league appearances: Malcolm Brown, Peter Hart, and Dave Sutton. Therefore, while the two named players are indeed among the players with the highest league appearances, the claim is incomplete because it omits Dave Sutton.
+
+Assumptions
+- The claim refers to the available dataset (Huddersfield Town F.C. 1979–80 season) since this is the only accessible source with relevant “league apps” data.
+- “League apps” is interpreted as the leading integer in the text field (e.g., “39 (1)” is treated as 39).
+- Ties are considered; the “highest” value includes all players who share that maximum.
+
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

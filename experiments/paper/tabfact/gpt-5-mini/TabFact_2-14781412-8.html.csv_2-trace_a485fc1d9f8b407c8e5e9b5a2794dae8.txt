@@ -1,0 +1,64 @@
+
+<userQuery>
+<query>
+nadia al - moutawaa be the first person to win the gold medal in equestrian at the asian game
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “Nadia Al-Moutawaa [is] the first person to win the gold medal in equestrian at the Asian Games.”
+
+Data source discovery
+- Available source: TabFact (PostgreSQL), public schema.
+- Relevant table found: public.equestrian_at_the_asian_games (year bigint, location text, gold text, silver text, bronze text).
+
+Schema evidence
+- Table: public.equestrian_at_the_asian_games with columns: year, location, gold, silver, bronze.
+
+Evidence from executed SQL queries
+1) Retrieve first 10 rows ordered by year (to understand coverage and earliest entry)
+SQL:
+SELECT year, location, gold, silver, bronze
+FROM public.equestrian_at_the_asian_games
+ORDER BY year ASC
+LIMIT 10;
+Result (all rows in table, earliest to latest):
+- 1982 | new delhi | nadia al - moutawaa | jamila al - moutawaa | bariaa salem al - sabbah
+- 1986 | seoul | takashi tomura | shuichi toki | ryuzo okuno
+- 1994 | hiroshima | konoshin kuwahara | ryuzo okuno | natya chantrasmi
+- 1998 | bangkok | jin kanno | sohn bong - gak | quzier ambak fathil
+- 2002 | busan | mikaela marãa jaworski | lee jin - kyung | tadayoshi hayashi
+- 2006 | doha | ali yousuf al - rumaihi | jasmine chen - shao man | joo jung - hyun
+- 2010 | guangzhou | ramzy al duhami | latifa al maktom | khaled al - eid
+
+Row count confirmation:
+SQL:
+SELECT COUNT(*) AS total_rows FROM public.equestrian_at_the_asian_games;
+Result: total_rows = 7
+
+2) Identify the earliest year and its gold medalist
+SQL:
+SELECT year, location, gold FROM public.equestrian_at_the_asian_games ORDER BY year ASC LIMIT 1;
+Result: 1982 | new delhi | nadia al - moutawaa
+
+3) Check if Nadia Al-Moutawaa appears elsewhere in gold entries
+SQL:
+SELECT year, location, gold FROM public.equestrian_at_the_asian_games WHERE lower(gold) LIKE '%nadia%' OR lower(gold) LIKE '%moutawaa%';
+Result: 1982 | new delhi | nadia al - moutawaa
+
+Analysis
+- The earliest recorded equestrian entry in the dataset is 1982 (New Delhi), and the gold medalist for that year is “nadia al - moutawaa.”
+- Therefore, within this authoritative dataset, Nadia Al-Moutawaa is the first recorded gold medalist in equestrian at the Asian Games.
+
+Conclusion
+- The claim is supported by the data: Nadia Al-Moutawaa is the first person listed as winning gold in equestrian at the Asian Games (earliest year present is 1982, with her as gold).
+
+Assumptions
+- The table public.equestrian_at_the_asian_games comprehensively lists the first occurrence/year for Asian Games equestrian gold medalists, and the earliest year in the table represents the first such gold medal at the Asian Games for this event category.
+- Name spellings and punctuation are taken as-is from the dataset (e.g., “nadia al - moutawaa”).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

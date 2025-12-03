@@ -1,0 +1,43 @@
+
+<userQuery>
+<query>
+substrate coproporphyrinogen iii be locate in the mitochondrion
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of data sources explored
+- Discovered a PostgreSQL database: TabFact.
+- Schema inspection shows one relevant table in public schema: porphyrin with columns (enzyme text, location text, substrate text, product text, chromosome text, ec text, omim bigint, porphyria text). No keys or FKs.
+
+Evidence
+1) Does the porphyrin table list coproporphyrinogen III as a substrate in the mitochondrion?
+- SQL executed:
+  SELECT enzyme, location, substrate, product, ec FROM porphyrin WHERE substrate ILIKE '%coproporphyrinogen iii%';
+- Result (1 row):
+  enzyme: coproporphyrinogen iii oxidase
+  location: mitochondrion
+  substrate: coproporphyrinogen iii
+  product: protoporphyrinogen ix
+  ec: 1.3.3.3
+- Interpretation: The entry shows coproporphyrinogen III is the substrate of coproporphyrinogen III oxidase, which is located in the mitochondrion.
+
+2) Context: where else does coproporphyrinogen appear in the pathway and in which compartments?
+- SQL executed:
+  SELECT enzyme, location, substrate, product, ec FROM porphyrin WHERE substrate ILIKE '%coproporphyrinogen%' OR product ILIKE '%coproporphyrinogen%';
+- Results (2 rows):
+  • uroporphyrinogen iii decarboxylase | cytosol | uroporphyrinogen iii | coproporphyrinogen iii | 4.1.1.37
+  • coproporphyrinogen iii oxidase | mitochondrion | coproporphyrinogen iii | protoporphyrinogen ix | 1.3.3.3
+- Interpretation: Coproporphyrinogen III is produced in the cytosol and subsequently used as a substrate in the mitochondrion.
+
+Conclusion
+- The claim that the substrate coproporphyrinogen III is located in the mitochondrion is supported by the data: it serves as the substrate for coproporphyrinogen III oxidase, which is located in the mitochondrion.
+
+Assumptions
+- I interpret the column 'location' as the compartment where the listed enzyme catalyzes the reaction. Therefore, the substrate must be present in that compartment during the reaction. The claim does not assert exclusivity of location, only presence in the mitochondrion, which the data support.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

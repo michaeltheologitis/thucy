@@ -1,0 +1,51 @@
+
+<userQuery>
+<query>
+otto graham have win 44 more game than he lose
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "otto graham have win 44 more game than he lose"
+
+Data sources discovered
+- TabFact PostgreSQL, public schema
+- Table: list_of_cleveland_browns_starting_quarterbacks (columns: quarterback, uniform no (s), games started, wins, losses, ties, winning pct)
+
+Evidence and executed SQL
+1) Retrieve Otto Graham’s wins, losses, ties, and compute wins − losses
+SQL query executed:
+SELECT quarterback, wins, losses, ties, (wins - losses) AS diff
+FROM public.list_of_cleveland_browns_starting_quarterbacks
+WHERE quarterback ILIKE '%Otto%';
+
+Result:
+- quarterback: graham , otto
+- wins: 57
+- losses: 13
+- ties: 1
+- diff (wins - losses): 44
+
+2) Confirm uniqueness of the Otto Graham row
+SQL executed:
+SELECT * FROM public.list_of_cleveland_browns_starting_quarterbacks WHERE quarterback ILIKE '%Graham%';
+Returned row(s):
+- quarterback: graham , otto; uniform no (s): 60 , 14; games started: 71; wins: 57; losses: 13; ties: 1; winning pct: 810
+
+SQL executed:
+SELECT quarterback, COUNT(*) AS occurrences FROM public.list_of_cleveland_browns_starting_quarterbacks WHERE quarterback ILIKE '%Graham%' GROUP BY quarterback ORDER BY occurrences DESC;
+Returned row(s):
+- quarterback: graham , otto — occurrences: 1
+
+Interpretation
+- The table shows Otto Graham with 57 wins and 13 losses. The computed difference is 57 − 13 = 44 more wins than losses, matching the claim.
+
+Assumptions
+- The claim is interpreted against the Browns starting quarterbacks table (regular-season starts for the Cleveland Browns as captured by this dataset). Otto Graham only played for the Browns, so this aligns with his Browns record.
+- Name matching used case-insensitive search (ILIKE) to locate “graham , otto.”
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,102 @@
+
+<userQuery>
+<query>
+the screening that start on may 3rd , 2006 end on march 29 , 2006
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the screening that start on May 3rd, 2006 end on March 29, 2006.”
+
+Data sources discovered
+- TabFact (postgres_tabfact10), schema: public
+- Relevant table: public.my_info_table with columns:
+  - "screening started" (text)
+  - "screening completed" (text)
+  - "chapter unfrozen" (text)
+  - "chapter opened" (text)
+  - "chapter closed" (text)
+
+What I checked and why
+1) Determine the date format stored in the screening fields to craft accurate searches.
+2) Search for any entries in 2006 to see nearby dates present and confirm whether May 3, 2006 or March 29, 2006 exists in either field.
+3) Directly test for the existence of a screening that starts on 3 May 2006 and ends on 29 March 2006.
+4) Broaden searches to include multiple textual variants (ordinals, commas, month-first vs day-first) for both dates.
+
+Executed SQL and evidence
+1) Inspect distinct values in "screening started" to understand format
+SQL:
+SELECT "screening started", COUNT(*) AS cnt
+FROM public.my_info_table
+GROUP BY "screening started"
+ORDER BY cnt DESC
+LIMIT 50;
+Result highlights (sample): values like "21 june 2006", "16 february 2006", "18 may 2006", "27 march 2006", "9 march 2006", "3 april 2006"; also some non-date tokens. Format is typically “day monthname year” in lowercase.
+
+2) Inspect distinct values in "screening completed"
+SQL:
+SELECT "screening completed", COUNT(*) AS cnt
+FROM public.my_info_table
+GROUP BY "screening completed"
+ORDER BY cnt DESC
+LIMIT 50;
+Result highlights (sample): values like "5 may 2006", "2 june 2006", "3 march 2006", "22 march 2006", "23 march 2006", "30 june 2006"; some non-date tokens.
+
+3) List rows where either screening field contains 2006
+SQL:
+SELECT "screening started","screening completed","chapter unfrozen","chapter opened","chapter closed"
+FROM public.my_info_table
+WHERE "screening started" ILIKE '%2006%'
+   OR "screening completed" ILIKE '%2006%';
+Result (15 rows): includes pairs such as
+- "18 may 2006" → "30 june 2006"
+- "27 march 2006" → "5 may 2006"
+- "3 april 2006" → "2 june 2006"
+- "9 march 2006" → "28 april 2006"
+- "8 february 2006" → "22 march 2006"
+- "16 february 2006" → "23 march 2006"
+- No entries show "3 may 2006" or "29 march 2006".
+
+4) Direct exact-date match for both dates (allow optional leading zero; case-insensitive)
+SQL:
+SELECT *
+FROM public.my_info_table
+WHERE "screening started" ~* '^0?3\s+May\s+2006$'
+  AND "screening completed" ~* '^0?29\s+March\s+2006$';
+Result: 0 rows.
+
+5) Direct exact-date match for start date alone
+SQL:
+SELECT *
+FROM public.my_info_table
+WHERE "screening started" ~* '^0?3\s+May\s+2006$';
+Result: 0 rows.
+
+6) Direct exact-date match for end date alone
+SQL:
+SELECT *
+FROM public.my_info_table
+WHERE "screening completed" ~* '^0?29\s+March\s+2006$';
+Result: 0 rows.
+
+7) Broader substring searches for multiple variants (ordinals and commas; month-first and day-first)
+SQL (May 3, 2006 variants count):
+SELECT SUM(CASE WHEN ("screening started" ILIKE ANY (ARRAY['%3 may 2006%','%3rd may 2006%','%3rd may, 2006%','%3 may, 2006%','%may 3 2006%','%may 3rd 2006%','%may 3, 2006%','%may 3rd, 2006%']) OR "screening completed" ILIKE ANY (ARRAY['%3 may 2006%','%3rd may 2006%','%3rd may, 2006%','%3 may, 2006%','%may 3 2006%','%may 3rd 2006%','%may 3, 2006%','%may 3rd, 2006%'])) THEN 1 ELSE 0 END) AS may_matches FROM public.my_info_table;
+Result: may_matches = 0
+
+SQL (March 29, 2006 variants count):
+SELECT SUM(CASE WHEN ("screening started" ILIKE ANY (ARRAY['%29 march 2006%','%29th march 2006%','%29th march, 2006%','%29 march, 2006%','%march 29 2006%','%march 29th 2006%','%march 29, 2006%','%march 29th, 2006%']) OR "screening completed" ILIKE ANY (ARRAY['%29 march 2006%','%29th march 2006%','%29th march, 2006%','%29 march, 2006%','%march 29 2006%','%march 29th 2006%','%march 29, 2006%','%march 29th, 2006%'])) THEN 1 ELSE 0 END) AS march29_matches FROM public.my_info_table;
+Result: march29_matches = 0
+
+Conclusion
+- There is no evidence in the authoritative dataset of any screening that started on May 3, 2006, nor any that ended on March 29, 2006. Consequently, a screening that both starts on May 3, 2006 and ends on March 29, 2006 does not exist in the data. The claim is not supported.
+
+Assumptions
+- The claim refers to the "screening started" and "screening completed" fields in public.my_info_table as the authoritative record of screening dates.
+- Dates are stored as text; matching was performed case-insensitively and included multiple textual variants to mitigate formatting differences. The dataset appears to use English month names in “day month year” format.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

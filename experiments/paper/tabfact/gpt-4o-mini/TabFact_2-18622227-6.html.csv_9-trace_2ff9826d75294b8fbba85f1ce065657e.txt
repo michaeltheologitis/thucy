@@ -1,0 +1,79 @@
+
+<userQuery>
+<query>
+the australian open have same a result as wimbledon have
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “the australian open have same a result as wimbledon have.” Using the available dataset (TabFact.katrina_adams), which records Katrina Adams’s Grand Slam results by tournament and year, I verify whether her Australian Open results are the same as her Wimbledon results.
+
+Data exploration and evidence
+1) Identify available tournaments (to ensure exact names/casing)
+SQL executed:
+SELECT DISTINCT tournament FROM katrina_adams ORDER BY tournament;
+Result:
+- australian open
+- french open
+- grand slam tournaments
+- us open
+- wimbledon
+
+2) Retrieve the Australian Open and Wimbledon rows
+SQL executed:
+SELECT * FROM katrina_adams WHERE tournament IN ('australian open', 'wimbledon');
+Key results extracted:
+- australian open: 1986=a, 1988=3r, 1989=3r, 1990=3r, 1991=a, 1992=qf, 1993=3r, 1994=2r, 1995=1r, 1996=a, 1997=2r, 1998=1r, 1999=1r
+- wimbledon:       1986=a, 1988=sf, 1989=qf, 1990=3r, 1991=qf, 1992=3r, 1993=1r, 1994=2r, 1995=3r, 1996=qf, 1997=3r, 1998=3r, 1999=1r
+
+3) Year-by-year comparison (are they equal?)
+SQL executed:
+SELECT 
+    a.year AS year, 
+    a.result AS ao_result, 
+    w.result AS wimbledon_result, 
+    CASE WHEN a.result = w.result THEN 'Yes' ELSE 'No' END AS results_equal 
+FROM 
+    (SELECT tournament, "1986" AS result, '1986' AS year FROM katrina_adams WHERE tournament = 'australian open' 
+     UNION ALL SELECT tournament, "1988", '1988' FROM katrina_adams WHERE tournament = 'australian open' 
+     UNION ALL SELECT tournament, "1989", '1989' FROM katrina_adams WHERE tournament = 'australian open' 
+     UNION ALL SELECT tournament, "1990", '1990' FROM katrina_adams WHERE tournament = 'australian open' 
+     UNION ALL SELECT tournament, "1991", '1991' FROM katrina_adams WHERE tournament = 'australian open' 
+     UNION ALL SELECT tournament, "1992", '1992' FROM katrina_adams WHERE tournament = 'australian open' 
+     UNION ALL SELECT tournament, "1993", '1993' FROM katrina_adams WHERE tournament = 'australian open' 
+     UNION ALL SELECT tournament, "1994", '1994' FROM katrina_adams WHERE tournament = 'australian open' 
+     UNION ALL SELECT tournament, "1995", '1995' FROM katrina_adams WHERE tournament = 'australian open' 
+     UNION ALL SELECT tournament, "1996", '1996' FROM katrina_adams WHERE tournament = 'australian open' 
+     UNION ALL SELECT tournament, "1997", '1997' FROM katrina_adams WHERE tournament = 'australian open' 
+     UNION ALL SELECT tournament, "1998", '1998' FROM katrina_adams WHERE tournament = 'australian open' 
+     UNION ALL SELECT tournament, "1999", '1999' FROM katrina_adams WHERE tournament = 'australian open') a 
+JOIN 
+    (SELECT tournament, "1986" AS result, '1986' AS year FROM katrina_adams WHERE tournament = 'wimbledon' 
+     UNION ALL SELECT tournament, "1988", '1988' FROM katrina_adams WHERE tournament = 'wimbledon' 
+     UNION ALL SELECT tournament, "1989", '1989' FROM katrina_adams WHERE tournament = 'wimbledon' 
+     UNION ALL SELECT tournament, "1990", '1990' FROM katrina_adams WHERE tournament = 'wimbledon' 
+     UNION ALL SELECT tournament, "1991", '1991' FROM katrina_adams WHERE tournament = 'wimbledon' 
+     UNION ALL SELECT tournament, "1992", '1992' FROM katrina_adams WHERE tournament = 'wimbledon' 
+     UNION ALL SELECT tournament, "1993", '1993' FROM katrina_adams WHERE tournament = 'wimbledon' 
+     UNION ALL SELECT tournament, "1994", '1994' FROM katrina_adams WHERE tournament = 'wimbledon' 
+     UNION ALL SELECT tournament, "1995", '1995' FROM katrina_adams WHERE tournament = 'wimbledon' 
+     UNION ALL SELECT tournament, "1996", '1996' FROM katrina_adams WHERE tournament = 'wimbledon' 
+     UNION ALL SELECT tournament, "1997", '1997' FROM katrina_adams WHERE tournament = 'wimbledon' 
+     UNION ALL SELECT tournament, "1998", '1998' FROM katrina_adams WHERE tournament = 'wimbledon' 
+     UNION ALL SELECT tournament, "1999", '1999' FROM katrina_adams WHERE tournament = 'wimbledon') w 
+ON a.year = w.year;
+Comparison outcome:
+- Same results in: 1986 (a/a), 1990 (3r/3r), 1994 (2r/2r), 1999 (1r/1r)
+- Different results in: 1988, 1989, 1991, 1992, 1993, 1995, 1996, 1997, 1998
+
+Conclusion
+- The Australian Open and Wimbledon do not have the same results overall for Katrina Adams; they only match in 4 of 13 listed years. Therefore, the blanket claim that they “have the same result” is not supported by the data.
+
+Assumptions made
+- Interpreted the claim within the scope of the available dataset (Katrina Adams’s Grand Slam results, 1986–1999). The statement was treated as asserting that her Australian Open results are the same as her Wimbledon results across the years recorded.
+</report>
+<verdict>
+Partly Inaccurate
+</verdict>
+</verificationAnswer>

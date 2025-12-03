@@ -1,0 +1,100 @@
+
+<userQuery>
+<query>
+ngc 1796 have the largest redshift at 633 kilometer per second plus or minus 6 kilometer per second
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "ngc 1796 have the largest redshift at 633 kilometer per second plus or minus 6 kilometer per second"
+
+Data sources discovered
+- Database: postgres_tabfact15 (TabFact)
+- Schema: public
+- Table: dorado_group
+  - Columns: name (text), type (text), ra ( j2000 ) (text), dec ( j2000 ) (text), redshift (km / s ) (text), apparent magnitude (double precision)
+
+Evidence and analysis
+1) What is the redshift listed for NGC 1796?
+- Evidence query (exact SQL):
+  SELECT name, "redshift (km / s )" FROM public.dorado_group WHERE name ILIKE '%1796%';
+- Result: name = ngc 1796, redshift (km / s ) = 1014 ± 9
+
+- Parsed velocity and uncertainty (exact SQL):
+  SELECT g.name, g."redshift (km / s )" AS redshift_text,
+         (regexp_matches(g."redshift (km / s )", '([0-9]+\.?[0-9]*)'))[1] AS velocity,
+         u.uncertainty
+  FROM public.dorado_group g
+  LEFT JOIN LATERAL (
+    SELECT (regexp_matches(g."redshift (km / s )", '[±+\-/()]\s*([0-9]+\.?[0-9]*)'))[1] AS uncertainty
+  ) u ON g."redshift (km / s )" ~ '[±+\-/()]'
+  WHERE g.name ILIKE '%1796%';
+- Parsed: velocity = 1014 km/s; uncertainty = 9 km/s
+
+Conclusion for part 1: The value 633 ± 6 km/s does NOT match NGC 1796. NGC 1796 is listed as 1014 ± 9 km/s in this dataset.
+
+2) Does NGC 1796 have the largest redshift in the table?
+- Evidence query to find the maximum redshift (exact SQL):
+  SELECT name, "redshift (km / s )" AS redshift_text,
+         trim(split_part("redshift (km / s )", '±', 1))::double precision AS redshift_val
+  FROM public.dorado_group
+  ORDER BY redshift_val DESC
+  LIMIT 1;
+- Result: name = ngc 1596; redshift_text = 1510 ± 8; redshift_val = 1510
+
+- Evidence query to rank NGC 1796 by redshift (exact SQL):
+  WITH v AS (
+    SELECT name, "redshift (km / s )" AS redshift_text,
+           trim(split_part("redshift (km / s )", '±', 1))::double precision AS redshift_val
+    FROM public.dorado_group
+  ), r AS (
+    SELECT name, redshift_text, redshift_val, rank() OVER (ORDER BY redshift_val DESC) AS rnk
+    FROM v
+  )
+  SELECT name, redshift_text, redshift_val, rnk
+  FROM r
+  WHERE lower(name) = lower('NGC 1796');
+- Result: NGC 1796 = 1014 ± 9 km/s, rank = 16 (rank 1 = highest redshift)
+
+Conclusion for part 2: NGC 1796 does not have the largest redshift in this dataset. The largest listed is NGC 1596 at 1510 ± 8 km/s.
+
+3) Which object has 633 ± 6 km/s?
+- Evidence query to find redshifts ≈ 633 km/s (exact SQL):
+  WITH parsed AS (
+    SELECT name,
+           "redshift (km / s )" AS redshift_text,
+           substring("redshift (km / s )" from '([0-9]+(\.[0-9]+)?)') AS value_str
+    FROM public.dorado_group
+  )
+  SELECT name, redshift_text, value_str::numeric AS value_num
+  FROM parsed
+  WHERE value_str IS NOT NULL AND value_str::numeric BETWEEN 623 AND 643;
+- Result: ngc 1705 — 633 ± 6
+
+4) Context: top 5 highest redshifts in the table
+- Evidence query (exact SQL):
+  SELECT name, "redshift (km / s )" AS redshift_text,
+         trim(split_part("redshift (km / s )", '±', 1)) AS redshift_value_text,
+         (trim(split_part("redshift (km / s )", '±', 1)))::numeric AS redshift_value_numeric
+  FROM public.dorado_group
+  WHERE trim(split_part("redshift (km / s )", '±', 1)) ~ '^[0-9.+-]+'
+  ORDER BY redshift_value_numeric DESC
+  LIMIT 5;
+- Results:
+  1) ngc 1596 — 1510 ± 8
+  2) ngc 1566 — 1504 ± 2
+  3) ngc 1672 — 1331 ± 3
+  4) ngc 1559 — 1304 ± 4
+  5) ngc 1546 — 1284 ± 14
+
+Overall conclusion
+- The claim is contradicted by the data. In this dataset, NGC 1796’s redshift is 1014 ± 9 km/s, not 633 ± 6 km/s, and it is not the largest redshift in the table. A different galaxy, NGC 1705, is listed at 633 ± 6 km/s. The largest listed redshift is for NGC 1596 (1510 ± 8 km/s).
+
+Assumptions noted
+- Scope: “largest redshift” was interpreted within the accessible dataset (public.dorado_group), which catalogs galaxies in the Dorado Group. This is the only available data source and is treated as authoritative per instructions. Different catalogs or scopes might yield different “largest” objects, but are outside what is available here.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

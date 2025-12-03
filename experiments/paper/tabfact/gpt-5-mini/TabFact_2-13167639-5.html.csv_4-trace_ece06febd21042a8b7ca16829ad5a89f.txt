@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+the semifinal first leg record attendance less than 50000
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim evaluated: "the semifinal first leg record attendance less than 50000"
+- Data source explored: TabFact (postgres_tabfact23) → public.t_2002_03_manchester_united_f_c_season
+- Finding: The recorded attendance for the semifinal first leg is 62,740, which is not less than 50,000.
+
+Evidence and executed SQL
+1) Identify how semifinal legs are labeled in the dataset
+SQL:
+SELECT "round", COUNT(*) AS cnt
+FROM public.t_2002_03_manchester_united_f_c_season
+GROUP BY "round"
+ORDER BY cnt DESC, "round";
+Result:
+- final: 1
+- round 3: 1
+- round 4: 1
+- round 5: 1
+- semi - final first leg: 1
+- semi - final second leg: 1
+Interpretation:
+- There is exactly one row labeled "semi - final first leg".
+
+2) Retrieve the semifinal first leg match details
+SQL:
+SELECT date, opponents, "result f - a", attendance
+FROM public.t_2002_03_manchester_united_f_c_season
+WHERE round = 'semi - final first leg';
+Result:
+- Date: 7 january 2003
+- Opponents: blackburn rovers
+- Result: 1 - 1
+- Attendance: 62,740
+Interpretation:
+- The recorded attendance for the semifinal first leg is 62,740.
+
+Conclusion
+- The claim that the semifinal first leg recorded attendance is less than 50,000 is contradicted by the data. The recorded figure is 62,740 (> 50,000).
+
+Assumptions
+- "record attendance" was interpreted as the recorded attendance value stored in the attendance column for the row labeled "semi - final first leg" in this dataset.
+- The dataset (2002–03 Manchester United season) is the intended context of the claim.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

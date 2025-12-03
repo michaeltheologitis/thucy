@@ -1,0 +1,55 @@
+
+<userQuery>
+<query>
+the score for air force - navy have all be decide up until 2018
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “The scores for Air Force–Navy have all been decided up until 2018.” I evaluate this against the Commander-in-Chief’s Trophy table (records service-academy game scores) for seasons through 2018.
+
+Finding: Not all Air Force–Navy scores are decided/recorded as final by 2018 in the data. Specifically, 2014, 2016, and 2018 are not recorded as decided scores (2016 and 2018 are ‘tbd’; 2014 shows a date/location placeholder rather than a score).
+
+Evidence from data (exact executed SQL and results):
+
+1) List seasons ≤ 2018 with the “air force - navy score”
+SQL:
+SELECT season, "air force - navy score" FROM public.commander_in_chief_s_trophy WHERE season <= 2018 ORDER BY season;
+Key rows demonstrating undecided/missing scores:
+- 2014 — 4 oct 2014 at air force
+- 2016 — tbd
+- 2018 — tbd
+(Other seasons show decided-looking scores, e.g., “16 - 13 (ot)”, “14 - 6”, etc.)
+
+2) Count of seasons ≤ 2018 and count of missing/undecided scores (NULL/empty/“tbd”/etc.)
+SQL (total rows):
+SELECT COUNT(*) AS total_rows FROM public.commander_in_chief_s_trophy WHERE season <= 2018;
+Result: total_rows = 44
+
+SQL (missing/undecided values treated as NULL, empty string, '-', '—', 'n/a', 'tbd', 'vacated', 'forfeited', or containing 'tie'):
+SELECT COUNT(*) AS missing_count FROM public.commander_in_chief_s_trophy WHERE season <= 2018 AND ("air force - navy score" IS NULL OR trim("air force - navy score") = '' OR lower(trim("air force - navy score")) IN ('-', '—', 'n/a', 'tbd', 'vacated', 'forfeited') OR lower("air force - navy score") LIKE '%tie%');
+Result: missing_count = 2 (2016, 2018 = ‘tbd’)
+
+3) Pattern check: rows not matching a decided-score pattern (digits-dash-digits)
+SQL (count decided-looking):
+SELECT count(*) AS decided_count FROM public.commander_in_chief_s_trophy WHERE season <= 2018 AND "air force - navy score" ~ '^\d+\s*-\s*\d+(\s+.*)?$';
+Result: decided_count = 41
+
+SQL (list non-matching):
+SELECT season, "trophy winner", "air force - navy score" FROM public.commander_in_chief_s_trophy WHERE season <= 2018 AND NOT ("air force - navy score" ~ '^\d+\s*-\s*\d+(\s+.*)?$') ORDER BY season;
+Results:
+- 2014 — trophy winner: tbd — air force - navy score: 4 oct 2014 at air force
+- 2016 — trophy winner: tbd — air force - navy score: tbd
+- 2018 — trophy winner: tbd — air force - navy score: tbd
+
+Conclusion: The data show at least three seasons at or before 2018 where the Air Force–Navy score is not a decided/recorded final score (2014, 2016, 2018). Therefore, the claim that all were decided up until 2018 is contradicted by the evidence.
+
+Assumptions made:
+- “Decided” means a recorded final numeric score (e.g., “21 - 17”), allowing optional trailing notes like “(ot)”. Values like “tbd” or a date/location line are treated as not decided.
+- “Up until 2018” interpreted as up to and including the 2018 season; even if interpreted as up to but not including 2018, 2014 and 2016 still contradict the claim.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

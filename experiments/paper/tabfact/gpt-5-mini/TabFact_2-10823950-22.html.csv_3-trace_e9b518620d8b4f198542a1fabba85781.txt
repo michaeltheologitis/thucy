@@ -1,0 +1,47 @@
+
+<userQuery>
+<query>
+7912 crowd attend melbourne 's away game
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Scope and data sources
+- Explored available data sources and found a single PostgreSQL database (TabFact) with one relevant table: t_1981_vfl_season. This table contains match-level records for the 1981 VFL season, including home/away teams and a crowd (attendance) field.
+
+Verification steps and evidence
+1) Initial check (exact-case away team = 'Melbourne' and crowd = 7912)
+- Executed SQL:
+SELECT COUNT(*) AS match_count
+FROM t_1981_vfl_season
+WHERE "away team" = 'Melbourne' AND "crowd" = 7912;
+- Result: [{"match_count": 0}]
+- Note: This suggested a case-sensitivity issue in team naming.
+
+2) Direct search for crowd = 7912 to identify the specific match
+- Executed SQL:
+SELECT "home team", "away team", "date", "venue", "crowd"
+FROM t_1981_vfl_season
+WHERE "crowd" = 7912
+ORDER BY "date";
+- Result:
+  - home team: hawthorn
+  - away team: melbourne
+  - date: 29 august 1981
+  - venue: princes park
+  - crowd: 7912
+
+Interpretation
+- The returned record shows Melbourne (stored as lowercase 'melbourne') was the away team in a match with a recorded crowd of 7,912 at Princes Park on 29 August 1981 versus Hawthorn. This directly supports the claim that a crowd of 7,912 attended Melbourne’s away game (at least in this instance from the 1981 VFL season data).
+
+Conclusion
+- The claim is supported by the data: there is a Melbourne away game with a crowd of 7,912 in the 1981 VFL season.
+
+Assumptions
+- Interpreted “Melbourne” as the Melbourne Football Club in the 1981 VFL season (the only available dataset). Team names in the table are lowercase; comparisons are case-sensitive.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

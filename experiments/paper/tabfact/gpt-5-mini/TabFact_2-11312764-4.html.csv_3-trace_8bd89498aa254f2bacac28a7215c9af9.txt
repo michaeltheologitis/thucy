@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+bodil olsson be not from switzerland and do not receive 27 sp + f
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: "bodil olsson be not from switzerland and do not receive 27 sp + f"
+
+How I interpreted the claim:
+- Entity: Bodil Olsson (a competitor in the 1979 World Figure Skating Championships dataset).
+- Sub-claim 1: Bodil Olsson is not from Switzerland.
+- Sub-claim 2: Bodil Olsson did not receive 27 in the “SP + FS” metric (short program + free skate total).
+
+Data source discovery:
+- Available database: TabFact (public schema).
+- Relevant table: public.t_1979_world_figure_skating_championships with columns: rank, name, nation, "sp + fs", points, places.
+
+Evidence and executed SQL:
+1) Locate Bodil Olsson and retrieve nation and "sp + fs" value
+SQL:
+SELECT name, nation, "sp + fs" FROM public.t_1979_world_figure_skating_championships WHERE name ILIKE '%Bodil%';
+Result:
+- name = bodil olsson, nation = sweden, sp + fs = 23
+
+2) Confirm exact (case-insensitive) match and full row details; also count matches
+SQL (row details):
+SELECT rank, name, nation, "sp + fs", points, places
+FROM public.t_1979_world_figure_skating_championships
+WHERE lower(name) = 'bodil olsson';
+Result:
+- rank: 25
+- name: bodil olsson
+- nation: sweden
+- sp + fs: 23
+- points: 147.02
+- places: 225
+
+SQL (count):
+SELECT count(*) AS match_count
+FROM public.t_1979_world_figure_skating_championships
+WHERE lower(name) = 'bodil olsson';
+Result:
+- match_count: 1
+
+Assessment of sub-claims against evidence:
+- Not from Switzerland: Supported. The nation value is "sweden", not Switzerland.
+- Did not receive 27 in “SP + FS”: Supported. The "sp + fs" value is 23, which is not 27.
+
+Conclusion: Both parts of the claim are supported by the data in the TabFact table.
+
+Assumptions made:
+- The phrase “sp + f” in the claim refers to the dataset’s “sp + fs” column (short program + free skate total).
+- The relevant person is the unique entry "bodil olsson" in the 1979 World Figure Skating Championships table in the accessible dataset.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

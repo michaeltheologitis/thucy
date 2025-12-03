@@ -1,0 +1,65 @@
+
+<userQuery>
+<query>
+the most highly attended game be against miami at the prudential center
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the most highly attended game be against miami at the prudential center.”
+
+Conclusion: Within the available dataset (public.t_2010_11_new_jersey_nets_season), the most highly attended game is indeed against Miami at the Prudential Center.
+
+Data source discovery
+- Verified one accessible data source: a PostgreSQL TabFact database (postgres_tabfact10), schema public.
+- Relevant table: public.t_2010_11_new_jersey_nets_season (2010–11 New Jersey Nets season fragment), columns: game (bigint), date (text), team (text), score (text), high points (text), high rebounds (text), high assists (text), location attendance (text), record (text).
+
+Evidence and executed SQL
+1) Inspect rows and verify the table contents (shows opponent, venue, and attendance together):
+Executed SQL:
+SELECT game, date, team, score, "location attendance" FROM public.t_2010_11_new_jersey_nets_season LIMIT 20;
+
+Returned rows (7 total in table):
+- game: 75, date: april 1, team: philadelphia, score: l 90 - 115 (ot), location attendance: wells fargo center 16695
+- game: 76, date: april 3, team: miami, score: l 94 - 108 (ot), location attendance: prudential center 18711
+- game: 77, date: april 5, team: minnesota, score: w 107 - 105 (ot), location attendance: prudential center 13461
+- game: 78, date: april 6, team: detroit, score: l 109 - 116 (ot), location attendance: the palace of auburn hills 14554
+- game: 79, date: april 8, team: new york, score: l 93 - 116 (ot), location attendance: prudential center 18023
+- game: 80, date: april 10, team: toronto, score: l 92 - 99 (ot), location attendance: air canada centre 17755
+- game: 81, date: april 11, team: charlotte, score: l 103 - 105 (ot), location attendance: prudential center 13853
+
+Row count check:
+Executed SQL:
+SELECT COUNT(*) FROM public.t_2010_11_new_jersey_nets_season;
+Result: 7
+
+2) Extract attendance as a number, identify the maximum, and confirm opponent and venue:
+Executed SQL:
+SELECT game, date, team, score, "location attendance",
+       substring("location attendance" FROM '^(.*) [0-9]+$') AS venue,
+       CAST(substring("location attendance" FROM '[0-9]+$') AS INTEGER) AS attendance
+FROM public.t_2010_11_new_jersey_nets_season
+ORDER BY attendance DESC;
+
+Key results (ordered by attendance descending):
+- game: 76, date: april 3, team: miami, location attendance: prudential center 18711, venue: prudential center, attendance: 18711
+- game: 79, date: april 8, team: new york, location attendance: prudential center 18023, venue: prudential center, attendance: 18023
+- game: 80, date: april 10, team: toronto, location attendance: air canada centre 17755, venue: air canada centre, attendance: 17755
+(remaining rows have lower attendance)
+
+Interpretation
+- The highest recorded attendance in the table is 18,711 for game 76 on April 3.
+- Opponent for that game: Miami.
+- Venue parsed from the same field: Prudential Center.
+- Therefore, in this dataset, the most highly attended game was against Miami at the Prudential Center.
+
+Assumptions
+- The “team” column represents the Nets’ opponent.
+- The “location attendance” field is structured as “venue_name attendanceNumber”, enabling regex parsing of the trailing numeric attendance and the preceding venue name.
+- The claim is evaluated with respect to the available table (7 games from the 2010–11 New Jersey Nets season as present in the database).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

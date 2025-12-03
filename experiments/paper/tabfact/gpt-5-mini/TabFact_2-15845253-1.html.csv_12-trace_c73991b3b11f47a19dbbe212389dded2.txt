@@ -1,0 +1,69 @@
+
+<userQuery>
+<query>
+2 viral family have a helical virion shape
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “2 viral family have a helical virion shape.”
+
+Data sources explored
+- Discovered a PostgreSQL database (TabFact) with a public schema containing one relevant table: public.viral_disease.
+- Schema details (relevant columns):
+  - family (text)
+  - virion shape (text)
+
+Evidence gathered (with executed SQL)
+1) Count of distinct families with helical virion shape
+- SQL:
+  SELECT COUNT(DISTINCT "family") AS distinct_family_count
+  FROM public.viral_disease
+  WHERE LOWER("virion shape") LIKE '%helical%';
+- Result: distinct_family_count = 7
+
+2) List of distinct families with helical virion shape
+- SQL:
+  SELECT DISTINCT "family"
+  FROM public.viral_disease
+  WHERE LOWER("virion shape") LIKE '%helical%'
+  ORDER BY "family";
+- Result (families):
+  - arenaviridae
+  - bunyaviridae
+  - coronaviridae
+  - filoviridae
+  - orthomyxoviridae
+  - paramyxoviridae
+  - rhabdoviridae
+
+3) Context: distribution of virion shape values in the table
+- SQL:
+  SELECT "virion shape", COUNT(*) AS count
+  FROM public.viral_disease
+  GROUP BY "virion shape"
+  ORDER BY COUNT(*) DESC, "virion shape";
+- Result (virion shape : count):
+  - icosahedral : 13
+  - helical : 6
+  - complex : 2
+  - helical , bullet shaped : 1
+  - spherical : 1
+
+Findings
+- The data show 7 distinct viral families with helical virion shape, not 2.
+- The families identified are: arenaviridae, bunyaviridae, coronaviridae, filoviridae, orthomyxoviridae, paramyxoviridae, and rhabdoviridae.
+
+Conclusion
+- The claim is contradicted by the data. More than two viral families in the dataset have helical virion morphology.
+
+Assumptions
+- “Viral family” corresponds to the “family” column in public.viral_disease.
+- “Helical virion shape” is identified via a case-insensitive substring match on the word “helical” within the “virion shape” column (thus including entries like “helical , bullet shaped”).
+- The TabFact public.viral_disease table is treated as authoritative for this verification task.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

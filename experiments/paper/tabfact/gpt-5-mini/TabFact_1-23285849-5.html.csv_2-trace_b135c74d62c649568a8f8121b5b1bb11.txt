@@ -1,0 +1,71 @@
+
+<userQuery>
+<query>
+attendance of all game at the pepsi center be over 15000
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Attendance of all games at the Pepsi Center is over 15,000.”
+
+Data sources discovered
+- postgres_tabfact24 (TabFact) — public schema
+- Available table: public.t_2009_10_denver_nuggets_season (Denver Nuggets 2009–10 season game log with a combined “location attendance” text field)
+
+Step 1 — Identify rows mentioning Pepsi Center
+Executed SQL:
+SELECT date, "location attendance" FROM public.t_2009_10_denver_nuggets_season WHERE "location attendance" ILIKE '%Pepsi%';
+
+Results (date — location attendance):
+- november 1 — pepsi center 15823
+- november 13 — pepsi center 19141
+- november 17 — pepsi center 16446
+- november 21 — pepsi center 19359
+- november 24 — pepsi center 16307
+- november 27 — pepsi center 19155
+
+Step 2 — Extract numeric attendance for those rows and compute min/max
+Executed SQL (extraction):
+SELECT "location attendance", regexp_replace("location attendance", '[^0-9]', '', 'g') AS digits, (regexp_replace("location attendance", '[^0-9]', '', 'g'))::bigint AS attendance
+FROM public.t_2009_10_denver_nuggets_season
+WHERE "location attendance" ILIKE '%Pepsi%';
+
+Executed SQL (aggregation):
+SELECT MIN((regexp_replace("location attendance", '[^0-9]', '', 'g'))::bigint) AS min_attendance, MAX((regexp_replace("location attendance", '[^0-9]', '', 'g'))::bigint) AS max_attendance
+FROM public.t_2009_10_denver_nuggets_season
+WHERE "location attendance" ILIKE '%Pepsi%';
+
+Result:
+- MIN attendance = 15823
+- MAX attendance = 19359
+
+Context check — what venues exist in this table
+Executed SQL:
+SELECT "location attendance" AS location_attendance, COUNT(*) AS cnt
+FROM public.t_2009_10_denver_nuggets_season
+GROUP BY "location attendance"
+ORDER BY cnt DESC;
+
+Results (sample):
+- pepsi center 15823 — 1
+- pepsi center 19141 — 1
+- pepsi center 16446 — 1
+- pepsi center 19359 — 1
+- pepsi center 16307 — 1
+- pepsi center 19155 — 1
+- plus several non-Pepsi Center venues (each 1)
+
+Conclusion
+- Within the available dataset (Denver Nuggets 2009–10 season table excerpt), every listed game at “Pepsi Center” has attendance above 15,000. The minimum observed attendance among those games is 15,823.
+- Scope limitation: The accessible data only covers a subset of games (13 total rows; 6 at Pepsi Center). It does not include all seasons or all Pepsi Center events. Therefore, while the claim holds for the games present in this dataset, we cannot validate it universally for “all games at the Pepsi Center.”
+
+Assumptions
+- “Game” refers to the games recorded in the available Denver Nuggets 2009–10 season table.
+- “Pepsi Center” identification is based on case-insensitive substring match in the combined “location attendance” field.
+- “Over 15,000” interpreted as strictly greater than 15,000.
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

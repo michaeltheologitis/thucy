@@ -1,0 +1,72 @@
+
+<userQuery>
+<query>
+in 2010 , when mixed double be danny bawa chrisnanta and debby susanto , the boy single be nugroho andi saputro
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify:
+- In 2010, mixed doubles were Danny Bawa Chrisnanta and Debby Susanto, and the boys' singles winner was Nugroho Andi Saputro.
+
+Data sources explored:
+- TabFact PostgreSQL database (public schema), table: indonesian_national_badminton_championships, with columns: year, boys singles, girls singles, boys doubles, girls doubles, mixed doubles.
+
+Step 1: Check 2010 winners in the dataset
+Executed SQL:
+SELECT "year", "mixed doubles", "boys singles" 
+FROM public.indonesian_national_badminton_championships
+WHERE "year" = 2010;
+
+Result:
+- year: 2010
+- mixed doubles: jones ralfy jansen nurbeta kwanrico
+- boys singles: shesar hiren rhustavito
+
+Finding: For 2010, the dataset lists different winners than claimed.
+
+Step 2: Search whether the claimed names appear in any year
+Executed SQL:
+SELECT year, "mixed doubles", "boys singles"
+FROM indonesian_national_badminton_championships
+WHERE LOWER("mixed doubles") LIKE '%danny%'
+   OR LOWER("mixed doubles") LIKE '%debby%'
+   OR LOWER("boys singles") LIKE '%nugroho%'
+   OR LOWER("boys singles") LIKE '%andi%';
+
+Result (matched rows):
+- year: 2006 | mixed doubles: danny bawa chrisnanta debby susanto | boys singles: nugroho andi saputro
+- year: 2007 | mixed doubles: wifqi windarto debby susanto | boys singles: nandang arif
+
+Finding: The exact pair “danny bawa chrisnanta debby susanto” in mixed doubles and “nugroho andi saputro” in boys’ singles occur in 2006, not 2010.
+
+Step 3: Retrieve full rows for 2006 and 2010 for complete context
+Executed SQL:
+SELECT * FROM public.indonesian_national_badminton_championships WHERE year IN (2006, 2010) ORDER BY year;
+
+Results:
+- 2006
+  • boys singles: nugroho andi saputro
+  • girls singles: sylvinna kurniawan
+  • boys doubles: danny bawa chrisnanta afiat yuris wirawan
+  • girls doubles: bellaetrix manuputty samantha lintang
+  • mixed doubles: danny bawa chrisnanta debby susanto
+- 2010
+  • boys singles: shesar hiren rhustavito
+  • girls singles: ganis nur rahmadani
+  • boys doubles: jones ralfy jansen dandi prabudita
+  • girls doubles: aris budiharti dian fitriani
+  • mixed doubles: jones ralfy jansen nurbeta kwanrico
+
+Conclusion:
+- The claim “in 2010 … mixed doubles [Danny Bawa Chrisnanta/Debby Susanto] and boys’ singles [Nugroho Andi Saputro]” is not supported by the data for 2010. Those exact winners correspond to 2006 in this authoritative dataset.
+
+Assumptions made:
+- Interpreted “mixed double” as the “mixed doubles” column and “boy single” as the “boys singles” column in the indonesian_national_badminton_championships table.
+- Interpreted the claim as referring to the Indonesian National (Junior) Badminton Championships, consistent with the table’s structure and labels.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

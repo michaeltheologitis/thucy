@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+st kilda be the away team on monday , 14 february
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary conclusion
+- In the available sports fixtures table (t_2000_ansett_australia_cup), the match on the date string "monday , 14 february" lists Geelong (home) vs Melbourne (away). St Kilda is not the away team on that date. St Kilda appears as the away team on "sunday , 30 january" and "sunday , 13 february" instead.
+
+Data sources inspected
+- Database: TabFact (treated as authoritative per instructions)
+- Relevant table discovered: t_2000_ansett_australia_cup (columns: "home team", "home team score", "away team", "away team score", ground, crowd, date)
+
+Evidence and executed SQL
+1) Verify who played on the exact date string 'monday , 14 february'
+- SQL:
+  SELECT "home team", "away team" FROM t_2000_ansett_australia_cup WHERE date = 'monday , 14 february';
+- Result:
+  - home team: geelong, away team: melbourne
+- Interpretation: On 'monday , 14 february', the away team was Melbourne (not St Kilda).
+
+2) List all matches where St Kilda were the away team
+- SQL:
+  SELECT date, "home team", "away team" FROM t_2000_ansett_australia_cup WHERE lower("away team") = 'st kilda';
+- Results:
+  - date: sunday , 30 january — home team: geelong, away team: st kilda
+  - date: sunday , 13 february — home team: adelaide, away team: st kilda
+- Interpretation: St Kilda were away on two Sundays (30 January and 13 February), not on the Monday in question.
+
+Context check (optional supporting query used)
+- SQL:
+  SELECT date, "home team", "away team", ground FROM t_2000_ansett_australia_cup LIMIT 20;
+- Sample shows the presence of the relevant date string and confirms table content includes that date and participating teams.
+
+Conclusion
+- The dataset shows that on "monday , 14 february" the away team was Melbourne, not St Kilda.
+
+Assumptions
+- The claim is interpreted within the only relevant sports fixtures table found (t_2000_ansett_australia_cup) in the TabFact database.
+- The date string in the claim matches the text format used in the dataset (e.g., "monday , 14 february").
+- No other fixtures tables or seasons beyond this discovered table are available via the connected data source.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

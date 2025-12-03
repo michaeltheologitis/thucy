@@ -1,0 +1,48 @@
+
+<userQuery>
+<query>
+there be 3 c - 95 brazilian aircraft currently in service
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of approach
+- Discovered available data sources and inspected the schema to locate relevant information about aircraft inventories and service status.
+- Queried the dataset for Brazilian-origin aircraft and specifically for the C-95 version to verify the stated count in service.
+
+Data source discovered
+- Database: TabFact
+- Schema: public
+- Table: uruguayan_air_force (columns: aircraft text, origin text, type text, versions text, "in service" text)
+
+Evidence from executed SQL
+1) Identify Brazilian-origin aircraft and service counts
+SQL:
+SELECT aircraft, origin, type, versions, "in service" FROM uruguayan_air_force WHERE origin ILIKE '%Brazil%';
+Result:
+- Aircraft: Embraer EMB 110 Bandeirante | Origin: Brazil | Type: Transport / Utility | Versions: C - 95 | In Service: 3
+- Aircraft: Embraer EMB 120 Brasilia | Origin: Brazil | Type: Transport | Versions: EMB 120 | In Service: 1
+
+2) Confirm rows with version C-95
+SQL:
+SELECT * FROM public.uruguayan_air_force WHERE versions ILIKE '%C%95%';
+Result:
+- Aircraft: Embraer EMB 110 Bandeirante | Versions: C - 95 | Origin: Brazil | In Service: 3
+
+3) Validate the numerical count for the Bandeirante (C-95)
+SQL:
+SELECT aircraft, versions, CAST(NULLIF(TRIM("in service"), '') AS integer) AS in_service_count FROM public.uruguayan_air_force WHERE aircraft ILIKE '%Bandeirante%';
+Result:
+- Aircraft: Embraer EMB 110 Bandeirante | Versions: C - 95 | In Service Count: 3
+
+Conclusion
+- The dataset shows that there are 3 C-95 (Embraer EMB 110 Bandeirante) Brazilian-origin aircraft currently in service (within the uruguayan_air_force table). This directly supports the claim of “3 C-95 Brazilian aircraft currently in service.”
+
+Assumptions made
+- “Brazilian aircraft” is interpreted as aircraft of Brazilian origin (not necessarily operated by Brazil), and “currently in service” corresponds to the "in service" field in the uruguayan_air_force dataset. The claim is evaluated against this dataset rather than the Brazilian Air Force inventory, which is not available in the accessible data sources.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

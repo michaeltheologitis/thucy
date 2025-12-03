@@ -1,0 +1,81 @@
+
+<userQuery>
+<query>
+14 viral family have a replication site in the cytoplasm
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim: 14 viral family have a replication site in the cytoplasm.
+
+Data source overview:
+- Connected database: viral_disease (public schema)
+- Table: public.viral_disease
+  Columns: family (text), baltimore group (text), envelopment (text), virion shape (text), replication site (text)
+
+Method:
+- Count distinct viral families by replication site and verify the count for cytoplasm.
+- List the viral families whose replication site is cytoplasm to validate the count.
+- Confirm with an exact (case-insensitive) equality check on the replication site value.
+
+Evidence:
+1) Distinct replication sites and number of distinct families per site
+SQL executed:
+SELECT "replication site", COUNT(DISTINCT "family") AS family_count
+FROM public.viral_disease
+GROUP BY "replication site"
+ORDER BY family_count DESC, "replication site";
+Result:
+- replication site = cytoplasm — family_count = 14
+- replication site = nucleus — family_count = 9
+
+2) Exact case-insensitive equality check for cytoplasm
+SQL executed:
+SELECT COUNT(DISTINCT family) AS distinct_family_count
+FROM public.viral_disease
+WHERE lower("replication site") = 'cytoplasm';
+Result:
+- distinct_family_count = 14
+
+Robustness check (trim + case-insensitive):
+SQL executed:
+SELECT COUNT(DISTINCT family) AS distinct_family_count
+FROM public.viral_disease
+WHERE lower(trim("replication site")) = 'cytoplasm';
+Result:
+- distinct_family_count = 14
+
+3) List of distinct viral families with replication site containing “cytoplasm” (case-insensitive)
+SQL executed:
+SELECT DISTINCT family
+FROM public.viral_disease
+WHERE "replication site" ILIKE '%cytoplasm%'
+ORDER BY family;
+Result (14 families):
+- Arenaviridae
+- Astroviridae
+- Bunyaviridae
+- Caliciviridae
+- Coronaviridae
+- Filoviridae
+- Flaviviridae
+- Hepeviridae
+- Paramyxoviridae
+- Picornaviridae
+- Poxviridae
+- Reoviridae
+- Rhabdoviridae
+- Togaviridae
+
+Conclusion:
+- The database shows exactly 14 distinct viral families with a replication site in the cytoplasm. This directly supports the claim.
+
+Assumptions:
+- Interpreted “viral family” as the distinct values in the family column.
+- Interpreted “replication site in the cytoplasm” as entries where replication site equals “cytoplasm” (case-insensitive). The ILIKE containment list matches and corroborates the equality-based counts.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

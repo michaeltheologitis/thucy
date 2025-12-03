@@ -1,0 +1,85 @@
+
+<userQuery>
+<query>
+the new york knicks do not win a game against the boston celtic in the 1984 - 85 season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the new york knicks do not win a game against the boston celtic in the 1984 - 85 season.”
+
+Data source discovery
+- Available database: TabFact (PostgreSQL), public schema.
+- Relevant table: t_1984_85_boston_celtics_season (subset of the 1984–85 Boston Celtics season).
+
+Schema (summary)
+- Columns: game (bigint), date (text), opponent (text), score (text), location (text), record (text).
+
+Step 1: Identify how the Knicks are labeled
+SQL executed:
+SELECT DISTINCT opponent FROM t_1984_85_boston_celtics_season ORDER BY opponent;
+Result (excerpt): new york knicks (exact label)
+
+Step 2: Retrieve all Celtics vs Knicks games in the table
+SQL executed:
+SELECT game, date, location, score, record
+FROM public.t_1984_85_boston_celtics_season
+WHERE opponent = 'new york knicks'
+ORDER BY game;
+Results:
+- Game 34 — date: fri jan 4 — location: boston garden — score: 105 - 94 — record: 28 - 6
+- Game 35 — date: mon jan 7 — location: madison square garden — score: 108 - 97 — record: 29 - 6
+
+Step 3: Parse scores and compute outcomes vs Knicks
+SQL executed:
+SELECT game, date, opponent, score,
+CAST(split_part(score, ' - ', 1) AS integer) AS celtics_points,
+CAST(split_part(score, ' - ', 2) AS integer) AS opponent_points,
+CASE WHEN CAST(split_part(score, ' - ', 1) AS integer) > CAST(split_part(score, ' - ', 2) AS integer) THEN 'W'
+     WHEN CAST(split_part(score, ' - ', 1) AS integer) < CAST(split_part(score, ' - ', 2) AS integer) THEN 'L'
+     ELSE 'T' END AS result
+FROM public.t_1984_85_boston_celtics_season
+WHERE opponent ILIKE '%Knicks%';
+Rows returned:
+- game 34 | 105 - 94 | result: W
+- game 35 | 108 - 97 | result: W
+
+Aggregate check
+SQL executed:
+SELECT COUNT(*) AS total_games,
+SUM(CASE WHEN CAST(split_part(score, ' - ', 1) AS integer) > CAST(split_part(score, ' - ', 2) AS integer) THEN 1 ELSE 0 END) AS celtics_wins,
+SUM(CASE WHEN CAST(split_part(score, ' - ', 1) AS integer) < CAST(split_part(score, ' - ', 2) AS integer) THEN 1 ELSE 0 END) AS celtics_losses
+FROM public.t_1984_85_boston_celtics_season
+WHERE opponent ILIKE '%Knicks%';
+Aggregate result:
+- total_games: 2, celtics_wins: 2, celtics_losses: 0
+
+Step 4: Assess coverage/completeness of the table
+SQL executed:
+SELECT MIN(game) AS min_game FROM public.t_1984_85_boston_celtics_season;
+Result: min_game = 33
+
+SQL executed:
+SELECT MAX(game) AS max_game FROM public.t_1984_85_boston_celtics_season;
+Result: max_game = 46
+
+SQL executed:
+SELECT COUNT(*) AS total_rows FROM public.t_1984_85_boston_celtics_season;
+Result: total_rows = 14
+
+Findings
+- In the available data (games 33–46 only), the Celtics played the New York Knicks twice and won both games (105–94, 108–97). The Knicks did not win any of these recorded games.
+- However, the table covers only a subset (14 games, game numbers 33–46) of the season, not the entire 1984–85 season. Therefore, while the data we have supports the claim for this subset, it does not allow us to conclude definitively about the entire season.
+
+Conclusion
+- The evidence shows 0 Knicks wins in the games recorded. Because the dataset is partial, we cannot fully verify the claim for the complete season.
+
+Assumptions
+- The score format is interpreted as Celtics points first, opponent points second, which is consistent with the parsed results and the postgame record field increasing in wins.
+- The table includes only a portion of the 1984–85 season (games 33–46) and appears to be regular-season games only; no additional sources were available to extend coverage.
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

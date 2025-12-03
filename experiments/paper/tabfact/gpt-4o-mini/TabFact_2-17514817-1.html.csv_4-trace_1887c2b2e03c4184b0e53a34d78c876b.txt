@@ -1,0 +1,58 @@
+
+<userQuery>
+<query>
+west berkshire brewery 's maggs magnificent mild 2 time win an award at the siba national beer competition between 1995 and 2009
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “West Berkshire Brewery’s Maggs Magnificent Mild won an award 2 times at the SIBA National Beer Competition between 1995 and 2009.”
+
+Data sources discovered
+- Database: TabFact
+- Schema: public
+- Table: west_berkshire_brewery (columns: year, beer name, prize, category, competition)
+
+Evidence 1: Identify relevant rows mentioning SIBA and Maggs Magnificent Mild
+- Executed SQL:
+  SELECT year, "beer name", prize, category, competition 
+  FROM public.west_berkshire_brewery 
+  WHERE lower("beer name") LIKE '%maggs%' OR lower("beer name") LIKE '%magg%'
+     OR competition ILIKE '%SIBA%'
+  ORDER BY year;
+- Returned rows (subset relevant to the claim):
+  - 2003 | maggs magnificent mild | gold medal | mild and porter | siba national beer competition
+  - 2006 | maggs magnificent mild | silver medal | mild | siba national beer competition
+
+Evidence 2: Precise match for SIBA National Beer Competition, restricted to 1995–2009 (inclusive)
+- Executed SQL (list rows):
+  SELECT year, "beer name", prize, category, competition 
+  FROM public.west_berkshire_brewery 
+  WHERE LOWER("beer name") = LOWER('Maggs Magnificent Mild') 
+  AND LOWER(competition) = LOWER('SIBA National Beer Competition') 
+  AND year BETWEEN 1995 AND 2009;
+- Results:
+  - Year: 2003, Beer Name: maggs magnificent mild, Prize: gold medal, Category: mild and porter, Competition: siba national beer competition
+  - Year: 2006, Beer Name: maggs magnificent mild, Prize: silver medal, Category: mild, Competition: siba national beer competition
+
+- Executed SQL (count):
+  SELECT COUNT(*) 
+  FROM public.west_berkshire_brewery 
+  WHERE LOWER("beer name") = LOWER('Maggs Magnificent Mild') 
+  AND LOWER(competition) = LOWER('SIBA National Beer Competition') 
+  AND year BETWEEN 1995 AND 2009;
+- Count result: 2
+
+Conclusion
+- The data show two awards at the SIBA National Beer Competition for Maggs Magnificent Mild within 1995–2009 (years 2003 and 2006). The claim is supported by the executed queries and results.
+
+Assumptions
+- “Won an award” is interpreted as receiving any medal or formally recorded prize in the competition results.
+- The timeframe 1995–2009 is inclusive.
+- The table comprehensively records the relevant awards for the beer in question.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,60 @@
+
+<userQuery>
+<query>
+the wightlink raider be the opponent at the home game
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “the Wightlink Raider(s) be the opponent at the home game.” Interpreted as asserting that Guildford Flames had a home game against Wightlink Raiders in the 2008–09 season (the scope of the available dataset).
+
+Data sources explored
+- Database: postgres_tabfact26 (public schema)
+- Relevant table (structure via schema inspection): t_2008_09_guildford_flames_season with columns: date (text), opponent (text), venue (text), result (text), attendance (text), competition (text), "man of the match" (text)
+
+Evidence from executed SQL
+1) Identify how venues are recorded
+- SQL:
+  SELECT DISTINCT venue FROM t_2008_09_guildford_flames_season ORDER BY venue NULLS LAST;
+- Result:
+  away
+  home
+
+2) Find all matches against Wightlink Raiders (exact substring)
+- SQL:
+  SELECT date, opponent, venue, competition, result
+  FROM t_2008_09_guildford_flames_season
+  WHERE opponent ILIKE '%wightlink raiders%'
+  ORDER BY date;
+- Result:
+  date: 22nd | opponent: wightlink raiders | venue: away | competition: league / cup | result: lost 5 - 4
+
+3) Broaden search to any opponent mentioning “Wightlink”
+- SQL:
+  SELECT date, opponent, venue, competition, result
+  FROM t_2008_09_guildford_flames_season
+  WHERE lower(opponent) LIKE '%wightlink%';
+- Result:
+  date: 22nd | opponent: wightlink raiders | venue: away | competition: league / cup | result: lost 5 - 4
+
+4) Check specifically for home matches mentioning “Wightlink”
+- SQL:
+  SELECT date, opponent, venue, competition, result
+  FROM t_2008_09_guildford_flames_season
+  WHERE opponent ILIKE '%wightlink%'
+    AND venue = 'home';
+- Result: no rows
+
+Conclusion
+- The dataset shows exactly one match vs Wightlink Raiders, and it was an away fixture. There are no home fixtures against Wightlink in this season table. Therefore, the claim that Wightlink Raiders were the opponent at a home game is not supported by the data and is contradicted by the evidence.
+
+Assumptions
+- The claim refers to the Guildford Flames 2008–09 season represented by the table t_2008_09_guildford_flames_season.
+- “Wightlink Raider” refers to the team “Wightlink Raiders.”
+- “Home game” corresponds to venue = 'home' as stored in the dataset.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

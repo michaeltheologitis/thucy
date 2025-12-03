@@ -1,0 +1,88 @@
+
+<userQuery>
+<query>
+there be more ford then any other with alfa romeo and matra tying for the least
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Data sources discovered
+- Connected database: TabFact (PostgreSQL), schema: public
+- Available table: t_1971_south_african_grand_prix(driver TEXT, constructor TEXT, laps BIGINT, "time / retired" TEXT, grid BIGINT)
+
+Interpretation of the claim
+- Interpreted within the only available dataset (1971 South African Grand Prix entries). The phrase “more ford than any other with alfa romeo and matra tying for the least” is taken to mean that, when grouping entries by engine manufacturer extracted from the constructor field, “Ford” occurs most frequently, and “Alfa Romeo” and “Matra” are tied for the fewest occurrences.
+
+Evidence and executed SQL
+1) Distinct constructors and their frequencies
+SQL:
+SELECT constructor, COUNT(*) AS freq
+FROM public.t_1971_south_african_grand_prix
+GROUP BY constructor
+ORDER BY freq DESC, constructor;
+Result (constructor — freq):
+- march - ford — 4
+- brabham - ford — 3
+- brm — 3
+- ferrari — 3
+- mclaren - ford — 3
+- surtees - ford — 3
+- lotus - ford — 2
+- tyrrell - ford — 2
+- march - alfa romeo — 1
+- matra — 1
+
+2) Engine grouping (engine = substring after the last hyphen in constructor; if no hyphen, engine = constructor). Counts ordered descending.
+SQL:
+SELECT engine, COUNT(*) AS count
+FROM (
+  SELECT TRIM(
+    CASE
+      WHEN constructor LIKE '%-%' THEN substring(constructor from '[^-]+$')
+      ELSE constructor
+    END
+  ) AS engine
+  FROM public.t_1971_south_african_grand_prix
+) AS sub
+GROUP BY engine
+ORDER BY count DESC, engine;
+Result (engine — count):
+- ford — 17
+- brm — 3
+- ferrari — 3
+- alfa romeo — 1
+- matra — 1
+
+3) Targeted counts for Ford, Alfa Romeo, and Matra (case-insensitive)
+SQL:
+SELECT e.engine, COALESCE(cx.count,0) AS count
+FROM (VALUES ('ford'),('alfa romeo'),('matra')) AS e(engine)
+LEFT JOIN (
+  SELECT LOWER(TRIM(
+    CASE
+      WHEN constructor LIKE '%-%' THEN substring(constructor from '[^-]+$')
+      ELSE constructor
+    END
+  )) AS engine, COUNT(*) AS count
+  FROM public.t_1971_south_african_grand_prix
+  GROUP BY engine
+) AS cx USING (engine)
+ORDER BY e.engine;
+Result (engine — count):
+- alfa romeo — 1
+- ford — 17
+- matra — 1
+
+Conclusion
+- Ford appears more than any other engine manufacturer (17 vs. the next highest at 3).
+- Alfa Romeo and Matra each appear once, tying for the least.
+
+Assumptions
+- The claim is evaluated within the only available dataset (the 1971 South African Grand Prix table).
+- Engine manufacturer is derived as the substring after the last hyphen in constructor; if no hyphen, the constructor name itself is treated as the engine manufacturer. Trimming and case-insensitive matching were applied.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

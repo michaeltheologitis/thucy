@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+in 2012 , jiyal shin earn 36517 more than yani tseng in 2011
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of approach
+- Discovered available data sources and identified a single table: women_s_british_open in the TabFact public schema.
+- Retrieved the champions and winner's shares for 2011 and 2012 and computed the difference.
+
+Data source and schema
+- Database: TabFact (public schema)
+- Table: women_s_british_open
+- Relevant columns: year (bigint), champion (text), winner 's share (bigint)
+
+Evidence
+1) Champions and winner's shares for 2011 and 2012
+SQL executed:
+SELECT year, champion, "winner 's share" FROM public.women_s_british_open WHERE year IN (2011, 2012) ORDER BY year;
+Results observed:
+- 2011: champion = yani tseng; winner's share = 392133
+- 2012: champion = jiyai shin; winner's share = 428650
+
+2) Difference between 2012 and 2011 winner's shares
+SQL executed:
+SELECT
+  (SELECT champion FROM public.women_s_british_open WHERE year=2011) AS champion_2011,
+  (SELECT "winner 's share" FROM public.women_s_british_open WHERE year=2011) AS share_2011,
+  (SELECT champion FROM public.women_s_british_open WHERE year=2012) AS champion_2012,
+  (SELECT "winner 's share" FROM public.women_s_british_open WHERE year=2012) AS share_2012,
+  ((SELECT "winner 's share" FROM public.women_s_british_open WHERE year=2012) - (SELECT "winner 's share" FROM public.women_s_british_open WHERE year=2011)) AS difference;
+Result observed:
+- share_2011 = 392133; share_2012 = 428650; difference = 36517
+
+Conclusion
+- In 2012, Jiyai Shin’s winner's share (428650) is 36517 more than Yani Tseng’s winner's share (392133) in 2011. This matches the claim.
+
+Assumptions
+- “jiyal shin” refers to Jiyai Shin.
+- “earn” refers to the “winner's share” column in the women_s_british_open table.
+- All amounts are in the same currency as stored in the table; no conversion needed.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

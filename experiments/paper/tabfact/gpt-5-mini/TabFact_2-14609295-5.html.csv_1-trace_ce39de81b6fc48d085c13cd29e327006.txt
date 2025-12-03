@@ -1,0 +1,62 @@
+
+<userQuery>
+<query>
+2012 set the record for the year with the highest score of 29 - 7. 2013 follow with 27 - 9
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Data sources discovered
+- PostgreSQL database: TabFact
+- Table used: public.vcu_rams_men_s_basketball (columns: year bigint, record text, seed bigint, region text, results text)
+
+Evidence and executed SQL
+1) List of all years and records (to see 2012 and 2013 in context)
+SQL:
+SELECT year, record FROM public.vcu_rams_men_s_basketball ORDER BY year ASC;
+Key results:
+- 2011 | 28 - 12
+- 2012 | 29 - 7
+- 2013 | 27 - 9
+
+2) Parse record into wins and losses for each row
+SQL:
+SELECT year, record, CAST(split_part(regexp_replace(record, E'–', '-', 'g'), '-', 1) AS INTEGER) AS wins, CAST(split_part(regexp_replace(record, E'–', '-', 'g'), '-', 2) AS INTEGER) AS losses FROM public.vcu_rams_men_s_basketball ORDER BY year ASC;
+Key results (subset):
+- 2007 | 28 - 7  | wins=28 | losses=7
+- 2011 | 28 - 12 | wins=28 | losses=12
+- 2012 | 29 - 7  | wins=29 | losses=7
+- 2013 | 27 - 9  | wins=27 | losses=9
+
+3) Identify the year(s) with the maximum number of wins
+SQL:
+WITH parsed AS (
+  SELECT year, record, CAST(split_part(regexp_replace(record, E'–', '-', 'g'), '-', 1) AS INTEGER) AS wins
+  FROM public.vcu_rams_men_s_basketball
+)
+SELECT year, record, wins FROM parsed WHERE wins = (SELECT MAX(wins) FROM parsed) ORDER BY year;
+Result:
+- 2012 | 29 - 7 | wins=29
+Interpretation: 2012 is the only year with 29 wins, the maximum in the table.
+
+4) Directly confirm 2012 and 2013 records
+SQL:
+SELECT year, record, CAST(split_part(regexp_replace(record, E'–', '-', 'g'), '-', 1) AS INTEGER) AS wins, CAST(split_part(regexp_replace(record, E'–', '-', 'g'), '-', 2) AS INTEGER) AS losses FROM public.vcu_rams_men_s_basketball WHERE year IN (2012, 2013) ORDER BY year;
+Results:
+- 2012 | 29 - 7 | wins=29 | losses=7
+- 2013 | 27 - 9 | wins=27 | losses=9
+
+Conclusion
+- The data show that 2012 has the best season record in this table with 29 wins and 7 losses.
+- The 2013 season record is 27 wins and 9 losses.
+Both parts of the claim are supported by the data.
+
+Assumptions
+- “Highest score” is interpreted as the most wins in the season “record” field (W-L).
+- “2013 follow with 27 - 9” is interpreted as stating the 2013 season record, not implying it is the second-best record overall.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

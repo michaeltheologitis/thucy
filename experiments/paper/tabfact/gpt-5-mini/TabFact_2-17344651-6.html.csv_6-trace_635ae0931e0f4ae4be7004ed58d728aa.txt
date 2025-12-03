@@ -1,0 +1,97 @@
+
+<userQuery>
+<query>
+the new york knicks win all home game play against the boston celtic in the 1984 - 1985 season
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “the new york knicks win all home game play against the boston celtic in the 1984 - 1985 season.”
+
+Interpretation: The New York Knicks won all of their home games (at Madison Square Garden) against the Boston Celtics during the 1984–85 NBA season.
+
+Data sources discovered
+- Database: TabFact (postgres_tabfact1)
+- Schema: public
+- Relevant table: public.t_1984_85_boston_celtics_season
+  - Columns: game (bigint), date (text), opponent (text), score (text), location (text), record (text)
+
+Schema evidence
+- Tool: functions.schema_query
+- Findings: Only one relevant table exists for 1984–85, representing the Boston Celtics’ season game log. The table includes opponent and location, sufficient to identify games vs. the New York Knicks and whether they were played at Boston Garden (Celtics home) or Madison Square Garden (Knicks home).
+
+Evidence and executed SQL
+1) List all Celtics 1984–85 games vs. the Knicks and show locations
+SQL:
+SELECT game, date, location, score, record
+FROM public.t_1984_85_boston_celtics_season
+WHERE opponent ILIKE '%Knicks%'
+ORDER BY game;
+
+Result rows:
+- game: 34 | date: fri jan 4 | location: boston garden | score: 105 - 94 | record: 28 - 6
+- game: 35 | date: mon jan 7 | location: madison square garden | score: 108 - 97 | record: 29 - 6
+
+2) Distinct locations in the table (to understand venue encoding)
+SQL:
+SELECT DISTINCT location
+FROM public.t_1984_85_boston_celtics_season
+ORDER BY location NULLS LAST;
+
+Result (subset relevant to this claim): boston garden; madison square garden; plus several other away arenas. “boston garden” is the Celtics’ home. “madison square garden” corresponds to the Knicks’ home.
+
+3) Retrieve all rows where opponent contains “New York” (to ensure no alternate naming)
+SQL:
+SELECT game, date, opponent, location, score, record
+FROM public.t_1984_85_boston_celtics_season
+WHERE opponent ILIKE '%new york%'
+ORDER BY game;
+
+Result:
+- game: 34 | fri jan 4 | opponent: new york knicks | location: boston garden | score: 105 - 94 | record: 28 - 6
+- game: 35 | mon jan 7 | opponent: new york knicks | location: madison square garden | score: 108 - 97 | record: 29 - 6
+
+4) Verify win/loss via record progression around these games
+SQL:
+SELECT game, date, opponent, location, score, record
+FROM public.t_1984_85_boston_celtics_season
+WHERE game IN (33,34,35,36)
+ORDER BY game;
+
+Result:
+- Game 33 | Record: 27 - 6
+- Game 34 (vs Knicks, Boston Garden) | Record: 28 - 6
+- Game 35 (vs Knicks, Madison Square Garden) | Record: 29 - 6
+- Game 36 | Record: 30 - 6
+Interpretation: Record increased after games 34 and 35, indicating the Celtics won both, including the road game at Madison Square Garden.
+
+5) Confirm any game(s) specifically at Madison Square Garden and opponent
+SQL:
+SELECT game, date, opponent, score, record
+FROM public.t_1984_85_boston_celtics_season
+WHERE lower(location) = 'madison square garden'
+ORDER BY game;
+
+Count SQL:
+SELECT COUNT(*) AS count
+FROM public.t_1984_85_boston_celtics_season
+WHERE lower(location) = 'madison square garden';
+
+Result: 1 row — game 35, mon jan 7, opponent: new york knicks, score: 108 - 97, record: 29 - 6. Count = 1.
+
+Conclusion
+- The data shows that in the 1984–85 season, the Celtics played at least one game against the Knicks at Madison Square Garden and won (108–97). Therefore, the statement that the New York Knicks won all of their home games against the Celtics that season is contradicted by the available record.
+
+Verdict: Inaccurate
+
+Assumptions
+- “Home game” refers to the Knicks’ home venue (Madison Square Garden).
+- The 1984–85 season is interpreted as the regular season, as reflected by the available Celtics season game log table.
+- Opponent naming uses “new york knicks” within this dataset; I verified using both '%Knicks%' and '%new york%' filters to avoid missing variants.
+- Location values are taken literally; “madison square garden” is treated as Knicks’ home court, consistent with NBA context.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+daniel palladino direct 3 episode fewer than amy sherman - palladino do
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Daniel Palladino directed 3 episodes fewer than Amy Sherman‑Palladino.”
+
+Data source discovery
+- Available database: TabFact
+- Schema: public
+- Table: list_of_gilmore_girls_episodes (columns include: no, title, director, writer (s), original air date, prod code, us viewers (million))
+
+Evidence from the data
+1) List all episodes directed by anyone with ‘Palladino’ in their name
+SQL:
+SELECT no, title, director FROM public.list_of_gilmore_girls_episodes WHERE director ILIKE '%palladino%';
+Result rows:
+- no: 66 | title: Ballrooms and Biscotti | director: Amy Sherman - Palladino
+- no: 83 | title: Tick, Tick, Tick, Boom! | director: Daniel Palladino
+
+2) Breakdown by exact director values (to confirm counts)
+SQL:
+SELECT director, COUNT(*) AS director_count FROM public.list_of_gilmore_girls_episodes WHERE director ILIKE '%palladino%' GROUP BY director;
+Results:
+- Amy Sherman - Palladino | 1
+- Daniel Palladino | 1
+
+3) Tokenized name matching for robustness (handles spacing and hyphen variants)
+- Amy Sherman‑Palladino count
+SQL:
+SELECT COUNT(*) AS count_amys FROM public.list_of_gilmore_girls_episodes WHERE LOWER(director) LIKE '%amy%' AND LOWER(director) LIKE '%sherman%' AND LOWER(director) LIKE '%palladino%';
+Result: 1
+- Daniel Palladino count
+SQL:
+SELECT COUNT(*) AS count_daniels FROM public.list_of_gilmore_girls_episodes WHERE LOWER(director) LIKE '%daniel%' AND LOWER(director) LIKE '%palladino%';
+Result: 1
+
+Conclusion
+- Amy Sherman‑Palladino directed 1 episode in this dataset.
+- Daniel Palladino directed 1 episode in this dataset.
+- Difference (Daniel fewer than Amy): 1 − 1 = 0 fewer, not 3 fewer.
+
+Verdict: The claim is contradicted by the data.
+
+Assumptions
+- The claim is evaluated within the scope of the provided dataset (Gilmore Girls episodes in TabFact.public.list_of_gilmore_girls_episodes) and does not include other shows or works.
+- Variants like “Amy Sherman - Palladino” are treated as “Amy Sherman‑Palladino.”
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

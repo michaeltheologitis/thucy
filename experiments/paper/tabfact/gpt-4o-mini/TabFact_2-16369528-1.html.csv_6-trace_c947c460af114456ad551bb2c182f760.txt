@@ -1,0 +1,61 @@
+
+<userQuery>
+<query>
+na only win the reader 's vote in 2011
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim interpreted: that the value for the Ned Kelly Awards “reader ’s vote” in 2011 is “na only”.
+- What the data shows: For 2011, the recorded value in the “reader ’s vote” column is “na”, not “na only”. The string “na only” does not appear anywhere in the dataset.
+
+Data source discovery
+- Discovered database: PostgreSQL
+- Relevant table: public.ned_kelly_awards
+- Columns: year (bigint), "best teenage / young adult" (text), "reader 's vote" (text), "best non - fiction" (text), "lifetime achievement" (text)
+
+Evidence and executed SQL
+1) Retrieve the reader’s vote value for 2011
+SQL:
+SELECT "reader 's vote" FROM public.ned_kelly_awards WHERE year = 2011;
+Result:
+na
+
+2) Full row for 2011 (to confirm context)
+SQL:
+SELECT * FROM public.ned_kelly_awards WHERE year = 2011;
+Result:
+year: 2011 | best teenage / young adult: na | reader 's vote: na | best non - fiction: na | lifetime achievement: na
+
+3) Check if the literal string "na only" exists anywhere in the reader’s vote column
+SQL:
+SELECT DISTINCT "reader 's vote" FROM public.ned_kelly_awards WHERE "reader 's vote" = 'na only';
+Result:
+0 rows (no occurrences of 'na only')
+
+4) (Context) List years and values where the reader’s vote is not equal to 'na only'
+SQL:
+SELECT year, "reader 's vote" FROM public.ned_kelly_awards WHERE "reader 's vote" <> 'na only';
+Result (abridged to key years):
+- 2001: bleeding hearts by lindy cameron
+- 2002: apartment 255 by bunty avieson
+- 2011: na
+(plus many other years recorded as 'na')
+
+Assessment
+- The dataset shows that in 2011 the “reader ’s vote” value is “na”. There is no record of the value “na only” for 2011 (or any year). Therefore, if the claim asserts the exact string “na only”, it is not supported by the data. If the intended meaning was simply that the 2011 reader’s vote value is “na”, that portion is supported by the data.
+
+Conclusion
+- The core year/value association (2011 → reader’s vote = “na”) is supported, but the phrase “na only” is not present in the data and is inaccurate.
+
+Assumptions
+- The claim refers to the Ned Kelly Awards dataset described above.
+- “Win the reader ’s vote” is interpreted as the recorded value in the "reader 's vote" column for that year.
+- The value “na” is taken at face value as recorded in the dataset (i.e., not reinterpreted as a missing-data code).
+</report>
+<verdict>
+Partly Verified
+</verdict>
+</verificationAnswer>

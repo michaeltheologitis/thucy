@@ -1,0 +1,49 @@
+
+<userQuery>
+<query>
+the township of jackson be in the mountrail county
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim evaluated: “The township of Jackson is in Mountrail County.”
+
+Data sources explored
+- Database discovered: TabFact (PostgreSQL), schema: public
+- Relevant table identified: public.list_of_townships_in_north_dakota (columns: township, county, latitude, longitude, geo id, ansi code, pop (2010), land ( sqmi ), water (sqmi))
+
+Evidence and executed SQL
+1) Check for a township named Jackson in Mountrail County
+SQL executed:
+SELECT * FROM public.list_of_townships_in_north_dakota
+WHERE lower(township) = 'jackson'
+  AND lower(county) LIKE '%mountrail%';
+Result: No rows returned.
+
+2) List all townships recorded for Mountrail County (to confirm what’s in the dataset)
+SQL executed:
+SELECT * FROM public.list_of_townships_in_north_dakota
+WHERE lower(county) LIKE '%mountrail%'
+ORDER BY township;
+Result rows (as stored):
+- township: james hill; county: mountrail; latitude: 48.423125; longitude: - 102.429934; geo id: 3806140500; ansi code: 1037048; pop (2010): 32; land ( sqmi ): 31.82; water (sqmi): 4.243
+
+3) Check whether a “Jackson” township exists elsewhere in North Dakota
+SQL executed:
+SELECT township, county, latitude, longitude, "geo id", "ansi code", "pop (2010)", "land ( sqmi )", "water (sqmi)" FROM public.list_of_townships_in_north_dakota WHERE township ILIKE '%jackson%';
+Result:
+- township: jackson; county: sargent; latitude: 46.066276; longitude: -97.945530; geo id: 3808140460; ansi code: 1036797; pop (2010): 33; land ( sqmi ): 35.809; water (sqmi): 0
+
+Conclusion
+- The authoritative dataset of North Dakota townships shows no “Jackson” township in Mountrail County. It does show a Jackson Township in Sargent County. Therefore, the claim that Jackson Township is in Mountrail County is not supported by the data.
+
+Assumptions
+- Mountrail County refers to Mountrail County, North Dakota, consistent with the dataset scope (North Dakota townships).
+- Matching used case-insensitive comparisons and allowed 'Mountrail' to appear with or without the word 'County'.
+- Conclusions are based strictly on the contents of public.list_of_townships_in_north_dakota within the TabFact database.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

@@ -1,0 +1,59 @@
+
+<userQuery>
+<query>
+in the 1981 open championship there be 8 player that tie for 9th
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary
+- Claim: In the 1981 Open Championship, there were 8 players tied for 9th.
+- Data source explored: TabFact (postgres_tabfact10) database, table public.t_1981_open_championship.
+- Finding: The table shows place = 't9' for 8 players, indicating 8 players tied for 9th.
+
+Data source and schema
+- Database: TabFact (postgres_tabfact10)
+- Table: public.t_1981_open_championship
+- Columns: place (text), player (text), country (text), score (bigint), to par (text)
+
+Evidence 1: Distinct finishing positions and counts
+Executed SQL:
+SELECT place, COUNT(*) AS cnt, (place ILIKE 'T%') AS is_tie
+FROM t_1981_open_championship
+GROUP BY place
+ORDER BY
+  CASE WHEN place ~ '[0-9]' THEN CAST(REGEXP_REPLACE(place, '.*?([0-9]+).*', '\\1') AS integer) ELSE 9999 END,
+  place;
+
+Result excerpt:
+- place = t1, count = 2, is_tie = true
+- place = t3, count = 6, is_tie = true
+- place = t9, count = 8, is_tie = true
+Interpretation: There are 8 entries with place = 't9' (tie for 9th).
+
+Evidence 2: List of players tied for 9th
+Executed SQL:
+SELECT place, player, country, score, "to par" FROM public.t_1981_open_championship WHERE place = 't9';
+
+Rows returned (8):
+1) place: t9 | player: howard clark   | country: england       | score: 72 | to par: + 2
+2) place: t9 | player: ben crenshaw   | country: united states | score: 72 | to par: + 2
+3) place: t9 | player: david jagger   | country: england       | score: 72 | to par: + 2
+4) place: t9 | player: mark james     | country: england       | score: 72 | to par: + 2
+5) place: t9 | player: greg norman    | country: australia     | score: 72 | to par: + 2
+6) place: t9 | player: arnold palmer  | country: united states | score: 72 | to par: + 2
+7) place: t9 | player: bill rogers    | country: united states | score: 72 | to par: + 2
+8) place: t9 | player: sam torrance   | country: scotland      | score: 72 | to par: + 2
+
+Conclusion
+- The available data directly supports the claim: there are 8 players tied for 9th place in the 1981 Open Championship table.
+
+Assumptions
+- Interpreted 't9' in the place column as “tied for 9th.”
+- The table likely represents a specific leaderboard slice (e.g., a round leaderboard) rather than final standings; the verification is confined to what this table records.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

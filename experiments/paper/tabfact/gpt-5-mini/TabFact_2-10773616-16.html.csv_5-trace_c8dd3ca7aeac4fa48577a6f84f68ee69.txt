@@ -1,0 +1,76 @@
+
+<userQuery>
+<query>
+collingwood have a home team score that be 3 time higher than that of geelong
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “collingwood have a home team score that be 3 time higher than that of geelong.”
+
+Data source discovered
+- Database: TabFact (Postgres)
+- Schema: public
+- Table: public.t_1954_vfl_season
+  - Columns: "home team" (text), "home team score" (text), "away team" (text), "away team score" (text), venue (text), crowd (bigint), date (text)
+
+Step 1 — Confirm relevant rows exist for both teams
+Executed SQL:
+SELECT "home team", COUNT(*) AS row_count
+FROM public.t_1954_vfl_season
+GROUP BY "home team"
+ORDER BY "home team";
+
+Result (excerpt):
+- collingwood: 1
+- geelong: 1
+(Each appears exactly once as a home team in this table.)
+
+Step 2 — Retrieve the home team scores for Collingwood and Geelong
+Executed SQL:
+SELECT "home team", "home team score" FROM public.t_1954_vfl_season WHERE lower("home team") IN ('collingwood','geelong');
+
+Results:
+- geelong: 13.12 (90)
+- collingwood: 12.16 (88)
+
+Step 3 — Parse numeric totals from the score strings
+Executed SQL:
+SELECT "home team", "home team score", (substring("home team score" from '\\((\\d+)\\)'))::int AS score_total
+FROM public.t_1954_vfl_season
+WHERE lower("home team") IN ('collingwood','geelong');
+
+Results:
+- home team: geelong, home team score: 13.12 (90), score_total: 90
+- home team: collingwood, home team score: 12.16 (88), score_total: 88
+
+Step 4 — Compute the ratio Collingwood / Geelong
+Executed SQL:
+SELECT
+  SUM(CASE WHEN "home team"='collingwood' THEN COALESCE(NULLIF(split_part(split_part("home team score",'(',2),')',1),'') , regexp_replace("home team score",'[^0-9]','','g'))::int ELSE 0 END) AS coll_total,
+  SUM(CASE WHEN "home team"='geelong' THEN COALESCE(NULLIF(split_part(split_part("home team score",'(',2),')',1),'') , regexp_replace("home team score",'[^0-9]','', 'g'))::int ELSE 0 END) AS geel_total,
+  ROUND(
+    SUM(CASE WHEN "home team"='collingwood' THEN COALESCE(NULLIF(split_part(split_part("home team score",'(',2),')',1),'') , regexp_replace("home team score",'[^0-9]','', 'g'))::int ELSE 0 END)::numeric
+    /
+    NULLIF(SUM(CASE WHEN "home team"='geelong' THEN COALESCE(NULLIF(split_part(split_part("home team score",'(',2),')',1),'') , regexp_replace("home team score",'[^0-9]','', 'g'))::int ELSE 0 END),0)::numeric, 6) AS ratio
+FROM public.t_1954_vfl_season
+WHERE "home team" IN ('collingwood','geelong');
+
+Results:
+- coll_total = 88
+- geel_total = 90
+- ratio = 0.977778 (i.e., 88/90 = 44/45)
+
+Conclusion
+- Collingwood’s home team score (88) is not three times higher than Geelong’s (90). In fact, it is slightly lower. The data contradicts the claim.
+
+Assumptions
+- “Home team score” refers to the total points shown in parentheses in the score string (e.g., 13.12 (90) → 90).
+- Verification is performed within the public.t_1954_vfl_season table of the provided database. If a different season or dataset was intended, results could differ.
+- “3 times higher” is interpreted as at least threefold (>= 3×). Under the alternative colloquial interpretation (“three times as high” or even “higher by three times,” i.e., 4×), the claim remains false.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

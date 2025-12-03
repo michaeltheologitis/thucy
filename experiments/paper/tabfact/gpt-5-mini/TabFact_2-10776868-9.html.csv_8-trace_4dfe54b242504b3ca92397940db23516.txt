@@ -1,0 +1,56 @@
+
+<userQuery>
+<query>
+collingwood score more point than hawthorn in the 1962 vfl match
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “collingwood score more point than hawthorn in the 1962 vfl match.”
+
+Data source discovery
+- Available source: TabFact (postgres_tabfact25), schema public.
+- Relevant table: public.t_1962_vfl_season with columns: "home team", "home team score", "away team", "away team score", "venue", "crowd", "date".
+
+What I checked
+1) Does the 1962 season table contain any Collingwood vs Hawthorn match?
+SQL (case-insensitive exact match):
+SELECT COUNT(*) AS cnt FROM public.t_1962_vfl_season 
+WHERE (lower("home team") = 'collingwood' AND lower("away team") = 'hawthorn')
+   OR (lower("home team") = 'hawthorn' AND lower("away team") = 'collingwood');
+Result: [{"cnt":0}]
+
+SQL (case-insensitive substring match, to catch name variants):
+SELECT COUNT(*) AS cnt FROM public.t_1962_vfl_season
+WHERE ("home team" ILIKE '%collingwood%' AND "away team" ILIKE '%hawthorn%')
+   OR ("home team" ILIKE '%hawthorn%' AND "away team" ILIKE '%collingwood%');
+Result: [{"cnt":0}]
+
+2) Context: show that both clubs do appear in the table (just not against each other).
+SQL (Collingwood rows):
+SELECT "date", "venue", "home team", "home team score", "away team", "away team score" 
+FROM public.t_1962_vfl_season
+WHERE lower("home team") = 'collingwood' OR lower("away team") = 'collingwood';
+Result (example row): [{"date":"23 june 1962","venue":null,"home team":"collingwood","home team score":null,"away team":"fitzroy","away team score":null}]
+
+SQL (Hawthorn rows):
+SELECT "date", "home team", "home team score", "away team", "away team score", "venue", "crowd"
+FROM public.t_1962_vfl_season
+WHERE "home team" ILIKE '%Hawthorn%'
+   OR "away team" ILIKE '%Hawthorn%'
+ORDER BY "date"
+LIMIT 5;
+Result (example row): date: 23 june 1962; home team: north melbourne; home team score: 10.8 (68); away team: hawthorn; away team score: 10.7 (67); venue: arden street oval; crowd: 8470
+
+Conclusion
+- The authoritative 1962 VFL season table available here contains no match between Collingwood and Hawthorn. Therefore, the premise that there was “the 1962 VFL match” between these two teams is not supported by the data. As such, the claim that Collingwood scored more points than Hawthorn in that match is inaccurate relative to this dataset.
+
+Assumptions
+- The claim refers to a head-to-head Collingwood vs Hawthorn match in 1962.
+- Team names are represented in the dataset as shown; I searched using both exact case-insensitive and substring matches to cover variants.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

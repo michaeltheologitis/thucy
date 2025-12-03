@@ -1,0 +1,76 @@
+
+<userQuery>
+<query>
+there be 13 tour match in the last 3 month of 1978
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim being checked: “there be 13 tour match in the last 3 month of 1978.”
+
+Scope and data source discovery:
+- Available dataset: a PostgreSQL database with a table on the 1978 New Zealand rugby union tour of Britain and Ireland.
+- Table: public.t_1978_new_zealand_rugby_union_tour_of_britain_and_ireland
+- Columns: "opposing team" (text), against (bigint), date (text), venue (text), status (text)
+
+Key schema check (to understand status values):
+SQL:
+SELECT DISTINCT status FROM public.t_1978_new_zealand_rugby_union_tour_of_britain_and_ireland;
+Result: test match; tour match
+
+Main verification (count ‘tour match’ in Oct–Dec 1978):
+SQL (count):
+SELECT COUNT(*) AS match_count
+FROM public.t_1978_new_zealand_rugby_union_tour_of_britain_and_ireland
+WHERE status = 'tour match'
+  AND to_date(date, 'DD Month YYYY') BETWEEN DATE '1978-10-01' AND DATE '1978-12-31';
+Result: match_count = 14
+
+Monthly breakdown for additional confirmation:
+SQL:
+SELECT TO_CHAR(TO_DATE(date, 'DD Month YYYY'), 'YYYY-MM') AS month, COUNT(*) AS count
+FROM public.t_1978_new_zealand_rugby_union_tour_of_britain_and_ireland
+WHERE status = 'tour match' AND TO_DATE(date, 'DD Month YYYY') BETWEEN DATE '1978-10-01' AND DATE '1978-12-31'
+GROUP BY month
+ORDER BY month;
+Results:
+- 1978-10: 5
+- 1978-11: 5
+- 1978-12: 4
+Total: 14
+
+Match listing (for transparency):
+SQL:
+SELECT date, "opposing team", venue
+FROM public.t_1978_new_zealand_rugby_union_tour_of_britain_and_ireland
+WHERE status = 'tour match'
+  AND to_date(date, 'DD Month YYYY') BETWEEN DATE '1978-10-01' AND DATE '1978-12-31'
+ORDER BY to_date(date, 'DD Month YYYY');
+Result (ordered):
+- 18 October 1978 – Cambridge University – Grange Road, Cambridge
+- 21 October 1978 – Cardiff – Cardiff Arms Park, Cardiff
+- 25 October 1978 – West Wales XV – St Helen's, Swansea
+- 28 October 1978 – London Counties – Twickenham, London
+- 31 October 1978 – Munster – Thomond Park, Limerick
+- 7 November 1978 – Ulster – Ravenhill, Belfast
+- 15 November 1978 – South and South-West Counties – Memorial Ground, Bristol
+- 18 November 1978 – Midland Counties – Welford Road, Leicester
+- 21 November 1978 – Combined Services – Aldershot Military Stadium, Aldershot
+- 29 November 1978 – Monmouthshire – Rodney Parade, Newport
+- 2 December 1978 – North of England – Birkenhead Park, Birkenhead
+- 5 December 1978 – North and Midland of Scotland – Linksfield Stadium, Aberdeen
+- 13 December 1978 – Bridgend – Brewery Field, Bridgend
+- 16 December 1978 – Barbarians – Cardiff Arms Park, Cardiff
+
+Conclusion: The data shows 14 tour matches in the last three months (October–December) of 1978 for the 1978 New Zealand rugby union tour of Britain and Ireland, not 13.
+
+Assumptions:
+- The claim pertains to the 1978 New Zealand rugby union tour of Britain and Ireland (the only available dataset). If the claim intended a different sport or tour, that data was not available in the connected sources.
+- “Last 3 month of 1978” is interpreted as October 1 through December 31, 1978.
+- “tour match” is defined by rows where status = 'tour match' in the dataset.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

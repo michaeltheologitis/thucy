@@ -1,0 +1,47 @@
+
+<userQuery>
+<query>
+there be 2 zakspeed chassis make in the year 1987
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “There were 2 Zakspeed chassis made/used in 1987.”
+
+Data source discovery
+- Available database: TabFact (PostgreSQL), schema: public.
+- Relevant table found: public.zakspeed with columns: year (bigint), chassis (text), engine (s) (text), tyres (text), points (bigint).
+
+Evidence
+1) Retrieve the 1987 Zakspeed entry
+SQL:
+SELECT * FROM public.zakspeed WHERE year = 1987;
+Result:
+- year: 1987
+- chassis: zakspeed 861 zakspeed 871
+- engine (s): zakspeed s4 t / c
+- tyres: g
+- points: 2
+Interpretation: The chassis field for 1987 lists two chassis models: “zakspeed 861” and “zakspeed 871”.
+
+2) Count the number of chassis models listed for 1987
+SQL:
+SELECT year, chassis, (length(lower(coalesce(chassis,''))) - length(replace(lower(coalesce(chassis,'')),'zakspeed',''))) / length('zakspeed') AS zakspeed_count FROM public.zakspeed WHERE year = 1987;
+Result:
+- year: 1987
+- chassis: zakspeed 861 zakspeed 871
+- zakspeed_count: 2
+Interpretation: There are two occurrences of the substring “zakspeed” in the chassis field, confirming two chassis models noted for 1987.
+
+Conclusion
+- The database shows that Zakspeed used two chassis models in 1987: Zakspeed 861 and Zakspeed 871. This supports the claim that there were 2 Zakspeed chassis in 1987.
+
+Assumptions
+- “make” is interpreted as “chassis models used/made that season,” not the number of physical individual chassis constructed.
+- The public.zakspeed table is treated as authoritative per the data-grounding instructions.
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

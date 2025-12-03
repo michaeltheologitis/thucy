@@ -1,0 +1,67 @@
+
+<userQuery>
+<query>
+when the rank be greater than 4 and the airport be shanghai pudong international airport , the highest total cargo be 2939157 metric tonne
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Summary of data sources examined
+- Discovered and used: PostgreSQL instance TabFact (postgres_tabfact34), schema public. Contains a table of world’s busiest airports by cargo traffic.
+
+Relevant schema identified
+- Table: public.world_s_busiest_airports_by_cargo_traffic
+  - rank (bigint)
+  - airport (text)
+  - code (text)
+  - total cargo (metric tonnes) (bigint)
+  - % change (text)
+  - Note: No year column; units embedded in the cargo column name.
+
+Evidence collected
+1) Locate the Shanghai Pudong International Airport row(s)
+Executed SQL:
+SELECT "rank", airport, "total cargo (metric tonnes)" FROM public."world_s_busiest_airports_by_cargo_traffic" WHERE airport ILIKE '%Shanghai Pudong%';
+Result:
+- rank: 3, airport: shanghai pudong international airport, total cargo (metric tonnes): 2939157
+
+2) Test the claim under the stated condition (rank > 4 AND airport = 'shanghai pudong international airport')
+Executed SQL (maximum cargo under the condition):
+SELECT MAX("total cargo (metric tonnes)") AS max_total_cargo
+FROM public.world_s_busiest_airports_by_cargo_traffic
+WHERE lower(airport) = 'shanghai pudong international airport' AND "rank" > 4;
+Result:
+- max_total_cargo = NULL (no matching rows)
+
+Executed SQL (count rows for that airport):
+SELECT COUNT(*) AS cnt
+FROM public.world_s_busiest_airports_by_cargo_traffic
+WHERE lower(airport) = 'shanghai pudong international airport';
+Result:
+- cnt = 1
+
+Executed SQL (show that single row, to explain mismatch with rank > 4):
+SELECT "rank", airport, "total cargo (metric tonnes)"
+FROM public.world_s_busiest_airports_by_cargo_traffic
+WHERE lower(airport) = 'shanghai pudong international airport'
+ORDER BY "rank";
+Result:
+- rank: 3, airport: shanghai pudong international airport, total cargo (metric tonnes): 2939157
+
+Assessment of the claim
+- The claim states: when the rank is greater than 4 and the airport is Shanghai Pudong International Airport, the highest total cargo is 2,939,157 metric tonnes.
+- Data shows only one row for this airport with rank = 3 (not greater than 4) and total cargo = 2,939,157 metric tonnes. Therefore, there are no rows that satisfy the filter rank > 4 for this airport. Under that filter, the maximum cargo is NULL, not 2,939,157.
+- While the cargo value 2,939,157 metric tonnes is correct for Shanghai Pudong International Airport in the table, it does not occur under the stated condition (rank > 4). Hence the conditional claim is not supported by the data.
+
+Conclusion
+- The claim is contradicted by the data because the condition rank > 4 yields no records for Shanghai Pudong International Airport, so no maximum of 2,939,157 can be established under that condition.
+
+Assumptions
+- Airport matching performed case-insensitively using the exact text 'shanghai pudong international airport'.
+- Verification is based solely on the available TabFact (postgres_tabfact34) dataset and its single relevant table, which lacks a year dimension.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

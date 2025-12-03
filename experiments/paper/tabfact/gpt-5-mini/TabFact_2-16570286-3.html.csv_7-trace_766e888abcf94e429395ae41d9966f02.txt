@@ -1,0 +1,80 @@
+
+<userQuery>
+<query>
+all of the england player take as many wicket as bill johnston
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim to verify: “all of the england player take as many wicket as bill johnston.”
+
+Data source discovery
+- Accessible database: TabFact (PostgreSQL), schema public
+- Available table: public.t_1948_ashes_series with columns [player, team, matches, wickets, average, "best bowling"]
+
+Step 1 — Confirm team labels present in the table
+Executed SQL:
+SELECT DISTINCT team FROM public.t_1948_ashes_series ORDER BY team;
+Result:
+- australia
+- england
+
+Step 2 — Find Bill Johnston’s wickets (reference value)
+Executed SQL:
+SELECT player, team, matches, wickets, average, "best bowling" FROM public.t_1948_ashes_series WHERE player ILIKE '%Bill Johnston%';
+Result:
+- player: bill johnston; team: australia; matches: 5; wickets: 27; average: 23.33; best bowling: 5 / 36
+
+Step 3 — Check England players vs. Bill Johnston’s wickets (27)
+3a) Count England players in table
+Executed SQL:
+SELECT COUNT(*) AS total_england FROM public.t_1948_ashes_series WHERE team = 'england';
+Result: total_england = 3
+
+3b) How many England players have wickets ≥ 27?
+Executed SQL:
+SELECT COUNT(*) AS england_wickets_ge_27 FROM public.t_1948_ashes_series WHERE team = 'england' AND wickets >= 27;
+Result: england_wickets_ge_27 = 0
+
+3c) How many England players have wickets = 27?
+Executed SQL:
+SELECT COUNT(*) AS england_wickets_eq_27 FROM public.t_1948_ashes_series WHERE team = 'england' AND wickets = 27;
+Result: england_wickets_eq_27 = 0
+
+3d) Which England players have wickets < 27?
+Executed SQL:
+SELECT player, wickets FROM public.t_1948_ashes_series WHERE team = 'england' AND wickets < 27 ORDER BY wickets ASC, player ASC;
+Result rows:
+- jim laker — 9
+- norman yardley — 9
+- alec bedser — 18
+
+Optional cross-check — Total England wickets (if interpreting the claim as a team-total comparison)
+Executed SQL (player breakdown):
+SELECT player, wickets FROM public.t_1948_ashes_series WHERE lower(team) = 'england' ORDER BY player;
+Result rows:
+- alec bedser — 18
+- jim laker — 9
+- norman yardley — 9
+Executed SQL (sum):
+SELECT SUM(wickets) AS total_wickets FROM public.t_1948_ashes_series WHERE lower(team) = 'england';
+Result:
+- total_wickets = 36
+
+Findings
+- Bill Johnston took 27 wickets in the 1948 Ashes (per the dataset).
+- No England player in the dataset took as many as 27 wickets; the listed England players had 9, 9, and 18 wickets respectively.
+- Therefore, the statement that “all of the England player[s] take as many wicket[s] as Bill Johnston” is contradicted by the data.
+
+Conclusion
+- The claim is inaccurate with respect to the data in public.t_1948_ashes_series.
+
+Assumptions
+- “England player” refers to rows where team = 'england' in public.t_1948_ashes_series (1948 Ashes series context).
+- “as many wicket[s] as Bill Johnston” was interpreted in the strict per-player sense (equal to or at least as many). Under either interpretation, the claim is false, as no England player reached 27 wickets in this dataset.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

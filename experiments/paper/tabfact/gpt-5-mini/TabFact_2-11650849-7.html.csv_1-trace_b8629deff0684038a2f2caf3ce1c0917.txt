@@ -1,0 +1,63 @@
+
+<userQuery>
+<query>
+the chicago bear be the loser against the green bay packer more than 10 time
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: The Chicago Bears have been the loser against the Green Bay Packers more than 10 times.
+
+Conclusion based on available data: Not supported by the dataset we can access. In the public.bears_packers_rivalry table, the Chicago Bears have 5 recorded losses to the Green Bay Packers.
+
+Evidence from the database (TabFact → public schema)
+
+1) Team appearance counts by winner
+Executed SQL:
+SELECT winner AS team, COUNT(*) AS wins FROM public.bears_packers_rivalry GROUP BY winner ORDER BY team;
+Returned rows:
+- team: "chicago bears", wins: 15
+- team: "green bay packers", wins: 5
+
+2) Team appearance counts by loser
+Executed SQL:
+SELECT loser AS team, COUNT(*) AS losses FROM public.bears_packers_rivalry GROUP BY loser ORDER BY team;
+Returned rows:
+- team: "chicago bears", losses: 5
+- team: "green bay packers", losses: 15
+
+3) Specific count of games where Bears lost to Packers
+Executed SQL:
+SELECT COUNT(*) AS count
+FROM public.bears_packers_rivalry
+WHERE LOWER(winner) = 'green bay packers' AND LOWER(loser) = 'chicago bears';
+Returned row:
+- count: 5
+
+4) Listing those games (context)
+Executed SQL:
+SELECT year, date, location, result
+FROM public.bears_packers_rivalry
+WHERE LOWER(winner) = 'green bay packers' AND LOWER(loser) = 'chicago bears'
+ORDER BY year;
+Returned rows:
+1) 1950 — sunday , october 1 — green bay — 31 - 21
+2) 1952 — sunday , november 9 — chicago — 41 - 28
+3) 1955 — sunday , october 2 — green bay — 24 - 3
+4) 1957 — sunday , september 29 — green bay — 21 - 17
+5) 1959 — sunday , september 27 — green bay — 9 - 6
+
+Assessment
+- The claim requires the number of Bears’ losses to Packers to be greater than 10.
+- The authoritative dataset available shows 5 such losses.
+- Therefore, within this data environment, the claim is inaccurate.
+
+Assumptions made
+- Team names are matched case-insensitively; the table stores them in lowercase (e.g., "chicago bears", "green bay packers").
+- The verification is scoped strictly to the available public.bears_packers_rivalry dataset, treated as authoritative per instructions.
+</report>
+<verdict>
+Inaccurate
+</verdict>
+</verificationAnswer>

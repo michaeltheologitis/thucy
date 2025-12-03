@@ -1,0 +1,53 @@
+
+<userQuery>
+<query>
+2 of the project be propose , but never list and never complete
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Claim interpreted: “Two of the projects were proposed, but never listed and never completed.” Within the available data source (EPA Superfund Mississippi), this maps to Superfund sites with a non-empty Proposed date, and empty/no values for Listed and Construction Completed.
+
+Data source discovered
+- Database: EPA Superfund Mississippi
+- Table: list_of_superfund_sites_in_mississippi
+- Relevant columns: proposed, listed, construction completed, partially deleted, deleted, cerclis id, name, county
+
+Schema details (summarized)
+- Columns (text): cerclis id, name, county, proposed, listed, construction completed, partially deleted, deleted
+- The proposed/listed/construction completed columns record NPL milestone statuses (text, often dates). A value of '-' or empty indicates no status/date recorded.
+
+Evidence 1: Total count of sites meeting the condition
+- Condition: proposed is non-empty; listed is empty/'-' or NULL; construction completed is empty/'-' or NULL
+- Result: 2
+- Executed SQL:
+SELECT COUNT(*) AS total_count
+FROM list_of_superfund_sites_in_mississippi
+WHERE proposed IS NOT NULL AND proposed <> ''
+AND (listed IS NULL OR listed = '' OR listed = '-')
+AND ("construction completed" IS NULL OR "construction completed" = '' OR "construction completed" = '-');
+
+Evidence 2: Records that meet the condition (site details)
+- Result rows:
+  - CERCLIS ID: msd008154486 | Name: Chemfax, Inc | County: Harrison | Proposed: 06 / 23 / 1993 | Listed: - | Construction Completed: - | Partially Deleted: - | Deleted: -
+  - CERCLIS ID: msd056029648 | Name: Potter Co | County: Copiah | Proposed: 05 / 10 / 1993 | Listed: - | Construction Completed: - | Partially Deleted: - | Deleted: -
+- Executed SQL:
+SELECT "cerclis id", name, county, proposed, listed, "construction completed", "partially deleted", deleted 
+FROM list_of_superfund_sites_in_mississippi 
+WHERE proposed IS NOT NULL AND proposed != '' AND proposed != '-' 
+AND (listed IS NULL OR listed = '' OR listed = '-') 
+AND ("construction completed" IS NULL OR "construction completed" = '' OR "construction completed" = '-');
+
+Conclusion
+- The data shows there are exactly two sites that were proposed but have no listed date and no construction completed date. This supports the claim as interpreted.
+
+Assumptions
+- “Project” refers to Superfund “sites” in the provided Mississippi dataset.
+- “Propose” means the Proposed NPL date is present; “list” means final NPL listing date present; “complete” refers to Construction Completed status/date.
+- Values of '-' or empty strings are treated as “no status/date recorded.”
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>

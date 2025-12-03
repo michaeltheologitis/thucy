@@ -1,0 +1,47 @@
+
+<userQuery>
+<query>
+brook lopez lead the team in both point and rebound in a single game 3 different time
+</query>
+</userQuery>
+
+<verificationAnswer>
+<report>
+Conclusion: Within the available New Jersey Nets 2010–11 season data, Brook Lopez led the team in both points and rebounds in the same game exactly 3 times.
+
+Key evidence from the database
+1) Identify all games where Brook Lopez was both the team-high scorer and rebounder
+Executed SQL:
+SELECT game, date, "high points" AS high_points_raw, "high rebounds" AS high_rebounds_raw
+FROM t_2010_11_new_jersey_nets_season
+WHERE lower("high points") LIKE 'brook lopez (%' AND lower("high rebounds") LIKE 'brook lopez (%'
+ORDER BY game;
+
+Result:
+- Game 77 (April 5): High Points: Brook Lopez (30); High Rebounds: Brook Lopez (12)
+- Game 78 (April 6): High Points: Brook Lopez (39); High Rebounds: Brook Lopez (7)
+- Game 80 (April 10): High Points: Brook Lopez (35); High Rebounds: Brook Lopez (11)
+
+2) Count of such games
+Executed SQL:
+SELECT COUNT(*) AS both_points_and_rebounds_by_lopez
+FROM t_2010_11_new_jersey_nets_season
+WHERE lower("high points") LIKE 'brook lopez (%' AND lower("high rebounds") LIKE 'brook lopez (%';
+
+Result: 3
+
+3) Check for ties (to ensure “led the team” is unambiguous)
+Executed SQL:
+SELECT COUNT(*) AS tie_points FROM t_2010_11_new_jersey_nets_season WHERE "high points" LIKE '%,%';
+SELECT COUNT(*) AS tie_rebounds FROM t_2010_11_new_jersey_nets_season WHERE "high rebounds" LIKE '%,%';
+
+Result: tie_points = 0; tie_rebounds = 0 (no ties recorded in this dataset)
+
+Assumptions
+- Scope: The claim is interpreted within the available dataset (New Jersey Nets 2010–11 season). No other seasons or teams are included in the accessible data.
+- Definition: “Led the team” is taken to mean recorded the team-high in that category for the Nets in the given game (as captured in the “high points” and “high rebounds” columns).
+</report>
+<verdict>
+Verified
+</verdict>
+</verificationAnswer>
