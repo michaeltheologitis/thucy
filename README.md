@@ -6,8 +6,9 @@
 ![The architecture of
 Thucy](https://raw.githubusercontent.com/michaeltheologitis/thucy/main/docs/images/thucy.png)
 
-We highly encourage to read the documentation from the [Thucy
-website](https://michaeltheologitis.github.io/thucy/). It is rendered
+We highly encourage to read the documentation from the official [Thucy
+website](https://michaeltheologitis.github.io/thucy/) (instead of the
+[GitHub](https://github.com/michaeltheologitis/thucy)). It is rendered
 better there since we have full control of the markdown!
 
 ## Motivation
