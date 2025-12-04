@@ -35,6 +35,12 @@ class Config:
         self.env_path = self.project_root / ".env"
         self.env_path.touch(exist_ok=True)
 
+        # Set defaults if not already set
+        env = dotenv_values(self.env_path)
+        for key, val in self.DEFAULTS.items():
+            if key not in env:
+                self.set_env_var(key, str(val))
+
         # Load environment variables
         self._load_env()
 
