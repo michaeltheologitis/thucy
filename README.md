@@ -117,7 +117,8 @@ configuration:
 thucy config show
 ```
 
-    OPENAI_API_KEY=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
+
+    OPENAI_API_KEY=sk-xxyy
     EXPERTS_MODEL=gpt-5-mini
     LEAD_MODEL=gpt-5
     SQL_EXPERT_MAX_TURNS=30
