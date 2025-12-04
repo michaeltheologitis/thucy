@@ -6,11 +6,11 @@
 ![The architecture of
 Thucy](https://raw.githubusercontent.com/michaeltheologitis/thucy/main/docs/images/thucy.png)
 
-<center>
+<div align="center">
 
 [![](https://img.shields.io/badge/paper-A42C25?style=for-the-badge&logo=arxiv&logoColor=white.png)](https://arxiv.org/abs/2512.03278)
 
-</center>
+</div>
 
 In today’s age, it is becoming increasingly difficult to decipher truth
 from lies. Every day, politicians, media outlets, and public figures
