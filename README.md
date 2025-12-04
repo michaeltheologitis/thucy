@@ -306,7 +306,7 @@ scratch), please run the notebook `experiments/paper/tabfact.ipynb`.
 This project has been created using [nbdev](https://nbdev.fast.ai/) (big
 shoutout!).
 
-If you want to contribute first run:
+If you want to develop independently first run:
 
 ``` sh
 nbdev_install_quarto
