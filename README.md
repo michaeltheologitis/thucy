@@ -76,6 +76,12 @@ Clone from [GitHub](https://github.com/michaeltheologitis/thucy):
 git clone https://github.com/michaeltheologitis/thucy.git
 ```
 
+Go to the project directory:
+
+``` sh
+cd thucy
+```
+
 Then, install the package (usually in a virtual environment):
 
 ``` sh
