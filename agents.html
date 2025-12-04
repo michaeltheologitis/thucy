@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.26">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="In this module, we define the prompts, input/output schemas, and overall behavior of the different agents in our multi-agent system. Each agent has a specific role and expertise, allowing them to collaborate effectively to achieve complex tasks.">
+
+<title>Agents: Prompts, Schemas, and Orchestration – thucy</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-000f0825b9c55ed21d14970d810c14a9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="Agents: Prompts, Schemas, and Orchestration – thucy">
+<meta property="og:description" content="In this module, we define the prompts, input/output schemas, and overall behavior of the different agents in our multi-agent system. Each agent has a specific role and expertise, allowing them to collaborate effectively to achieve complex tasks.">
+<meta property="og:site_name" content="thucy">
+<meta name="twitter:title" content="Agents: Prompts, Schemas, and Orchestration – thucy">
+<meta name="twitter:description" content="In this module, we define the prompts, input/output schemas, and overall behavior of the different agents in our multi-agent system. Each agent has a specific role and expertise, allowing them to collaborate effectively to achieve complex tasks.">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">thucy</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./agents.html">Agents: Prompts, Schemas, and Orchestration</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Thucy: An LLM-based MAS for Claim Verification</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./configuration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Static Configurations</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./toolbox.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Google’s MCP Toolbox</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./agents.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Agents: Prompts, Schemas, and Orchestration</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./main.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Main</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#expert-agent-data-expert" id="toc-expert-agent-data-expert" class="nav-link active" data-scroll-target="#expert-agent-data-expert">Expert Agent: Data Expert</a>
+  <ul class="collapse">
+  <li><a href="#prompt-definition" id="toc-prompt-definition" class="nav-link" data-scroll-target="#prompt-definition">Prompt Definition:</a></li>
+  <li><a href="#inputoutput" id="toc-inputoutput" class="nav-link" data-scroll-target="#inputoutput">Input/Output</a></li>
+  <li><a href="#agent-as-tool-wrap" id="toc-agent-as-tool-wrap" class="nav-link" data-scroll-target="#agent-as-tool-wrap">Agent-as-Tool Wrap</a></li>
+  <li><a href="#discover_data_sources" id="toc-discover_data_sources" class="nav-link" data-scroll-target="#discover_data_sources">discover_data_sources</a></li>
+  <li><a href="#example" id="toc-example" class="nav-link" data-scroll-target="#example">Example</a></li>
+  </ul></li>
+  <li><a href="#expert-agent-schema-expert" id="toc-expert-agent-schema-expert" class="nav-link" data-scroll-target="#expert-agent-schema-expert">Expert Agent: Schema Expert</a>
+  <ul class="collapse">
+  <li><a href="#promptinstructions" id="toc-promptinstructions" class="nav-link" data-scroll-target="#promptinstructions">Prompt/Instructions</a></li>
+  <li><a href="#inputoutput-1" id="toc-inputoutput-1" class="nav-link" data-scroll-target="#inputoutput-1">Input/Output</a></li>
+  <li><a href="#agent-as-tool-wrap-1" id="toc-agent-as-tool-wrap-1" class="nav-link" data-scroll-target="#agent-as-tool-wrap-1">Agent-as-Tool Wrap</a></li>
+  <li><a href="#schema_query" id="toc-schema_query" class="nav-link" data-scroll-target="#schema_query">schema_query</a></li>
+  <li><a href="#example-1" id="toc-example-1" class="nav-link" data-scroll-target="#example-1">Example</a></li>
+  </ul></li>
+  <li><a href="#expert-agent-sql-expert" id="toc-expert-agent-sql-expert" class="nav-link" data-scroll-target="#expert-agent-sql-expert">Expert Agent: SQL Expert</a>
+  <ul class="collapse">
+  <li><a href="#promptinstructions-1" id="toc-promptinstructions-1" class="nav-link" data-scroll-target="#promptinstructions-1">Prompt/Instructions</a></li>
+  <li><a href="#inputoutput-2" id="toc-inputoutput-2" class="nav-link" data-scroll-target="#inputoutput-2">Input/Output</a></li>
+  <li><a href="#agent-as-tool-wrap-2" id="toc-agent-as-tool-wrap-2" class="nav-link" data-scroll-target="#agent-as-tool-wrap-2">Agent-as-Tool Wrap</a></li>
+  <li><a href="#nl_query" id="toc-nl_query" class="nav-link" data-scroll-target="#nl_query">nl_query</a></li>
+  <li><a href="#example-2" id="toc-example-2" class="nav-link" data-scroll-target="#example-2">Example</a></li>
+  </ul></li>
+  <li><a href="#lead-agent-verifier" id="toc-lead-agent-verifier" class="nav-link" data-scroll-target="#lead-agent-verifier">Lead Agent: Verifier</a>
+  <ul class="collapse">
+  <li><a href="#promptinstructions-2" id="toc-promptinstructions-2" class="nav-link" data-scroll-target="#promptinstructions-2">Prompt/Instructions</a></li>
+  <li><a href="#inputoutput-3" id="toc-inputoutput-3" class="nav-link" data-scroll-target="#inputoutput-3">Input/Output</a></li>
+  <li><a href="#example-3" id="toc-example-3" class="nav-link" data-scroll-target="#example-3">Example</a></li>
+  <li><a href="#verify" id="toc-verify" class="nav-link" data-scroll-target="#verify">verify</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/michaeltheologitis/thucy/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div><div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="agents.html.md"><i class="bi bi-file-code"></i>CommonMark</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Agents: Prompts, Schemas, and Orchestration</h1>
+</div>
+
+<div>
+  <div class="description">
+    In this module, we define the prompts, input/output schemas, and overall behavior of the different agents in our multi-agent system. Each agent has a specific role and expertise, allowing them to collaborate effectively to achieve complex tasks.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<p>We are going to first set the toolset to <code>seattle</code>. Practically, this means that our experts will subscribe to toolsets like <code>seattle-sql</code>, <code>seattle-schema</code> which you can find in the <code>tools.yaml</code> file at the root of the project.</p>
+<div id="6464fbd6" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>genai_mcp.<span class="ex">connect</span>()</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>genai_mcp.set_specific_toolset(<span class="st">'seattle'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="expert-agent-data-expert" class="level2">
+<h2 class="anchored" data-anchor-id="expert-agent-data-expert">Expert Agent: Data Expert</h2>
+<p>The Data performs a high-level survey of available data sources without diving into detailed schemas.</p>
+<section id="prompt-definition" class="level3">
+<h3 class="anchored" data-anchor-id="prompt-definition">Prompt Definition:</h3>
+<div id="580425de" class="cell">
+<details open="" class="code-fold">
+<summary>Exported source</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>DATA_EXPERT_PROMPT <span class="op">=</span> <span class="st">"""</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="st"># Role and Objective</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="st">You are a data expert that explores available sources. Your task is to perform a rapid, one-time survey of all accessible data sources. Your goal is to identify what databases, data stores, or connected sources exist and summarize, at a high level, what type of data each likely contains.</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="st"># Exploration Scope</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="st">Focus on high-level data assets only — databases, schemas, APIs, or data files. Do not inspect or describe tables, columns, or detailed schemas. You are creating a top-down map of the data environment, not a deep schema inventory.</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="st"># Grounding and Accuracy</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="st">Base your findings only on verified information obtained via your tools. Never infer or imagine data that was not found. If a source cannot be accessed or no metadata is available, state that fact explicitly. Keep the exploration factual, concise, and high-level.</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="st"># Instructions</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="st">- Use your tools to discover and identify all accessible data sources as efficiently as possible.</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="st">- Do not expand into schema-level details such as tables, columns, or keys.</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="st">- Keep your report short, factual, and organized — avoid long explanations or speculation.</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="st">- Do not ask the user for clarification; make reasonable assumptions and proceed.</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="st">- Prioritize speed and completeness of coverage over depth.</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="inputoutput" class="level3">
+<h3 class="anchored" data-anchor-id="inputoutput">Input/Output</h3>
+<p>We only have output here.</p>
+<section id="output" class="level4">
+<h4 class="anchored" data-anchor-id="output">Output</h4>
+<p>This agent returns a <a href="https://michaeltheologitis.github.io/thucy/agents.html#datareport"><code>DataReport</code></a> containing a concise summary of discovered data sources.</p>
+<div id="3435913b" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>description(DataReport)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>report: A concise single-paragraph report on the available data sources.
+</code></pre>
+</div>
+</div>
+<div id="b10c15cd" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>example_report <span class="op">=</span> DataReport(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    report<span class="op">=</span>(<span class="st">"[...] A nice concise description of the environment [...]"</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="c9a35218" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>example_report</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>DataReport(report='[...] A nice concise description of the environment [...]')</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="agent-as-tool-wrap" class="level3">
+<h3 class="anchored" data-anchor-id="agent-as-tool-wrap">Agent-as-Tool Wrap</h3>
+<p>Here, we expose the agent <strong>as a tool</strong> (i.e., <a href="https://michaeltheologitis.github.io/thucy/agents.html#discover_data_sources"><code>discover_data_sources</code></a>) to be used by the Lead Agent.</p>
+<hr>
+<p><a href="https://github.com/michaeltheologitis/thucy/blob/main/thucy/agents.py#L45" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="discover_data_sources" class="level3">
+<h3 class="anchored" data-anchor-id="discover_data_sources">discover_data_sources</h3>
+<blockquote class="blockquote">
+<pre><code> discover_data_sources ()</code></pre>
+</blockquote>
+<p><em>Performs a one-time high-level discovery of all connected data sources and returns a concise summary of available databases and their content domains.</em></p>
+</section>
+<section id="example" class="level3">
+<h3 class="anchored" data-anchor-id="example">Example</h3>
+<div id="21465d25" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> <span class="cf">await</span> discover_data_sources()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="fb8337e7" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>result</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>DataReport(report='I discovered one accessible data source: a PostgreSQL database named “Seattle” (public schema accessible). Within the public schema there is a dataset/object named “crime_data” (by name, it appears to be crime-related). No other databases, schemas, APIs, or data files were discoverable with the available tools or metadata.')</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="expert-agent-schema-expert" class="level2">
+<h2 class="anchored" data-anchor-id="expert-agent-schema-expert">Expert Agent: Schema Expert</h2>
+<p>The Schema Expert answers questions about database structure, relationships, and schema design.</p>
+<section id="promptinstructions" class="level3">
+<h3 class="anchored" data-anchor-id="promptinstructions">Prompt/Instructions</h3>
+<div id="676ad361" class="cell">
+<details open="" class="code-fold">
+<summary>Exported source</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>SCHEMA_EXPERT_PROMPT <span class="op">=</span> <span class="st">"""</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="st"># Role and Objective</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="st">You are a database expert specializing in answering schema-related questions for relational databases. You have tools that allow you to inspect and analyze schemas across multiple databases. Use these tools whenever they are beneficial to your analysis.</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="st"># Core Behavioral Principle</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="st">Never invent or infer schemas, tables, or columns that are not actually present in the inspected databases. If no relevant database or table exists, state that explicitly and stop. Do not describe hypothetical, example, or canonical schemas under any circumstance.</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="st"># Instructions</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="st">- Do not ask the user for clarification. For ambiguous questions, make reasonable assumptions and include them at the end of your answer—always present your answer first.</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="st">- Identify which databases or data sources are relevant to the user's question.</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="st">- Examine their schemas and explain how their structural elements (such as tables, columns, keys, and relationships) are connected.</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="st">- Respond precisely to the user's intent, providing exactly the information requested—nothing more, nothing less.</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="st">- Always state explicitly the names of the databases your answer pertains to; it is imperative that the user knows the specific databases referenced.</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="st">- Avoid speculation, assumptions, or irrelevant details.</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="inputoutput-1" class="level3">
+<h3 class="anchored" data-anchor-id="inputoutput-1">Input/Output</h3>
+<section id="input" class="level4">
+<h4 class="anchored" data-anchor-id="input">Input</h4>
+<p>This agent expects a <a href="https://michaeltheologitis.github.io/thucy/agents.html#schemaquery"><code>SchemaQuery</code></a>.</p>
+<div id="dac3cdfd" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>description(SchemaQuery)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>context_hint: A high-level hint about which database or domain the tool should focus on. This helps steer the tool toward the most relevant data sources.
+
+query: The natural language request or question about the schema of the available relational databases.
+</code></pre>
+</div>
+</div>
+<div id="2ed050f2" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>schema_query_example <span class="op">=</span> SchemaQuery(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    context_hint<span class="op">=</span><span class="st">"[...] A high-level hint about which database or domain [...]"</span>,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    query<span class="op">=</span><span class="st">"[...] The natural language request or question about the schema [...]"</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="6831608b" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>schema_query_example</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>SchemaQuery(context_hint='[...] A high-level hint about which database or domain [...]', query='[...] The natural language request or question about the schema [...]')</code></pre>
+</div>
+</div>
+</section>
+<section id="output-1" class="level4">
+<h4 class="anchored" data-anchor-id="output-1">Output</h4>
+<p>The Schema Expert returns a <a href="https://michaeltheologitis.github.io/thucy/agents.html#schemaqueryanswer"><code>SchemaQueryAnswer</code></a> object.</p>
+<div id="12f88b5d" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>description(SchemaQueryAnswer)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>answer: The final synthesized answer to the user's schema-related question. The response must explicitly state the names of all databases it pertains to.
+</code></pre>
+</div>
+</div>
+<div id="fb9d33e2" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>schema_answer_example <span class="op">=</span> SchemaQueryAnswer(</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    answer<span class="op">=</span><span class="st">"[...] The final answer to the schema-related question [...]"</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="2aab3479" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>schema_answer_example</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>SchemaQueryAnswer(answer='[...] The final answer to the schema-related question [...]')</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="agent-as-tool-wrap-1" class="level3">
+<h3 class="anchored" data-anchor-id="agent-as-tool-wrap-1">Agent-as-Tool Wrap</h3>
+<p>Here, we expose the agent <strong>as a tool</strong> (i.e., <a href="https://michaeltheologitis.github.io/thucy/agents.html#schema_query"><code>schema_query</code></a>) to be used by the Lead Agent.</p>
+<hr>
+<p><a href="https://github.com/michaeltheologitis/thucy/blob/main/thucy/agents.py#L118" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="schema_query" class="level3">
+<h3 class="anchored" data-anchor-id="schema_query">schema_query</h3>
+<blockquote class="blockquote">
+<pre><code> schema_query (query:__main__.SchemaQuery)</code></pre>
+</blockquote>
+<p><em>A tool that answers natural language questions about database schemas across multiple potential relational database sources. It can describe tables, columns, relationships, keys, and other structural details for the relevant database.</em></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>query</td>
+<td>SchemaQuery</td>
+<td>The <a href="https://michaeltheologitis.github.io/thucy/agents.html#schemaquery"><code>SchemaQuery</code></a> instance containing the user’s schema question</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>SchemaQueryAnswer</strong></td>
+<td><strong>The <a href="https://michaeltheologitis.github.io/thucy/agents.html#schemaqueryanswer"><code>SchemaQueryAnswer</code></a> instance containing the final answer</strong></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="example-1" class="level3">
+<h3 class="anchored" data-anchor-id="example-1">Example</h3>
+<div id="3b3a334d" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> SchemaQuery(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    context_hint<span class="op">=</span><span class="st">"Seattle, WA"</span>,</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    query<span class="op">=</span><span class="st">"Are there any columns related to dates of crimes?"</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> <span class="cf">await</span> schema_query(s)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="01f04946" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>result</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>SchemaQueryAnswer(answer='Database: Seattle\n\nTable: public.crime_data\n- offense_date — timestamp without time zone\n- report_datetime — timestamp without time zone\n\nNo other tables or columns in the Seattle database schema contain date/time data according to the inspected schema.\n\nAssumption: You meant columns that store date/time values related to crimes in the Seattle database; I inspected all tables in that database.')</code></pre>
+</div>
+</div>
+<div id="f2221d36" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(result.answer)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Database: Seattle
+
+Table: public.crime_data
+- offense_date — timestamp without time zone
+- report_datetime — timestamp without time zone
+
+No other tables or columns in the Seattle database schema contain date/time data according to the inspected schema.
+
+Assumption: You meant columns that store date/time values related to crimes in the Seattle database; I inspected all tables in that database.</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="expert-agent-sql-expert" class="level2">
+<h2 class="anchored" data-anchor-id="expert-agent-sql-expert">Expert Agent: SQL Expert</h2>
+<p>he SQL Expert translates NL questions into SQL queries and returns the evidence (in SQL) for its answers.</p>
+<section id="promptinstructions-1" class="level3">
+<h3 class="anchored" data-anchor-id="promptinstructions-1">Prompt/Instructions</h3>
+<div id="67b76d20" class="cell">
+<details open="" class="code-fold">
+<summary>Exported source</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>SQL_EXPERT_PROMPT <span class="op">=</span> <span class="st">"""</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="st"># Role and Objective</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="st">You are an SQL expert focused on transparency and reproducibility. Your goal is to answer the user's question as accurately and directly as possible, while *always displaying every final SQL query* that contributed evidence to your answer. Each part of your response must clearly show the concrete SQL query (or queries) that produced the corresponding result.  You have access to tools that allow you to execute SQL queries on various databases. Use these tools whenever they are beneficial to your analysis.</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="st"># Evidence Traceability</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="st">- For each analytical statement or conclusion you present, include the exact SQL query that generated the supporting data. </span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="st">- Only show SQL queries that were successfully executed and directly used to form your final answer. </span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="st">- Do not show intermediate or failed queries. </span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="st">- When multiple queries are used (for different sub-parts of the reasoning), display each query alongside the reasoning it supports, in clearly labeled sections.</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="st"># Instructions</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a><span class="st">- Do not ask the user for clarification. For ambiguous questions, make reasonable assumptions and include them at the end of your answer — always present your answer first.</span></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="st">- Translate natural language questions into SQL queries, execute them, and communicate the results clearly in natural language.</span></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a><span class="st">- Before executing any SQL query, verify that it is well-defined and addresses a single, specific information need.</span></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a><span class="st">- For multi-step problems, plan the sequence of steps explicitly and execute them sequentially, integrating each intermediate result into the final coherent answer.</span></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a><span class="st">- Ensure each SQL query matches the SQL dialect of the target database used by the query tool.</span></span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a><span class="st"># SQL Query Best Practices</span></span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a><span class="st">- Plan your approach before executing any query. </span></span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a><span class="st">- Prefer multiple simple, well-scoped queries over single complex ones by breaking problems into logical sub-steps.</span></span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="inputoutput-2" class="level3">
+<h3 class="anchored" data-anchor-id="inputoutput-2">Input/Output</h3>
+<section id="input-1" class="level4">
+<h4 class="anchored" data-anchor-id="input-1">Input</h4>
+<p>This agent expects a <a href="https://michaeltheologitis.github.io/thucy/agents.html#nlquery"><code>NLQuery</code></a> (we will later re-structure it manually in the <code>orchestration</code> module).</p>
+<div id="8c505391" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>description(NLQuery)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>query: The user's request or question expressed in natural language.
+
+schema_info: The relevant database schema information, including the names of all databases involved, as well as details on tables, relationships, and foreign keys necessary for answering the query.
+</code></pre>
+</div>
+</div>
+<div id="cbc9077f" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>nl_query_example <span class="op">=</span> NLQuery(</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    query<span class="op">=</span><span class="st">"[...] The user's request or question [...]"</span>,</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    schema_info<span class="op">=</span><span class="st">"[...] The relevant database schema information [...]"</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="33eb6fa1" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(nl_query_example)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>query="[...] The user's request or question [...]" schema_info='[...] The relevant database schema information [...]'</code></pre>
+</div>
+</div>
+<p>Since the LLMs expect NL inputs, we must structure multi-variable schemas accordingly:</p>
+<div id="f820bab0" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(nl_query_example.describe_for_agent())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>### NL Request or Question
+[...] The user's request or question [...]
+### Relevant Schema Information for the Necessary Data
+[...] The relevant database schema information [...]
+</code></pre>
+</div>
+</div>
+</section>
+<section id="output-2" class="level4">
+<h4 class="anchored" data-anchor-id="output-2">Output</h4>
+<p>The SQL Expert returns a <a href="https://michaeltheologitis.github.io/thucy/agents.html#nlqueryanswer"><code>NLQueryAnswer</code></a>. This is a common structure we will use again.</p>
+<div id="c81f2df9" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>description(NLQueryAnswer)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>answer: The final synthesized answer to the user's natural language query, expressed clearly and completely in natural language.
+</code></pre>
+</div>
+</div>
+<div id="a31df87d" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>nl_query_answer <span class="op">=</span> NLQueryAnswer(</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>    answer<span class="op">=</span><span class="st">"[...] The final answer to a user's query (the 'user' can be an agent ofc) [...]"</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="54aadd5c" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(nl_query_answer)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>answer="[...] The final answer to a user's query (the 'user' can be an agent ofc) [...]"</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="agent-as-tool-wrap-2" class="level3">
+<h3 class="anchored" data-anchor-id="agent-as-tool-wrap-2">Agent-as-Tool Wrap</h3>
+<p>Here, we expose the agent <strong>as a tool</strong> (i.e., <a href="https://michaeltheologitis.github.io/thucy/agents.html#nl_query"><code>nl_query</code></a>) to be used by the Lead Agent.</p>
+<hr>
+<p><a href="https://github.com/michaeltheologitis/thucy/blob/main/thucy/agents.py#L196" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="nl_query" class="level3">
+<h3 class="anchored" data-anchor-id="nl_query">nl_query</h3>
+<blockquote class="blockquote">
+<pre><code> nl_query (query:__main__.NLQuery)</code></pre>
+</blockquote>
+<p><em>Handles natural language questions by translating them into SQL, executing the queries, and returning both the results and the concrete SQL statements that produced them. Each part of the answer is accompanied by the exact executed SQL query that served as its evidence.</em></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>query</td>
+<td>NLQuery</td>
+<td>The <a href="https://michaeltheologitis.github.io/thucy/agents.html#nlquery"><code>NLQuery</code></a> instance containing the user’s question and schema info</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>NLQueryAnswer</strong></td>
+<td><strong>The <a href="https://michaeltheologitis.github.io/thucy/agents.html#nlqueryanswer"><code>NLQueryAnswer</code></a> instance containing the final answer and SQL evidence</strong></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="example-2" class="level3">
+<h3 class="anchored" data-anchor-id="example-2">Example</h3>
+<div id="5ec89847" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>q <span class="op">=</span> NLQuery(</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    query<span class="op">=</span><span class="st">"How many unique police sectors are there? Could you list them with counts?"</span>,</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    schema_info<span class="op">=</span><span class="st">"Seattle database, columns: beat, sector"</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> <span class="cf">await</span> nl_query(q)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="51533c05" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(result.answer)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Answer:
+
+- Number of unique police sectors: 20
+
+- List of sectors with counts (sector : count):
+  U : 114,581
+  E : 108,678
+  K : 107,441
+  B : 104,270
+  M : 101,570
+  D : 100,808
+  R : 95,004
+  Q : 91,649
+  L : 87,061
+  N : 85,461
+  S : 76,985
+  W : 75,603
+  J : 72,777
+  F : 72,619
+  C : 66,903
+  G : 66,803
+  O : 47,993
+  - : 11,072
+  99 : 3,544
+  OOJ : 176
+
+SQL queries executed (each query below produced the stated result):
+
+1) Query used to locate table(s) containing the columns "sector" or "beat":
+SELECT table_schema, table_name, column_name
+FROM information_schema.columns
+WHERE column_name IN ('sector','beat')
+ORDER BY table_schema, table_name;
+
+Result returned:
+  table_schema: public, table_name: crime_data, column_name: beat
+  table_schema: public, table_name: crime_data, column_name: sector
+
+2) Query to count distinct sectors:
+SELECT COUNT(DISTINCT sector) AS unique_sectors
+FROM public.crime_data;
+
+Result returned:
+  unique_sectors: 20
+
+3) Query to list each sector with its count (ordered by count desc):
+SELECT sector, COUNT(*) AS count
+FROM public.crime_data
+GROUP BY sector
+ORDER BY count DESC, sector;
+
+Result returned (sector, count):
+  ("U", 114581)
+  ("E", 108678)
+  ("K", 107441)
+  ("B", 104270)
+  ("M", 101570)
+  ("D", 100808)
+  ("R", 95004)
+  ("Q", 91649)
+  ("L", 87061)
+  ("N", 85461)
+  ("S", 76985)
+  ("W", 75603)
+  ("J", 72777)
+  ("F", 72619)
+  ("C", 66903)
+  ("G", 66803)
+  ("O", 47993)
+  ("-", 11072)
+  ("99", 3544)
+  ("OOJ", 176)
+
+Notes and assumptions (presented after the answer):
+- I searched information_schema.columns to find which table(s) in the Seattle database contain the columns "sector" and "beat"; that returned a single table: public.crime_data. All subsequent queries used public.crime_data.
+- The sector values include some non-alphabetic entries (for example '-', '99', 'OOJ'); I reported them as they appear in the data.
+- If you want the list filtered to only standard sector codes (e.g., exclude '-', '99', 'OOJ') or sorted differently, tell me which filter/sort you prefer and I will run the adjusted query and show the exact SQL.</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="lead-agent-verifier" class="level2">
+<h2 class="anchored" data-anchor-id="lead-agent-verifier">Lead Agent: Verifier</h2>
+<p>The Verifier is the orchestrating agent that verifies claims by coordinating with other expert agents and grounding all conclusions in real data.</p>
+<section id="promptinstructions-2" class="level3">
+<h3 class="anchored" data-anchor-id="promptinstructions-2">Prompt/Instructions</h3>
+<div id="464cec2a" class="cell">
+<details open="" class="code-fold">
+<summary>Exported source</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>VERIFIER_PROMPT <span class="op">=</span> <span class="st">"""</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="st"># Role and Objective</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="st">You are a data expert and a verifier. Your goal is to verify every claim provided to you by grounding your reasoning in real, verifiable data sources. You have access to various tools that enable you to retrieve and analyze factual data—use them whenever they enhance your analysis. You must produce a clear and structured report that summarizes your findings and **includes the exact SQL queries** that generated the supporting evidence. Your query tools are specifically designed to return these executed SQL statements for inclusion in your report.</span></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="st"># Data Grounding Principles</span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a><span class="st">- Always begin by exploring the available data sources to understand their structure and contents before interpreting the claim. This ensures your reasoning is firmly grounded in the real data environment.</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a><span class="st">- Treat all accessible data sources as **reliable and authoritative**. You can fully trust that the data you access is accurate, complete within its scope, and suitable for verification.</span></span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a><span class="st">- Base your conclusions strictly on what the data supports. Avoid speculation or reasoning not grounded in evidence from the data.</span></span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a><span class="st"># Instructions</span></span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a><span class="st">- You should always base your conclusions on real data.</span></span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a><span class="st">- Do not ask the user for clarification. For ambiguous questions, first explore the available data environment to ground your interpretation in what the data represents. Then make reasonable assumptions about the claim's intent and clearly list them at the end of your report—after providing your answer.</span></span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a><span class="st">- Present the collected evidence directly in your report—including any executed SQL—ensuring that each conclusion is visibly grounded in data.</span></span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a><span class="st">- Verify each user claim by consulting available data sources.</span></span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a><span class="st">- Examine claims thoroughly and assess whether they are supported or contradicted by the evidence.</span></span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a><span class="st">- Use tools to obtain the information you need, delegating clear and well-scoped tasks to them when appropriate.</span></span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a><span class="st">- For multi-step questions, plan the reasoning explicitly and execute each step through a separate tool call. Each call should address one specific information need.</span></span>
+<span id="cb46-18"><a href="#cb46-18" aria-hidden="true" tabindex="-1"></a><span class="st">- Remember: Tools are stateless. Recreate any necessary context between tool calls explicitly.</span></span>
+<span id="cb46-19"><a href="#cb46-19" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="inputoutput-3" class="level3">
+<h3 class="anchored" data-anchor-id="inputoutput-3">Input/Output</h3>
+<section id="input-2" class="level4">
+<h4 class="anchored" data-anchor-id="input-2">Input</h4>
+<p>This agent expects a NL <a href="https://michaeltheologitis.github.io/thucy/agents.html#userquery"><code>UserQuery</code></a>.</p>
+<div id="cc7dd923" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>user_query_example <span class="op">=</span> UserQuery(</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>    query<span class="op">=</span><span class="st">"[...] The user's request or question [...]"</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="a6da4a43" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>user_query_example</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>UserQuery(query="[...] The user's request or question [...]")</code></pre>
+</div>
+</div>
+</section>
+<section id="output-3" class="level4">
+<h4 class="anchored" data-anchor-id="output-3">Output</h4>
+<p>The Verifier returns a <a href="https://michaeltheologitis.github.io/thucy/agents.html#verificationanswer"><code>VerificationAnswer</code></a> object.</p>
+<div id="214c9884" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>description(VerificationAnswer)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>report: The full report describing which parts of the claims are true and which are not.
+
+verdict: Your final verdict should be one of the following:
+- **Verified**: The overall claim is fully supported by the evidence, allowing for minor acceptable deviations (e.g., rounding, naming, or formatting differences).
+- **Partly Verified**: The overall claim is supported by the evidence, but some supporting details are incomplete, imprecise, or contain minor factual inaccuracies.
+- **Partly Inaccurate**: The overall claim contains a mixture of true and false elements, with errors substantial enough to undermine confidence in the conclusion.
+- **Inaccurate**: The overall claim is contradicted or unsupported by the evidence.
+
+</code></pre>
+</div>
+</div>
+<div id="d8f24b7a" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>verification_answer_example <span class="op">=</span> VerificationAnswer(</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>    report<span class="op">=</span><span class="st">"[...] A detailed report on the verification of the claims with concrete SQL [...]"</span>,</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>    verdict<span class="op">=</span><span class="st">"Verified"</span></span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="83177d5d" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>verification_answer_example</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>VerificationAnswer(report='[...] A detailed report on the verification of the claims with concrete SQL [...]', verdict='Verified')</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="example-3" class="level3">
+<h3 class="anchored" data-anchor-id="example-3">Example</h3>
+<hr>
+<p><a href="https://github.com/michaeltheologitis/thucy/blob/main/thucy/agents.py#L264" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="verify" class="level3">
+<h3 class="anchored" data-anchor-id="verify">verify</h3>
+<blockquote class="blockquote">
+<pre><code> verify (user_query:__main__.UserQuery)</code></pre>
+</blockquote>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>user_query</td>
+<td>UserQuery</td>
+<td>The <a href="https://michaeltheologitis.github.io/thucy/agents.html#userquery"><code>UserQuery</code></a> instance containing the user’s claims to verify):</td>
+</tr>
+</tbody>
+</table>
+<div id="a4095af0" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>q <span class="op">=</span> UserQuery(query<span class="op">=</span><span class="st">"Seattle has less than 10 unique police sectors."</span>)</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> <span class="cf">await</span> verify(q)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="be455b73" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(result.verdict)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Inaccurate</code></pre>
+</div>
+</div>
+<div id="f6729121" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb59"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(result.report)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Data sources discovered
+- Seattle database (public schema). One key table relevant to police geography was identified: public.crime_data, which includes a sector column.
+
+Schema exploration
+- Table: public.crime_data — contains incident-level records with police geography fields: beat (text), precinct (text), sector (text), reporting_area (text), neighborhood (text).
+
+Evidence from executed SQL
+1) List all distinct sectors
+SQL executed:
+SELECT DISTINCT sector FROM public.crime_data ORDER BY sector;
+Result:
+- "-"
+- "99"
+- "B"
+- "C"
+- "D"
+- "E"
+- "F"
+- "G"
+- "J"
+- "K"
+- "L"
+- "M"
+- "N"
+- "O"
+- "OOJ"
+- "Q"
+- "R"
+- "S"
+- "U"
+- "W"
+
+2) Count distinct sectors
+SQL executed:
+SELECT COUNT(DISTINCT sector) AS unique_sector_count FROM public.crime_data;
+Result:
+- unique_sector_count: 20
+
+Analysis
+- The dataset records 20 distinct sector values (non-null), which is not less than 10.
+
+Conclusion
+- The claim that “Seattle has less than 10 unique police sectors” is contradicted by the data in the Seattle database public.crime_data table.
+
+Assumptions and notes
+- The count includes all distinct non-null values in the sector field as stored, including placeholder-like values such as '-' and '99' if present in the source. Even if such placeholders were excluded, the remaining lettered sectors alone exceed 10, so the conclusion remains unchanged.</code></pre>
+</div>
+</div>
+<div id="26ab4781" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb61"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>genai_mcp.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/michaeltheologitis\.github\.io\/thucy");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/michaeltheologitis/thucy/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
