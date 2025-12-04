@@ -117,13 +117,14 @@ configuration:
 thucy config show
 ```
 
-    OPENAI_API_KEY = sk_xxyy
-    EXPERTS_MODEL = gpt-5-mini
-    LEAD_MODEL = gpt-5
-    SQL_EXPERT_MAX_TURNS = 30
-    SCHEMA_EXPERT_MAX_TURNS = 30
-    DATA_EXPERT_MAX_TURNS = 30
-    GENAI_SERVER_URL = http://127.0.0.1:5000
+    OPENAI_API_KEY=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
+    EXPERTS_MODEL=gpt-5-mini
+    LEAD_MODEL=gpt-5
+    SQL_EXPERT_MAX_TURNS=30
+    SCHEMA_EXPERT_MAX_TURNS=30
+    DATA_EXPERT_MAX_TURNS=30
+    GENAI_SERVER_URL=http://127.0.0.1:5000
+    LEAD_MAX_TURNS=40
 
 ### Google’s MCP Toolbox
 
