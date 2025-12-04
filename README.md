@@ -6,10 +6,15 @@
 ![The architecture of
 Thucy](https://raw.githubusercontent.com/michaeltheologitis/thucy/main/docs/images/thucy.png)
 
-We highly encourage to read the documentation from the official [Thucy
-website](https://michaeltheologitis.github.io/thucy/) (instead of the
-[GitHub](https://github.com/michaeltheologitis/thucy)). It is rendered
-better there since we have full control of the markdown!
+We highly encourage you to read the documentation from the official
+[Thucy website](https://michaeltheologitis.github.io/thucy/) (better
+rendering).
+
+## Paper
+
+You can read the paper [here](https://arxiv.org/abs/2512.03278). It has
+been accepted at AAAI 2026 Workshop on LLM-based Multi-Agent Systems
+([LaMAS](https://sites.google.com/view/lamas2026)).
 
 ## Motivation
 
