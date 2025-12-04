@@ -6,9 +6,9 @@
 ![The architecture of
 Thucy](https://raw.githubusercontent.com/michaeltheologitis/thucy/main/docs/images/thucy.png)
 
-We highly encourage you to read the documentation from the official
-[Thucy website](https://michaeltheologitis.github.io/thucy/) (better
-rendering).
+We highly encourage to read the docs from the official [Thucy
+website](https://michaeltheologitis.github.io/thucy/) (complete, and
+better rendering).
 
 ## Paper
 
