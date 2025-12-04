@@ -12,6 +12,20 @@
 ![The architecture of
 Thucy](https://raw.githubusercontent.com/michaeltheologitis/thucy/main/docs/images/thucy.png)
 
+In today’s age, it is becoming increasingly difficult to decipher truth
+from lies. Every day, politicians, media outlets, and public figures
+make conflicting claims—often about topics that can, in principle, be
+verified against structured data. For instance, statements about crime
+rates, economic growth or healthcare can all be verified against
+official public records and structured datasets. Building a system that
+can automatically do that would have sounded like science fiction just a
+few years ago. Yet, with the extraordinary progress in LLMs and agentic
+AI, this is now within reach. Still, there remains a striking gap
+between what is technically possible and what is being demonstrated by
+recent work. Most existing verification systems operate only on small,
+single-table databases—typically a few hundred rows—that conveniently
+fit within an LLM’s context window.
+
 In this project, we propose **Thucy**, the first cross-database,
 cross-table multi-agent claim verification system that also provides
 concrete evidence for each verification verdict. Thucy remains
