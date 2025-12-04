@@ -1,4 +1,4 @@
-# Thucy: An LLM-based Multi-Agent System for Claim Verification across
+# Thucy: An LLM-based MAS for Claim Verification across Relational
 Databases
 
 
