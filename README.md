@@ -39,7 +39,7 @@ benchmark for fact verification over structured data—Thucy surpasses the
 previous state of the art by 5.6 percentage points in accuracy (94.3%
 vs. 88.7%).
 
-### Example
+## Example
 
 Given the daily-updated Seattle [crime
 data](https://data.seattle.gov/Public-Safety/SPD-Crime-Data-2008-Present/tazs-3rd5/about_data)
@@ -243,6 +243,17 @@ from personal experience here). Usually, the errors are self-explanatory
 and easily-fixable. Otherwise, you can take a look at the
 [docs](https://googleapis.github.io/genai-toolbox/resources/sources/).
 
+## Add some Interesting Data!
+
+Remember to add some data to your database(s). For example, [Seattle
+Crime
+Data](https://data.seattle.gov/Public-Safety/SPD-Crime-Data-2008-Present/tazs-3rd5/about_data)
+or [Los Angeles
+Crime](https://catalog.data.gov/dataset/crime-data-from-2020-to-present)
+etc. Simply `COPY` the CSV files into the database(s) you configured
+above. **Do not bother with the messiness of the data, Thucy’s job is to
+handle that!**
+
 ## Usage Workflow
 
 First, make sure that the toolbox is running:
@@ -280,8 +291,10 @@ scratch), please run the notebook `experiments/paper/tabfact.ipynb`.
 
 # Extend & Develop
 
-This project has been created using [nbdev](https://nbdev.fast.ai/). If
-you want to extend it or contribute first run:
+This project has been created using [nbdev](https://nbdev.fast.ai/) (big
+shoutout!).
+
+If you want to contribute first run:
 
 ``` sh
 nbdev_install_quarto
